@@ -8,7 +8,6 @@
 <script>document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'</script>
 <style>
 @font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
-@font-face{font-family:'Fraunces Title';src:url('/fonts/fraunces-title.woff2') format('woff2');font-weight:800;font-display:block}
 @font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
 :root{--bg:#f4f2ee;--fg:#1a1a1a;--m:#666;--line:#cfccc6;--soft:#ebe8e2;--accent:#661864;--mono:'Paper Mono',ui-monospace,monospace;--flip:cubic-bezier(.25,1.2,.4,1);--R:min(62vh,46vw);--R:min(62svh,46vw);--S:calc(var(--R)*.965)}
 html[data-theme=dark]{--bg:#121212;--fg:#ecebe8;--m:#8f8f93;--line:#3a3a3d;--soft:#1c1c1e;--accent:#ca72c7}
@@ -41,7 +40,7 @@ button{font:inherit;color:inherit}
 .crate{position:relative;height:calc(var(--S)*1.95);margin-top:8px;perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% - var(--S)*1.13);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:none}
 .crate.dragging{cursor:grabbing}
 /* hover nudges the front record a little toward the pointer's side */
-.crate:not(.pulling):not(.lifted) .rc.cur:hover{--hx:calc(var(--mx,0)*2.2%);--hz:calc(var(--mx,0)*.8deg);--up:-.6%}
+.crate:not(.pulling):not(.lifted) .rc.cur:hover{--hx:calc(var(--mx,0)*.5%);--hz:calc(var(--mx,0)*.25deg)}
 .stack{position:absolute;left:50%;bottom:calc(50% - var(--S)/2);width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt,-16deg))}
 .rc{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;transform-style:preserve-3d;transition:transform .7s var(--flip),opacity .45s;cursor:pointer}
 .crate.lifted .rc:not(.cur){opacity:0;transition:transform .7s var(--flip),opacity .35s}
@@ -164,10 +163,11 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 @media(prefers-reduced-motion:reduce){.ready .crate{transition:opacity .3s}}
 /* the name hangs on the wall behind the crate; the back records cover its feet */
 .page{position:relative}
-.wall{position:absolute;left:0;right:0;bottom:calc(50% + var(--S)*.53);z-index:0;margin:0;text-align:center;font:800 calc(var(--S)*.2)/1 'Fraunces Title',Georgia,serif;letter-spacing:-.01em;color:var(--fg);pointer-events:none;
+.wall{position:absolute;left:0;right:0;bottom:calc(50% + var(--S)*.53);z-index:0;margin:0;text-align:center;font:500 calc(var(--S)*.19)/1 'Instrument Sans',sans-serif;letter-spacing:-.035em;color:var(--fg);pointer-events:none;
   opacity:0;transform:translateY(12px)}
-.ready .wall{opacity:1;transform:none;transition:opacity .6s,transform 1s var(--flip)}
+.ready .wall{opacity:1;transform:none;transition:opacity .5s .35s,transform 1s var(--flip)}
 .page .crate{z-index:1}
+.ready .page:has(.crate.lifted) .wall{opacity:0;transition:opacity .12s} /* gone while a record is out */
 </style>
 </head>
 <body>
@@ -412,7 +412,7 @@ function hang(){
   const w=$('.wall'),page=$('.page'),lift=new DOMMatrix(getComputedStyle(crate).transform).m42;
   const tops=$$('.rc',stack).filter((n,j)=>j>=cur&&!n.classList.contains('gone')).map(n=>n.getBoundingClientRect().top-lift);
   if(!tops.length)return;
-  w.style.bottom=`${page.getBoundingClientRect().bottom-Math.min(...tops)-parseFloat(getComputedStyle(w).fontSize)*.16}px`;
+  w.style.bottom=`${page.getBoundingClientRect().bottom-Math.min(...tops)-parseFloat(getComputedStyle(w).fontSize)*.08}px`;
 }
 function start(){
   const m=location.hash.match(/^#(record\/)?(.+)$/); // read the address before sorting rewrites it
