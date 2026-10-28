@@ -181,6 +181,12 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
   html:not(.phone) .pair:hover .sw,html:not(.phone) .pair:focus-within .sw,html:not(.phone) .pair .sw[aria-expanded=true]{opacity:1;translate:0;transition:opacity .2s,translate .55s var(--flip),transform .5s var(--flip),background-color .2s,color .2s}
 }
 @media(hover:hover) and (prefers-reduced-motion:reduce){html:not(.phone) .pair .sw{translate:0}}
+/* the caret's tooltip: after a short wait on it, a small label rises above it; it leaves on a quick fade and stays away while the menu is open */
+.sw{position:relative}
+.sw .tip{position:absolute;bottom:calc(100% + 8px);left:50%;padding:5px 9px;border-radius:6px;background:var(--fg);color:var(--bg);font-size:12px;line-height:1.3;white-space:nowrap;pointer-events:none;opacity:0;translate:-50% 4px;transition:opacity .1s,translate 0s .1s}
+@media(hover:hover){html:not(.phone) .sw:is(:hover,:focus-visible):not([aria-expanded=true]) .tip{opacity:1;translate:-50% 0;transition:opacity .2s .35s,translate .5s var(--flip) .35s}}
+html.phone .sw .tip{display:none}
+@media(prefers-reduced-motion:reduce){.sw .tip{translate:-50% 0}}
 /* Play opens a short list of services; it arrives on a spring and leaves on a quick fade */
 .play-m{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;display:grid;padding:6px;border-radius:14px;background:var(--bg);border:1px solid var(--line);
   box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
@@ -521,7 +527,7 @@ function playHTML(r){
   const mine=on.find(([k])=>k===picked());
   const menu=`<div class="play-m" id="playM"><p class="pm-h">Play on</p>${on.map(([k,n])=>`<a href="${l[k]}" target="_blank" rel="noopener" data-k="${k}"${k===mine?.[0]?' aria-current="true"':''}>${mark(k)}<span>${n}</span>${NEW_TAB}</a>`).join('')}</div>`;
   // a remembered pick: Play wears its logo and goes there; the caret beside it switches
-  if(mine)return`<div class="play"><div class="pair">${go(mine,true)}<button class="sw" id="playB" aria-expanded="false" aria-controls="playM" aria-label="Play somewhere else">${CARET}</button></div>${menu}</div>`;
+  if(mine)return`<div class="play"><div class="pair">${go(mine,true)}<button class="sw" id="playB" aria-expanded="false" aria-controls="playM" aria-label="Play somewhere else">${CARET}<span class="tip" aria-hidden="true">Play somewhere else</span></button></div>${menu}</div>`;
   return`<div class="play"><button class="btn" id="playB" aria-expanded="false" aria-controls="playM">${PLAY_ICON}Play</button>${menu}</div>`;
 }
 const playMenu=()=>$('#oinfo .play.on');
