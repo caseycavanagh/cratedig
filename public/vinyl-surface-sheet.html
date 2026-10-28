@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jacket paper and light</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/directions/lib-widgets-v1.css">
+<style>
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
+:root{--m:#6e6e6e;--line:#929292;--accent:#661864;--mono:'Paper Mono',ui-monospace,monospace;--sq:cubic-bezier(.2,1.4,.4,1)}
+html[data-theme=dark]{--m:#828287;--line:#636368;--accent:#ca72c7}
+*{font-variant-numeric:tabular-nums}
+body{font-family:'Instrument Sans',sans-serif;font-size:18px}
+.picks{font-family:var(--mono);color:var(--m);font-size:12px}
+.wrap{max-width:1400px;margin:0 auto;padding:56px 28px 96px}
+@media(max-width:680px){.wrap{padding:40px 16px 80px}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:28px;font-size:15px}
+.top h1{font-size:16px;font-weight:500}.top p{color:var(--m);margin-top:4px;max-width:680px}
+.tools{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.pill{all:unset;cursor:pointer;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--cb);background:var(--tile);display:inline-flex;align-items:center;font-size:13px;transition:transform .5s var(--sq)}
+.pill:hover{border-color:var(--m)}.pill:active{transform:scale(.99);transition-duration:.08s}.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grp{font-size:16px;font-weight:500;margin:44px 0 4px}.grp:first-of-type{margin-top:0}
+.grp+p{font-size:15px;color:var(--m);margin-bottom:16px;max-width:680px}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,640px),1fr));gap:18px;align-items:start}
+.st{position:relative;border-radius:18px;background:var(--soft);padding:46px 18px 18px;min-width:0}
+@media(max-width:680px){.st{padding:46px 8px 14px}}
+.st .id{position:absolute;top:14px;left:18px;right:44px;font:500 11px var(--mono);color:var(--m)}.st .id b{color:var(--fg);font-weight:500;margin-right:6px}
+.st .use{display:block;margin:14px 4px 2px;font-size:13px;color:var(--m);line-height:1.45}
+.st .use b{color:var(--fg);font-weight:500}
+.st .cost{display:flex;gap:14px;flex-wrap:wrap;margin:8px 4px 0;font:400 11px var(--mono);color:var(--m)}
+.st .cost a{color:var(--m);text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:3px;margin-left:auto}
+.st .cost a:hover{color:var(--fg);text-decoration-color:currentColor}.st .cost a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+.star{all:unset;cursor:pointer;position:absolute;top:9px;right:10px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;color:var(--m);font-size:15px;z-index:5;transition:transform .5s var(--sq)}
+.star:hover{background:var(--tile);color:var(--fg)}.star:active{transform:scale(.96);transition-duration:.08s}.star:focus-visible{outline:2px solid var(--accent)}
+.st.picked{box-shadow:inset 0 0 0 2px var(--accent)}.st.picked .star{color:var(--accent)}
+.live{display:block;width:100%;height:560px;border:0;border-radius:12px;background:var(--bg)}
+@media(max-width:680px){.live{height:520px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>Jacket paper and light</h1><p>The records crate with real paper on the jackets and light on them. Each sticker is the crate itself: flip with the arrow keys, scroll or drag, hover the front record, click it to pull it out. Every jacket gets its own paper from its name, so no two neighbors match. Star one paper and one light. Each one’s cost is traced against today’s crate while ten records flip and while the pointer moves over the front record. The paper is baked into each cover once, as it loads, so the crate still draws one image per jacket.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy picks</button><button class="pill" id="clear" type="button">Clear</button><span id="tt"></span></div></div>
+  <h2 class="grp">Paper</h2><p>What the jackets are made of, under today’s light. Each step adds to the one before it.</p><div class="sheet" id="P"></div>
+  <h2 class="grp">Light</h2><p>How light falls on them, all with P4’s papers so there’s gloss, tooth and wear to catch it. Hover the front record in L3 and L4.</p><div class="sheet" id="L"></div>
+</div>
+<script src="/directions/lib-widgets-v1.js"></script>
+<script>
+// each group opens on a record that shows it off: worn uncoated stock for paper, worn gloss for light
+const START={P:'the-avett-brothers-emotionalism',L:'various-artists-amerikinda-20-years-of-dualtone'};
+// cost: what the browser redraws while ten records flip and while the pointer moves over the front record, traced against P1
+const SAME='Flipping and hovering redraw the same as today';
+const COST={P1:'Today’s cost',P2:SAME,P3:SAME,P4:SAME,L1:SAME,L2:SAME,L3:SAME+': the lamp is a small layer the GPU slides around',L4:'Draws one canvas on the GPU each frame the lamp moves. It can’t be measured here without a GPU, so judge it on your Mac'};
+const P=[
+  ['P1','Today','Plain covers with flat shading. Grain only shows on a record you pull out.',1],
+  ['P2','Papers','Three stocks. <b>Matte</b> (about half): a fine grain. <b>Uncoated</b>: a coarser tooth and a warm, faded cast. <b>Gloss</b>: a sheen across the corner.',2],
+  ['P3','Papers and wear','P2, and about half the jackets are worn: the ring the record pressed into the cover, the label ring inside it, scuffed corners and soft edges.',3],
+  ['P4','Papers, wear and shrink wrap','P3, and about one in five still in its shrink wrap: creases pulled toward the edges and a plastic sheen.',4],
+];
+const L=[
+  ['L1','Today','Flat shading by depth, nothing else.',1],
+  ['L2','Window','A soft light from the upper left on every jacket, brighter and crisper on gloss and shrink wrap. It doesn’t move.',2],
+  ['L3','Lamp','A light that follows the pointer over the front record (and the one you pull out) on a spring, and rests at the upper left. Gloss and shrink wrap catch it as a bright spot, matte as a soft glow, uncoated barely.',3],
+  ['L4','Lamp in WebGL','The same lamp, drawn on the GPU so it rakes across the paper: the tooth throws tiny shadows, the ring wear stands up, shrink wrap creases glint. One canvas on the lit record only; the cover stays an image.',4],
+];
+const ALL={};
+const sticker=(id,name,use,src)=>{ALL[id]=name;src+='#'+START[id[0]];return `<div class="st" data-id="${id}"><span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id}">★</button>
+  <iframe class="live" title="${id} ${name}" data-src="${src}"></iframe>
+  <span class="use">${use}</span><span class="cost"><span>${COST[id]}</span><a href="${src}">Open on its own</a></span></div>`};
+$('#P').innerHTML=P.map(([id,n,u,t])=>sticker(id,n,u,`vinyl-prototype.html?tx=${t}&lt=1`)).join('');
+$('#L').innerHTML=L.map(([id,n,u,l])=>sticker(id,n,u,`vinyl-prototype.html?tx=4&lt=${l}`)).join('');
+
+// each crate loads as it comes near the screen, so the first ones aren't waiting on all eight
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.src=e.target.dataset.src;io.unobserve(e.target)}}),{rootMargin:'200px 0px'});
+$$('.live').forEach(f=>io.observe(f));
+// the crates follow this page's light and dark
+const theme=()=>document.documentElement.dataset.theme;
+const sync=f=>{try{f.contentDocument.documentElement.dataset.theme=theme()}catch(e){}};
+$$('.live').forEach(f=>f.addEventListener('load',()=>sync(f)));
+
+let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-surface-picks')||'[]'))}catch(e){}
+const save=()=>{try{localStorage.setItem('vinyl-surface-picks',JSON.stringify([...picks]))}catch(e){}};
+const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
+$$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{navigator.clipboard?.writeText([...picks].sort().map(id=>`${id} ${ALL[id]}`).join(', ')).catch(()=>{});$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1200)};
+$('#clear').onclick=()=>{picks.clear();save();show()};
+$('#tt').innerHTML=TOGGLE;$('.tt').onclick=()=>{document.documentElement.dataset.theme=theme()==='dark'?'light':'dark';$$('.live').forEach(sync)};
+document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';show();
+</script>
+</body>
+</html>
