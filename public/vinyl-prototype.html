@@ -158,8 +158,13 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .facts dt{color:var(--m)}
 .facts dd{margin:0}
 .play{position:relative;margin-top:28px}
-.play>.btn{height:40px;padding:0 20px 0 16px;font-size:15px;gap:8px}
-.play>.btn svg{flex:none}
+.play .btn{height:40px;padding:0 20px 0 16px;font-size:15px;gap:8px}
+.play .btn svg{flex:none}
+.split{display:inline-flex}
+.split .btn:first-child{border-radius:999px 0 0 999px;padding-right:16px}
+.split .more{border-radius:0 999px 999px 0;margin-left:-1px;padding:0 14px 0 12px;color:var(--m)}
+.split .btn:hover{position:relative;z-index:1}
+.split .more[aria-expanded=true]{color:var(--fg)}
 /* Play opens a short list of services; it arrives on a spring and leaves on a quick fade */
 .play-m{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;display:grid;padding:6px;border-radius:14px;background:var(--bg);border:1px solid var(--line);
   box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
@@ -169,6 +174,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .play.on .play-m{opacity:1;visibility:visible;transform:none;transition:opacity .18s,transform .45s var(--flip)}
 .play-m a{all:unset;cursor:pointer;padding:9px 12px;border-radius:9px;font-size:14px;transition:transform .5s var(--flip),background-color .15s}
 .play-m a:hover{background:var(--soft)}
+.play-m a[aria-current]::after{content:'✓';float:right;margin-left:16px;color:var(--m)}
 .play-m a:active{transform:scale(.99);transition-duration:.08s}
 .play-m a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 html[data-theme=dark] .play-m{box-shadow:0 12px 32px -12px #000c}
@@ -357,17 +363,25 @@ function fill(r,noInfo){
   base=REST;ry=base;rx=TILT;
   document.title=`${r.title} · Records`;
 }
-// every place a record can be played: Spotify by its ID, the rest from album.link (scripts/vinyl-covers.mjs)
+// every place a record can be played: Spotify by its ID, the rest by the album's UPC (scripts/vinyl-covers.mjs)
 const SERVICES=[['spotify','Spotify'],['appleMusic','Apple Music'],['youtubeMusic','YouTube Music'],['tidal','Tidal'],['amazonMusic','Amazon Music'],['deezer','Deezer']];
 const NEW_TAB='<span class="sr"> (opens in a new tab)</span>',PLAY_ICON='<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M2.5 1.2v9.6c0 .5.5.8.9.5l7.4-4.8a.6.6 0 0 0 0-1L3.4.7c-.4-.3-.9 0-.9.5Z"/></svg>';
+// the service a visitor picks is remembered on their device, and Play goes straight there from then on
+const PICK='records-play';
+const picked=()=>{try{return localStorage.getItem(PICK)}catch{return null}};
+const CHEVRON='<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5l3-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function playHTML(r){
   const l={...r.links};if(r.spotify)l.spotify='https://open.spotify.com/album/'+r.spotify;if(r.apple)l.appleMusic=r.apple;
   const on=SERVICES.filter(([k])=>l[k]);
   if(!on.length)return'';
+  const go=([k,n])=>`<a class="btn" href="${l[k]}" target="_blank" rel="noopener">${PLAY_ICON}Play<span class="sr"> on ${n}</span>${NEW_TAB}</a>`;
   // one service: Play goes straight there
-  if(on.length===1)return`<div class="play"><a class="btn" href="${l[on[0][0]]}" target="_blank" rel="noopener">${PLAY_ICON}Play<span class="sr"> on ${on[0][1]}</span>${NEW_TAB}</a></div>`;
-  return`<div class="play"><button class="btn" id="playB" aria-expanded="false" aria-controls="playM">${PLAY_ICON}Play</button>
-      <div class="play-m" id="playM">${on.map(([k,n])=>`<a href="${l[k]}" target="_blank" rel="noopener">${n}${NEW_TAB}</a>`).join('')}</div></div>`;
+  if(on.length===1)return`<div class="play">${go(on[0])}</div>`;
+  const mine=on.find(([k])=>k===picked());
+  const menu=`<div class="play-m" id="playM">${on.map(([k,n])=>`<a href="${l[k]}" target="_blank" rel="noopener" data-k="${k}"${k===mine?.[0]?' aria-current="true"':''}>${n}${NEW_TAB}</a>`).join('')}</div>`;
+  // a remembered pick: Play goes there, and the arrow beside it switches
+  if(mine)return`<div class="play"><div class="split">${go(mine)}<button class="btn more" id="playB" aria-expanded="false" aria-controls="playM" aria-label="Play somewhere else">${CHEVRON}</button></div>${menu}</div>`;
+  return`<div class="play"><button class="btn" id="playB" aria-expanded="false" aria-controls="playM">${PLAY_ICON}Play</button>${menu}</div>`;
 }
 const playMenu=()=>$('#oinfo .play.on');
 function togglePlay(show,focus){
@@ -379,7 +393,13 @@ function togglePlay(show,focus){
 }
 $('#oinfo').addEventListener('click',e=>{
   if(e.target.closest('#playB'))togglePlay(!playMenu(),e.detail===0); // a keyboard press lands on the first service
-  else if(e.target.closest('#playM a'))togglePlay(false);
+  const a=e.target.closest('#playM a');
+  if(a){
+    try{localStorage.setItem(PICK,a.dataset.k)}catch{}
+    const kb=e.detail===0;togglePlay(false);
+    // once the menu has faded, Play becomes the pick
+    setTimeout(()=>{const w=$('#oinfo .play');if(!w)return;w.outerHTML=playHTML(order[cur]);if(kb)$('#oinfo .play a.btn')?.focus()},150);
+  }
 });
 document.addEventListener('pointerdown',e=>{if(playMenu()&&!e.target.closest('.play'))togglePlay(false)});
 $('#oinfo').addEventListener('focusout',e=>{if(playMenu()&&!e.relatedTarget?.closest?.('.play')&&e.relatedTarget)togglePlay(false)});
