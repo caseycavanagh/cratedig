@@ -14,7 +14,7 @@ import { EDITS, type Edits, type Patch, type Rec, denied, imgKey, ownImg, owner,
 export async function GET() {
   await connection();
   const run = kv();
-  const editable = !!process.env.CRATE_KEY;
+  const editable = !!process.env.CRATE_KEY?.trim();
   if (!run) return Response.json({ configured: false, editable, edits: { added: [], removed: [], patch: {} } });
   // the page asks for a fresh copy (?t=…) after Casey edits; everyone else can have one a few seconds old
   return Response.json(

@@ -77,19 +77,9 @@ html.phone .tail{display:none}
 .edge.t{transform:rotateX(90deg) translateZ(calc(var(--W)/2));--dk:#00000014}
 .edge.t::after{background:var(--grain),linear-gradient(180deg,#00000030,#ffffff4a 45%,#ffffff1a 60%,#00000038),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
 .edge.b{transform:rotateX(-90deg) translateZ(calc(var(--W)/2));--dk:#00000080}
-/* cardboard: a fine grain, light from the top left, and worn edges that catch it */
-.sleeve .face::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
-  background:var(--wearL,linear-gradient(#0000,#0000)),var(--paperL,var(--grain) 0 0/128px),linear-gradient(115deg,#ffffff16,#0000 35%,#0000 70%,#0000001c);
-  box-shadow:inset 1px 1px 0 #ffffff40,inset -1px -1px 0 #00000030,inset 0 0 0 2px #ffffff0d}
 /* Each jacket's paper and wear come from its year (see "dress"): laminated gloss before 1970, matte through the 2000s, uncoated
-   stock after; worn before 1980, a little worn through the 90s. In the crate they're baked into the cover as it loads (see "bake"),
-   so a record is still one image to draw; the record you pull out wears the same layers here. */
-.sleeve[data-paper=matte] .face::before{--paperL:var(--grain) 0 0/128px,linear-gradient(#ffffff06,#ffffff06)}
-.sleeve[data-paper=uncoated] .face::before{--paperL:var(--tooth) 0 0/96px,linear-gradient(#f7efdc10,#f7efdc10)}
-.sleeve[data-paper=gloss] .face::before{--paperL:linear-gradient(118deg,#0000 30%,#ffffff1e 41%,#ffffff08 48%,#0000 56%),linear-gradient(#ffffff0e,#0000 35%)}
-.sleeve[data-wear="1"] .face::before{--wearL:radial-gradient(circle at 0 0,#ffffff24,#0000 3.5%),radial-gradient(circle at 100% 100%,#ffffff1a,#0000 3%)}
-.sleeve[data-wear="2"] .face::before{--wearL:radial-gradient(circle at 0 0,#ffffff38,#0000 5%),radial-gradient(circle at 100% 100%,#ffffff26,#0000 4%),radial-gradient(circle at 100% 0,#ffffff1c,#0000 3%),linear-gradient(#f3e4c40f,#f3e4c40f);
-  box-shadow:inset 0 0 0 1px #ffffff26,inset 0 0 5px #ffffff14}
+   stock after; worn before 1980, a little worn through the 90s. They're baked into the cover as it loads (see "bake"), so a record
+   is still one image to draw, and the record you pull out shows that same image: nothing changes as it lands back in the crate. */
 /* the lamp: a WebGL canvas on the lit record that draws only light and shadow */
 .glow{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -567,7 +557,9 @@ function art(r){
 // local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
 const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f; // covers Casey uploads come from /api/crate/img
 // a lazy image waits in data-src until its record comes near the front (see place)
-const imgHTML=(f,lazy)=>`<img class="art" ${lazy?'data-src':'src'}="${img(f)}" alt="" decoding="sync" draggable="false">`;
+const BAKED=new Map(); // cover → the same cover with its paper and wear baked in (see "bake")
+const baked=u=>BAKED.get(new URL(u,location.href).href)||u;
+const imgHTML=(f,lazy)=>`<img class="art" ${lazy?'data-src':'src'}="${lazy?img(f):baked(img(f))}" alt="" decoding="sync" draggable="false">`;
 const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
 const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
@@ -829,7 +821,7 @@ prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
 [prevP,nextP].forEach(b=>b.addEventListener('pointerleave',()=>{if(!open.classList.contains('swapping'))open.classList.remove('hush')}));
 const sleeveHTML=r=>`<div class="sh"></div><div class="sh b"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
 function fill(r,noInfo){
-  sleeve.innerHTML=sleeveHTML(r);dress(sleeve,r);
+  sleeve.innerHTML=sleeveHTML(r);dress(sleeve,r);bakeIn(sleeve);
   peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);
   $('#ocount').textContent=`${cur+1} of ${order.length}`;
   if(!noInfo)info(r);
@@ -993,7 +985,7 @@ function closeRecord(fromPop){
       const t=Math.min(1,(now-t0)/T),e=t*t*t*(t*(t*6-15)+10),b=cratePose(); // measured every frame: the crate may still be settling
       if(b){const m={};for(const k of ['x','y','z','s','ax','az'])m[k]=a[k]+(b[k]-a[k])*e;lift.style.transform=poseTf(m);
         stage.style.perspective=(P0+(b.P-P0)*e).toFixed(1)+'px';stage.style.perspectiveOrigin=`${(ox0+(b.ox-ox0)*e).toFixed(1)}px ${(oy0+(b.oy-oy0)*e).toFixed(1)}px`}
-      sv.rx=rx0*(1-e);sv.ry=ry0+(ryTo-ry0)*e;sv.vx=sv.vy=0;paintS();
+      sv.rx=rx0*(1-e);sv.ry=ry0+(ryTo-ry0)*e;sv.vx=sv.vy=0;paintS();lampGo(); // the lamp stays put in the room as the record flies under it
       if(t<1){flyF=requestAnimationFrame(f);return}
       $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));lampHand();sleeve.classList.add('fade');later(done,130);
     })(t0);
@@ -1113,10 +1105,11 @@ const TILES={};
 {const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d'),d=x.createImageData(96,96);
  for(let i=0;i<d.data.length;i+=4){const v=Math.random()<.5?40:235;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*14|0}x.putImageData(d,0,0);
  root.style.setProperty('--tooth',blobURL(TILES.tooth=c))}
-// Bake a record's paper and wear into its cover as the image arrives: drawn once, the same layers as the CSS on the sleeve,
-// sized to the record on screen. The crate then draws exactly what it did before: one image per face.
+// Bake a record's paper and wear into its cover as the image arrives: drawn once, sized to the record on screen. The crate then
+// draws exactly what it did before, one image per face, and the record you pull out uses the same baked image.
 function bake(i,el){
-  if(i._baked||!i.naturalWidth||new URL(i.src).origin!==location.origin)return;i._baked=1; // a cover from another site can't be read back: it stays plain
+  if(i._baked||!i.naturalWidth||i.src.startsWith('blob:')||new URL(i.src).origin!==location.origin)return;i._baked=1; // a cover from another site can't be read back: it stays plain
+  const src=i.src;if(BAKED.has(src)){i.src=BAKED.get(src);return}
   const w=i.naturalWidth,h=i.naturalHeight,k=w/(nodes[0]?.offsetWidth||480),c=document.createElement('canvas');c.width=w;c.height=h;
   const x=c.getContext('2d'),P=el.dataset.paper,wear=+el.dataset.wear||0;
   const fill=f=>{x.fillStyle=f;x.fillRect(0,0,w,h)};
@@ -1133,8 +1126,10 @@ function bake(i,el){
   if(P==='gloss'){fill(lin(118,[[.3,'#ffffff00'],[.41,'#ffffff1e'],[.48,'#ffffff08'],[.56,'#ffffff00']]));fill(lin(180,[[0,'#ffffff0e'],[.35,'#ffffff00']]))}
   if(wear===1){corner(0,0,.035,'#ffffff24');corner(w,h,.03,'#ffffff1a')}
   if(wear===2){corner(0,0,.05,'#ffffff38');corner(w,h,.04,'#ffffff26');corner(w,0,.03,'#ffffff1c');fill('#f3e4c40f');x.strokeStyle='#ffffff26';x.lineWidth=2*k;x.strokeRect(0,0,w,h)}
-  c.toBlob(b=>{if(b)i.src=URL.createObjectURL(b)},'image/webp',.92);
+  c.toBlob(b=>{if(b)BAKED.set(src,i.src=URL.createObjectURL(b))},'image/webp',.92);
 }
+// a pulled-out record whose cover the crate hasn't baked yet bakes its own
+const bakeIn=el=>el.querySelectorAll('img.art').forEach(i=>i.complete&&i.naturalWidth?bake(i,el):i.addEventListener('load',()=>bake(i,el),{once:true}));
 // The lamp: it follows the pointer over the front record, or the record you pulled out, on a spring, and rests at the top left.
 // Drawn in WebGL: only light, never the paper, so the texture stays put on the cover as the lamp moves. Only where there's a mouse.
 const lamp={x:.22,y:.14,vx:0,vy:0,e:null,el:null,copy:null,raf:0,t:0};
@@ -1165,7 +1160,9 @@ function lampTick(t){
   if(still)lamp.t=0;else lamp.raf=requestAnimationFrame(lampTick);
 }
 {const at=e=>{if(e.pointerType==='mouse'){lamp.e={x:e.clientX,y:e.clientY};lampGo()}},off=()=>{lamp.e=null;lampGo()};
- crate.addEventListener('pointermove',at);crate.addEventListener('pointerleave',off);stage.addEventListener('pointermove',at);stage.addEventListener('pointerleave',off)}
+ // pointerenter too: when a record goes home the pointer leaves the open view and enters the crate without moving, and the light
+ // should stay under it rather than drift back to rest
+ for(const el of [crate,stage]){el.addEventListener('pointermove',at);el.addEventListener('pointerenter',at);el.addEventListener('pointerleave',off)}}
 // one canvas, moved to whichever record is lit; it draws only light and shadow over the cover (the cover stays an image). Kept faint:
 // the light should read as the room's, not a spotlight
 const GL=matchMedia('(hover:hover) and (pointer:fine)').matches?(()=>{
@@ -1330,7 +1327,7 @@ function afterEdit(r){
   rearrange(RECORDS.includes(r)?r:order[cur]);
   if(open.hidden||order[cur]!==r)return;
   $('.rc.cur',stack)?.classList.add('held');
-  sleeve.innerHTML=sleeveHTML(r);dress(sleeve,r);info(r);peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);$('#ocount').textContent=`${cur+1} of ${order.length}`;
+  sleeve.innerHTML=sleeveHTML(r);dress(sleeve,r);bakeIn(sleeve);info(r);peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);$('#ocount').textContent=`${cur+1} of ${order.length}`;
 }
 // a short note at the bottom, sometimes with an undo
 const toastEl=$('#toast');let toastT=0;

@@ -41,8 +41,10 @@ export async function readEdits(run: Run): Promise<Edits> {
 
 // Is this Casey? Wrong guesses are counted per address, and past 20 in an hour that address waits.
 export async function owner(req: Request, run: Run): Promise<boolean | "slow"> {
-  const key = process.env.CRATE_KEY;
-  const got = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+  // both sides cleaned the same way: a key pasted into Vercel often carries a trailing newline, space or quotes
+  const clean = (s?: string | null) => (s ?? "").normalize("NFC").trim().replace(/^(["'])(.*)\1$/, "$2").trim();
+  const key = clean(process.env.CRATE_KEY);
+  const got = clean(req.headers.get("authorization")?.replace(/^Bearer\s+/i, ""));
   if (!key || !got) return false;
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
   const tries = `crate:tries:${createHash("sha256").update(ip).digest("hex").slice(0, 16)}`;
