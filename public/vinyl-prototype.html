@@ -45,6 +45,7 @@ button{font:inherit;color:inherit}
 .crate.lifted .floor{opacity:0}
 .floor{transition:opacity .4s}
 .rc.held{visibility:hidden}
+.crate.still .rc,.crate.still.lifted .rc:not(.cur){transition:none}
 .rc.gone{visibility:hidden}
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:2px;container-type:inline-size}
 .face::after{content:'';position:absolute;inset:0;background:var(--shade,transparent);transition:background .7s;pointer-events:none}
@@ -97,6 +98,7 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 /* the details start tucked under the record and slide out to the right */
 .o-info{position:relative;z-index:1;flex:none;width:min(340px,30vw);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
+.open.in.swapping .o-info{opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 @media(max-width:860px){
   .o-grid{flex-direction:column;gap:32px}
   .o-info{width:var(--O);transform:translateY(-50%) scale(.96)}
@@ -261,18 +263,18 @@ function swap(dir){
   if(busy||j===cur)return;
   timers.forEach(clearTimeout);timers=[];
   $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));
-  go(j,true);$('.rc.cur',stack).classList.add('held');
+  crate.classList.add('still');go(j,true);$('.rc.cur',stack).classList.add('held');
   const r=order[cur];
   history.replaceState(history.state,'','#record/'+r.slug);
   if(reduce){fill(r);setS();return}
   busy=true;
   lift.className='lift';lift.style.transition='transform .28s cubic-bezier(.4,0,1,1),opacity .2s';
   lift.style.transform=`translateX(${-dir*35}%) rotateY(${-dir*8}deg)`;lift.style.opacity='0';
-  open.classList.remove('in');
+  open.classList.add('swapping');
   later(()=>{
     fill(r);lift.style.transition='none';lift.style.transform=`translateX(${dir*35}%) rotateY(${dir*8}deg)`;setS();void lift.offsetWidth;
     lift.style.transition='transform .8s var(--flip),opacity .3s';lift.style.transform='';lift.style.opacity='';
-    open.classList.add('in');
+    open.classList.remove('swapping');
   },280);
   later(()=>{lift.style.transition='';busy=false},1050);
 }
@@ -283,7 +285,7 @@ function closeRecord(fromPop){
   timers.forEach(clearTimeout);timers=[];
   const done=()=>{open.hidden=true;lift.className='lift';sleeve.className='sleeve';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
     $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');busy=false;document.activeElement?.blur()};
-  open.classList.remove('in');
+  open.classList.remove('in');crate.classList.remove('still');
   if(reduce){done();return}
   // reverse: details tuck back under, the record drops back into the crate, the rest fades back in
   busy=true;
@@ -299,7 +301,7 @@ stage.addEventListener('pointermove',e=>{
   if(reduce||busy||e.pointerType!=='mouse')return;
   const b=stage.getBoundingClientRect();ry=base+((e.clientX-b.left)/b.width-.5)*6;rx=TILT-((e.clientY-b.top)/b.height-.5)*4;setS();
 });
-const sEnd=()=>{if(!sdrag)return;const tap=Math.abs(ry-sdrag.ry)<2;sdrag=null;stage.classList.remove('dragging');sleeve.classList.remove('dragging');base=tap?base+180:REST+180*Math.round((ry-REST)/180);ry=base;rx=TILT;settle();setS()};
+const sEnd=()=>{if(!sdrag)return;const tap=Math.abs(ry-sdrag.ry)<2;sdrag=null;stage.classList.remove('dragging');sleeve.classList.remove('dragging');base=tap?base:REST+180*Math.round((ry-REST)/180);ry=base;rx=TILT;settle();setS()};
 stage.addEventListener('pointerup',sEnd);stage.addEventListener('pointercancel',sEnd);
 stage.addEventListener('mouseleave',()=>{if(!sdrag&&!busy){ry=base;rx=TILT;settle();setS()}});
 stage.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();turn()}});
@@ -320,8 +322,8 @@ crate.addEventListener('pointermove',e=>{
   const dy=e.clientY-drag.y;if(Math.abs(dy)>6)moved=true;
   go(drag.i+Math.trunc(dy/48)); // pull toward you to flip forward
 });
-// a tap without a drag: the record in front flips forward, a flipped one comes back
-const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;j===cur?openRecord():go(j)}drag=null;moved=false;crate.classList.remove('dragging')};
+// a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
+const end=()=>{if(drag&&!moved&&drag.rc)openRecord();drag=null;moved=false;crate.classList.remove('dragging')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,iframe')||e.metaKey||e.ctrlKey)return;
