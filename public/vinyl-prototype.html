@@ -41,11 +41,13 @@ button{font:inherit;color:inherit}
 .crate.dragging{cursor:grabbing}
 /* hover nudges the front cover a few pixels toward the pointer's side (on the cover, so it never disturbs the crate's motion) */
 .crate:not(.pulling):not(.lifted) .rc.cur:hover{--hx:calc(var(--mx,0)*.5%);--hz:calc(var(--mx,0)*.25deg)}
-.rc .fr{translate:var(--hx,0%) 0;rotate:var(--hz,0deg);transition:translate .5s var(--flip),rotate .5s var(--flip)}
+.rc .fr{translate:var(--hx,0%) 0;rotate:var(--hz,0deg);transition:translate .5s var(--flip),rotate .5s var(--flip),opacity .4s}
 .stack{position:absolute;left:50%;bottom:calc(50% - var(--S)/2);width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt,-16deg))}
-.rc{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;transform-style:preserve-3d;transition:opacity .45s;cursor:pointer}
-.crate.lifted .rc:not(.cur){opacity:0;transition:opacity .35s}
-.crate.still .rc,.crate.still.lifted .rc:not(.cur){transition:none} /* cycling in the open view: the hidden crate changes without fading */
+.rc{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;transform-style:preserve-3d;cursor:pointer}
+/* fade the covers, never the record itself: opacity on a 3D record flattens it, and a flipped one would show its front mirrored */
+.rc .face{transition:opacity .4s}
+.crate.lifted .rc:not(.cur) .face{opacity:0}
+.crate.still .rc .face{transition:none} /* cycling in the open view: the hidden crate changes without fading */
 .crate.lifted .floor{opacity:0}
 .floor{transition:opacity .4s}
 .rc.held{visibility:hidden}
