@@ -9,7 +9,7 @@
 <style>
 @font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
 @font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
-:root{--bg:#f4f2ee;--fg:#1a1a1a;--m:#666;--line:#cfccc6;--soft:#ebe8e2;--accent:#661864;--mono:'Paper Mono',ui-monospace,monospace;--flip:cubic-bezier(.25,1.2,.4,1);--S:min(380px,74vw)}
+:root{--bg:#f4f2ee;--fg:#1a1a1a;--m:#666;--line:#cfccc6;--soft:#ebe8e2;--accent:#661864;--mono:'Paper Mono',ui-monospace,monospace;--flip:cubic-bezier(.25,1.2,.4,1);--S:min(380px,74vw,46vh)}
 html[data-theme=dark]{--bg:#121212;--fg:#ecebe8;--m:#8f8f93;--line:#3a3a3d;--soft:#1c1c1e;--accent:#ca72c7}
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
 *{font-variant-numeric:tabular-nums}
@@ -18,7 +18,9 @@ body{font-family:'Instrument Sans',sans-serif;font-size:16px;line-height:1.55;ba
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
-.page{max-width:1000px;margin:0 auto;padding:32px 24px 96px}
+.page{height:100vh;height:100svh;display:grid;place-items:center;overflow:hidden}
+.page .crate{width:100%;margin:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
 .top{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .top h1{font:500 15px var(--mono)}
 .top h1 span{color:var(--m)}
@@ -62,14 +64,37 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .hint{text-align:center;color:var(--m);font-size:13px;margin-top:10px}
 
 /* the record in front */
-.info{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;margin-top:56px;padding-top:28px;border-top:1px solid var(--line)}
-@media(max-width:760px){.info{grid-template-columns:1fr;gap:24px}}
-.info h2{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
-.info .by{font-size:19px;color:var(--m);margin-top:4px}
+.caption{text-align:center;margin-top:22px;min-height:50px}
+.caption b{display:block;font-weight:500;font-size:18px}
+.caption span{color:var(--m);font-size:15px}
+
+/* a record lifted out of the crate */
+.open{position:fixed;inset:0;z-index:10;background:var(--bg);overflow:auto;overscroll-behavior:contain}
+.open[hidden]{display:none}
+.open.leaving{opacity:0;transition:opacity .18s}
+.o-page{max-width:1120px;margin:0 auto;padding:28px 24px 64px}
+.o-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:48px;align-items:start;margin-top:24px}
+.o-grid>div:first-child{position:sticky;top:24px}
+@media(max-width:860px){.o-grid{grid-template-columns:1fr;gap:16px}.o-grid>div:first-child{position:static}}
+.stage{--O:min(460px,80vw);height:calc(var(--O) + 60px);display:grid;place-items:center;perspective:1600px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.stage.dragging{cursor:grabbing}
+.sleeve{position:relative;width:var(--O);height:var(--O);transform-style:preserve-3d;transition:transform .25s ease-out}
+.sleeve.settle{transition:transform .9s var(--flip)}
+.sleeve.dragging{transition:none}
+.sleeve.arrive{animation:arrive .9s var(--flip)}
+@keyframes arrive{from{transform:translateY(55%) rotateX(58deg) scale(.7)}}
+.sleeve .face{border-radius:2px}
+.sleeve .bk{transform:rotateY(180deg)}
+.sleeve .edge{position:absolute;top:0;left:calc(50% - 2px);width:4px;height:100%;transform:rotateY(-90deg) translateZ(calc(var(--O)/2));filter:brightness(.7)}
+.sleeve .sh{position:absolute;inset:3% 3% 0;box-shadow:0 34px 60px -24px #0008;transform:translateZ(-2px)}
+.stage-tools{display:flex;justify-content:center;margin-top:-16px}
+.o-info h2{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
+.o-info .by{font-size:19px;color:var(--m);margin-top:4px}
 .facts{display:grid;grid-template-columns:96px 1fr;gap:6px 16px;margin-top:22px;font-size:15px}
 .facts dt{color:var(--m)}
 .facts dd{margin:0}
 .note{margin-top:20px;font-size:14px;color:var(--m)}
+.player,.noplayer{margin-top:20px}
 .player{display:block;width:100%;height:352px;border:0;border-radius:12px;background:var(--soft)}
 .noplayer{display:grid;place-items:center;height:152px;border-radius:12px;background:var(--soft);color:var(--m);font-size:14px;text-align:center;padding:16px}
 
@@ -77,36 +102,32 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
   .page{padding:24px 16px 80px}
   :root{--S:62vw}
   .crate{perspective:900px}
-  .info h2{font-size:26px}
+  .o-info h2{font-size:26px}
 }
-@media(prefers-reduced-motion:reduce){.rc,.face::after{transition:none}}
+@media(prefers-reduced-motion:reduce){.rc,.face::after,.sleeve,.sleeve.settle{transition:none}.sleeve.arrive{animation:none}}
 </style>
 </head>
 <body>
-<div class="page">
-  <header class="top">
-    <h1>Records <span id="count"></span></h1>
-    <button class="icon" id="theme" aria-label="Toggle theme"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
-  </header>
-
-  <div class="sort" role="group" aria-label="Sort by">
-    <button class="btn" data-sort="artist">Artist</button>
-    <button class="btn" data-sort="year">Year</button>
-    <button class="btn" data-sort="added">Recently added</button>
-  </div>
-
-  <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back.">
+<main class="page">
+  <h1 class="sr">Records</h1>
+  <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record.">
     <div class="floor"></div>
     <div class="stack" id="stack"></div>
   </section>
-  <div class="flips">
-    <button class="btn" id="prev" aria-label="Flip back">←</button>
-    <span class="count" id="pos" aria-live="polite"></span>
-    <button class="btn" id="next" aria-label="Flip forward">→</button>
-  </div>
-  <p class="hint">Scroll, drag or use the arrow keys to flip</p>
+  <p class="sr" id="pos" aria-live="polite"></p>
+</main>
 
-  <section class="info" id="info"></section>
+<div class="open" id="open" hidden role="dialog" aria-modal="true" aria-labelledby="oTitle">
+  <div class="o-page">
+    <button class="btn" id="close">← Back to the crate</button>
+    <div class="o-grid">
+      <div>
+        <div class="stage" id="stage"><div class="sleeve" id="sleeve"></div></div>
+        <div class="stage-tools"><button class="btn" id="turn">Turn over</button></div>
+      </div>
+      <div class="o-info" id="oinfo"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -155,7 +176,6 @@ function sortBy(k){
   sortKey=k;const keep=order[cur];
   const name=a=>a.replace(/^the /i,'');
   order=[...RECORDS].sort(k==='year'?(a,b)=>a.year-b.year:k==='added'?(a,b)=>b.added.localeCompare(a.added):(a,b)=>name(a.artist).localeCompare(name(b.artist)));
-  $$('.sort .btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sort===k));
   build();go(0,true);
 }
 function build(){
@@ -175,25 +195,57 @@ function place(){
     n.classList.toggle('gone',d<-9||d>14);
   });
 }
-let infoT=null;
 function go(i,now){
   i=Math.max(0,Math.min(order.length-1,i));
   if(i===cur&&!now)return;cur=i;place();
-  $('#pos').textContent=`${cur+1} of ${order.length}`;
-  $('#prev').disabled=cur===0;$('#next').disabled=cur===order.length-1;
   history.replaceState(null,'','#'+order[cur].slug);
-  clearTimeout(infoT);infoT=setTimeout(info,now?0:350);
-}
-function info(){
   const r=order[cur];
-  $('#info').innerHTML=`<div>
-      <h2>${r.title}</h2><p class="by">${r.artist}</p>
+  $('#pos').textContent=`${r.title}, ${r.artist}, ${r.year}. ${cur+1} of ${order.length}`;
+}
+
+// Pull a record out: big sleeve to turn over, details and the Spotify player beside it
+const open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage');
+let base=18,ry=base,rx=-3,sdrag=null;
+const setS=()=>sleeve.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+const settle=()=>{sleeve.classList.add('settle');clearTimeout(settle.t);settle.t=setTimeout(()=>sleeve.classList.remove('settle'),900)};
+const turnLabel=()=>$('#turn').textContent=Math.round((base-18)/180)%2?'Turn back over':'Turn over';
+function openRecord(){
+  const r=order[cur];
+  sleeve.innerHTML=`<div class="sh"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div><div class="edge" style="background:${spineBg(r)}"></div>`;
+  base=18;ry=base;rx=-3;turnLabel();
+  $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
       <dl class="facts"><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}</dd><dt>Added</dt><dd>${fmtDate(r.added)}</dd></dl>
       <p class="note">${r.front?'Covers from the Cover Art Archive':'Stand-in cover art until the real covers are fetched'}</p>
     </div>
-    <div>${r.spotify?`<iframe class="player" src="https://open.spotify.com/embed/album/${r.spotify}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Play ${r.title} on Spotify"></iframe>`:`<div class="noplayer">The Spotify player shows up once this album is matched</div>`}</div>`;
+    ${r.spotify?`<iframe class="player" src="https://open.spotify.com/embed/album/${r.spotify}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" title="Play ${r.title} on Spotify"></iframe>`:`<div class="noplayer">No Spotify match for this one yet</div>`}`;
+  open.classList.remove('leaving');open.hidden=false;open.scrollTop=0;
+  document.documentElement.style.overflow='hidden';
+  sleeve.classList.remove('arrive');void sleeve.offsetWidth;
+  if(!reduce)sleeve.classList.add('arrive');setS();
   document.title=`${r.title} · Records`;
+  if(!history.state?.open)history.pushState({open:1},'','#'+r.slug);
+  $('#close').focus({preventScroll:true});
 }
+function closeRecord(fromPop){
+  if(open.hidden)return;
+  if(!fromPop&&history.state?.open){history.back();return}
+  const done=()=>{open.hidden=true;open.classList.remove('leaving');$('#oinfo').innerHTML='';document.documentElement.style.overflow='';crate.focus({preventScroll:true})};
+  if(reduce)done();else{open.classList.add('leaving');setTimeout(done,180)}
+  document.title='Records';
+}
+addEventListener('popstate',()=>closeRecord(true));
+$('#close').onclick=()=>closeRecord();
+sleeve.addEventListener('animationend',()=>sleeve.classList.remove('arrive'));
+stage.addEventListener('pointerdown',e=>{sdrag={x:e.clientX,ry};stage.setPointerCapture(e.pointerId);stage.classList.add('dragging');sleeve.classList.add('dragging')});
+stage.addEventListener('pointermove',e=>{
+  if(sdrag){ry=sdrag.ry+(e.clientX-sdrag.x)*.6;rx=-3;setS();return}
+  if(reduce||e.pointerType!=='mouse'||sleeve.classList.contains('arrive'))return;
+  const b=stage.getBoundingClientRect();ry=base+((e.clientX-b.left)/b.width-.5)*14;rx=-3-((e.clientY-b.top)/b.height-.5)*10;setS();
+});
+const sEnd=()=>{if(!sdrag)return;const tap=Math.abs(ry-sdrag.ry)<2;sdrag=null;stage.classList.remove('dragging');sleeve.classList.remove('dragging');base=tap?base+180:18+180*Math.round((ry-18)/180);ry=base;rx=-3;settle();setS();turnLabel()};
+stage.addEventListener('pointerup',sEnd);stage.addEventListener('pointercancel',sEnd);
+stage.addEventListener('mouseleave',()=>{if(!sdrag&&!sleeve.classList.contains('arrive')){ry=base;rx=-3;settle();setS()}});
+$('#turn').onclick=()=>{base+=180;ry=base;rx=-3;settle();setS();turnLabel()};
 
 // scroll, drag, keys
 let acc=0,lastWheel=0;
@@ -212,19 +264,17 @@ crate.addEventListener('pointermove',e=>{
   go(drag.i+Math.trunc(dy/48)); // pull toward you to flip forward
 });
 // a tap without a drag: the record in front flips forward, a flipped one comes back
-const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;go(j===cur?cur+1:j)}drag=null;moved=false;crate.classList.remove('dragging')};
+const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;j===cur?openRecord():go(j)}drag=null;moved=false;crate.classList.remove('dragging')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,iframe')||e.metaKey||e.ctrlKey)return;
+  if(!open.hidden){if(e.key==='Escape')closeRecord();return}
+  if((e.key==='Enter'||e.key===' ')&&e.target===crate){e.preventDefault();openRecord();return}
   const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];
   if(f){e.preventDefault();go(cur+f)}
   if(e.key==='Home'){e.preventDefault();go(0)}
   if(e.key==='End'){e.preventDefault();go(order.length-1)}
 });
-$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
-$$('.sort .btn').forEach(b=>b.onclick=()=>sortBy(b.dataset.sort));
-$('#theme').onclick=()=>{const d=document.documentElement;d.dataset.theme=d.dataset.theme==='dark'?'light':'dark'};
-$('#count').textContent=RECORDS.length;
 
 function start(){
   sortBy(sortKey);
@@ -236,7 +286,7 @@ start();
 fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(async m=>{
   if(!Object.keys(m).length)return;
   RECORDS.forEach(r=>Object.assign(r,m[r.slug]||{}));
-  await Promise.all(RECORDS.filter(r=>r.front&&!r.back).map(async r=>r.spine=await edgeColor('vinyl/'+r.front)));
+  await Promise.all(RECORDS.filter(r=>r.front).map(async r=>r.spine=await edgeColor('vinyl/'+r.front)));
   const keep=order[cur].slug;sortBy(sortKey);go(order.findIndex(r=>r.slug===keep),true);
 });
 </script>
