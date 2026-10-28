@@ -1,6 +1,6 @@
 // Casey's edits to the records crate (src/lib/crate.ts). The crate page reads them and lays them over its own list.
 //   GET  /api/crate                     → { configured, editable, edits: { added, removed, patch } }
-//   POST /api/crate { op, ... }          → { edits }, with the key in CRATE_KEY as a bearer token
+//   POST /api/crate { op, ... }          → { edits }, with the key in CRATE_KEY in an X-Crate-Key header
 //     op "check"                         is the key right
 //     op "add"     record                a record: artist, title, year, label, format, front, back, spine, spotify, links
 //     op "remove"  slug                  off the crate (kept, covers and all, so it can be put back)

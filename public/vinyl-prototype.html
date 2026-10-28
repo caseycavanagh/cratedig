@@ -1296,7 +1296,7 @@ function applyEdits(){
 let apiQ=Promise.resolve();
 function api(body){
   const p=apiQ.then(async()=>{
-    const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+OWNER},body:JSON.stringify(body)}).catch(()=>null);
+    const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json','X-Crate-Key':encodeURIComponent(OWNER)},body:JSON.stringify(body)}).catch(()=>null);
     const d=await r?.json().catch(()=>({}));
     if(r?.status===401){lockOut();throw new Error('Your key stopped working')}
     if(!r?.ok)throw new Error(d?.error?d.error[0].toUpperCase()+d.error.slice(1):'That didn’t save');
@@ -1305,7 +1305,7 @@ function api(body){
   apiQ=p.catch(()=>{});return p;
 }
 async function upload(blob){
-  const r=await fetch('/api/crate/img',{method:'POST',headers:{'Content-Type':blob.type,Authorization:'Bearer '+OWNER},body:blob}).catch(()=>null);
+  const r=await fetch('/api/crate/img',{method:'POST',headers:{'Content-Type':blob.type,'X-Crate-Key':encodeURIComponent(OWNER)},body:blob}).catch(()=>null);
   const d=await r?.json().catch(()=>({}));
   if(!r?.ok)throw new Error('The cover didn’t upload');
   return d.url;
@@ -1355,9 +1355,11 @@ function ownerInit(){
 const dropAsk=()=>{const u=new URL(location.href);u.searchParams.delete('edit');history.replaceState(history.state,'',u)};
 $('#unlockF').addEventListener('submit',async e=>{
   e.preventDefault();const key=$('#key').value.trim(),b=$('#unlockB');if(!key)return;b.disabled=true;$('#keyErr').textContent='';
-  const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:'{"op":"check"}'}).catch(()=>null);
+  const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json','X-Crate-Key':encodeURIComponent(key)},body:'{"op":"check"}'}).catch(()=>null);
   b.disabled=false;
-  if(!r?.ok){$('#keyErr').textContent=r?.status===429?'Too many tries. Try again in an hour':r?'That key didn’t work':'Couldn’t reach the site';return}
+  // "That key didn't work" only when the site itself compared the key; anything else says what answered instead
+  const why=r&&!r.ok?await r.json().catch(()=>null):null;
+  if(!r?.ok){$('#keyErr').textContent=!r?'Couldn’t reach the site':r.status===429?'Too many tries. Try again in an hour':why?.error==='not allowed'?'That key didn’t work':`The site didn’t check the key (${r.status}${why?.error?', '+why.error:''})`;return}
   OWNER=key;try{localStorage.setItem('records-key',key)}catch{}
   EDITS=(await r.json()).edits;applyEdits();rearrange(order[cur]);unlockD.close();setEditing(true);toast('Unlocked. Edit is at the top right');
 });

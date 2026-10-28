@@ -1,6 +1,6 @@
 // Casey's edits to the records crate (public/directions/vinyl-prototype.html), kept in Upstash Redis (src/lib/kv.ts)
 // next to the likes: records added and taken out, jacket colors, and covers Casey uploads. Anyone can read them,
-// because the crate shows them; only Casey can change them, with the key in CRATE_KEY sent as a bearer token.
+// because the crate shows them; only Casey can change them, with the key in CRATE_KEY sent in an X-Crate-Key header.
 import { createHash, timingSafeEqual } from "node:crypto";
 import { kv } from "@/lib/kv";
 
@@ -44,7 +44,16 @@ export async function owner(req: Request, run: Run): Promise<boolean | "slow"> {
   // both sides cleaned the same way: a key pasted into Vercel often carries a trailing newline, space or quotes
   const clean = (s?: string | null) => (s ?? "").normalize("NFC").trim().replace(/^(["'])(.*)\1$/, "$2").trim();
   const key = clean(process.env.CRATE_KEY);
-  const got = clean(req.headers.get("authorization")?.replace(/^Bearer\s+/i, ""));
+  // the key comes in its own header, URI-encoded so any character survives; Authorization is left alone, since a protected
+  // Vercel preview reads that header itself
+  const sent = req.headers.get("x-crate-key");
+  let got = clean(req.headers.get("authorization")?.replace(/^Bearer\s+/i, ""));
+  if (sent)
+    try {
+      got = clean(decodeURIComponent(sent));
+    } catch {
+      got = clean(sent);
+    }
   if (!key || !got) return false;
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
   const tries = `crate:tries:${createHash("sha256").update(ip).digest("hex").slice(0, 16)}`;
