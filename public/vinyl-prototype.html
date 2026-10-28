@@ -41,9 +41,8 @@ button{font:inherit;color:inherit}
 /* the crate */
 .crate{position:relative;height:calc(var(--S)*1.95);margin-top:8px;perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% - var(--S)*1.13);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:none}
 .crate.dragging{cursor:grabbing}
-/* hover nudges the front cover a few pixels toward the pointer's side (on the cover, so it never disturbs the crate's motion) */
-.crate:not(.pulling):not(.lifted) .rc.cur:hover{--hx:calc(var(--mx,0)*.5%);--hz:calc(var(--mx,0)*.25deg)}
-.rc .fr{translate:var(--hx,0%) 0;rotate:var(--hz,0deg);transition:translate .5s var(--flip),rotate .5s var(--flip),opacity .4s}
+/* hover nudges the front cover a few pixels toward the pointer's side: on the cover, so it never disturbs the crate's motion, and on its own spring in JS (see "nudge") */
+.rc .fr{transition:opacity .4s}
 .stack{position:absolute;left:50%;bottom:calc(50% - var(--S)/2);width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt,-16deg))}
 .rc{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;transform-style:preserve-3d;cursor:pointer}
 /* fade the covers, never the record itself: opacity on a 3D record flattens it, and a flipped one would show its front mirrored */
@@ -438,7 +437,7 @@ function tick(t){
     off.vx+=(-K*off.x-C*off.vx)*dt;off.x+=off.vx*dt;off.vy+=(-K*off.y-C*off.vy)*dt;off.y+=off.vy*dt;
     if(Math.abs(off.x)+Math.abs(off.y)<.1&&Math.abs(off.vx)+Math.abs(off.vy)<1)off.x=off.y=off.vx=off.vy=0;else rest=false;
   }
-  if(rest){pos=aim;vel=0;render();raf=0;tick.t=0;if(PHONE)place(true);return}
+  if(rest){pos=aim;vel=0;render();raf=0;tick.t=0;if(PHONE)place(true);else queueNudge();return}
   render();raf=requestAnimationFrame(tick);
 }
 function kick(){if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);render();return}if(!raf){tick.t=0;raf=requestAnimationFrame(tick)}}
@@ -455,6 +454,7 @@ function place(rest){
     n.classList.toggle('cur',d===0);n.classList.toggle('fell',!PHONE&&d<0);
     if(shown[j]!==show){shown[j]=show;n.classList.toggle('gone',!show)}
   });
+  if(!PHONE)queueNudge();
 }
 const setHash=()=>{clearTimeout(setHash.t);setHash.t=setTimeout(()=>{if(open.hidden)history.replaceState(null,'','#'+order[cur].slug)},250)};
 function go(i,now){
@@ -576,6 +576,7 @@ function openRecord(deep,from){
   const r=order[cur];fill(r);
   timers.forEach(clearTimeout);timers=[];
   open.hidden=false;open.scrollTop=0;
+  ptr=null;if(!PHONE)aimNudge(); // the pointer is in the open view now; the crate waits for it to come back
   document.documentElement.style.overflow='hidden';
   if(PHONE)aimPeeks();
   // 1 click, 2 the rest of the crate dissolves, 3 the record lifts out, 4 the details slide out from under it
@@ -714,8 +715,32 @@ crate.addEventListener('wheel',e=>{
 let drag=null,moved=false;
 // a pull of a record's worth flips one; a short, deliberate pull still flips one; only a long pull riffles several
 const PULL=120,pulled=dy=>{const n=Math.abs(dy)/PULL;return Math.sign(dy)*(n<1?(n>.25?1:0):Math.round(n))};
-let mxF=0;addEventListener('resize',()=>{frontBox=null;deckS=0;if(PHONE){if(nodes.length&&!raf)render();if(!open.hidden)aimPeeks()}});
-crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||mxF||raf)return;mxF=requestAnimationFrame(()=>{mxF=0;const n=nodes[cur];if(!n)return;const b=frontBox||=n.querySelector('.fr').getBoundingClientRect();const mx=Math.max(-1,Math.min(1,((e.clientX-b.left)/b.width-.5)*2)).toFixed(1);if(n.dataset.mx!==mx){n.dataset.mx=mx;n.style.setProperty('--mx',mx)}})});
+// Hover: the front cover leans a few pixels toward the pointer's side, on its own small spring. Its target follows the pointer
+// smoothly, and a cover the pointer leaves (or that stops being the front one) settles back on the same spring, never a CSS transition restarting on every move.
+const nudges=new Map();let nudgeF=0,aimF=0,ptr=null;
+function nudgeTick(t){
+  const dt=nudgeTick.t?Math.min(.032,(t-nudgeTick.t)/1000):1/60;nudgeTick.t=t;let moving=false;
+  for(const [n,s] of nudges){
+    s.v+=(-180*(s.x-s.t)-26*s.v)*dt;s.x+=s.v*dt;
+    if(Math.abs(s.x-s.t)<.003&&Math.abs(s.v)<.02){s.x=s.t;s.v=0;if(!s.t)nudges.delete(n)}else moving=true;
+    const f=n.firstElementChild;f.style.translate=s.x?`${(s.x*.5).toFixed(3)}% 0`:'';f.style.rotate=s.x?`${(s.x*.25).toFixed(3)}deg`:'';
+  }
+  nudgeF=moving?requestAnimationFrame(nudgeTick):0;if(!moving)nudgeTick.t=0;
+}
+function nudgeTo(n,t){const s=nudges.get(n);if(s?s.t===t:!t)return;if(s)s.t=t;else nudges.set(n,{x:0,v:0,t});if(!nudgeF)nudgeF=requestAnimationFrame(nudgeTick)}
+// only the front record of a crate at rest leans, and only while the pointer is over it
+function aimNudge(){
+  aimF=0;const n=nodes[cur];
+  for(const m of nudges.keys())if(m!==n)nudgeTo(m,0);
+  if(!n||PHONE)return;
+  let t=0;
+  if(ptr&&!reduce&&!raf&&!moved&&open.hidden){const b=frontBox||=n.firstElementChild.getBoundingClientRect();if(ptr.x>=b.left&&ptr.x<=b.right&&ptr.y>=b.top&&ptr.y<=b.bottom)t=Math.max(-1,Math.min(1,((ptr.x-b.left)/b.width-.5)*2))}
+  nudgeTo(n,Math.round(t*100)/100);
+}
+const queueNudge=()=>{if(!aimF)aimF=requestAnimationFrame(aimNudge)};
+crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;ptr={x:e.clientX,y:e.clientY};queueNudge()});
+crate.addEventListener('pointerleave',()=>{ptr=null;queueNudge()});
+addEventListener('resize',()=>{frontBox=null;deckS=0;if(PHONE){if(nodes.length&&!raf)render();if(!open.hidden)aimPeeks()}});
 crate.addEventListener('pointerdown',e=>{if(PHONE)return;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc')};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
