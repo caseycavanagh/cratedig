@@ -103,18 +103,19 @@ const $=(s,r=document)=>r.querySelector(s);
 const V=window.VisitorCrate,KEY='vinyl-make';
 let crate=[]; // records in the order they were added
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const has=id=>crate.some(r=>r.id===id);
+const key=r=>(r.src||'a')+r.id; // Discogs and Apple IDs can collide
+const has=k=>crate.some(r=>key(r)===k);
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify({name:$('#name').value,crate}))}catch{}}
 function render(){
   const name=$('#name').value,n=crate.length;
   $('#mineH').textContent=V.crateName(name);
   $('#count').textContent=n===1?'1 record':`${n} records`;
-  $('#row').innerHTML=crate.map(r=>`<div class="mini" role="listitem"><img src="${esc(r.thumb)}" alt="${esc(r.title)} by ${esc(r.artist)}" width="96" height="96"><button class="x" data-id="${r.id}" aria-label="Remove ${esc(r.title)}">×</button></div>`).join('');
-  const url=n?V.link(name,crate.map(r=>r.id)):'';
+  $('#row').innerHTML=crate.map(r=>`<div class="mini" role="listitem"><img src="${esc(r.thumb)}" alt="${esc(r.title)} by ${esc(r.artist)}" width="96" height="96"><button class="x" data-k="${key(r)}" aria-label="Remove ${esc(r.title)}">×</button></div>`).join('');
+  const url=n?V.link(name,crate):'';
   $('#openC').toggleAttribute('href',!!n);if(n)$('#openC').href=url;
   $('#openC').setAttribute('aria-disabled',!n);$('#copy').setAttribute('aria-disabled',!n);
-  document.querySelectorAll('.alb').forEach(b=>{const on=has(+b.dataset.id);b.setAttribute('aria-pressed',on);b.querySelector('.tag').textContent=on?'Added':'Add'});
+  document.querySelectorAll('.alb').forEach(b=>{const on=has(b.dataset.k);b.setAttribute('aria-pressed',on);b.querySelector('.tag').textContent=on?'Added':'Add'});
   save();
 }
 
@@ -122,7 +123,7 @@ function render(){
 let results=[],timer=0,seq=0;const cache={};
 function show(list){
   results=list;
-  $('#grid').innerHTML=list.map(r=>`<li><button class="alb" data-id="${r.id}" aria-pressed="false"><span class="cv"><img src="${esc(r.thumb)}" alt="" loading="lazy"><span class="tag">Add</span></span><span class="t">${esc(r.title)}</span><span class="a">${esc(r.artist)} <span class="y">${r.year}</span></span></button></li>`).join('');
+  $('#grid').innerHTML=list.map(r=>`<li><button class="alb" data-k="${key(r)}" aria-pressed="false"><span class="cv"><img src="${esc(r.thumb)}" alt="" loading="lazy"><span class="tag">Add</span></span><span class="t">${esc(r.title)}</span><span class="a">${esc(r.artist)} <span class="y">${esc(r.year)}</span></span></button></li>`).join('');
   render();
 }
 async function find(term){
@@ -133,22 +134,22 @@ async function find(term){
   try{
     const list=await V.search(term);if(id!==seq)return;
     cache[term]=list;show(list);
-    $('#status').textContent=list.length?'':'No albums found. Try the artist’s name.';
-  }catch{if(id===seq)$('#status').textContent='Apple’s search isn’t answering. Try again in a minute.'}
+    $('#status').textContent=list.length?'':'No records found. Try the artist’s name.';
+  }catch{if(id===seq)$('#status').textContent='Search isn’t answering. Try again in a minute.'}
 }
-$('#q').addEventListener('input',e=>{clearTimeout(timer);timer=setTimeout(()=>find(e.target.value.trim()),350)});
+$('#q').addEventListener('input',e=>{clearTimeout(timer);timer=setTimeout(()=>find(e.target.value.trim()),450)});
 
 $('#grid').addEventListener('click',e=>{
   const b=e.target.closest('.alb');if(!b)return;
-  const id=+b.dataset.id;
-  if(has(id))crate=crate.filter(r=>r.id!==id);
-  else if(crate.length<V.MAX)crate.push(results.find(r=>r.id===id));
+  const k=b.dataset.k;
+  if(has(k))crate=crate.filter(r=>key(r)!==k);
+  else if(crate.length<V.MAX)crate.push(results.find(r=>key(r)===k));
   else{$('#status').textContent=`A crate holds ${V.MAX} records.`;return}
   render();
 });
 $('#row').addEventListener('click',e=>{
   const x=e.target.closest('.x');if(!x)return;
-  const i=crate.findIndex(r=>r.id===+x.dataset.id);crate.splice(i,1);render();
+  const i=crate.findIndex(r=>key(r)===x.dataset.k);crate.splice(i,1);render();
   const c=$('#row').children[Math.min(i,crate.length-1)];(c?c.querySelector('.x'):$('#q')).focus();
 });
 $('#name').addEventListener('input',render);
@@ -159,10 +160,10 @@ $('#copy').addEventListener('click',async()=>{
 
 // start from a crate in the address (an edit link), or the last one made on this browser
 (async()=>{
-  const p=new URLSearchParams(location.search),ids=V.decode(p.get('c'));
-  if(ids.length){
+  const p=new URLSearchParams(location.search);
+  if(p.get('d')||p.get('c')){
     $('#name').value=p.get('by')||'';$('#status').textContent='Gathering records…';
-    try{crate=await V.lookup(ids);$('#status').textContent=''}catch{$('#status').textContent='Couldn’t load that crate. Try again in a minute.'}
+    try{crate=await V.fromAddress(p);$('#status').textContent=''}catch{$('#status').textContent='Couldn’t load that crate. Try again in a minute.'}
   }else{
     try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s){$('#name').value=s.name||'';crate=s.crate||[]}}catch{}
   }
