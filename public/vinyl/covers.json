@@ -4,77 +4,128 @@
     "release": "f23a6c29-be3e-4c82-94f0-2ab075beb302",
     "front": "lucinda-williams-car-wheels-on-a-gravel-road-front.jpg",
     "back": "lucinda-williams-car-wheels-on-a-gravel-road-back.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/car-wheels-on-a-gravel-road/1440915686",
+      "deezer": "https://www.deezer.com/album/161620"
+    }
   },
   "wilco-yankee-hotel-foxtrot": {
     "spotify": "0rPtXOMN42nsLDiShvGamv",
     "release": "790cb86e-52b0-4c3d-a8d2-c5fa57b74076",
     "front": "wilco-yankee-hotel-foxtrot-front.jpg",
-    "back": "wilco-yankee-hotel-foxtrot-back.jpg"
+    "back": "wilco-yankee-hotel-foxtrot-back.jpg",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/yankee-hotel-foxtrot-expanded-edition/1777509024",
+      "deezer": "https://www.deezer.com/album/271542"
+    },
+    "frontSource": "apple"
   },
   "gillian-welch-time-the-revelator": {
     "spotify": "4MvnpOua97k2qtkvNIZYaA",
     "release": "917a723a-9449-4517-83be-1bc8a56ae64b",
     "front": "gillian-welch-time-the-revelator-front.jpg",
-    "back": "gillian-welch-time-the-revelator-back.jpg"
+    "back": "gillian-welch-time-the-revelator-back.jpg",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/time-the-revelator/79765126",
+      "deezer": "https://www.deezer.com/album/61217552"
+    },
+    "frontSource": "apple"
   },
   "jason-isbell-southeastern": {
     "spotify": "1bg476ZQn7hmcXaU05SHV4",
     "release": "68687279-e748-4ee8-8f3d-e940462d8929",
     "front": "jason-isbell-southeastern-front.jpg",
-    "back": "jason-isbell-southeastern-back.jpg"
+    "back": "jason-isbell-southeastern-back.jpg",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/southeastern-10-year-anniversary-edition/1704740898",
+      "deezer": "https://www.deezer.com/album/6649319"
+    },
+    "frontSource": "apple"
   },
   "townes-van-zandt-live-at-the-old-quarter-houston-texas": {
     "spotify": "1SXpC0UH36YNCRSQMVRsoC",
     "release": "8ddf71dd-6e0e-463f-8ce7-f37da0104bc4",
     "front": "townes-van-zandt-live-at-the-old-quarter-houston-texas-front.jpg",
     "back": "townes-van-zandt-live-at-the-old-quarter-houston-texas-back.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/live-at-the-old-quarter-houston-texas/1079243361",
+      "deezer": "https://www.deezer.com/album/14585566"
+    }
   },
   "uncle-tupelo-no-depression": {
     "spotify": "4khnycwIKJXlo2ToImlQCf",
     "release": "3950d762-f987-46ac-8044-86d90e40dd5d",
     "front": "uncle-tupelo-no-depression-front.jpg",
     "back": "uncle-tupelo-no-depression-back.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/no-depression/192705668",
+      "deezer": "https://www.deezer.com/album/77153"
+    }
   },
   "emmylou-harris-pieces-of-the-sky": {
     "spotify": "04TlWfr3EnQE47HyNTBnex",
     "release": "f0d81055-5de5-4bf6-a746-e00a0619c057",
     "front": "emmylou-harris-pieces-of-the-sky-front.jpg",
     "back": "emmylou-harris-pieces-of-the-sky-back.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/pieces-of-the-sky-remastered/5559908",
+      "deezer": "https://www.deezer.com/album/85888"
+    }
   },
   "gram-parsons-grievous-angel": {
     "spotify": "6UQujMGmR5MbFsML9amCuN",
     "release": "2fdf1fb4-607f-3276-b6b1-7d7d169ad5bc",
     "front": "gram-parsons-grievous-angel-front.jpg",
     "back": "gram-parsons-grievous-angel-back.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/grievous-angel/304907551",
+      "deezer": "https://www.deezer.com/album/273177"
+    }
   },
   "neil-young-harvest": {
     "spotify": "2l3QxNo4QubBNmVKxLeum0",
     "release": "2488e872-0b64-429e-b32f-116637399160",
     "front": "neil-young-harvest-front.jpg",
     "back": "neil-young-harvest-back.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/harvest-50th-anniversary-edition/1648841033",
+      "deezer": "https://www.deezer.com/album/356690"
+    }
   },
   "sturgill-simpson-metamodern-sounds-in-country-music": {
     "spotify": "5N1kfa3omZENLwlVhEgqHF",
     "front": "sturgill-simpson-metamodern-sounds-in-country-music-front.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/metamodern-sounds-in-country-music/1887707089",
+      "deezer": "https://www.deezer.com/album/946804331"
+    }
   },
   "whiskeytown-strangers-almanac": {
     "spotify": "29gnqAHOpVJJL3h8wPrlMl",
     "release": "15b149ae-0c53-4c6f-bc22-5e7c449a81c2",
     "front": "whiskeytown-strangers-almanac-front.jpg",
     "back": "whiskeytown-strangers-almanac-back.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/strangers-almanac-deluxe-edition/1456285661",
+      "deezer": "https://www.deezer.com/album/103262"
+    }
   },
   "margo-price-midwest-farmers-daughter": {
     "spotify": "1RV9pacIcXvkUiAD0EjTdL",
     "release": "f2aef3f3-352b-4a05-91db-58ee4f5f6675",
     "front": "margo-price-midwest-farmers-daughter-front.jpg",
-    "frontSource": "apple"
+    "frontSource": "apple",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/midwest-farmers-daughter/1072852186",
+      "deezer": "https://www.deezer.com/album/861644062"
+    }
   }
 }

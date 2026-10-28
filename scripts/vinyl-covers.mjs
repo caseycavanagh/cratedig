@@ -4,8 +4,8 @@
 // (SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET from .env.local), and writes
 // covers.json for the prototype to read. Fronts come from Apple Music's
 // artwork (clean, label-supplied) when it has the album; backs stay with the
-// Cover Art Archive. album.link (Odesli) maps each Spotify album to the other
-// services the Play menu offers.
+// Cover Art Archive. The Play menu's other links come from the album's UPC
+// (from Spotify): Apple Music and Deezer both look albums up by UPC, no key.
 // Run on a Mac: node scripts/vinyl-covers.mjs   (add --force to refetch)
 import {mkdir, writeFile, readFile, access} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
@@ -108,24 +108,33 @@ async function spotifyAlbum(artist, title) {
   return hit?.id || null;
 }
 
-// Apple Music: the iTunes Search API needs no key; artwork URLs take any size up to the master
-async function appleFront(artist, title) {
+async function spotifyUpc(id) {
+  const r = await fetch(`https://api.spotify.com/v1/albums/${id}?market=US`, {headers: {Authorization: 'Bearer ' + token}});
+  return r.ok ? (await r.json()).external_ids?.upc || null : null;
+}
+// a UPC can be written with or without its leading zero
+const upcs = u => u ? [...new Set([u, u.length === 12 ? '0' + u : u.replace(/^0(?=\d{12}$)/, '')])] : [];
+
+// Apple Music: the iTunes Search API needs no key; by UPC first, then by name
+async function appleAlbum(artist, title, upc) {
+  for (const u of upcs(upc)) {
+    const hit = (await get('https://itunes.apple.com/lookup?entity=album&country=us&upc=' + u))?.results?.find(i => i.wrapperType === 'collection');
+    if (hit) return hit;
+  }
   const r = await get('https://itunes.apple.com/search?entity=album&limit=10&country=us&term=' + encodeURIComponent(`${q(artist)} ${q(title)}`));
   const a = norm(artist), t = norm(title);
-  const hit = (r?.results || []).find(i => norm(i.artistName) === a && norm(i.collectionName) === t)
-    || (r?.results || []).find(i => norm(i.artistName) === a && norm(i.collectionName).startsWith(t));
-  return hit?.artworkUrl100?.replace(/\/\d+x\d+bb\.(jpg|png)$/, '/1500x1500bb.jpg') || null;
+  return (r?.results || []).find(i => norm(i.artistName) === a && norm(i.collectionName) === t)
+    || (r?.results || []).find(i => norm(i.artistName) === a && norm(i.collectionName).startsWith(t)) || null;
 }
+// artwork URLs take any size up to the master
+const appleArt = hit => hit?.artworkUrl100?.replace(/\/\d+x\d+bb\.(jpg|png)$/, '/1500x1500bb.jpg') || null;
 
-// album.link: no key, about 10 lookups a minute
-const PLATFORMS = ['appleMusic', 'youtubeMusic', 'tidal', 'amazonMusic', 'deezer'];
-let lastLink = 0;
-async function albumLinks(spotify) {
-  const wait = lastLink + 6500 - Date.now(); if (wait > 0) await sleep(wait);
-  lastLink = Date.now();
-  const r = await get('https://api.song.link/v1-alpha.1/links?userCountry=US&url=' + encodeURIComponent('https://open.spotify.com/album/' + spotify));
-  const by = r?.linksByPlatform || {};
-  return Object.fromEntries(PLATFORMS.filter(p => by[p]?.url).map(p => [p, by[p].url]));
+// Deezer: no key; by UPC first, then by name (errors come back as 200s with an error object)
+async function deezerLink(artist, title, upc) {
+  for (const u of upcs(upc)) { const a = await get('https://api.deezer.com/album/upc:' + u); if (a?.link) return a.link; }
+  const r = await get('https://api.deezer.com/search/album?q=' + encodeURIComponent(`artist:"${q(artist)}" album:"${q(title)}"`));
+  const a = norm(artist), t = norm(title);
+  return (r?.data || []).find(i => norm(i.artist?.name || '') === a && norm(i.title).startsWith(t))?.link || null;
 }
 
 await mkdir(OUT, {recursive: true});
@@ -140,13 +149,19 @@ for (const [artist, title] of RECORDS) {
     if (id) manifest[s] = {...manifest[s], spotify: id};
     console.log(id ? 'spotify' : 'no spotify', s);
   }
-  if (manifest[s]?.spotify && (force || !manifest[s].links)) {
-    const links = await albumLinks(manifest[s].spotify).catch(() => null);
-    if (links) manifest[s] = {...manifest[s], links};
-    console.log(links ? 'links ' + Object.keys(links).join(' ') : 'no links', s);
+  const needLinks = force || !manifest[s]?.links, needFront = force || manifest[s]?.frontSource !== 'apple';
+  const upc = token && manifest[s]?.spotify && (needLinks || needFront) ? await spotifyUpc(manifest[s].spotify).catch(() => null) : null;
+  const apple = needLinks || needFront ? await appleAlbum(artist, title, upc).catch(() => null) : null;
+  if (needLinks) {
+    const links = {};
+    if (apple?.collectionViewUrl) links.appleMusic = apple.collectionViewUrl.split('?')[0];
+    const dz = await deezerLink(artist, title, upc).catch(() => null);
+    if (dz) links.deezer = dz;
+    if (Object.keys(links).length) manifest[s] = {...manifest[s], links};
+    console.log('links', Object.keys(links).join(' ') || 'none', upc ? '(by UPC)' : '(by name)', s);
   }
-  if (force || manifest[s]?.frontSource !== 'apple') {
-    const url = await appleFront(artist, title).catch(() => null);
+  if (needFront) {
+    const url = appleArt(apple);
     if (url) {
       const front = `${s}-front.jpg`;
       await save(url, path.join(OUT, front));
