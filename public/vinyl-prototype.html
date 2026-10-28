@@ -60,25 +60,21 @@ button{font:inherit;color:inherit}
 .rc .fr,.sleeve .fr{transform:translateZ(calc(var(--T)/2))}
 .rc .bk,.sleeve .bk{transform:rotateY(180deg) translateZ(calc(var(--T)/2))}
 .edge{position:absolute;top:0;left:calc(50% - var(--T)/2);width:var(--T);height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.edge::after{content:'';position:absolute;inset:0}
-.rc .edge::before{content:'';position:absolute;inset:0;background:var(--shade,transparent);transition:background .7s}
-.edge.l{transform:rotateY(-90deg) translateZ(calc(var(--W)/2));filter:brightness(.62)}
-.edge.r{transform:rotateY(90deg) translateZ(calc(var(--W)/2));filter:brightness(.72)}
+.edge::after{content:'';position:absolute;inset:0;background:var(--grain),linear-gradient(90deg,#0000003a,#ffffff30 40%,#ffffff12 60%,#00000040),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
+.rc .edge::before{content:'';position:absolute;inset:0;background:var(--shade,transparent)}
+/* edges darken by how far they turn from the light (plain layers, no filters: cheap to composite) */
+.edge.l{transform:rotateY(-90deg) translateZ(calc(var(--W)/2));--dk:#0000005e}
+.edge.r{transform:rotateY(90deg) translateZ(calc(var(--W)/2));--dk:#00000047}
 .edge.t,.edge.b{left:0;top:calc(50% - var(--T)/2);width:100%;height:var(--T)}
-.edge.t{transform:rotateX(90deg) translateZ(calc(var(--W)/2));filter:brightness(.92)}
-.edge.b{transform:rotateX(-90deg) translateZ(calc(var(--W)/2));filter:brightness(.5)}
+.edge.t{transform:rotateX(90deg) translateZ(calc(var(--W)/2));--dk:#00000014}
+.edge.t::after{background:var(--grain),linear-gradient(180deg,#00000030,#ffffff4a 45%,#ffffff1a 60%,#00000038),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
+.edge.b{transform:rotateX(-90deg) translateZ(calc(var(--W)/2));--dk:#00000080}
 /* cardboard: a fine grain, light from the top left, and worn edges that catch it */
-:root{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .rc .face::before,.sleeve .face::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
-  background:var(--grain),linear-gradient(115deg,#ffffff16,#0000 35%,#0000 70%,#0000001c);background-size:160px,auto;mix-blend-mode:overlay;
-  box-shadow:inset 1px 1px 0 #ffffff40,inset -1px -1px 0 #00000030,inset 0 0 0 2px #ffffff0d,inset 0 0 calc(var(--W)*.02) #00000024}
-.edge{background-blend-mode:multiply}
-.edge::after{background:var(--grain),linear-gradient(90deg,#0000003a,#ffffff30 40%,#ffffff12 60%,#00000040);background-size:120px,auto}
-.edge.t::after{background:var(--grain),linear-gradient(180deg,#00000030,#ffffff4a 45%,#ffffff1a 60%,#00000038);background-size:120px,auto}
+  background:var(--grain),linear-gradient(115deg,#ffffff16,#0000 35%,#0000 70%,#0000001c);background-size:128px,auto;
+  box-shadow:inset 1px 1px 0 #ffffff40,inset -1px -1px 0 #00000030,inset 0 0 0 2px #ffffff0d}
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
 img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none}
-/* back scans are photos of the jacket, often in shrink wrap: trim their borders */
-.bk img.art{inset:-3.5%;width:107%;height:107%;max-width:none}
 .cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
 .cover-type b{display:block;font:500 6cqw 'Instrument Sans',sans-serif}
 .cover-type i{display:block;font:400 4.4cqw var(--mono);font-style:normal;opacity:.85;margin-top:1.2cqw}
@@ -120,18 +116,19 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .sleeve.dragging{transition:none}
 .sleeve{--T:max(3px,calc(var(--O)*.007));--W:var(--O)}
 .sleeve .face{border-radius:1px}
-.sleeve .sh{position:absolute;inset:3% 3% 0;box-shadow:0 1px 2px #0002,0 6px 12px -4px #0002,0 24px 40px -14px #0005,0 60px 100px -36px #0008;transform:translateZ(calc(var(--T)/-2 - 1px));opacity:0;transition:opacity .6s}
-.open.in .sleeve .sh{opacity:1}
-html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #000a,0 60px 100px -36px #000d}
+/* the shadow sits under the sleeve, outside it, so it stays behind whichever side faces you */
+.lift .sh{position:absolute;inset:3% 3% 0;box-shadow:0 1px 2px #0002,0 6px 12px -4px #0002,0 24px 40px -14px #0005,0 60px 100px -36px #0008;transform:translateZ(-24px);opacity:0;transition:opacity .6s}
+.open.in .lift .sh{opacity:1}
+html[data-theme=dark] .lift .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #000a,0 60px 100px -36px #000d}
 /* the neighbors peek in from the page edges; hover pulls one out a little further */
 .peek{all:unset;position:fixed;top:50%;z-index:2;width:var(--R);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
   transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s;box-shadow:0 20px 40px -20px #0006}
 .peek img,.peek>div{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
-.peek.prev{left:0;--x:calc(-100% + 28px);--h:calc(-100% + 96px);--r:-1.5deg}
-.peek.next{right:0;--x:calc(100% - 28px);--h:calc(100% - 96px);--r:1.5deg}
-.peek{transform:translate(var(--x),-50%) rotate(var(--r))}
+.peek.prev{left:0;--x:calc(-100% + 28px);--h:calc(-100% + 96px)}
+.peek.next{right:0;--x:calc(100% - 28px);--h:calc(100% - 96px)}
+.peek{transform:translate(var(--x),-50%)}
 .open.in .peek.on{opacity:.45;pointer-events:auto;transition:transform .85s var(--flip),opacity .5s .25s}
-.open.in .peek.on:hover{opacity:1;transform:translate(var(--h),-50%) rotate(0deg);transition:transform .6s var(--flip),opacity .25s}
+.open.in .peek.on:hover{opacity:1;transform:translate(var(--h),-50%);transition:transform .6s var(--flip),opacity .25s}
 .open.in.swapping .peek{opacity:0;transition:none}
 /* the details start tucked under the record and slide out to the right */
 .o-info{position:relative;z-index:1;flex:none;width:min(340px,30vw);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
@@ -182,7 +179,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
   <div class="o-page">
     <button class="btn" id="close">← Back to the crate</button>
     <div class="o-grid">
-      <div class="stage" id="stage" tabindex="0" role="button" aria-label="Turn the sleeve over"><div class="lift" id="lift"><div class="sleeve" id="sleeve"></div></div></div>
+      <div class="stage" id="stage" tabindex="0" role="button" aria-label="Turn the sleeve over"><div class="lift" id="lift"><div class="sh"></div><div class="sleeve" id="sleeve"></div></div></div>
       <div class="o-info" id="oinfo"></div>
     </div>
   </div>
@@ -221,7 +218,7 @@ function art(r){
 }
 const coverHTML=r=>r.front?`<img class="art" src="vinyl/${r.front}" alt="" decoding="async" draggable="false">`:`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
-const edgesHTML=r=>['l','r','t','b'].map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
+const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
 const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 const backHTML=r=>r.back?`<img class="art" src="vinyl/${r.back}" alt="" decoding="async" draggable="false">`:`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
@@ -238,7 +235,7 @@ function sortBy(k){
   build();go(0,true);
 }
 function build(){
-  stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}</div>`).join('');
+  stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r,['t'])}</div>`).join('');
 }
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
 // a hair of disorder, the same every visit: each record sits slightly off true
@@ -286,7 +283,7 @@ const prevP=$('#prevP'),nextP=$('#nextP');
 function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';if(r)b.title=`${r.title}, ${r.artist}`}
 prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
 function fill(r){
-  sleeve.innerHTML=`<div class="sh"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
+  sleeve.innerHTML=`<div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
   peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
       <dl class="facts"><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}</dd><dt>Added</dt><dd>${fmtDate(r.added)}</dd></dl>
@@ -327,16 +324,20 @@ function swap(dir){
   if(reduce){fill(r);setS();return}
   // the record travels out to the edge it came from and becomes the peek; the neighbor travels in from its edge
   busy=true;
-  const W=stage.offsetWidth,sc=stage.getBoundingClientRect(),cx=sc.left+W/2;
-  const edgeX=side=>side<0?28-W/2-cx:innerWidth-28+W/2-cx;
-  const ghost=lift.cloneNode(true);ghost.removeAttribute('id');ghost.querySelector('.sleeve').removeAttribute('id');
+  const sc=stage.getBoundingClientRect(),W=sc.width,cx=sc.left+W/2,cy=sc.top+sc.height/2;
+  // a peek at rest: 28px showing at the page edge, vertically centered on the viewport
+  const edge=side=>`translate(${side<0?28-W/2-cx:innerWidth-28+W/2-cx}px,${innerHeight/2-cy}px)`;
+  const ghost=lift.cloneNode(true);ghost.removeAttribute('id');const gs=ghost.querySelector('.sleeve');gs.removeAttribute('id');
   ghost.className='lift ghost';ghost.style.transform='';stage.append(ghost);
   open.classList.add('swapping');
-  fill(r);lift.className='lift';lift.style.transition='none';lift.style.transform=`translateX(${edgeX(dir)}px)`;lift.style.opacity='.45';setS();
+  fill(r);lift.className='lift';lift.style.transition='none';lift.style.transform=edge(dir);lift.style.opacity='.45';
+  sleeve.className='sleeve';sleeve.style.transform='rotateX(0deg) rotateY(0deg)';
   void lift.offsetWidth;
-  const ease='cubic-bezier(.3,.75,.2,1)';
-  ghost.style.transition=`transform .7s ${ease},opacity .7s`;ghost.style.transform=`translateX(${edgeX(-dir)}px)`;ghost.style.opacity='.45';
+  const ease='cubic-bezier(.3,.75,.2,1)',flat=360*Math.round(ry/360);
+  ghost.style.transition=`transform .7s ${ease},opacity .7s`;ghost.style.transform=edge(-dir);ghost.style.opacity='.45';
+  gs.className='sleeve';gs.style.transition=`transform .7s ${ease}`;gs.style.transform=`rotateX(0deg) rotateY(${flat}deg)`;
   lift.style.transition=`transform .7s ${ease},opacity .5s`;lift.style.transform='';lift.style.opacity='';
+  base=REST;ry=base;rx=TILT;settle();setS();
   later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},700);
   later(()=>{lift.style.transition='';busy=false},760);
 }
@@ -378,7 +379,7 @@ crate.addEventListener('wheel',e=>{
   acc+=e.deltaY;if(Math.abs(acc)>=45){go(cur+Math.sign(acc));acc=0}
 },{passive:false});
 let drag=null,moved=false;
-crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag)return;const b=$('.rc.cur .fr',stack)?.getBoundingClientRect();if(b)crate.style.setProperty('--mx',Math.max(-1,Math.min(1,((e.clientX-b.left)/b.width-.5)*2)).toFixed(2))});
+let mxF=0;crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||mxF)return;mxF=requestAnimationFrame(()=>{mxF=0;const n=$('.rc.cur',stack),b=n?.querySelector('.fr').getBoundingClientRect();if(b)n.style.setProperty('--mx',Math.max(-1,Math.min(1,((e.clientX-b.left)/b.width-.5)*2)).toFixed(1))})});
 crate.addEventListener('pointerdown',e=>{drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc')};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
@@ -399,12 +400,17 @@ addEventListener('keydown',e=>{
 });
 
 function start(){
+  const m=location.hash.match(/^#(record\/)?(.+)$/); // read the address before sorting rewrites it
   sortBy(sortKey);
-  const m=location.hash.match(/^#(record\/)?(.+)$/),j=m?order.findIndex(r=>r.slug===m[2]):-1;
+  const j=m?order.findIndex(r=>r.slug===m[2]):-1;
   if(j>0)go(j,true);
   if(j>=0&&m[1])openRecord(true);
 }
 // Real covers and Spotify IDs, fetched by scripts/vinyl-covers.mjs; spines take their color from the cover's left edge
+// grain: one 128px tile of soft noise, drawn once
+{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),d=x.createImageData(128,128);
+ for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=14}x.putImageData(d,0,0);
+ document.documentElement.style.setProperty('--grain',`url(${c.toDataURL()})`)}
 function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d');x.drawImage(i,0,0,i.naturalWidth*.03,i.naturalHeight,0,0,4,64);const d=x.getImageData(0,0,4,64).data;let r=0,g=0,b=0;for(let k=0;k<d.length;k+=4){r+=d[k];g+=d[k+1];b+=d[k+2]}const n=d.length/4;res(`rgb(${r/n|0},${g/n|0},${b/n|0})`)}catch{res(null)}};i.onerror=()=>res(null);i.src=src})}
 fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(async m=>{
   RECORDS.forEach(r=>Object.assign(r,m[r.slug]||{}));
