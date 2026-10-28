@@ -84,13 +84,13 @@ html.phone .tail{display:none}
 /* Each jacket's paper and wear come from its year (see "dress"): laminated gloss before 1970, matte through the 2000s, uncoated
    stock after; worn before 1980, a little worn through the 90s. In the crate they're baked into the cover as it loads (see "bake"),
    so a record is still one image to draw; the record you pull out wears the same layers here. */
-.sleeve[data-paper=matte] .face::before{--paperL:var(--grain) 0 0/128px,linear-gradient(#ffffff08,#ffffff08)}
-.sleeve[data-paper=uncoated] .face::before{--paperL:var(--tooth) 0 0/96px,linear-gradient(#f7efdc1e,#f7efdc1e)}
+.sleeve[data-paper=matte] .face::before{--paperL:var(--grain) 0 0/128px,linear-gradient(#ffffff06,#ffffff06)}
+.sleeve[data-paper=uncoated] .face::before{--paperL:var(--tooth) 0 0/96px,linear-gradient(#f7efdc10,#f7efdc10)}
 .sleeve[data-paper=gloss] .face::before{--paperL:linear-gradient(118deg,#0000 30%,#ffffff1e 41%,#ffffff08 48%,#0000 56%),linear-gradient(#ffffff0e,#0000 35%)}
 .sleeve[data-wear="1"] .face::before{--wearL:radial-gradient(circle at 0 0,#ffffff24,#0000 3.5%),radial-gradient(circle at 100% 100%,#ffffff1a,#0000 3%)}
 .sleeve[data-wear="2"] .face::before{--wearL:radial-gradient(circle at 0 0,#ffffff38,#0000 5%),radial-gradient(circle at 100% 100%,#ffffff26,#0000 4%),radial-gradient(circle at 100% 0,#ffffff1c,#0000 3%),linear-gradient(#f3e4c40f,#f3e4c40f);
   box-shadow:inset 0 0 0 1px #ffffff26,inset 0 0 5px #ffffff14}
-/* the lamp: a WebGL canvas on the lit record that draws only light and shadow, raking across the paper */
+/* the lamp: a WebGL canvas on the lit record that draws only light and shadow */
 .glow{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
 .art.plain{background-image:var(--ring);background-size:100% 100%}
@@ -1111,7 +1111,7 @@ function dress(el,r){
  root.style.setProperty('--ring',blobURL(c))}
 const TILES={};
 {const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d'),d=x.createImageData(96,96);
- for(let i=0;i<d.data.length;i+=4){const v=Math.random()<.5?40:235;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*30|0}x.putImageData(d,0,0);
+ for(let i=0;i<d.data.length;i+=4){const v=Math.random()<.5?40:235;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*14|0}x.putImageData(d,0,0);
  root.style.setProperty('--tooth',blobURL(TILES.tooth=c))}
 // Bake a record's paper and wear into its cover as the image arrives: drawn once, the same layers as the CSS on the sleeve,
 // sized to the record on screen. The crate then draws exactly what it did before: one image per face.
@@ -1124,15 +1124,19 @@ function bake(i,el){
   const pat=(t,n)=>{const p=x.createPattern(t,'repeat');p.setTransform(new DOMMatrix().scale(k*n/t.width));return p};
   const corner=(cx,cy,r,col)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r*Math.hypot(w,h));g.addColorStop(0,col);g.addColorStop(1,'#ffffff00');fill(g)};
   x.drawImage(i,0,0);
-  if(P==='matte'&&TILES.grain){fill(pat(TILES.grain,128));fill('#ffffff08')}
-  if(P==='uncoated'){fill(pat(TILES.tooth,96));fill('#f7efdc1e')}
+  x.filter='blur(.6px)'; // soft enough not to shimmer as the record nudges under the pointer
+  if(P==='matte'&&TILES.grain){x.globalAlpha=.5;fill(pat(TILES.grain,128));x.globalAlpha=1}
+  if(P==='uncoated')fill(pat(TILES.tooth,96));
+  x.filter='none';
+  if(P==='matte')fill('#ffffff06');
+  if(P==='uncoated')fill('#f7efdc10');
   if(P==='gloss'){fill(lin(118,[[.3,'#ffffff00'],[.41,'#ffffff1e'],[.48,'#ffffff08'],[.56,'#ffffff00']]));fill(lin(180,[[0,'#ffffff0e'],[.35,'#ffffff00']]))}
   if(wear===1){corner(0,0,.035,'#ffffff24');corner(w,h,.03,'#ffffff1a')}
   if(wear===2){corner(0,0,.05,'#ffffff38');corner(w,h,.04,'#ffffff26');corner(w,0,.03,'#ffffff1c');fill('#f3e4c40f');x.strokeStyle='#ffffff26';x.lineWidth=2*k;x.strokeRect(0,0,w,h)}
   c.toBlob(b=>{if(b)i.src=URL.createObjectURL(b)},'image/webp',.92);
 }
 // The lamp: it follows the pointer over the front record, or the record you pulled out, on a spring, and rests at the top left.
-// Drawn in WebGL so it rakes across the paper's tooth and the wear; only where there's a mouse to move it.
+// Drawn in WebGL: only light, never the paper, so the texture stays put on the cover as the lamp moves. Only where there's a mouse.
 const lamp={x:.22,y:.14,vx:0,vy:0,e:null,el:null,raf:0,t:0};
 function lampOn(){
   if(!GL)return;
@@ -1159,40 +1163,28 @@ function lampTick(t){
 const GL=matchMedia('(hover:hover) and (pointer:fine)').matches?(()=>{
   const c=document.createElement('canvas');c.className='glow';
   const g=c.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias:false,depth:false,stencil:false});if(!g)return null;
-  const FS=`precision highp float;
-uniform vec2 res;uniform vec3 L;uniform float paper,wear,seed,sz;
-float h(vec2 p){p=fract(p*vec2(.1031,.103)+seed);p+=dot(p,p.yx+33.33);return fract((p.x+p.y)*p.x);}
-float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
-float H(vec2 uv){
-  vec2 q=uv*sz;float v=0.;
-  if(paper<.5)v=(n(q*.8)*.5+n(q*1.9)*.5)*.35;
-  else if(paper<1.5)v=(n(q*.5)*.6+n(q*1.3)*.4)*.8;
-  if(wear>.5){vec2 m=min(uv,1.-uv);float edge=smoothstep(.05,0.,min(m.x,m.y));v+=(edge*(n(q*.3)-.5)*1.2+(n(uv*6.)-.5)*.3)*wear*.5;}
-  return v;
-}
+  const FS=`precision mediump float;
+uniform vec2 res;uniform vec3 L;uniform float paper;
 void main(){
-  vec2 uv=vec2(gl_FragCoord.x/res.x,1.-gl_FragCoord.y/res.y);float e=1./res.x;
-  float s=.22*res.x/sz;
-  vec3 N=normalize(vec3((H(uv-vec2(e,0.))-H(uv+vec2(e,0.)))*s,(H(uv+vec2(0.,e))-H(uv-vec2(0.,e)))*s,1.));
+  vec2 uv=vec2(gl_FragCoord.x/res.x,1.-gl_FragCoord.y/res.y);
   vec3 l=L-vec3(uv,0.);float d=length(l);vec3 Ld=l/d;
-  float relief=dot(N,Ld)-Ld.z;
   float gl=paper>1.5?1.:0.;
-  float sp=pow(max(dot(N,normalize(Ld+vec3(0.,0.,1.))),0.),mix(18.,110.,gl))*mix(paper>.5?.02:.06,.28,gl);
-  float fall=1./(1.+d*d*2.2);
-  float lit=clamp(max(relief,0.)*.9+sp*fall*1.2+fall*.03,0.,.5);
-  float dark=clamp(max(-relief,0.)*.9+(1.-fall)*.08,0.,.35);
-  gl_FragColor=vec4(vec3(lit),lit+dark*(1.-lit));
+  float sp=pow(normalize(Ld+vec3(0.,0.,1.)).z,mix(8.,60.,gl))*mix(paper>.5?.06:.1,.4,gl);
+  float fall=1./(1.+d*d*3.);
+  float lit=clamp(sp*fall*1.5+fall*fall*.3,0.,.6);
+  float dark=clamp((1.-fall)*.34,0.,.45);
+  float j=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)/255.; // a hair of dither, so the soft falloff doesn't band
+  gl_FragColor=vec4(vec3(lit+j),lit+j+dark*(1.-lit));
 }`;
   const sh=(t,src)=>{const o=g.createShader(t);g.shaderSource(o,src);g.compileShader(o);return o};
   const p=g.createProgram();g.attachShader(p,sh(g.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));g.attachShader(p,sh(g.FRAGMENT_SHADER,FS));
   g.bindAttribLocation(p,0,'a');g.linkProgram(p);if(!g.getProgramParameter(p,g.LINK_STATUS))return null;g.useProgram(p);
   g.bindBuffer(g.ARRAY_BUFFER,g.createBuffer());g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),g.STATIC_DRAW);g.enableVertexAttribArray(0);g.vertexAttribPointer(0,2,g.FLOAT,false,0,0);
-  const u=Object.fromEntries(['res','L','paper','wear','seed','sz'].map(k=>[k,g.getUniformLocation(p,k)]));
+  const u=Object.fromEntries(['res','L','paper'].map(k=>[k,g.getUniformLocation(p,k)]));
   return{c,draw(el,f){
-    if(!f)return;const sz=f.offsetWidth,w=Math.round(sz*Math.min(devicePixelRatio,1.5));if(!sz)return;
+    if(!f)return;const w=f.offsetWidth;if(!w)return; // light is smooth: drawn at one canvas pixel per CSS pixel
     if(c.width!==w){c.width=c.height=w;g.viewport(0,0,w,w)}
-    g.uniform2f(u.res,w,w);g.uniform3f(u.L,lamp.x,lamp.y,.55);g.uniform1f(u.sz,sz);
-    g.uniform1f(u.paper,{uncoated:1,gloss:2}[el.dataset.paper]||0);g.uniform1f(u.wear,+el.dataset.wear||0);g.uniform1f(u.seed,(el===sleeve?order[cur]:order[+el.dataset.j])?.slug.length*.137%1||0);
+    g.uniform2f(u.res,w,w);g.uniform3f(u.L,lamp.x,lamp.y,.55);g.uniform1f(u.paper,{uncoated:1,gloss:2}[el.dataset.paper]||0);
     g.drawArrays(g.TRIANGLES,0,3);
   }};
 })():null;
