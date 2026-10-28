@@ -99,7 +99,10 @@ html[data-theme=dark] .pg{--vb:#121212;--vf:#ecebe8;--vm:#8f8f93;--vl:#3a3a3d;--
 .alt:hover .lg path,.alt.h .lg path{fill:var(--c)}
 .alt:active,.alt.p,.sw:active,.sw.p{transform:scale(.96);transition-duration:.08s}
 .alt:focus-visible,.sw:focus-visible,.alt.f,.sw.f{outline:2px solid var(--accent);outline-offset:2px}
-.sw[aria-expanded=true]{color:var(--vf)}
+.sw[aria-expanded=true]{color:var(--vf);background:var(--vs)}
+.sw .cv{transition:transform .45s var(--flip)}.sw[aria-expanded=true] .cv{transform:rotate(180deg)}
+.sw.wide{width:auto;padding:0 9px;border-radius:999px}
+.stk{display:flex}.stk .lg+.lg{margin-left:-4px}
 .t-outline .b.tint{background:color-mix(in srgb,var(--c) 10%,var(--vb));border-color:color-mix(in srgb,var(--c) 40%,var(--vl))}
 .t-outline .b.tint:hover,.t-outline .b.tint.h{border-color:var(--c)}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
@@ -158,6 +161,7 @@ html[data-theme=dark] .menu{box-shadow:0 12px 32px -12px #000c}
 <div class="wrap">
   <div class="top"><div><h1>Play button</h1><p>The Play button on the records page, in three parts: the button, the menu of services, and how it looks once you've picked one. Each sticker is live (click Play, pick a service, then click Play again), with every state laid out below it. Star one from each group.</p></div>
     <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy picks</button><button class="pill" id="clear" type="button">Clear</button><span id="tt"></span></div></div>
+  <h2 class="grp">The switch beside L4</h2><p>L4 with other things in the round button. I1, the caret, is on the records page now; it turns over while the menu is open.</p><div class="sheet" id="I"></div>
   <h2 class="grp">Logo in the button, no split</h2><p>New, after your note: once you’ve picked, the button carries the service’s logo and stays one piece. Each one is a different way to switch. Before a pick, Play opens the menu with logos.</p><div class="sheet" id="L"></div>
   <h2 class="grp">The button</h2><p>How Play looks and feels before anyone has picked. Each one uses the M1 menu and R1 once picked.</p><div class="sheet" id="B"></div>
   <h2 class="grp">The menu</h2><p>Where the services show up. Each one uses the B1 button.</p><div class="sheet" id="M"></div>
@@ -174,6 +178,11 @@ const MARK={spotify:'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12
   deezer:'M18.81 4.16v3.03H24V4.16h-5.19zM6.27 8.38v3.027h5.189V8.38h-5.19zm12.54 0v3.027H24V8.38h-5.19zM6.27 12.594v3.027h5.189v-3.027h-5.19zm6.271 0v3.027h5.19v-3.027h-5.19zm6.27 0v3.027H24v-3.027h-5.19zM0 16.81v3.029h5.19v-3.03H0zm6.27 0v3.029h5.189v-3.03h-5.19zm6.271 0v3.029h5.19v-3.03h-5.19zm6.27 0v3.029H24v-3.03h-5.19Z'};
 const mark=(k,color)=>`<svg class="lg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="${color?SV.find(x=>x[0]===k)[2]:'currentColor'}" d="${MARK[k]}"/></svg>`;
 const LOGO={logo:0,logoc:1,lchange:1,lcaption:1,lothers:1,lswap:1,lhold:1,ltint:1};
+const ph=(d,c='')=>`<svg class="${c}" width="14" height="14" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="${d}"/></svg>`;
+const ICON={caret:ph('M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z','cv'),
+  updown:ph('M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z'),
+  dots:ph('M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z'),
+  arrows:ph('M213.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L188.69,184H48a8,8,0,0,1,0-16H188.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,213.66,181.66Zm-139.32-64a8,8,0,0,0,11.32-11.32L67.31,88H208a8,8,0,0,0,0-16H67.31L85.66,53.66A8,8,0,0,0,74.34,42.34l-32,32a8,8,0,0,0,0,11.32Z')};
 const SWAP='<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 4.5h9m0 0L8.5 2M11 4.5 8.5 7M12 9.5H3m0 0L5.5 7M3 9.5 5.5 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 // the control's markup for a variant {t,m,r} in a state {picked,open,h,p,f,mi,mf}
@@ -189,7 +198,7 @@ function playHTML(v,s={}){
   else if(v.r==='lchange')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${word}</button><button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
   else if(v.r==='lcaption')trig=`<button class="b${st('b')}" data-a="go">${word}</button><span class="cap">${pk[1]} · <button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
   else if(v.r==='lothers')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${word}</button><span class="alts">${SV.filter(x=>x!==pk).map(([k,n,c],i)=>`<button class="alt${i===0?st('more'):''}" data-a="pick" data-k="${k}" style="--c:${c}" aria-label="Play on ${n} instead">${mark(k,1)}</button>`).join('')}</span></span>`;
-  else if(v.r==='lswap')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${word}</button><button class="sw${st('more')}" data-a="toggle" aria-expanded="${ex}" aria-label="Play somewhere else">${SWAP}</button></span>`;
+  else if(v.r==='lswap')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${word}</button><button class="sw${v.icon==='stack'?' wide':''}${st('more')}" data-a="toggle" aria-expanded="${ex}" aria-label="Play somewhere else">${v.icon==='stack'?`<span class="stk">${SV.filter(x=>x!==pk).map(([k])=>mark(k,1)).join('')}</span>`:ICON[v.icon]||SWAP}</button></span>`;
   else if(v.r==='lhold')trig=`<button class="b${st('b')}${s.open?' p':''}" data-a="go" data-hold aria-expanded="${ex}" aria-description="Hold, right-click or press the down arrow for other services">${word}</button><span class="cap">Hold for more</span>`;
   else if(v.r==='ltint')trig=`<span class="named"><button class="b tint${st('b')}" data-a="go" style="--c:${pk[2]}">${word}</button><button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
   else if(v.r==='logoswitch')trig=`<span class="split dotted"><button class="b${st('b')}" data-a="go">${word}</button>${more(`${mark(pk[0],1)}${CHEV}`)}</span>`;
@@ -237,6 +246,12 @@ function sticker(box,id,name,v,use,cells,n=2){
   const d={v,live:$('.live',s),picked:null};demos.set(d.live,d);paint(d);
 }
 const tall=v=>v.m==='inline'||v.m==='drawer'?0:v.m==='mono'?2:1;
+[['Caret (live)','caret','A caret that points at the menu and turns over while it’s open'],
+ ['Up and down','updown','A pair of carets, like a select: says “choose from a list”'],
+ ['Three dots','dots','The usual “more” mark. Familiar, but says less about what’s inside'],
+ ['Arrows','arrows','Left and right arrows: “swap where this plays”. Phosphor, a little cleaner than L4’s'],
+ ['The other logos','stack','The other services’ logos, overlapped, as the button itself: it shows what you can switch to']].forEach(([n,icon,use],i)=>{const v={t:'outline',m:'logosc',r:'lswap',icon},sp={picked:'spotify'};sticker('#I','I'+(i+1),n,v,use,[
+  ['Spotify',v,sp],['Apple Music',v,{picked:'appleMusic'}],['Hover switch',v,{...sp,h:'more'}],['Switching',v,{...sp,open:1},1]])});
 L.forEach(([n,r,use],i)=>{const v={t:'outline',m:'logosc',r},sp={picked:'spotify'};sticker('#L','L'+(i+1),n,v,use,r==='lothers'?[
   ['Spotify',v,{picked:'spotify'}],['Apple Music',v,{picked:'appleMusic'}],['Deezer',v,{picked:'deezer'}],['Hover Play',v,{...sp,h:'b'}],['Hover another',v,{...sp,h:'more'}],['Before a pick',v,{}]]:[
   ['Spotify',v,{picked:'spotify'}],['Apple Music',v,{picked:'appleMusic'}],['Deezer',v,{picked:'deezer'}],['Hover Play',v,{...sp,h:'b'}],[r==='lhold'?'Pressed':'Hover switch',v,{...sp,...(r==='lhold'?{h:'b',p:'b'}:{h:'more'})}],['Switching',v,{...sp,open:1,...(r==='lhold'?{}:{h:'more'})},1]])});
