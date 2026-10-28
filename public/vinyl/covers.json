@@ -3,7 +3,8 @@
     "spotify": "3iC6dJobZulVXp0F4Bojig",
     "release": "f23a6c29-be3e-4c82-94f0-2ab075beb302",
     "front": "lucinda-williams-car-wheels-on-a-gravel-road-front.jpg",
-    "back": "lucinda-williams-car-wheels-on-a-gravel-road-back.jpg"
+    "back": "lucinda-williams-car-wheels-on-a-gravel-road-back.jpg",
+    "frontSource": "apple"
   },
   "wilco-yankee-hotel-foxtrot": {
     "spotify": "0rPtXOMN42nsLDiShvGamv",
@@ -27,44 +28,53 @@
     "spotify": "1SXpC0UH36YNCRSQMVRsoC",
     "release": "8ddf71dd-6e0e-463f-8ce7-f37da0104bc4",
     "front": "townes-van-zandt-live-at-the-old-quarter-houston-texas-front.jpg",
-    "back": "townes-van-zandt-live-at-the-old-quarter-houston-texas-back.jpg"
+    "back": "townes-van-zandt-live-at-the-old-quarter-houston-texas-back.jpg",
+    "frontSource": "apple"
   },
   "uncle-tupelo-no-depression": {
     "spotify": "4khnycwIKJXlo2ToImlQCf",
     "release": "3950d762-f987-46ac-8044-86d90e40dd5d",
     "front": "uncle-tupelo-no-depression-front.jpg",
-    "back": "uncle-tupelo-no-depression-back.jpg"
+    "back": "uncle-tupelo-no-depression-back.jpg",
+    "frontSource": "apple"
   },
   "emmylou-harris-pieces-of-the-sky": {
     "spotify": "04TlWfr3EnQE47HyNTBnex",
     "release": "f0d81055-5de5-4bf6-a746-e00a0619c057",
     "front": "emmylou-harris-pieces-of-the-sky-front.jpg",
-    "back": "emmylou-harris-pieces-of-the-sky-back.jpg"
+    "back": "emmylou-harris-pieces-of-the-sky-back.jpg",
+    "frontSource": "apple"
   },
   "gram-parsons-grievous-angel": {
     "spotify": "6UQujMGmR5MbFsML9amCuN",
     "release": "2fdf1fb4-607f-3276-b6b1-7d7d169ad5bc",
     "front": "gram-parsons-grievous-angel-front.jpg",
-    "back": "gram-parsons-grievous-angel-back.jpg"
+    "back": "gram-parsons-grievous-angel-back.jpg",
+    "frontSource": "apple"
   },
   "neil-young-harvest": {
     "spotify": "2l3QxNo4QubBNmVKxLeum0",
     "release": "2488e872-0b64-429e-b32f-116637399160",
     "front": "neil-young-harvest-front.jpg",
-    "back": "neil-young-harvest-back.jpg"
+    "back": "neil-young-harvest-back.jpg",
+    "frontSource": "apple"
   },
   "sturgill-simpson-metamodern-sounds-in-country-music": {
-    "spotify": "5N1kfa3omZENLwlVhEgqHF"
+    "spotify": "5N1kfa3omZENLwlVhEgqHF",
+    "front": "sturgill-simpson-metamodern-sounds-in-country-music-front.jpg",
+    "frontSource": "apple"
   },
   "whiskeytown-strangers-almanac": {
     "spotify": "29gnqAHOpVJJL3h8wPrlMl",
     "release": "15b149ae-0c53-4c6f-bc22-5e7c449a81c2",
     "front": "whiskeytown-strangers-almanac-front.jpg",
-    "back": "whiskeytown-strangers-almanac-back.jpg"
+    "back": "whiskeytown-strangers-almanac-back.jpg",
+    "frontSource": "apple"
   },
   "margo-price-midwest-farmers-daughter": {
     "spotify": "1RV9pacIcXvkUiAD0EjTdL",
     "release": "f2aef3f3-352b-4a05-91db-58ee4f5f6675",
-    "front": "margo-price-midwest-farmers-daughter-front.jpg"
+    "front": "margo-price-midwest-farmers-daughter-front.jpg",
+    "frontSource": "apple"
   }
 }
