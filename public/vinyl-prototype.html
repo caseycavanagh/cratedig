@@ -792,7 +792,7 @@ let base=REST,ry=base,rx=TILT,sdrag=null,busy=false,timers=[],flyF=0;
 const later=(f,ms)=>timers.push(setTimeout(f,ms));
 // the sleeve turns on a spring too: ry/rx say where it's headed, sv where it is now
 const sv={ry:REST,rx:TILT,vy:0,vx:0},SK=190,SC=24;let sraf=0;
-const paintS=()=>sleeve.style.transform=`rotateX(${sv.rx.toFixed(2)}deg) rotateY(${sv.ry.toFixed(2)}deg)`;
+const paintS=()=>{sleeve.style.transform=`rotateX(${sv.rx.toFixed(2)}deg) rotateY(${sv.ry.toFixed(2)}deg)`;if(lamp.el===sleeve&&(Math.cos(sv.ry*Math.PI/180)<0)!==GL.c.parentNode?.classList.contains('bk'))lampOn()};
 const snapS=(y,x)=>{sv.ry=y;sv.rx=x;sv.vy=sv.vx=0;paintS()};
 function stick(t){
   if(sdrag){sraf=0;return}
@@ -976,7 +976,7 @@ function closeRecord(fromPop){
   if(!fromPop&&history.state?.open){history.back();return}
   history.replaceState(null,'','#'+order[cur].slug); // the record on top now, even after cycling
   timers.forEach(clearTimeout);timers=[];
-  const done=()=>{open.hidden=true;lampOn();lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
+  const done=()=>{open.hidden=true;lampOn();lamp.copy?.remove();lamp.copy=null;lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
     $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');veil.style.transition='';root.classList.remove('pulldown','sliding');busy=false;document.activeElement?.blur()};
   open.classList.remove('in');crate.classList.remove('still');
   if(reduce){quick=false;vanish=false;done();return}
@@ -995,7 +995,7 @@ function closeRecord(fromPop){
         stage.style.perspective=(P0+(b.P-P0)*e).toFixed(1)+'px';stage.style.perspectiveOrigin=`${(ox0+(b.ox-ox0)*e).toFixed(1)}px ${(oy0+(b.oy-oy0)*e).toFixed(1)}px`}
       sv.rx=rx0*(1-e);sv.ry=ry0+(ryTo-ry0)*e;sv.vx=sv.vy=0;paintS();
       if(t<1){flyF=requestAnimationFrame(f);return}
-      $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));sleeve.classList.add('fade');later(done,130);
+      $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));lampHand();sleeve.classList.add('fade');later(done,130);
     })(t0);
   };
   if(quick){quick=false;crate.classList.remove('lifted');veil.style.transition='opacity .3s';veil.style.opacity='0';fly()} // the veil lifts off the pile as the record lands
@@ -1106,7 +1106,7 @@ function dress(el,r){
 // tiles drawn once: a coarser tooth for uncoated stock (the matte grain is drawn further down), and the faint ring a record
 // presses into a plain jacket's back, uneven the way wear is: a lighter edge with a shadow just inside, and the label's ring
 {const n=256,c=document.createElement('canvas');c.width=c.height=n;const x=c.getContext('2d');
- for(const [r,a,lw] of [[120,.09,2.2],[117.6,-.05,1.4],[42,.035,1.4]])for(let t=0;t<Math.PI*2;t+=.02){const k=Math.max(0,.55+.45*Math.sin(t*2+.7)+(Math.random()-.5)*.5);
+ for(const [r,a,lw] of [[120,.045,2],[117.6,-.026,1.2],[42,.018,1.2]])for(let t=0;t<Math.PI*2;t+=.02){const k=Math.max(0,.55+.45*Math.sin(t*2+.7)+(Math.random()-.5)*.5);
    x.strokeStyle=a>0?`rgb(255 255 255/${(a*k).toFixed(3)})`:`rgb(0 0 0/${(-a*k).toFixed(3)})`;x.lineWidth=lw;x.beginPath();x.arc(n/2,n/2,r,t,t+.024);x.stroke()}
  root.style.setProperty('--ring',blobURL(c))}
 const TILES={};
@@ -1137,17 +1137,25 @@ function bake(i,el){
 }
 // The lamp: it follows the pointer over the front record, or the record you pulled out, on a spring, and rests at the top left.
 // Drawn in WebGL: only light, never the paper, so the texture stays put on the cover as the lamp moves. Only where there's a mouse.
-const lamp={x:.22,y:.14,vx:0,vy:0,e:null,el:null,raf:0,t:0};
-function lampOn(){
+const lamp={x:.22,y:.14,vx:0,vy:0,e:null,el:null,copy:null,raf:0,t:0};
+function lampOn(to){
   if(!GL)return;
-  const el=open.hidden?nodes[cur]:sleeve;if(!el)return;
-  if(el!==lamp.el){lamp.el=el;el.querySelector('.fr')?.append(GL.c)}
+  const el=to||(open.hidden?nodes[cur]:sleeve);if(!el)return;
+  const f=el.querySelector(el===sleeve&&Math.cos(sv.ry*Math.PI/180)<0?'.bk':'.fr'); // a pulled-out record turned around is lit on its back
+  lamp.el=el;if(f&&f!==GL.c.parentNode){f.append(GL.c);GL.draw(el,f)} // drawn as it moves, so the light never misses a frame
   lampGo();
+}
+// as the sleeve fades into the record in the crate, the light moves to that record and a still copy stays on the sleeve, so it never blinks
+function lampHand(){
+  if(!GL||lamp.el!==sleeve)return;
+  const s=GL.c.parentNode,k=lamp.copy=document.createElement('canvas');k.className='glow';k.width=k.height=GL.c.width;
+  GL.draw(sleeve,s);k.getContext('2d').drawImage(GL.c,0,0);s.append(k);
+  lampOn(nodes[cur]);
 }
 const lampGo=()=>{if(GL&&!lamp.raf)lamp.raf=requestAnimationFrame(lampTick)};
 function lampTick(t){
   const dt=lamp.t?Math.min(.032,(t-lamp.t)/1000):1/60;lamp.t=t;lamp.raf=0;
-  const f=lamp.el?.querySelector('.fr');let tx=.22,ty=.14;
+  const f=lamp.el&&GL.c.parentNode;let tx=.22,ty=.14;
   if(lamp.e&&f){const b=f.getBoundingClientRect();if(b.width){tx=Math.max(-.3,Math.min(1.3,(lamp.e.x-b.left)/b.width));ty=Math.max(-.3,Math.min(1.3,(lamp.e.y-b.top)/b.height))}}
   if(reduce){lamp.x=tx;lamp.y=ty;lamp.vx=lamp.vy=0}
   else{lamp.vx+=(-160*(lamp.x-tx)-24*lamp.vx)*dt;lamp.x+=lamp.vx*dt;lamp.vy+=(-160*(lamp.y-ty)-24*lamp.vy)*dt;lamp.y+=lamp.vy*dt}
@@ -1169,10 +1177,10 @@ void main(){
   vec2 uv=vec2(gl_FragCoord.x/res.x,1.-gl_FragCoord.y/res.y);
   vec3 l=L-vec3(uv,0.);float d=length(l);vec3 Ld=l/d;
   float gl=paper>1.5?1.:0.;
-  float sp=pow(normalize(Ld+vec3(0.,0.,1.)).z,mix(8.,60.,gl))*mix(paper>.5?.06:.1,.4,gl);
-  float fall=1./(1.+d*d*3.);
-  float lit=clamp(sp*fall*1.5+fall*fall*.3,0.,.6);
-  float dark=clamp((1.-fall)*.34,0.,.45);
+  float sp=pow(normalize(Ld+vec3(0.,0.,1.)).z,mix(12.,80.,gl))*mix(paper>.5?.04:.08,.34,gl);
+  float fall=1./(1.+d*d*2.6);
+  float lit=clamp(sp*fall*1.4+fall*fall*.22,0.,.55);
+  float dark=clamp((1.-fall)*.26,0.,.42);
   float j=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)/255.; // a hair of dither, so the soft falloff doesn't band
   gl_FragColor=vec4(vec3(lit+j),lit+j+dark*(1.-lit));
 }`;
