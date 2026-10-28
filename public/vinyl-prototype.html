@@ -140,7 +140,9 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .phint.prev::before,.phint.next::before{font:400 12px/1 var(--mono);color:var(--m);margin-bottom:6px}
 .phint.prev::before{content:'← Previous'}
 .phint.next::before{content:'Next →'}
-.open.in:not(.swapping) .peek.prev.on:hover~.phint.prev,.open.in:not(.swapping) .peek.next.on:hover~.phint.next{opacity:1;transform:none;transition:opacity .25s .05s,transform .5s var(--flip) .05s}
+/* gone the instant a record moves, and quiet until you hover a peek afresh, so a hint never shows the record after next */
+.open.swapping .phint,.open.hush .phint{opacity:0;transition:none}
+.open.in:not(.swapping):not(.hush) .peek.prev.on:hover~.phint.prev,.open.in:not(.swapping):not(.hush) .peek.next.on:hover~.phint.next{opacity:1;transform:none;transition:opacity .25s .05s,transform .5s var(--flip) .05s}
 @media(hover:none){.phint{display:none}}
 /* the details start tucked under the record and slide out to the right */
 .o-info{position:relative;z-index:1;flex:none;width:min(340px,30vw);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
@@ -155,15 +157,28 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .facts{display:grid;grid-template-columns:96px 1fr;gap:6px 16px;margin-top:22px;font:400 14px/1.5 var(--mono)}
 .facts dt{color:var(--m)}
 .facts dd{margin:0}
-.spotify{margin-top:28px;height:40px;padding:0 18px;font-size:15px}
-.spotify svg{flex:none}
+.play{position:relative;margin-top:28px}
+.play>.btn{height:40px;padding:0 20px 0 16px;font-size:15px;gap:8px}
+.play>.btn svg{flex:none}
+/* Play opens a short list of services; it arrives on a spring and leaves on a quick fade */
+.play-m{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;display:grid;padding:6px;border-radius:14px;background:var(--bg);border:1px solid var(--line);
+  box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
+  transition:opacity .12s,visibility 0s .12s,transform 0s .12s}
+.play.up .play-m{top:auto;bottom:calc(100% + 8px);transform-origin:20px 100%;transform:translateY(4px) scale(.97)}
+.o-info:has(.play.on){z-index:3}
+.play.on .play-m{opacity:1;visibility:visible;transform:none;transition:opacity .18s,transform .45s var(--flip)}
+.play-m a{all:unset;cursor:pointer;padding:9px 12px;border-radius:9px;font-size:14px;transition:transform .5s var(--flip),background-color .15s}
+.play-m a:hover{background:var(--soft)}
+.play-m a:active{transform:scale(.99);transition-duration:.08s}
+.play-m a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+html[data-theme=dark] .play-m{box-shadow:0 12px 32px -12px #000c}
 
 @media(max-width:600px){
   .page{padding:24px 16px 80px}
   :root{--R:min(78vw,50vh);--R:min(78vw,50svh)}
   .o-info h2{font-size:26px}
 }
-@media(prefers-reduced-motion:reduce){.peek,.open.in .peek.on,.open.in .peek.on:hover,.rc,.rc .fr,.lift.moving,.lift.back,.o-info,.open.in .o-info{transition:none}}
+@media(prefers-reduced-motion:reduce){.peek,.open.in .peek.on,.open.in .peek.on:hover,.rc,.rc .fr,.lift.moving,.lift.back,.o-info,.open.in .o-info,.play-m,.play.on .play-m{transition:none}}
 /* loading: a quiet count, then the whole crate rises in at once */
 .loading{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;font:400 13px/1 var(--mono);color:var(--m);transition:opacity .3s;pointer-events:none}
 .loading .bar{width:120px;height:1px;background:var(--line);overflow:hidden}
@@ -334,6 +349,7 @@ function fromCrate(rect){
 const prevP=$('#prevP'),nextP=$('#nextP');
 function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';const h=b.nextElementSibling.nextElementSibling;h.innerHTML=r?`<b>${r.title}</b><i>${r.artist}</i>`:''}
 prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
+[prevP,nextP].forEach(b=>b.addEventListener('pointerleave',()=>{if(!open.classList.contains('swapping'))open.classList.remove('hush')}));
 function fill(r,noInfo){
   sleeve.innerHTML=`<div class="sh"></div><div class="sh b"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
   peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);
@@ -341,10 +357,36 @@ function fill(r,noInfo){
   base=REST;ry=base;rx=TILT;
   document.title=`${r.title} · Records`;
 }
+// every place a record can be played: Spotify by its ID, the rest from album.link (scripts/vinyl-covers.mjs)
+const SERVICES=[['spotify','Spotify'],['appleMusic','Apple Music'],['youtubeMusic','YouTube Music'],['tidal','Tidal'],['amazonMusic','Amazon Music'],['deezer','Deezer']];
+const NEW_TAB='<span class="sr"> (opens in a new tab)</span>',PLAY_ICON='<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M2.5 1.2v9.6c0 .5.5.8.9.5l7.4-4.8a.6.6 0 0 0 0-1L3.4.7c-.4-.3-.9 0-.9.5Z"/></svg>';
+function playHTML(r){
+  const l={...r.links};if(r.spotify)l.spotify='https://open.spotify.com/album/'+r.spotify;if(r.apple)l.appleMusic=r.apple;
+  const on=SERVICES.filter(([k])=>l[k]);
+  if(!on.length)return'';
+  // one service: Play goes straight there
+  if(on.length===1)return`<div class="play"><a class="btn" href="${l[on[0][0]]}" target="_blank" rel="noopener">${PLAY_ICON}Play<span class="sr"> on ${on[0][1]}</span>${NEW_TAB}</a></div>`;
+  return`<div class="play"><button class="btn" id="playB" aria-expanded="false" aria-controls="playM">${PLAY_ICON}Play</button>
+      <div class="play-m" id="playM">${on.map(([k,n])=>`<a href="${l[k]}" target="_blank" rel="noopener">${n}${NEW_TAB}</a>`).join('')}</div></div>`;
+}
+const playMenu=()=>$('#oinfo .play.on');
+function togglePlay(show,focus){
+  const w=$('#oinfo .play');if(!w||!$('#playB',w))return;
+  if(show){const b=$('#playB',w).getBoundingClientRect();w.classList.toggle('up',b.bottom+$('#playM',w).offsetHeight+24>innerHeight)}
+  w.classList.toggle('on',show);$('#playB',w).setAttribute('aria-expanded',show);
+  if(show&&focus)$('#playM a',w).focus();
+  if(!show&&focus)$('#playB',w).focus();
+}
+$('#oinfo').addEventListener('click',e=>{
+  if(e.target.closest('#playB'))togglePlay(!playMenu(),e.detail===0); // a keyboard press lands on the first service
+  else if(e.target.closest('#playM a'))togglePlay(false);
+});
+document.addEventListener('pointerdown',e=>{if(playMenu()&&!e.target.closest('.play'))togglePlay(false)});
+$('#oinfo').addEventListener('focusout',e=>{if(playMenu()&&!e.relatedTarget?.closest?.('.play')&&e.relatedTarget)togglePlay(false)});
 function info(r){
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
       <dl class="facts">${[['Released',r.year],['Label',r.label],['Format',r.format]].filter(f=>f[1]).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
-    ${r.spotify?`<a class="btn spotify" href="https://open.spotify.com/album/${r.spotify}" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21Zm4.8 15.15a.66.66 0 0 1-.9.22c-2.48-1.5-5.6-1.85-9.27-1.01a.66.66 0 1 1-.3-1.28c4.02-.92 7.47-.52 10.25 1.17.31.19.41.6.22.9Zm1.28-2.85a.82.82 0 0 1-1.13.27c-2.84-1.75-7.17-2.25-10.53-1.23a.82.82 0 1 1-.48-1.57c3.84-1.16 8.6-.6 11.87 1.4.39.24.51.75.27 1.13Zm.11-2.97C14.78 8.8 9.15 8.6 5.9 9.6a.98.98 0 1 1-.57-1.88c3.74-1.13 9.96-.91 13.88 1.41a.98.98 0 0 1-1 1.7Z"/></svg>Play on Spotify<span class="sr"> (opens in a new tab)</span></a>`:r.apple?`<a class="btn spotify" href="${r.apple}" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.7c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.5 1.3-.1 1.7-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.2-1.2 3-2.5 1-1.4 1.4-2.8 1.4-2.8s-2.6-1-2.6-4.2ZM14 5.4c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4Z"/></svg>Play on Apple Music<span class="sr"> (opens in a new tab)</span></a>`:''}`;
+    ${playHTML(r)}`;
 }
 function openRecord(deep,from){
   const r=order[cur];fill(r);
@@ -384,7 +426,7 @@ function swap(dir){
   const edge=side=>`translate(${side<0?28-W/2-cx:innerWidth-28+W/2-cx}px,${innerHeight/2-cy}px)`;
   const ghost=lift.cloneNode(true);ghost.removeAttribute('id');const gs=ghost.querySelector('.sleeve');gs.removeAttribute('id');
   ghost.className='lift ghost';ghost.style.transform='';stage.append(ghost);
-  open.classList.add('swapping');
+  open.classList.add('swapping','hush');
   fill(r,true);later(()=>info(r),200);lift.className='lift';lift.style.transition='none';lift.style.transform=edge(dir);lift.style.opacity='.45';
   snapS(0,0);
   void lift.offsetWidth;
@@ -455,6 +497,13 @@ const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j,from={rect:d
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,iframe')||e.metaKey||e.ctrlKey)return;
+  if(!open.hidden&&playMenu()){
+    const items=$$('#playM a'),i=items.indexOf(document.activeElement),k={ArrowDown:1,ArrowUp:-1}[e.key];
+    if(e.key==='Escape'){e.preventDefault();togglePlay(false,true)}
+    if(k){e.preventDefault();items[(i+k+items.length)%items.length].focus()}
+    if(e.key==='Home'||e.key==='End'){e.preventDefault();items.at(e.key==='Home'?0:-1).focus()}
+    return;
+  }
   if(!open.hidden){if(e.key==='Escape')closeRecord();const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];if(f){e.preventDefault();swap(f)}return}
   if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,a')){e.preventDefault();openRecord();return}
   const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];

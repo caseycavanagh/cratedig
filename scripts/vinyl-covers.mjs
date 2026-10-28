@@ -4,7 +4,8 @@
 // (SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET from .env.local), and writes
 // covers.json for the prototype to read. Fronts come from Apple Music's
 // artwork (clean, label-supplied) when it has the album; backs stay with the
-// Cover Art Archive.
+// Cover Art Archive. album.link (Odesli) maps each Spotify album to the other
+// services the Play menu offers.
 // Run on a Mac: node scripts/vinyl-covers.mjs   (add --force to refetch)
 import {mkdir, writeFile, readFile, access} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
@@ -116,6 +117,17 @@ async function appleFront(artist, title) {
   return hit?.artworkUrl100?.replace(/\/\d+x\d+bb\.(jpg|png)$/, '/1500x1500bb.jpg') || null;
 }
 
+// album.link: no key, about 10 lookups a minute
+const PLATFORMS = ['appleMusic', 'youtubeMusic', 'tidal', 'amazonMusic', 'deezer'];
+let lastLink = 0;
+async function albumLinks(spotify) {
+  const wait = lastLink + 6500 - Date.now(); if (wait > 0) await sleep(wait);
+  lastLink = Date.now();
+  const r = await get('https://api.song.link/v1-alpha.1/links?userCountry=US&url=' + encodeURIComponent('https://open.spotify.com/album/' + spotify));
+  const by = r?.linksByPlatform || {};
+  return Object.fromEntries(PLATFORMS.filter(p => by[p]?.url).map(p => [p, by[p].url]));
+}
+
 await mkdir(OUT, {recursive: true});
 const manifestPath = path.join(OUT, 'covers.json');
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8').catch(() => '{}'));
@@ -127,6 +139,11 @@ for (const [artist, title] of RECORDS) {
     const id = await spotifyAlbum(artist, title).catch(() => null);
     if (id) manifest[s] = {...manifest[s], spotify: id};
     console.log(id ? 'spotify' : 'no spotify', s);
+  }
+  if (manifest[s]?.spotify && (force || !manifest[s].links)) {
+    const links = await albumLinks(manifest[s].spotify).catch(() => null);
+    if (links) manifest[s] = {...manifest[s], links};
+    console.log(links ? 'links ' + Object.keys(links).join(' ') : 'no links', s);
   }
   if (force || manifest[s]?.frontSource !== 'apple') {
     const url = await appleFront(artist, title).catch(() => null);
