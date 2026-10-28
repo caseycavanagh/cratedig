@@ -364,7 +364,9 @@ const stack=$('#stack'),crate=$('#crate');
 function sortBy(k){
   sortKey=k;const keep=order[cur];
   const name=a=>a.replace(/^the /i,'');
-  order=[...RECORDS].sort(k==='year'?(a,b)=>a.year-b.year:k==='added'?(a,b)=>b.added.localeCompare(a.added):(a,b)=>name(a.artist).localeCompare(name(b.artist)));
+  // by artist (a leading "The" doesn't count), then each artist's records oldest first; a record without a year goes after that artist's dated ones
+  const yr=r=>+r.year||9999;
+  order=[...RECORDS].sort(k==='year'?(a,b)=>a.year-b.year:k==='added'?(a,b)=>b.added.localeCompare(a.added):(a,b)=>name(a.artist).localeCompare(name(b.artist),'en',{sensitivity:'base'})||yr(a)-yr(b)||a.title.localeCompare(b.title));
   build();go(0,true);
 }
 let nodes=[],jits=[],shown=[],frontBox=null;
