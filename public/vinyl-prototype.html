@@ -79,28 +79,21 @@ html.phone .tail{display:none}
 .edge.b{transform:rotateX(-90deg) translateZ(calc(var(--W)/2));--dk:#00000080}
 /* cardboard: a fine grain, light from the top left, and worn edges that catch it */
 .sleeve .face::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
-  background:var(--grain),linear-gradient(115deg,#ffffff16,#0000 35%,#0000 70%,#0000001c);background-size:128px,auto;
+  background:var(--wearL,linear-gradient(#0000,#0000)),var(--paperL,var(--grain) 0 0/128px),linear-gradient(115deg,#ffffff16,#0000 35%,#0000 70%,#0000001c);
   box-shadow:inset 1px 1px 0 #ffffff40,inset -1px -1px 0 #00000030,inset 0 0 0 2px #ffffff0d}
-/* Jacket papers and light, still being picked: vinyl-surface-sheet.html opens this page with ?tx= (paper) and ?lt= (light).
-   Each jacket gets its own paper, chosen from its name. In the crate the paper (and light 2) is baked into the cover image as it
-   loads (see "bake"), so a record is still one image to draw; the record you pull out wears the same layers in CSS. */
-.look .sleeve .face::before{background:var(--keyL,linear-gradient(#0000,#0000)),var(--shrinkL,linear-gradient(#0000,#0000)),var(--wearL,linear-gradient(#0000,#0000)),var(--paperL,var(--grain) 0 0/128px),linear-gradient(115deg,#ffffff16,#0000 35%,#0000 70%,#0000001c)}
-.look .sleeve[data-paper=matte] .face::before{--paperL:var(--grain) 0 0/128px,linear-gradient(#ffffff08,#ffffff08)}
-.look .sleeve[data-paper=uncoated] .face::before{--paperL:var(--tooth) 0 0/96px,linear-gradient(#f7efdc1e,#f7efdc1e)}
-.look .sleeve[data-paper=gloss] .face::before{--paperL:linear-gradient(118deg,#0000 30%,#ffffff1e 41%,#ffffff08 48%,#0000 56%),linear-gradient(#ffffff0e,#0000 35%)}
-.look .sleeve[data-wear] .face::before{--wearL:var(--ring) 0 0/100% 100% no-repeat,radial-gradient(circle at 0 0,#ffffff38,#0000 5%),radial-gradient(circle at 100% 100%,#ffffff26,#0000 4%),radial-gradient(circle at 100% 0,#ffffff1c,#0000 3%);box-shadow:inset 0 0 0 1px #ffffff26,inset 0 0 5px #ffffff14}
-.look .sleeve[data-shrink] .face::before{--shrinkL:var(--crinkle) 0 0/100% 100%,linear-gradient(104deg,#0000 18%,#ffffff26 30%,#ffffff08 38%,#0000 46%),linear-gradient(#ffffff0a,#ffffff0a)}
-/* light 2: a window to the upper left, the same on every jacket */
-.lt2 .sleeve .face::before{--keyL:linear-gradient(135deg,#ffffff1a,#0000 40%,#0000 65%,#00000016)}
-.lt2 .sleeve[data-paper=gloss] .face::before,.lt2 .sleeve[data-shrink] .face::before{--keyL:linear-gradient(135deg,#ffffff30,#ffffff0a 20%,#0000 38%,#0000 70%,#0000001a)}
-/* light 3: a lamp at the pointer, on the front record only; gloss and shrink wrap catch it as a small bright spot, plain paper as a soft glow.
-   The glow is its own small layer, moved by transform: the lamp never repaints anything */
-.lit{position:absolute;left:-10%;top:-10%;width:120%;height:120%;z-index:1;pointer-events:none;will-change:transform;background:radial-gradient(closest-side,#ffffff1e,#ffffff08 55%,#0000)}
-.lit.uncoated{background:radial-gradient(closest-side,#ffffff12,#0000)}
-.lit.gloss{left:25%;top:25%;width:50%;height:50%;background:radial-gradient(closest-side,#ffffff58,#ffffff1c 22%,#ffffff06 55%,#0000)}
-/* light 4: the same lamp drawn with WebGL, raking across the paper's tooth, the ring wear and the shrink wrap */
+/* Each jacket's paper and wear come from its year (see "dress"): laminated gloss before 1970, matte through the 2000s, uncoated
+   stock after; worn before 1980, a little worn through the 90s. In the crate they're baked into the cover as it loads (see "bake"),
+   so a record is still one image to draw; the record you pull out wears the same layers here. */
+.sleeve[data-paper=matte] .face::before{--paperL:var(--grain) 0 0/128px,linear-gradient(#ffffff08,#ffffff08)}
+.sleeve[data-paper=uncoated] .face::before{--paperL:var(--tooth) 0 0/96px,linear-gradient(#f7efdc1e,#f7efdc1e)}
+.sleeve[data-paper=gloss] .face::before{--paperL:linear-gradient(118deg,#0000 30%,#ffffff1e 41%,#ffffff08 48%,#0000 56%),linear-gradient(#ffffff0e,#0000 35%)}
+.sleeve[data-wear="1"] .face::before{--wearL:radial-gradient(circle at 0 0,#ffffff24,#0000 3.5%),radial-gradient(circle at 100% 100%,#ffffff1a,#0000 3%)}
+.sleeve[data-wear="2"] .face::before{--wearL:radial-gradient(circle at 0 0,#ffffff38,#0000 5%),radial-gradient(circle at 100% 100%,#ffffff26,#0000 4%),radial-gradient(circle at 100% 0,#ffffff1c,#0000 3%),linear-gradient(#f3e4c40f,#f3e4c40f);
+  box-shadow:inset 0 0 0 1px #ffffff26,inset 0 0 5px #ffffff14}
+/* the lamp: a WebGL canvas on the lit record that draws only light and shadow, raking across the paper */
 .glow{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
+.art.plain{background-image:var(--ring);background-size:100% 100%}
 img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none}
 .cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
 .cover-type b{display:block;font:500 6cqw 'Instrument Sans',sans-serif}
@@ -580,7 +573,7 @@ const spineBg=r=>r.spine||r.pal[0];
 const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
 const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-const backHTML=(r,lazy)=>r.back?imgHTML(r.back,lazy):`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
+const backHTML=(r,lazy)=>r.back?imgHTML(r.back,lazy):`<div class="art plain" style="background-color:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color, with the ring the record wore into it
 
 // crate geometry, in px
 const GAP=7,AHEAD=8,BEHIND=16,FGAP=3.5;
@@ -706,7 +699,7 @@ function kick(){if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);render();retu
 // Shading is two flat steps (behind, flipped), so a flip repaints only the records that change sides.
 // Covers load a few records beyond what's drawn, so one is always decoded before it shows. Only records near the front
 // can fall forward and show their back, so backs load over a shorter reach; a phone's pile never shows one.
-const warm=(n,d)=>{if(n._lazy.length)n._lazy=n._lazy.filter(i=>{if(d>(PHONE?-99:4)&&i.parentNode.classList.contains('bk'))return true;if(BAKE)i.addEventListener('load',()=>bake(i,n),{once:true});i.src=i.dataset.src;i.removeAttribute('data-src');return false})};
+const warm=(n,d)=>{if(n._lazy.length)n._lazy=n._lazy.filter(i=>{if(d>(PHONE?-99:4)&&i.parentNode.classList.contains('bk'))return true;i.addEventListener('load',()=>bake(i,n),{once:true});i.src=i.dataset.src;i.removeAttribute('data-src');return false})};
 // about to jump somewhere (a letter under the pointer): load what will show there
 const warmAt=i=>{if(i==null)return;for(let j=Math.max(0,i-3);j<=Math.min(order.length-1,i+10);j++)warm(nodes[j],j-i)};
 function place(rest){
@@ -1104,44 +1097,28 @@ const queueNudge=()=>{if(!aimF)aimF=requestAnimationFrame(aimNudge)};
 crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;ptr={x:e.clientX,y:e.clientY};queueNudge()});
 crate.addEventListener('pointerleave',()=>{ptr=null;queueNudge()});
 
-// Jacket papers and light, still being picked (see "Jacket papers" in the styles). tx: 1 as today, 2 papers (matte, uncoated,
-// gloss), 3 papers and wear, 4 papers, wear and shrink wrap. lt: 1 as today, 2 a window, 3 a lamp at the pointer, 4 that lamp in WebGL.
-const LOOK=new URLSearchParams(location.search),TX=Math.min(4,+LOOK.get('tx')||1),LT=Math.min(4,+LOOK.get('lt')||1);
-if(TX>1||LT>1)root.classList.add('look','tx'+TX,'lt'+LT);
-const rnd=(r,k)=>{let h=0;for(const c of r.slug)h=(h*31+c.charCodeAt(0))|0;return((Math.sin(h*(k+1)*12.9898)*43758.5453)%1+1)%1};
+// Paper and wear by year (see "Each jacket's paper" in the styles). A record without a year is plain matte and unworn.
 function dress(el,r){
-  if(TX<2)return;
-  const p=rnd(r,7);el.dataset.paper=p<.45?'matte':p<.7?'uncoated':'gloss';
-  if(TX>2&&rnd(r,8)<.45)el.dataset.wear='';else delete el.dataset.wear;
-  if(TX>3&&rnd(r,9)<.22)el.dataset.shrink='';else delete el.dataset.shrink;
+  const y=+r.year||0;
+  el.dataset.paper=!y||y>=1970&&y<2010?'matte':y<1970?'gloss':'uncoated';
+  if(y&&y<1980)el.dataset.wear='2';else if(y&&y<2000)el.dataset.wear='1';else delete el.dataset.wear;
 }
-// tiles for the papers, drawn once: a coarser tooth, the ring a record wears into its jacket, shrink wrap's creases
+// tiles drawn once: a coarser tooth for uncoated stock (the matte grain is drawn further down), and the faint ring a record
+// presses into a plain jacket's back, uneven the way wear is: a lighter edge with a shadow just inside, and the label's ring
+{const n=256,c=document.createElement('canvas');c.width=c.height=n;const x=c.getContext('2d');
+ for(const [r,a,lw] of [[120,.09,2.2],[117.6,-.05,1.4],[42,.035,1.4]])for(let t=0;t<Math.PI*2;t+=.02){const k=Math.max(0,.55+.45*Math.sin(t*2+.7)+(Math.random()-.5)*.5);
+   x.strokeStyle=a>0?`rgb(255 255 255/${(a*k).toFixed(3)})`:`rgb(0 0 0/${(-a*k).toFixed(3)})`;x.lineWidth=lw;x.beginPath();x.arc(n/2,n/2,r,t,t+.024);x.stroke()}
+ root.style.setProperty('--ring',blobURL(c))}
 const TILES={};
-if(TX>1){
-  const tile=(n,f)=>{const c=document.createElement('canvas');c.width=c.height=n;f(c.getContext('2d'),n);return c};
-  root.style.setProperty('--tooth',blobURL(TILES.tooth=tile(96,(x,n)=>{const d=x.createImageData(n,n);for(let i=0;i<d.data.length;i+=4){const v=Math.random()<.5?40:235;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*30|0}x.putImageData(d,0,0)})));
-  root.style.setProperty('--ring',blobURL(TILES.ring=tile(256,(x,n)=>{
-    x.lineCap='round';
-    for(const [r,w,k] of [[124,3,.2],[44,2,.08]])for(let a=0;a<Math.PI*2;a+=.018){x.strokeStyle=`rgb(255 255 255/${(Math.max(0,Math.sin(a*2.3+1)*.5+Math.random()*.6)*k).toFixed(3)})`;x.lineWidth=w*(.6+Math.random()*.8);x.beginPath();x.arc(n/2,n/2,r+Math.random()*1.4,a,a+.02);x.stroke()}
-    const g=x.createRadialGradient(n/2,n/2,0,n/2,n/2,124);g.addColorStop(0,'#ffffff00');g.addColorStop(.92,'#ffffff08');g.addColorStop(1,'#ffffff00');x.fillStyle=g;x.fillRect(0,0,n,n);
-  })));
-  root.style.setProperty('--crinkle',blobURL(TILES.crinkle=tile(256,(x,n)=>{
-    // soft wavy folds, most of them near the edges and corners where the wrap pulls
-    x.lineCap='round';x.filter='blur(1.2px)';
-    for(let i=0;i<14;i++){
-      const side=i%4,t=Math.random(),edge=Math.random()*n*.16,[x0,y0]=[[t*n,edge],[n-edge,t*n],[t*n,n-edge],[edge,t*n]][side],a=side%2?Math.PI/2:0,l=n*(.12+Math.random()*.3);
-      x.save();x.translate(x0,y0);x.rotate(a+(Math.random()-.5)*.9);x.strokeStyle=`rgb(255 255 255/${(.1+Math.random()*.16).toFixed(2)})`;x.lineWidth=1+Math.random()*2.5;
-      x.beginPath();x.moveTo(-l/2,0);x.bezierCurveTo(-l/6,(Math.random()-.5)*14,l/6,(Math.random()-.5)*14,l/2,(Math.random()-.5)*6);x.stroke();x.restore();
-    }
-  })));
-}
-// Bake a record's paper (and light 2) into its cover as the image arrives: drawn once, the same layers as the CSS on the sleeve,
+{const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d'),d=x.createImageData(96,96);
+ for(let i=0;i<d.data.length;i+=4){const v=Math.random()<.5?40:235;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*30|0}x.putImageData(d,0,0);
+ root.style.setProperty('--tooth',blobURL(TILES.tooth=c))}
+// Bake a record's paper and wear into its cover as the image arrives: drawn once, the same layers as the CSS on the sleeve,
 // sized to the record on screen. The crate then draws exactly what it did before: one image per face.
-const BAKE=TX>1||LT===2;
 function bake(i,el){
-  if(i._baked||!i.naturalWidth)return;i._baked=1;
+  if(i._baked||!i.naturalWidth||new URL(i.src).origin!==location.origin)return;i._baked=1; // a cover from another site can't be read back: it stays plain
   const w=i.naturalWidth,h=i.naturalHeight,k=w/(nodes[0]?.offsetWidth||480),c=document.createElement('canvas');c.width=w;c.height=h;
-  const x=c.getContext('2d'),P=el.dataset.paper,wear='wear' in el.dataset,shr='shrink' in el.dataset;
+  const x=c.getContext('2d'),P=el.dataset.paper,wear=+el.dataset.wear||0;
   const fill=f=>{x.fillStyle=f;x.fillRect(0,0,w,h)};
   const lin=(deg,stops)=>{const a=deg*Math.PI/180,dx=Math.sin(a),dy=-Math.cos(a),L=Math.abs(w*dx)+Math.abs(h*dy),g=x.createLinearGradient(w/2-dx*L/2,h/2-dy*L/2,w/2+dx*L/2,h/2+dy*L/2);stops.forEach(([o,col])=>g.addColorStop(o,col));return g};
   const pat=(t,n)=>{const p=x.createPattern(t,'repeat');p.setTransform(new DOMMatrix().scale(k*n/t.width));return p};
@@ -1150,78 +1127,72 @@ function bake(i,el){
   if(P==='matte'&&TILES.grain){fill(pat(TILES.grain,128));fill('#ffffff08')}
   if(P==='uncoated'){fill(pat(TILES.tooth,96));fill('#f7efdc1e')}
   if(P==='gloss'){fill(lin(118,[[.3,'#ffffff00'],[.41,'#ffffff1e'],[.48,'#ffffff08'],[.56,'#ffffff00']]));fill(lin(180,[[0,'#ffffff0e'],[.35,'#ffffff00']]))}
-  if(wear){x.drawImage(TILES.ring,0,0,w,h);corner(0,0,.05,'#ffffff38');corner(w,h,.04,'#ffffff26');corner(w,0,.03,'#ffffff1c');x.strokeStyle='#ffffff26';x.lineWidth=2*k;x.strokeRect(0,0,w,h)}
-  if(shr){x.drawImage(TILES.crinkle,0,0,w,h);fill(lin(104,[[.18,'#ffffff00'],[.3,'#ffffff26'],[.38,'#ffffff08'],[.46,'#ffffff00']]));fill('#ffffff0a')}
-  if(LT===2)fill(P==='gloss'||shr?lin(135,[[0,'#ffffff30'],[.2,'#ffffff0a'],[.38,'#ffffff00'],[.7,'#00000000'],[1,'#0000001a']]):lin(135,[[0,'#ffffff1a'],[.4,'#ffffff00'],[.65,'#00000000'],[1,'#00000016']]));
-  try{c.toBlob(b=>{if(b)i.src=URL.createObjectURL(b)},'image/webp',.92)}catch{} // a cover from another site can't be read back: it stays plain
+  if(wear===1){corner(0,0,.035,'#ffffff24');corner(w,h,.03,'#ffffff1a')}
+  if(wear===2){corner(0,0,.05,'#ffffff38');corner(w,h,.04,'#ffffff26');corner(w,0,.03,'#ffffff1c');fill('#f3e4c40f');x.strokeStyle='#ffffff26';x.lineWidth=2*k;x.strokeRect(0,0,w,h)}
+  c.toBlob(b=>{if(b)i.src=URL.createObjectURL(b)},'image/webp',.92);
 }
-// the lamp (light 3 and 4): it follows the pointer over the front record, or the record you pulled out, on a spring, and rests at the top left
+// The lamp: it follows the pointer over the front record, or the record you pulled out, on a spring, and rests at the top left.
+// Drawn in WebGL so it rakes across the paper's tooth and the wear; only where there's a mouse to move it.
 const lamp={x:.22,y:.14,vx:0,vy:0,e:null,el:null,raf:0,t:0};
-const LIT=document.createElement('div');LIT.className='lit';
 function lampOn(){
-  if(LT<3)return;
+  if(!GL)return;
   const el=open.hidden?nodes[cur]:sleeve;if(!el)return;
-  if(el!==lamp.el){lamp.el=el;el.querySelector('.fr')?.append(GL?GL.c:LIT);LIT.className='lit '+('shrink' in el.dataset?'gloss':el.dataset.paper||'')}
+  if(el!==lamp.el){lamp.el=el;el.querySelector('.fr')?.append(GL.c)}
   lampGo();
 }
-const lampGo=()=>{if(LT>2&&!lamp.raf)lamp.raf=requestAnimationFrame(lampTick)};
+const lampGo=()=>{if(GL&&!lamp.raf)lamp.raf=requestAnimationFrame(lampTick)};
 function lampTick(t){
   const dt=lamp.t?Math.min(.032,(t-lamp.t)/1000):1/60;lamp.t=t;lamp.raf=0;
   const f=lamp.el?.querySelector('.fr');let tx=.22,ty=.14;
-  if(lamp.e&&f){const b=f.getBoundingClientRect(),lo=GL?-.3:0,hi=1-lo;if(b.width){tx=Math.max(lo,Math.min(hi,(lamp.e.x-b.left)/b.width));ty=Math.max(lo,Math.min(hi,(lamp.e.y-b.top)/b.height))}}
+  if(lamp.e&&f){const b=f.getBoundingClientRect();if(b.width){tx=Math.max(-.3,Math.min(1.3,(lamp.e.x-b.left)/b.width));ty=Math.max(-.3,Math.min(1.3,(lamp.e.y-b.top)/b.height))}}
   if(reduce){lamp.x=tx;lamp.y=ty;lamp.vx=lamp.vy=0}
   else{lamp.vx+=(-160*(lamp.x-tx)-24*lamp.vx)*dt;lamp.x+=lamp.vx*dt;lamp.vy+=(-160*(lamp.y-ty)-24*lamp.vy)*dt;lamp.y+=lamp.vy*dt}
   const still=Math.abs(lamp.x-tx)+Math.abs(lamp.y-ty)<.002&&Math.abs(lamp.vx)+Math.abs(lamp.vy)<.01;
   if(still){lamp.x=tx;lamp.y=ty;lamp.vx=lamp.vy=0}
-  if(lamp.el){
-    if(GL)GL.draw(lamp.el,f);
-    else{const k=LIT.classList.contains('gloss')?200:100/1.2;LIT.style.transform=`translate(${((lamp.x-.5)*k).toFixed(2)}%,${((lamp.y-.5)*k).toFixed(2)}%)`}
-  }
+  if(lamp.el)GL.draw(lamp.el,f);
   if(still)lamp.t=0;else lamp.raf=requestAnimationFrame(lampTick);
 }
-if(LT>2){
-  const at=e=>{if(e.pointerType==='mouse'){lamp.e={x:e.clientX,y:e.clientY};lampGo()}},off=()=>{lamp.e=null;lampGo()};
-  crate.addEventListener('pointermove',at);crate.addEventListener('pointerleave',off);stage.addEventListener('pointermove',at);stage.addEventListener('pointerleave',off);
-}
-// light 4: one WebGL canvas, moved to whichever record is lit; it draws only light and shadow over the cover (the cover stays an image)
-const GL=LT===4?(()=>{
+{const at=e=>{if(e.pointerType==='mouse'){lamp.e={x:e.clientX,y:e.clientY};lampGo()}},off=()=>{lamp.e=null;lampGo()};
+ crate.addEventListener('pointermove',at);crate.addEventListener('pointerleave',off);stage.addEventListener('pointermove',at);stage.addEventListener('pointerleave',off)}
+// one canvas, moved to whichever record is lit; it draws only light and shadow over the cover (the cover stays an image). Kept faint:
+// the light should read as the room's, not a spotlight
+const GL=matchMedia('(hover:hover) and (pointer:fine)').matches?(()=>{
   const c=document.createElement('canvas');c.className='glow';
   const g=c.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias:false,depth:false,stencil:false});if(!g)return null;
   const FS=`precision highp float;
-uniform vec2 res;uniform vec3 L;uniform float paper,wear,shrink,seed,sz;
+uniform vec2 res;uniform vec3 L;uniform float paper,wear,seed,sz;
 float h(vec2 p){p=fract(p*vec2(.1031,.103)+seed);p+=dot(p,p.yx+33.33);return fract((p.x+p.y)*p.x);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
 float H(vec2 uv){
   vec2 q=uv*sz;float v=0.;
-  if(paper<.5)v=(n(q*.8)*.5+n(q*1.9)*.5)*.5;
-  else if(paper<1.5)v=(n(q*.5)*.6+n(q*1.3)*.4)*1.1;
-  if(wear>.5){float r=length(uv-.5);v+=smoothstep(.018,0.,abs(r-.47))*(.4+.6*n(uv*40.))*1.6+smoothstep(.01,0.,abs(r-.17))*.5*n(uv*30.)+(n(uv*6.)-.5)*.8;}
-  if(shrink>.5)v+=(n(vec2(uv.x*2.+uv.y*.8,uv.y*5.)*3.)-.5)*1.2;
+  if(paper<.5)v=(n(q*.8)*.5+n(q*1.9)*.5)*.35;
+  else if(paper<1.5)v=(n(q*.5)*.6+n(q*1.3)*.4)*.8;
+  if(wear>.5){vec2 m=min(uv,1.-uv);float edge=smoothstep(.05,0.,min(m.x,m.y));v+=(edge*(n(q*.3)-.5)*1.2+(n(uv*6.)-.5)*.3)*wear*.5;}
   return v;
 }
 void main(){
   vec2 uv=vec2(gl_FragCoord.x/res.x,1.-gl_FragCoord.y/res.y);float e=1./res.x;
-  float s=.35*res.x/sz;
+  float s=.22*res.x/sz;
   vec3 N=normalize(vec3((H(uv-vec2(e,0.))-H(uv+vec2(e,0.)))*s,(H(uv+vec2(0.,e))-H(uv-vec2(0.,e)))*s,1.));
   vec3 l=L-vec3(uv,0.);float d=length(l);vec3 Ld=l/d;
   float relief=dot(N,Ld)-Ld.z;
-  float gl=paper>1.5||shrink>.5?1.:0.;
-  float sp=pow(max(dot(N,normalize(Ld+vec3(0.,0.,1.))),0.),mix(18.,110.,gl))*mix(paper>.5&&paper<1.5?.04:.12,.5,gl);
+  float gl=paper>1.5?1.:0.;
+  float sp=pow(max(dot(N,normalize(Ld+vec3(0.,0.,1.))),0.),mix(18.,110.,gl))*mix(paper>.5?.02:.06,.28,gl);
   float fall=1./(1.+d*d*2.2);
-  float lit=clamp(max(relief,0.)*1.4+sp*fall*1.4+fall*.05,0.,.85);
-  float dark=clamp(max(-relief,0.)*1.4+(1.-fall)*.16,0.,.6);
+  float lit=clamp(max(relief,0.)*.9+sp*fall*1.2+fall*.03,0.,.5);
+  float dark=clamp(max(-relief,0.)*.9+(1.-fall)*.08,0.,.35);
   gl_FragColor=vec4(vec3(lit),lit+dark*(1.-lit));
 }`;
   const sh=(t,src)=>{const o=g.createShader(t);g.shaderSource(o,src);g.compileShader(o);return o};
   const p=g.createProgram();g.attachShader(p,sh(g.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));g.attachShader(p,sh(g.FRAGMENT_SHADER,FS));
   g.bindAttribLocation(p,0,'a');g.linkProgram(p);if(!g.getProgramParameter(p,g.LINK_STATUS))return null;g.useProgram(p);
   g.bindBuffer(g.ARRAY_BUFFER,g.createBuffer());g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),g.STATIC_DRAW);g.enableVertexAttribArray(0);g.vertexAttribPointer(0,2,g.FLOAT,false,0,0);
-  const u=Object.fromEntries(['res','L','paper','wear','shrink','seed','sz'].map(k=>[k,g.getUniformLocation(p,k)]));
+  const u=Object.fromEntries(['res','L','paper','wear','seed','sz'].map(k=>[k,g.getUniformLocation(p,k)]));
   return{c,draw(el,f){
     if(!f)return;const sz=f.offsetWidth,w=Math.round(sz*Math.min(devicePixelRatio,1.5));if(!sz)return;
     if(c.width!==w){c.width=c.height=w;g.viewport(0,0,w,w)}
     g.uniform2f(u.res,w,w);g.uniform3f(u.L,lamp.x,lamp.y,.55);g.uniform1f(u.sz,sz);
-    g.uniform1f(u.paper,{uncoated:1,gloss:2}[el.dataset.paper]||0);g.uniform1f(u.wear,'wear' in el.dataset?1:0);g.uniform1f(u.shrink,'shrink' in el.dataset?1:0);g.uniform1f(u.seed,(el===sleeve?order[cur]:order[+el.dataset.j])?.slug.length*.137%1||0);
+    g.uniform1f(u.paper,{uncoated:1,gloss:2}[el.dataset.paper]||0);g.uniform1f(u.wear,+el.dataset.wear||0);g.uniform1f(u.seed,(el===sleeve?order[cur]:order[+el.dataset.j])?.slug.length*.137%1||0);
     g.drawArrays(g.TRIANGLES,0,3);
   }};
 })():null;
