@@ -104,7 +104,7 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .caption span{color:var(--m);font-size:15px}
 
 /* a record lifted out of the crate */
-.open{--O:var(--R);position:fixed;inset:0;z-index:10;overflow:auto;overscroll-behavior:contain}
+.open{--O:var(--R);position:fixed;inset:0;z-index:10;overflow:hidden auto;overscroll-behavior:contain} /* a record sliding off to the side never brings in a scrollbar */
 .open[hidden]{display:none}
 .open:focus{outline:none}
 #close{position:fixed;top:24px;left:24px;z-index:3;opacity:0;transition:opacity .3s,transform .5s var(--flip)}
@@ -117,7 +117,7 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .lift{width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 50%}
 .lift.ghost{position:absolute;inset:0;pointer-events:none}
 .lift.moving{transition:transform .9s var(--flip)}
-.stage.moving{transition:perspective-origin .9s var(--flip)}
+.stage.moving{transition:perspective-origin .9s var(--flip),perspective .9s var(--flip)}
 .sleeve.fade>*{opacity:0;transition:opacity .12s} /* the sleeve's parts fade, never the sleeve: opacity on it would flatten it */
 .sleeve{position:relative;width:100%;height:100%;transform-style:preserve-3d}
 .sleeve{--T:max(3px,calc(var(--O)*.007));--W:var(--O)}
@@ -342,6 +342,52 @@ html[data-theme=dark] .qnone{box-shadow:0 12px 32px -12px #000c}
 .meta:hover{text-decoration-color:currentColor}
 .meta:active{transform:scale(.99);transition-duration:.08s}
 .meta:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.find .sp{flex:1}
+.ed{pointer-events:auto}
+.ed[hidden]{display:none}
+.ed[aria-pressed=true]{border-color:var(--fg)}
+/* the search's panel: what's not in the crate; for Casey, editing, what's out of it and what MusicBrainz has to add */
+.qnone{width:min(380px,calc(100vw - 48px));max-height:min(62vh,520px);overflow:auto;overscroll-behavior:contain;padding:6px}
+.qnone .qh{padding:6px 8px 8px;font:400 12px/1.4 var(--mono)}
+.qnone ul{list-style:none;padding:0;margin:0 0 4px}
+.hit{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:9px;color:var(--fg)}
+.hit img,.hit .ph{flex:none;width:40px;height:40px;border-radius:2px;object-fit:cover;background:var(--soft)}
+.hit span{flex:1;min-width:0;display:grid;line-height:1.3}
+.hit b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hit i{font-style:normal;font-size:13px;color:var(--m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn.sm{height:30px;padding:0 12px;font-size:13px;flex:none}
+/* Casey's tools on a record, while editing */
+.own{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.own-c{position:relative;display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px 0 6px;border:1px solid var(--line);border-radius:999px;font-size:13px;cursor:pointer;transition:transform .5s var(--flip),border-color .2s}
+.own-c:hover{border-color:var(--m)}
+.own-c:active{transform:scale(.99);transition-duration:.08s}
+.own-c:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.own-c input{-webkit-appearance:none;appearance:none;width:20px;height:20px;padding:0;border:1px solid #0002;border-radius:50%;background:none;cursor:pointer}
+.own-c input::-webkit-color-swatch-wrapper{padding:0}
+.own-c input::-webkit-color-swatch{border:0;border-radius:50%}
+.own-c input::-moz-color-swatch{border:0;border-radius:50%}
+.own.busy{opacity:.5;pointer-events:none}
+html.phone .own{margin-top:16px;padding-top:14px}
+/* a short note at the bottom, sometimes with an undo; it arrives on a spring and leaves on a quick fade */
+.toast{position:fixed;z-index:20;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;border-radius:999px;background:var(--fg);color:var(--bg);font-size:14px;
+  opacity:0;visibility:hidden;translate:-50% 12px;transition:opacity .15s,visibility 0s .15s,translate 0s .15s}
+.toast:not(:has(button)){padding-right:16px}
+.toast.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--flip)}
+.toast button{all:unset;cursor:pointer;height:28px;padding:0 12px;border-radius:999px;border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);font-size:13px;transition:transform .5s var(--flip)}
+.toast button:active{transform:scale(.99);transition-duration:.08s}
+.toast button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* unlocking edit mode, once per device */
+.unlock{margin:auto;width:min(340px,calc(100vw - 32px));padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--bg);color:var(--fg);box-shadow:0 24px 64px -24px #0006}
+.unlock::backdrop{background:#0000004d}
+.unlock h2{font-size:20px;font-weight:500;margin-bottom:16px}
+.unlock label{display:block;font:400 12px/1.4 var(--mono);color:var(--m);margin-bottom:6px}
+.unlock input{box-sizing:border-box;width:100%;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font:inherit;font-size:16px}
+.unlock input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.unlock .err{min-height:20px;margin-top:6px;font-size:13px;color:var(--m)}
+.unlock .row{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+@media(prefers-reduced-motion:reduce){.toast,.toast.on{transition:opacity .2s;translate:-50% 0}}
+html.phone .ed{height:40px;margin-right:48px}
+html.phone .qnone{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 60px);width:auto;max-height:calc(100svh - 160px)}
 html.phone .find{top:calc(env(safe-area-inset-top) + 12px);left:calc(env(safe-area-inset-left) + 12px);right:calc(env(safe-area-inset-right) + 12px)}
 html.phone .chip{height:40px;max-width:calc(100% - 52px)}
 /* on a phone the search waits as a round button and opens across the top */
@@ -377,16 +423,29 @@ html.phone .az button[aria-current=true]::before{display:none}
   <p class="sr" id="pos" aria-live="polite"></p>
   <div class="find">
     <button type="button" class="chip" id="chip" hidden></button>
+    <span class="sp"></span>
+    <button type="button" class="btn ed" id="editB" aria-pressed="false" hidden>Edit</button>
     <form class="q" id="qf" role="search">
       <label class="qi" for="q"><svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg><span class="sr">Search the crate</span></label>
       <input id="q" type="search" placeholder="Search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
       <span class="qn" id="qn" aria-hidden="true"></span>
       <button type="button" class="qx" id="qx" hidden><svg width="14" height="14" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg><span class="sr">Clear the search</span></button>
-      <div class="qnone" id="qnone" hidden><p>Not in the crate</p></div>
+      <div class="qnone" id="qnone" hidden></div>
     </form>
   </div>
   <nav class="az" id="az" aria-label="Jump to a letter"></nav>
 </main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="upF" accept="image/*" hidden>
+<dialog class="unlock" id="unlock" aria-labelledby="unlockH">
+  <form id="unlockF">
+    <h2 id="unlockH">Edit your crate</h2>
+    <label for="key">Key</label>
+    <input id="key" type="password" autocomplete="current-password" required>
+    <p class="err" id="keyErr" aria-live="polite"></p>
+    <div class="row"><button type="button" class="btn" id="unlockX">Cancel</button><button class="btn" id="unlockB">Unlock</button></div>
+  </form>
+</dialog>
 
 <div class="open" id="open" hidden tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="oTitle">
   <button class="peek prev" id="prevP" tabindex="-1" aria-hidden="true"></button>
@@ -680,7 +739,7 @@ function search(){
   qSync();const v=q.value.trim();
   if(!v){if(filt?.k==='q')arrange(null);return}
   const n=arrange({k:'q',v});
-  $('#qn').textContent=n||'';$('#qnone').hidden=!!n;
+  $('#qn').textContent=n||'';$('#qnone').hidden=!!n;if(!n)$('#qnone').innerHTML='<p class="qh">Not in the crate</p>';
   if(!n)$('#pos').textContent='Not in the crate.';
   return n;
 }
@@ -716,19 +775,25 @@ function stick(t){
 }
 const setS=()=>{if(reduce){snapS(ry,rx);return}if(!sraf){stick.t=0;sraf=requestAnimationFrame(stick)}};
 const turn=()=>{base+=180;ry=base;rx=TILT;setS()};
-// Where the front record sits in the crate, as a pose of the lifted sleeve. In the crate it's seen from above, so it looks
-// tipped toward you: the sleeve tips until it's the same shape on screen (as wide, as tall, its top as much wider than
-// its bottom), seen square on by moving the stage's perspective origin under it. Then the handover either way is invisible.
-function cratePose(rect){
-  const src=rect||$('.rc.cur .fr',stack)?.getBoundingClientRect(),t=stage.getBoundingClientRect(),O=t.width,ox=O/2,oy=t.height/2;
-  if(!src)return{dx:0,dy:0,s:1,rx:0,ox,oy,tf:'',po:''};
-  const P=parseFloat(getComputedStyle(stage).perspective)||2600,want=Math.min(1,src.height/src.width);
-  const ratio=r=>Math.cos(r)*P/(P+O/2*Math.sin(r)); // height over width of a square tipped r toward you
-  let lo=0,hi=1.4;for(let k=0;k<24;k++){const m=(lo+hi)/2;if(ratio(m)>want)lo=m;else hi=m}
-  const r=(lo+hi)/2,a=O/2*Math.sin(r),sc=src.width/(O*P/(P-a));
-  const yt=-O/2*Math.cos(r)*P/(P-a),yb=O/2*Math.cos(r)*P/(P+a); // tipped, the sleeve's box sits a little above its middle
-  const dx=src.left+src.width/2-(t.left+ox),dy=src.top+src.height/2-(t.top+oy)-sc*(yt+yb)/2;
-  return{dx,dy,s:sc,rx:-r*180/Math.PI,ox,oy,tf:`translate(${dx}px,${dy}px) scale(${sc})`,po:`${ox+dx}px ${oy+dy}px`};
+// Where a record sits in the crate, as a pose of the lifted sleeve: the crate's own perspective (how far off you look from, and
+// from where) and the record's exact place, lean and twist in it, read from the page as it's drawn. Put on the stage and the lift,
+// the sleeve covers the record pixel for pixel, so the handover either way can't be seen; in between, the sleeve leans into
+// the crate's real angle and the view rises to look down on it, the way a record goes back in.
+const deg=180/Math.PI;
+// a lift transform as its parts: place, lean (X), twist (Z) and size
+const parts=M=>{const k=Math.hypot(M.m11,M.m12,M.m13)||1;return{x:M.m41,y:M.m42,z:M.m43,s:k,ax:Math.atan2(-M.m32/k,M.m33/k)*deg,az:Math.atan2(-M.m21/k,M.m11/k)*deg}};
+const poseTf=p=>`translate3d(${p.x.toFixed(2)}px,${p.y.toFixed(2)}px,${p.z.toFixed(2)}px) rotateX(${p.ax.toFixed(3)}deg) rotateZ(${p.az.toFixed(3)}deg) scale(${p.s.toFixed(5)})`;
+function cratePose(node=$('.rc.cur',stack)){
+  if(!node)return null;
+  const t=stage.getBoundingClientRect(),c=t.width/2,cr=crate.getBoundingClientRect(),cs=getComputedStyle(crate),[px,py]=cs.perspectiveOrigin.split(' ').map(parseFloat);
+  // the record's place in the crate: the stack's transform, then its own, each about its own origin
+  let M=new DOMMatrix();
+  for(const el of [stack,node]){
+    const s=getComputedStyle(el),[ox,oy,oz=0]=s.transformOrigin.split(' ').map(parseFloat);
+    M=M.translate(parseFloat(s.left),parseFloat(s.top)).translate(ox,oy,oz).multiply(new DOMMatrix(s.transform==='none'?undefined:s.transform)).translate(-ox,-oy,-oz);
+  }
+  const p=parts(new DOMMatrix().translate(cr.left-t.left-c,cr.top-t.top-c).multiply(M).scale3d(parseFloat(getComputedStyle(node).width)/t.width).translate(c,c));
+  return{...p,P:parseFloat(cs.perspective),ox:cr.left+px-t.left,oy:cr.top+py-t.top,tf:poseTf(p)};
 }
 const prevP=$('#prevP'),nextP=$('#nextP');
 function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';const h=b.nextElementSibling.nextElementSibling;h.innerHTML=r?`<b>${r.title}</b><i>${r.artist}</i>`:''}
@@ -817,7 +882,7 @@ $('#oinfo').addEventListener('click',e=>{
   if(!(filt&&filt.k===f.k&&same(filt.v,f.v)))arrange(f); // the crate changes behind the record, then the record goes home into it
   closeRecord();
 });
-function openRecord(deep,from){
+function openRecord(deep){
   const r=order[cur];fill(r);
   timers.forEach(clearTimeout);timers=[];
   open.hidden=false;open.scrollTop=0;
@@ -830,10 +895,11 @@ function openRecord(deep,from){
   if(reduce){held.classList.add('held');lift.style.transform='';setS();open.classList.add('in')}
   else{
     busy=true;cancelAnimationFrame(flyF);lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');
-    const ps=cratePose(from?.rect);
-    lift.style.transform=ps.tf;stage.style.perspectiveOrigin=ps.po;from?.flipped?snapS(180,-20):snapS(0,ps.rx);
+    const ps=cratePose(held);
+    if(ps){lift.style.transform=ps.tf;stage.style.perspective=ps.P+'px';stage.style.perspectiveOrigin=`${ps.ox}px ${ps.oy}px`}
+    snapS(0,0);
     held.classList.add('held');void lift.offsetWidth;
-    later(()=>{lift.classList.add('moving');stage.classList.add('moving');lift.style.transform='';stage.style.perspectiveOrigin='';setS()},120);
+    later(()=>{lift.classList.add('moving');stage.classList.add('moving');lift.style.transform='';stage.style.perspective=stage.style.perspectiveOrigin='';setS()},120);
     later(()=>open.classList.add('in'),380);
     later(()=>{busy=false;lift.classList.remove('moving');stage.classList.remove('moving')},1100);
   }
@@ -881,7 +947,7 @@ function closeRecord(fromPop){
   if(!fromPop&&history.state?.open){history.back();return}
   history.replaceState(null,'','#'+order[cur].slug); // the record on top now, even after cycling
   timers.forEach(clearTimeout);timers=[];
-  const done=()=>{open.hidden=true;lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
+  const done=()=>{open.hidden=true;lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
     $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');veil.style.transition='';root.classList.remove('pulldown','sliding');busy=false;document.activeElement?.blur()};
   open.classList.remove('in');crate.classList.remove('still');
   if(reduce){quick=false;done();return}
@@ -890,14 +956,14 @@ function closeRecord(fromPop){
   // one tween carries the sleeve home, from wherever it is: position, size, lean and turn all land together on the record in the
   // crate, easing in and out so nothing starts or stops with a jolt; then the record in the crate shows through as the sleeve fades
   const fly=()=>{
-    const ps=cratePose(),m=new DOMMatrix(getComputedStyle(lift).transform),x0=m.m41,y0=m.m42,s0=Math.hypot(m.a,m.b)||1;
+    const cs=getComputedStyle(stage),a=parts(new DOMMatrix(getComputedStyle(lift).transform)),P0=parseFloat(cs.perspective)||2600,[ox0,oy0]=cs.perspectiveOrigin.split(' ').map(parseFloat);
     const rx0=sv.rx,ry0=sv.ry,ryTo=360*Math.round(sv.ry/360),T=PHONE?460:620,t0=performance.now();
     cancelAnimationFrame(sraf);sraf=0;lift.className='lift';lift.style.transition='';stage.classList.remove('moving');
     (function f(now){
-      const t=Math.min(1,(now-t0)/T),e=t*t*t*(t*(t*6-15)+10);
-      lift.style.transform=`translate(${(x0+(ps.dx-x0)*e).toFixed(2)}px,${(y0+(ps.dy-y0)*e).toFixed(2)}px) scale(${(s0+(ps.s-s0)*e).toFixed(4)})`;
-      stage.style.perspectiveOrigin=`${(ps.ox+ps.dx*e).toFixed(1)}px ${(ps.oy+ps.dy*e).toFixed(1)}px`;
-      sv.rx=rx0+(ps.rx-rx0)*e;sv.ry=ry0+(ryTo-ry0)*e;sv.vx=sv.vy=0;paintS();
+      const t=Math.min(1,(now-t0)/T),e=t*t*t*(t*(t*6-15)+10),b=cratePose(); // measured every frame: the crate may still be settling
+      if(b){const m={};for(const k of ['x','y','z','s','ax','az'])m[k]=a[k]+(b[k]-a[k])*e;lift.style.transform=poseTf(m);
+        stage.style.perspective=(P0+(b.P-P0)*e).toFixed(1)+'px';stage.style.perspectiveOrigin=`${(ox0+(b.ox-ox0)*e).toFixed(1)}px ${(oy0+(b.oy-oy0)*e).toFixed(1)}px`}
+      sv.rx=rx0*(1-e);sv.ry=ry0+(ryTo-ry0)*e;sv.vx=sv.vy=0;paintS();
       if(t<1){flyF=requestAnimationFrame(f);return}
       $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));sleeve.classList.add('fade');later(done,130);
     })(t0);
@@ -1010,10 +1076,10 @@ crate.addEventListener('pointermove',e=>{
   const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
 // a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
-const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j,from={rect:drag.rc.querySelector('.fr').getBoundingClientRect(),flipped:j<cur};if(j!==cur)go(j);openRecord(false,from)}if(drag&&moved)go(cur,false);drag=null;moved=false;crate.classList.remove('dragging','pulling')};
+const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);openRecord(false)}if(drag&&moved)go(cur,false);drag=null;moved=false;crate.classList.remove('dragging','pulling')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 // a finger on the pile: down flips the top record toward you, up stands the last one back up, a tap opens it; sideways does nothing
-const openTop=()=>{const r=nodes[cur].querySelector('.fr').getBoundingClientRect();off.x=off.y=off.vx=off.vy=0;openRecord(false,{rect:r});render()};
+const openTop=()=>{off.x=off.y=off.vx=off.vy=0;openRecord(false);render()};
 const rub=e=>e*.3/(1+Math.abs(e)/300); // past the ends the pile gives, less the further you go
 crate.addEventListener('pointerdown',e=>{
   if(!PHONE||busy||!e.isPrimary)return;
