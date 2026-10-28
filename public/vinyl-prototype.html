@@ -51,7 +51,7 @@ button{font:inherit;color:inherit}
 .crate.still .rc .face{transition:none} /* cycling in the open view: the hidden crate changes without fading */
 .crate.lifted .floor,.crate.lifted .tail{opacity:0}
 /* the records past the drawn ones: one plane along their tops, striped in their colors, so the crate looks as deep as the collection is */
-.tail{position:absolute;left:calc(var(--S)/-2);top:0;width:var(--S);transform-origin:50% 0;background-repeat:no-repeat;pointer-events:none;transition:opacity .4s}
+.tail{position:absolute;left:calc(var(--S)*-8/15);top:0;width:calc(var(--S)*16/15);transform-origin:50% 0;background-repeat:no-repeat;mask-repeat:no-repeat;pointer-events:none;transition:opacity .4s}
 .crate.still .tail{transition:none}
 html.phone .tail{display:none}
 .floor{transition:opacity .4s}
@@ -104,13 +104,14 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .caption span{color:var(--m);font-size:15px}
 
 /* a record lifted out of the crate */
-.open{--O:var(--R);position:fixed;inset:0;z-index:10;overflow:hidden auto;overscroll-behavior:contain} /* a record sliding off to the side never brings in a scrollbar */
+.open{--O:min(var(--R),calc(100vw - 680px));position:fixed;inset:0;z-index:10;overflow:hidden auto;overscroll-behavior:contain} /* a record sliding off to the side never brings in a scrollbar */
 .open[hidden]{display:none}
 .open:focus{outline:none}
 #close{position:fixed;top:24px;left:24px;z-index:3;opacity:0;transition:opacity .3s,transform .5s var(--flip)}
 .open.in #close{opacity:1}
 .o-page{min-height:100%;display:grid;place-items:center;padding:80px 24px}
-.o-grid{display:flex;align-items:center;justify-content:center;gap:64px}
+/* the record dead center; the details hang off its right side */
+.o-grid{position:relative;display:flex;align-items:center;justify-content:center}
 .stage{position:relative;z-index:2;flex:none;width:var(--O);height:var(--O);perspective:2600px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .stage.dragging{cursor:grabbing}
 .stage:focus-visible{outline:none}
@@ -138,7 +139,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 @media(hover:hover){.open.in .peek.on:hover{opacity:1;transform:translate(var(--h),-50%);transition:transform .6s var(--flip),opacity .25s}}
 .open.in.swapping .peek{opacity:0;transition:none}
 /* hovering a peek names it, quietly, just below the edge it's peeking from */
-.phint{position:fixed;top:calc(50% + var(--R)/2 + 18px);z-index:2;display:grid;gap:2px;max-width:min(260px,40vw);pointer-events:none;opacity:0;transition:opacity .15s,transform .2s;font-size:14px;line-height:1.3}
+.phint{position:fixed;top:calc(50% + var(--O)/2 + 18px);z-index:2;display:grid;gap:2px;max-width:min(260px,40vw);pointer-events:none;opacity:0;transition:opacity .15s,transform .2s;font-size:14px;line-height:1.3}
 .phint.prev{left:28px;transform:translateX(-6px)}
 .phint.next{right:28px;text-align:right;transform:translateX(6px)}
 .phint b{font-weight:500}
@@ -151,12 +152,13 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .open.in:not(.swapping):not(.hush) .peek.prev.on:hover~.phint.prev,.open.in:not(.swapping):not(.hush) .peek.next.on:hover~.phint.next{opacity:1;transform:none;transition:opacity .25s .05s,transform .5s var(--flip) .05s}
 @media(hover:none){.phint{display:none}}
 /* the details start tucked under the record and slide out to the right */
-.o-info{position:relative;z-index:1;flex:none;width:min(340px,30vw);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
+.o-info{position:absolute;left:calc(100% + 48px);top:50%;translate:0 -50%;z-index:1;flex:none;width:min(340px,calc((100vw - var(--O))/2 - 80px));opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
 .open.in.swapping .o-info{opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .1s}
-@media(max-width:860px){
+@media(max-width:1040px){
+  .open{--O:var(--R)}
   .o-grid{flex-direction:column;gap:32px}
-  .o-info{width:var(--O);transform:translateY(-50%) scale(.96)}
+  .o-info{position:relative;left:auto;top:auto;translate:none;width:var(--O);transform:translateY(-50%) scale(.96)}
   .open.in.swapping .o-info{transform:translateY(-50%) scale(.96)}
 }
 .o-info h2{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
@@ -231,7 +233,7 @@ html.phone .stage{touch-action:none}
 html.phone .sleeve .sh{box-shadow:0 1px 2px #0002,0 8px 16px -6px #0003,0 24px 40px -18px #0005}
 html.phone[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 12px 24px -8px #0009,0 28px 44px -18px #000c}
 /* the details slide down from under the record */
-html.phone .o-info{flex:1;display:flex;flex-direction:column;width:var(--O);transform:translateY(-56px) scale(.98)}
+html.phone .o-info{position:relative;left:auto;top:auto;translate:none;flex:1;display:flex;flex-direction:column;width:var(--O);transform:translateY(-56px) scale(.98)}
 html.phone .open.in .o-info{transform:none}
 html.phone .open.in.swapping .o-info{transform:translateY(-32px) scale(.98);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .12s}
 html.phone .o-info h2{font-size:25px}
@@ -356,6 +358,7 @@ html[data-theme=dark] .qnone{box-shadow:0 12px 32px -12px #000c}
 .hit b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hit i{font-style:normal;font-size:13px;color:var(--m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .btn.sm{height:30px;padding:0 12px;font-size:13px;flex:none}
+.hit .in{flex:none}
 /* Casey's tools on a record, while editing */
 .own{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
 .own-c{position:relative;display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px 0 6px;border:1px solid var(--line);border-radius:999px;font-size:13px;cursor:pointer;transition:transform .5s var(--flip),border-color .2s}
@@ -550,7 +553,7 @@ function art(r){
   return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${g}</svg>`;
 }
 // local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
-const img=f=>/^https?:/.test(f)?f:'vinyl/'+f;
+const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f; // covers Casey uploads come from /api/crate/img
 // a lazy image waits in data-src until its record comes near the front (see place)
 const imgHTML=(f,lazy)=>`<img class="art" ${lazy?'data-src':'src'}="${img(f)}" alt="" decoding="sync" draggable="false">`;
 const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
@@ -575,9 +578,10 @@ const letter=r=>{const c=fold(name(r))[0]||'';return /[a-z]/.test(c)?c.toUpperCa
 // A filter narrows the crate to one artist, label, year or format (from a record's details) or to a search; null is the whole crate
 const FIELD={artist:r=>r.artist,label:r=>r.label,year:r=>r.year,format:r=>r.format},KIND={artist:'Artist',label:'Label',year:'Year',format:'Format'};
 const same=(a,b)=>!!a&&fold(a)===fold(b);
+const matchQ=(r,v)=>{const h=fold([r.artist,r.sortAs,r.title,r.label,r.year,r.format].join(' '));return fold(v).split(' ').filter(Boolean).every(t=>h.includes(t))};
 function matching(f){
   if(!f)return RECORDS;
-  if(f.k==='q'){const ts=fold(f.v).split(' ').filter(Boolean);return RECORDS.filter(r=>{const h=fold([r.artist,r.sortAs,r.title,r.label,r.year,r.format].join(' '));return ts.every(t=>h.includes(t))})}
+  if(f.k==='q')return RECORDS.filter(r=>matchQ(r,f.v));
   return RECORDS.filter(r=>same(FIELD[f.k](r),f.v));
 }
 // the crate holds what a filter keeps, the record in front staying in front when it's among them; a filter that keeps nothing changes nothing
@@ -592,22 +596,33 @@ function arrange(f,keep=order[cur]){
 let nodes=[],jits=[],shown=[],frontBox=null,tail=null,tailN=0,tailS=0;
 // each record's node is made once and kept, so a filter that drops a record and brings it back doesn't load its covers again
 const made=new Map();
+const look=r=>[r.front,r.back,spineBg(r),r.pal].join('|');
 function nodeFor(r){
-  let n=made.get(r);if(n)return n;
+  let n=made.get(r);if(n?._look===look(r))return n; // an edit to its covers or color makes it a new one
   // until its cover arrives, a record is a plain jacket in its spine color
   const t=document.createElement('div');
   t.innerHTML=`<div class="rc"><div class="face fr" style="background:${spineBg(r)}">${coverHTML(r,true)}</div><div class="face bk" style="background:${spineBg(r)}">${backHTML(r,true)}</div></div>`;
-  n=t.firstElementChild;n._lazy=[...n.querySelectorAll('img[data-src]')];n._jit=jit(r);made.set(r,n);return n;
+  n=t.firstElementChild;n._lazy=[...n.querySelectorAll('img[data-src]')];n._jit=jit(r);n._look=look(r);made.set(r,n);return n;
 }
 function build(){
   nodes=order.map(nodeFor);nodes.forEach((n,j)=>n.dataset.j=j);
   jits=nodes.map(n=>n._jit);shown=nodes.map(n=>!n.classList.contains('gone'));frontBox=null; // cached so each frame does no lookups
   tail||=Object.assign(document.createElement('div'),{className:'tail'});
   stack.replaceChildren(...nodes,tail);
-  // the tail: every record's top as a band in its spine color, shaded like the records behind, with the dark gap before the next
-  const c=document.createElement('canvas'),x=c.getContext('2d');c.width=2;c.height=order.length*8;
-  order.forEach((r,j)=>{x.fillStyle=spineBg(r);x.fillRect(0,j*8,2,8);x.fillStyle='rgb(0 0 0/.16)';x.fillRect(0,j*8,2,8);x.fillStyle='rgb(0 0 0/.5)';x.fillRect(0,j*8+5,2,3)});
-  tail.style.backgroundImage=`linear-gradient(#0000,#00000038),url(${c.toDataURL()})`;tail.style.backgroundSize=`100% 100%,100% ${order.length*GAP}px`;
+  // the tail: every record's top as a band in its spine color, shaded like the records behind, over the dark gaps between them.
+  // Each band sits a hair off true like the records in front, with its own shift, tilt and lean, so the back reads as a stack
+  // of jackets rather than stripes. Drawn back to front, so a nearer record covers the one behind where they cross.
+  // The bands reach past the gaps at the sides (the tail is a sixteenth wider than a record); a mask keeps the fade off what's between them.
+  const B=240,H=14,c=document.createElement('canvas'),x=c.getContext('2d');c.width=B+16;c.height=order.length*H;
+  order.forEach((r,j)=>{x.fillStyle=spineBg(r);x.fillRect(13,j*H,B-10,H)}); // the gaps: each record's color in shadow
+  x.fillStyle='rgb(0 0 0/.58)';x.fillRect(13,0,B-10,c.height);
+  for(let j=order.length-1;j>=0;j--){
+    const q=jits[j],th=H*(5+q.a*1.2)/8;
+    x.setTransform(1,q.z*1.6*H/B,0,1,B/2+8+q.x*.025*B,j*H); // up to a record and change of tilt end to end, and a few pixels either way
+    x.fillStyle=spineBg(order[j]);x.fillRect(-B/2,0,B,th);x.fillStyle='rgb(0 0 0/.16)';x.fillRect(-B/2,0,B,th);
+  }
+  c.toBlob(b=>{if(!b)return;URL.revokeObjectURL(tail._url);const u=`url(${tail._url=URL.createObjectURL(b)})`;tail.style.backgroundImage=`linear-gradient(#0000,#00000038),${u}`;tail.style.maskImage=u}); // encoded off the main thread
+  tail.style.backgroundSize=`100% 100%,100% ${order.length*GAP}px`;tail.style.maskSize=`100% ${order.length*GAP}px`;
   renderAZ();
 }
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
@@ -688,7 +703,7 @@ function place(rest){
     if(shown[j]!==show){shown[j]=show;n.classList.toggle('gone',!show)}
   });
   tailN=PHONE?0:Math.max(0,order.length-cur-11);
-  if(tail){tail.style.display=tailN?'':'none';tail.style.height=tailN*GAP+'px';tail.style.backgroundPosition=`0 0,0 ${-(cur+11)*GAP}px`}
+  if(tail){tail.style.display=tailN?'':'none';tail.style.height=tailN*GAP+'px';tail.style.backgroundPosition=`0 0,0 ${-(cur+11)*GAP}px`;tail.style.maskPosition=`0 ${-(cur+11)*GAP}px`}
   if(!PHONE)queueNudge();
 }
 const setHash=()=>{clearTimeout(setHash.t);setHash.t=setTimeout(()=>{if(open.hidden)history.replaceState(null,'','#'+order[cur].slug)},250)};
@@ -734,12 +749,12 @@ function scrubAt(e){
 }
 // Search: the crate fills with what matches as you type; Enter pulls out the record in front, Escape puts everything back
 const q=$('#q'),qf=$('#qf'),chip=$('#chip');let qT=0;
-const qSync=()=>{const v=q.value.trim();qf.classList.toggle('has',!!v);$('#qx').hidden=!v;if(!v){$('#qn').textContent='';$('#qnone').hidden=true}};
+const qSync=()=>{const v=q.value.trim();qf.classList.toggle('has',!!v);$('#qx').hidden=!v;if(!v){$('#qn').textContent='';$('#qnone').hidden=true;clearTimeout(mbT);mbN++}};
 function search(){
   qSync();const v=q.value.trim();
   if(!v){if(filt?.k==='q')arrange(null);return}
   const n=arrange({k:'q',v});
-  $('#qn').textContent=n||'';$('#qnone').hidden=!!n;if(!n)$('#qnone').innerHTML='<p class="qh">Not in the crate</p>';
+  $('#qn').textContent=n||'';panel(v,n);
   if(!n)$('#pos').textContent='Not in the crate.';
   return n;
 }
@@ -799,8 +814,9 @@ const prevP=$('#prevP'),nextP=$('#nextP');
 function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';const h=b.nextElementSibling.nextElementSibling;h.innerHTML=r?`<b>${r.title}</b><i>${r.artist}</i>`:''}
 prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
 [prevP,nextP].forEach(b=>b.addEventListener('pointerleave',()=>{if(!open.classList.contains('swapping'))open.classList.remove('hush')}));
+const sleeveHTML=r=>`<div class="sh"></div><div class="sh b"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
 function fill(r,noInfo){
-  sleeve.innerHTML=`<div class="sh"></div><div class="sh b"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
+  sleeve.innerHTML=sleeveHTML(r);
   peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);
   $('#ocount').textContent=`${cur+1} of ${order.length}`;
   if(!noInfo)info(r);
@@ -874,7 +890,7 @@ const metaHTML=(r,k)=>{const v=FIELD[k](r),n=v?RECORDS.filter(x=>same(FIELD[k](x
 function info(r){
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
       <dl class="facts">${[['Released','year'],['Label','label'],['Format','format']].filter(([,k])=>FIELD[k](r)).map(([t,k])=>`<div><dt>${t}</dt><dd>${metaHTML(r,k)}</dd></div>`).join('')}</dl>
-    ${playHTML(r)}`;
+    ${playHTML(r)}${ownHTML(r)}`;
 }
 $('#oinfo').addEventListener('click',e=>{
   const b=e.target.closest('.meta');if(!b||busy)return;
@@ -950,7 +966,8 @@ function closeRecord(fromPop){
   const done=()=>{open.hidden=true;lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
     $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');veil.style.transition='';root.classList.remove('pulldown','sliding');busy=false;document.activeElement?.blur()};
   open.classList.remove('in');crate.classList.remove('still');
-  if(reduce){quick=false;done();return}
+  if(reduce){quick=false;vanish=false;done();return}
+  if(vanish){vanish=quick=false;busy=true;open.style.transition='opacity .2s';open.style.opacity='0';later(()=>{open.style.transition=open.style.opacity='';done()},200);return}
   // reverse: details tuck back under, the record drops back into the crate, the rest fades back in
   busy=true;
   // one tween carries the sleeve home, from wherever it is: position, size, lean and turn all land together on the record in the
@@ -1124,7 +1141,7 @@ function buzz(){
 // a window narrowed past a phone's width becomes one, and back
 phoneQ.addEventListener('change',()=>{PHONE=phoneQ.matches;restFor();root.classList.toggle('phone',PHONE);deckS=0;off.x=off.y=0;if(nodes.length){place(true);render();say()}});
 addEventListener('keydown',e=>{
-  if(e.target.closest('input,textarea,iframe')||e.metaKey||e.ctrlKey)return;
+  if(e.target.closest('input,textarea,iframe,dialog')||e.metaKey||e.ctrlKey)return;
   if(!open.hidden&&playMenu()){
     const items=$$('#playM a'),i=items.indexOf(document.activeElement),k={ArrowDown:1,ArrowUp:-1}[e.key];
     if(e.key==='Escape'){e.preventDefault();togglePlay(false,true)}
@@ -1142,6 +1159,182 @@ addEventListener('keydown',e=>{
   if(e.key==='End'){e.preventDefault();go(order.length-1)}
 });
 
+// ---------- Edit mode: Casey's own, online (api/crate and src/lib/crate.ts) ----------
+// Edits lay over RECORDS: records added and taken out, jacket colors, covers. Only Casey's crate has them, never a visitor's.
+// A device unlocks once with the key (open the page with ?edit) and keeps it; from then on it shows an Edit button. Nobody else sees any of it.
+let BASE=null,EDITS={added:[],removed:[],patch:{}},EDITABLE=false,OWNER=null,editing=false,vanish=false,mbT=0,mbN=0,mbRes=[];
+try{OWNER=localStorage.getItem('records-key')}catch{}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>`&#${c.charCodeAt(0)};`);
+const slugOf=(a,t)=>(a+' '+t).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const rgbOf=c=>c?.[0]==='#'?[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)):(String(c).match(/\d+/g)||[216,211,202]).slice(0,3).map(Number);
+const hexOf=c=>'#'+rgbOf(c).map(v=>(+v).toString(16).padStart(2,'0')).join('');
+const inkOn=c=>{const [r,g,b]=rgbOf(c);return r*.299+g*.587+b*.114>150?'#1a1a1a':'#f4f2ee'}; // type on a jacket of that color
+const added=new Map(); // slug → record, the same object each time, so the crate keeps its node
+function applyEdits(){
+  if(!BASE)return;
+  const mine=EDITS.added.map(a=>{const r=added.get(a.slug)||{};added.set(a.slug,r);for(const k of Object.keys(r))delete r[k];r._o={pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...a,mine:true};return r});
+  for(const r of [...BASE,...mine]){
+    r._o||={front:r.front,back:r.back,spine:r.spine,pal:r.pal};Object.assign(r,r._o);
+    const p=EDITS.patch[r.slug];if(!p)continue;
+    if(p.front)r.front=p.front;if(p.back)r.back=p.back;if(p.spine)r.spine=p.spine;
+    if(p.bg){const t=inkOn(p.bg);r.spine=p.bg;r.pal=[p.bg,t,t]}
+  }
+  const out=new Set(EDITS.removed);
+  RECORDS.splice(0,RECORDS.length,...[...BASE,...mine].filter(r=>!out.has(r.slug)));
+}
+// one change at a time, in order; the answer is the edits as saved
+let apiQ=Promise.resolve();
+function api(body){
+  const p=apiQ.then(async()=>{
+    const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+OWNER},body:JSON.stringify(body)}).catch(()=>null);
+    const d=await r?.json().catch(()=>({}));
+    if(r?.status===401){lockOut();throw new Error('Your key stopped working')}
+    if(!r?.ok)throw new Error(d?.error?d.error[0].toUpperCase()+d.error.slice(1):'That didn’t save');
+    EDITS=d.edits;applyEdits();return d;
+  });
+  apiQ=p.catch(()=>{});return p;
+}
+async function upload(blob){
+  const r=await fetch('/api/crate/img',{method:'POST',headers:{'Content-Type':blob.type,Authorization:'Bearer '+OWNER},body:blob}).catch(()=>null);
+  const d=await r?.json().catch(()=>({}));
+  if(!r?.ok)throw new Error('The cover didn’t upload');
+  return d.url;
+}
+// a cover, cut square and at most 1200px, as WebP (JPEG where a browser can't write WebP), small enough for one database value
+async function shrink(src){
+  const b=await createImageBitmap(src),s=Math.min(b.width,b.height),n=Math.min(1200,s),c=document.createElement('canvas');
+  c.width=c.height=n;c.getContext('2d').drawImage(b,(b.width-s)/2,(b.height-s)/2,s,s,0,0,n,n);
+  for(const k of [.82,.7,.55,.4]){
+    let o=await new Promise(r=>c.toBlob(r,'image/webp',k));
+    if(!o||o.type!=='image/webp')o=await new Promise(r=>c.toBlob(r,'image/jpeg',k));
+    if(o&&o.size<600000)return o;
+  }
+  throw new Error('That image is too big');
+}
+// after an edit: the crate takes it in, keeping the record in front, and an open record shows it
+const rearrange=keep=>{if(!arrange(filt,keep))arrange(null,keep)};
+function afterEdit(r){
+  rearrange(RECORDS.includes(r)?r:order[cur]);
+  if(open.hidden||order[cur]!==r)return;
+  $('.rc.cur',stack)?.classList.add('held');
+  sleeve.innerHTML=sleeveHTML(r);info(r);peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);$('#ocount').textContent=`${cur+1} of ${order.length}`;
+}
+// a short note at the bottom, sometimes with an undo
+const toastEl=$('#toast');let toastT=0;
+function toast(msg,act,fn){
+  clearTimeout(toastT);toastEl.innerHTML=`<span>${esc(msg)}</span>${act?`<button type="button">${esc(act)}</button>`:''}`;
+  if(fn)toastEl.querySelector('button').onclick=()=>{toastEl.classList.remove('on');fn()};
+  toastEl.classList.add('on');toastT=setTimeout(()=>toastEl.classList.remove('on'),act?7000:3500);
+}
+const editB=$('#editB'),unlockD=$('#unlock');
+function setEditing(on){
+  editing=!!(on&&OWNER&&EDITABLE);editB.hidden=!(OWNER&&EDITABLE);editB.setAttribute('aria-pressed',editing);editB.textContent=editing?'Done':'Edit';
+  try{sessionStorage.setItem('records-editing',editing?'1':'')}catch{}
+  if(!open.hidden)info(order[cur]);if(q.value.trim())search();
+}
+editB.onclick=()=>setEditing(!editing);
+function lockOut(){OWNER=null;try{localStorage.removeItem('records-key')}catch{}setEditing(false);toast('Your key stopped working. Open the page with ?edit to unlock again')}
+function ownerInit(){
+  const ask=new URLSearchParams(location.search).has('edit');let was='';try{was=sessionStorage.getItem('records-editing')}catch{}
+  setEditing(OWNER&&(was||ask));
+  if(!ask)return;
+  if(!EDITABLE){toast('Edit mode isn’t set up here yet');dropAsk()}
+  else if(OWNER)dropAsk();
+  else unlockD.showModal();
+}
+const dropAsk=()=>{const u=new URL(location.href);u.searchParams.delete('edit');history.replaceState(history.state,'',u)};
+$('#unlockF').addEventListener('submit',async e=>{
+  e.preventDefault();const key=$('#key').value.trim(),b=$('#unlockB');if(!key)return;b.disabled=true;$('#keyErr').textContent='';
+  const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:'{"op":"check"}'}).catch(()=>null);
+  b.disabled=false;
+  if(!r?.ok){$('#keyErr').textContent=r?.status===429?'Too many tries. Try again in an hour':r?'That key didn’t work':'Couldn’t reach the site';return}
+  OWNER=key;try{localStorage.setItem('records-key',key)}catch{}
+  EDITS=(await r.json()).edits;applyEdits();rearrange(order[cur]);unlockD.close();setEditing(true);toast('Unlocked. Edit is at the top right');
+});
+$('#unlockX').onclick=()=>unlockD.close();
+unlockD.addEventListener('close',()=>{$('#key').value='';$('#keyErr').textContent='';dropAsk()});
+// Casey's tools on an open record: jacket color, new covers, take it out
+const ownHTML=r=>editing?`<div class="own">
+      <label class="own-c"><input type="color" id="ownC" value="${hexOf(spineBg(r))}"><span>Jacket color</span></label>
+      <button type="button" class="btn sm" data-up="front">${r.front?'New front':'Add a front'}</button><button type="button" class="btn sm" data-up="back">${r.back?'New back':'Add a back'}</button>
+      ${EDITS.patch[r.slug]?'<button type="button" class="btn sm" id="ownReset">Back to the original</button>':''}<button type="button" class="btn sm" id="ownX">Take it out of the crate</button>
+    </div>`:'';
+const upF=$('#upF'),ownBusy=on=>$('#oinfo .own')?.classList.toggle('busy',on);
+$('#oinfo').addEventListener('click',e=>{
+  if(!editing||busy)return;const r=order[cur];
+  const u=e.target.closest('[data-up]');if(u){upF.dataset.side=u.dataset.up;upF.click()}
+  if(e.target.closest('#ownReset'))patch(r,{bg:null,spine:null,front:null,back:null},'Back to the original');
+  if(e.target.closest('#ownX'))takeOut(r);
+});
+// the color shows on the record as you pick it, and saves when you're done
+$('#oinfo').addEventListener('input',e=>{
+  if(e.target.id!=='ownC')return;const r=order[cur],c=e.target.value,t=inkOn(c),x={...r,spine:c,pal:[c,t,t]};
+  $$('#sleeve .edge').forEach(n=>n.style.background=c);if(!r.front)$('#sleeve .fr').innerHTML=coverHTML(x);if(!r.back)$('#sleeve .bk').innerHTML=backHTML(x);
+});
+$('#oinfo').addEventListener('change',e=>{if(e.target.id==='ownC')patch(order[cur],{bg:e.target.value},'Jacket color saved')});
+async function patch(r,set,msg){
+  ownBusy(true);
+  try{await api({op:'patch',slug:r.slug,set});toast(msg)}catch(e){toast(e.message)}
+  afterEdit(r);
+}
+upF.addEventListener('change',async()=>{
+  const f=upF.files[0],side=upF.dataset.side,r=order[cur];upF.value='';if(!f||!r)return;
+  ownBusy(true);
+  try{
+    const url=await upload(await shrink(f)),set={[side]:url};
+    if(side==='front'&&!EDITS.patch[r.slug]?.bg)set.spine=await edgeColor(url); // the spine follows a new front, unless Casey picked a color
+    await patch(r,set,side==='front'?'New front saved':'New back saved');
+  }catch(e){toast(e.message);ownBusy(false)}
+});
+// taking a record out: the record view fades, the crate closes up behind it, and an undo waits at the bottom
+async function takeOut(r){
+  if(RECORDS.length<2)return;
+  const next=order[cur+1]||order[cur-1];ownBusy(true);
+  try{await api({op:'remove',slug:r.slug})}catch(e){toast(e.message);ownBusy(false);return}
+  made.delete(r);rearrange(next);vanish=true;closeRecord();
+  toast(`Took out ${r.title}`,'Undo',()=>putBack(r));
+}
+async function putBack(r){
+  try{await api({op:'restore',slug:r.slug});made.delete(r);if(q.value){q.value='';qSync()}arrange(null,r);toast(`${r.title} is back`)}catch(e){toast(e.message)}
+}
+// Search, while editing: records taken out that match, and what MusicBrainz has, to add
+const hitHTML=(x,act)=>`<li class="hit">${x.thumb||x.front?`<img src="${esc(x.thumb||img(x.front))}"${x.fallback?` data-fb="${esc(x.fallback)}"`:''} alt="" loading="lazy">`:'<i class="ph"></i>'}<span><b>${esc(x.title)}</b><i>${esc(x.artist)}${x.year?' · '+esc(x.year):''}</i></span>${act}</li>`;
+const fallbacks=el=>$$('img',el).forEach(i=>i.addEventListener('error',()=>{if(i.dataset.fb){i.src=i.dataset.fb;delete i.dataset.fb}else i.style.visibility='hidden'}));
+function panel(v,n){
+  const p=$('#qnone');
+  if(!editing){p.hidden=!!n;if(!n)p.innerHTML='<p class="qh">Not in the crate</p>';return}
+  const out=[...(BASE||[]),...added.values()].filter(r=>EDITS.removed.includes(r.slug)&&matchQ(r,v));
+  p.hidden=false;
+  p.innerHTML=`<p class="qh">${n?`${n} in the crate`:'Not in the crate'}</p>${out.length?`<ul>${out.map(r=>hitHTML(r,`<button type="button" class="btn sm" data-back="${esc(r.slug)}">Put back</button>`)).join('')}</ul>`:''}<p class="qh" id="mbH">Looking on MusicBrainz…</p><ul id="mbL"></ul>`;
+  fallbacks(p);clearTimeout(mbT);const my=++mbN;
+  mbT=setTimeout(async()=>{ // MusicBrainz takes one search a second: wait for a pause in the typing
+    let res=[];try{res=await VisitorCrate.search(v)}catch{}
+    if(my!==mbN||!$('#mbL'))return;
+    const have=new Set([...RECORDS.map(r=>r.slug)]);mbRes=res;
+    $('#mbH').textContent=res.length?'Add from MusicBrainz':'Nothing on MusicBrainz either';
+    $('#mbL').innerHTML=res.map((x,i)=>hitHTML(x,have.has(slugOf(x.artist,x.title))?'<i class="in">In the crate</i>':`<button type="button" class="btn sm" data-add="${i}">Add</button>`)).join('');
+    fallbacks($('#mbL'));
+  },500);
+}
+$('#qnone').addEventListener('click',e=>{
+  const a=e.target.closest('[data-add]'),b=e.target.closest('[data-back]');
+  if(b){b.disabled=true;putBack([...BASE,...added.values()].find(x=>x.slug===b.dataset.back))}
+  if(a)addFrom(mbRes[+a.dataset.add],a);
+});
+// adding: the facts and covers from MusicBrainz, the covers kept in the crate's own store
+async function addFrom(x,btn){
+  btn.disabled=true;btn.textContent='Adding…';
+  try{
+    let m=x;
+    if(x.src==='m'){const d=await fetch('/api/musicbrainz?ids='+x.id).then(r=>r.ok?r.json():{}).catch(()=>({}));m={...x,...d.records?.[0]}}
+    const keep=async u=>{if(!u)return'';try{const r=await fetch(u);return r.ok?await upload(await shrink(await r.blob())):''}catch{return''}};
+    const [front,back]=await Promise.all([keep(m.front||(m.fallback||'').replace(/front-250$/,'front-1200')),keep(m.back)]);
+    await api({op:'add',record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined}});
+    const r=added.get(slugOf(m.artist,m.title));q.value='';qSync();arrange(null,r);q.blur();
+    toast(`Added ${m.title}`);
+  }catch(e){btn.disabled=false;btn.textContent='Add';toast(e.message)}
+}
+
 function start(){
   const m=location.hash.match(/^#(record\/)?(.+)$/); // read the address before sorting rewrites it
   arrange(null,null);
@@ -1156,12 +1349,18 @@ function start(){
  document.documentElement.style.setProperty('--grain',`url(${c.toDataURL()})`)}
 function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d');x.drawImage(i,0,0,i.naturalWidth*.03,i.naturalHeight,0,0,4,64);const d=x.getImageData(0,0,4,64).data;let r=0,g=0,b=0;for(let k=0;k<d.length;k+=4){r+=d[k];g+=d[k+1];b+=d[k+2]}const n=d.length/4;res(`rgb(${r/n|0},${g/n|0},${b/n|0})`)}catch{res(null)}};i.onerror=()=>res(null);i.crossOrigin='anonymous';i.src=src})}
 // Casey's crate, or a visitor's crate when the address carries one (vinyl-make.html builds those links)
-Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null)]).then(async([m,v])=>{
+// Casey's edits come too (fresh for Casey, a few seconds old for everyone else), unless they're slow: the crate doesn't wait long for them
+const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(OWNER?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
+Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,2500))])]).then(async([m,v,ed])=>{
   if(v&&v.records.length){RECORDS.splice(0,RECORDS.length,...v.records);document.title=VisitorCrate.crateName(v.name)}
-  else RECORDS.forEach(r=>Object.assign(r,{...m[r.slug],...r})); // a value written in RECORDS wins
+  else{
+    RECORDS.forEach(r=>Object.assign(r,{...m[r.slug],...r})); // a value written in RECORDS wins
+    BASE=[...RECORDS];
+    if(ed){EDITS=ed.edits||EDITS;EDITABLE=!!(ed.configured&&ed.editable);applyEdits()}
+  }
   // a visitor's crate reads its spine colors from the covers; Casey's come with covers.json
   await Promise.race([Promise.all(RECORDS.filter(r=>r.front&&!r.spine).map(async r=>r.spine=await edgeColor(img(r.front)))),new Promise(r=>setTimeout(r,8000))]);
-  start();
+  start();if(!visiting)ownerInit();
   // hold the crate back until the covers on screen are decoded, so it arrives whole; the rest load as you flip toward them
   const imgs=[...nodes.filter((_,j)=>shown[j]).flatMap(n=>[...n.querySelectorAll('img[src]')]),...$$('img',open.hidden?document.createElement('i'):open)];let n=0;
   const tick=()=>{n++;$('#loadN').textContent=`${n} of ${imgs.length}`;$('#loadBar').style.transform=`scaleX(${n/imgs.length})`};
