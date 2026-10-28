@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Records</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script>document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'</script>
+<style>
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
+:root{--bg:#fcfcfc;--fg:#1a1a1a;--m:#6e6e6e;--line:#d0d0d0;--cb:#e6e6e6;--soft:#f2f2f0;--accent:#661864;--floor:#0000000f;--mono:'Paper Mono',ui-monospace,monospace;--spring:cubic-bezier(.2,1.4,.4,1);--s:260px;--d:34px}
+html[data-theme=dark]{--bg:#0f0f10;--fg:#e8e8e8;--m:#8a8a8f;--line:#3e3e43;--cb:#2a2a2e;--soft:#1b1b1d;--accent:#ca72c7;--floor:#ffffff10}
+*,*::before,*::after{box-sizing:border-box}*{margin:0}
+*{font-variant-numeric:tabular-nums}
+html{background:var(--bg)}
+body{font-family:'Instrument Sans',sans-serif;font-size:16px;line-height:1.55;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration-color:var(--line);text-underline-offset:3px;transition:text-decoration-color .2s}
+a:hover{text-decoration-color:currentColor}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
+
+.page{max-width:1120px;margin:0 auto;padding:40px 28px 96px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.top h1{font:500 15px var(--mono)}
+.top h1 span{color:var(--m)}
+.icon{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--m);transition:transform .5s var(--spring)}
+.icon:hover{color:var(--fg)}
+.icon:active{transform:scale(.96);transition-duration:.08s}
+.icon:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{all:unset;cursor:pointer;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px;font-size:14px;transition:transform .5s var(--spring),border-color .2s}
+.btn:hover{border-color:var(--m)}
+.btn:active{transform:scale(.99);transition-duration:.08s}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn[aria-pressed=true]{border-color:var(--fg)}
+
+/* shelf */
+.intro{max-width:560px;margin-top:56px;font-size:18px}
+.intro p+p{margin-top:6px;color:var(--m);font-size:15px}
+.sort{display:flex;gap:6px;margin-top:20px;flex-wrap:wrap}
+.shelf{margin:40px -28px 0;padding:24px 28px 0;display:flex;align-items:flex-end;gap:3px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scroll-padding:0 28px}
+.shelf::after{content:'';flex:none;width:28px}
+.floor{height:1px;background:var(--line);margin:0 -28px;box-shadow:0 10px 24px 6px var(--floor)}
+.rec{all:unset;position:relative;flex:none;width:var(--d);height:var(--s);cursor:pointer;perspective:1400px;transition:width .75s var(--spring)}
+.rec .box{position:absolute;left:0;top:0;width:var(--s);height:var(--s);transform-style:preserve-3d;transform-origin:0 50%;transform:rotateY(90deg);transition:transform .75s var(--spring)}
+.rec.on{width:calc(var(--d)*.45 + var(--s)*.89)}
+.rec.on .box{transform:rotateY(27deg)}
+.rec:focus-visible{outline:none}
+.rec:focus-visible .spine,.rec:focus-visible .front{outline:2px solid var(--accent);outline-offset:2px}
+.rec:active .box{transition-duration:.12s}
+.face{position:absolute;top:0;left:0;height:100%;backface-visibility:hidden;overflow:hidden}
+.front{width:100%;transform:translateZ(var(--d));container-type:inline-size}
+.spine{width:var(--d);transform-origin:0 50%;transform:rotateY(-90deg)}
+.caption{margin-top:22px;min-height:52px;font-size:15px}
+.caption b{font-weight:500}
+.caption span{color:var(--m)}
+
+/* cover art */
+.art{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
+.cover-type b{display:block;font:500 6cqw 'Instrument Sans',sans-serif}
+.cover-type i{display:block;font:400 4.4cqw var(--mono);font-style:normal;opacity:.85;margin-top:1.2cqw}
+.spine-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 0 10px;writing-mode:vertical-rl;font:400 11px/1 var(--mono);white-space:nowrap;overflow:hidden}
+.spine-in b{font-weight:500}
+.spine-in em{font-style:normal;opacity:.75}
+.spine::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0000002e,#0000 30%,#ffffff14 55%,#00000024)}
+.edge{background:linear-gradient(#0000,#0000)}
+
+/* detail */
+.detail{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:center;margin-top:40px}
+@media(max-width:900px){.detail{grid-template-columns:1fr;gap:8px}}
+.back{display:inline-block;margin-top:44px;font-size:15px}
+.stage{--S:min(380px,58vw);--D:14px;position:relative;height:calc(var(--S) + 120px);display:grid;place-items:center;perspective:1500px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.stage.dragging{cursor:grabbing}
+.holder{position:relative;width:var(--S);height:var(--S);transform:translateX(calc(var(--S)*-.2));transform-style:preserve-3d}
+.sleeve{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .25s ease-out}
+.sleeve.settle{transition:transform .9s var(--spring)}
+.sleeve.dragging{transition:none}
+.sleeve.arrive{animation:arrive 1s var(--spring)}
+@keyframes arrive{from{transform:translateY(28px) rotateY(-70deg) rotateX(6deg)}}
+.sf{position:absolute;backface-visibility:hidden;overflow:hidden}
+.sf.front{inset:0;width:auto;container-type:inline-size;transform:translateZ(calc(var(--D)/2));box-shadow:inset 0 0 0 1px #0000000d}
+.sf.backc{inset:0;transform:rotateY(180deg) translateZ(calc(var(--D)/2));container-type:inline-size}
+.sf.left{top:0;height:100%;width:var(--D);left:calc(50% - var(--D)/2);transform:rotateY(-90deg) translateZ(calc(var(--S)/2))}
+.sf.topf,.sf.botf{left:0;width:100%;height:var(--D);top:calc(50% - var(--D)/2);filter:brightness(.82)}
+.sf.topf{transform:rotateX(90deg) translateZ(calc(var(--S)/2))}
+.sf.botf{transform:rotateX(-90deg) translateZ(calc(var(--S)/2))}
+.sf.left::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#00000033,#0000 40%,#00000022)}
+.sf.left .spine-in{font-size:10px;padding:10px 0}
+.back-in{position:absolute;inset:0;padding:8cqw;font:400 3.6cqw/1.6 var(--mono);display:flex;flex-direction:column;justify-content:space-between}
+.back-in b{display:block;font:500 5cqw/1.25 'Instrument Sans',sans-serif;margin-bottom:3cqw}
+.back-in dl{display:grid;grid-template-columns:auto 1fr;gap:.6cqw 4cqw}
+.back-in dt{opacity:.7}
+.back-in dd{margin:0}
+.disc{position:absolute;left:2%;top:2%;width:96%;height:96%;transform:translateX(0);transition:transform 1.3s var(--spring) .15s;cursor:pointer}
+.sleeve.out .disc{transform:translateX(44%)}
+.vinyl{position:absolute;inset:0;border-radius:50%;background:
+  radial-gradient(circle,#0000 0 31%,#0000 31%),
+  repeating-radial-gradient(circle,#161616 0 1.2px,#1d1d1d 1.6px 2.6px),
+  #141414;box-shadow:0 0 0 1px #0006 inset,0 18px 40px -16px #0009;animation:spin 1.8s linear infinite;animation-play-state:paused}
+.vinyl::before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,#fff0 0deg,#ffffff1c 30deg,#fff0 70deg,#fff0 180deg,#ffffff14 210deg,#fff0 250deg)}
+.vinyl::after{content:'';position:absolute;left:50%;top:50%;width:1.6%;height:1.6%;margin:-.8% 0 0 -.8%;border-radius:50%;background:var(--bg);z-index:2}
+.label{position:absolute;left:33%;top:33%;width:34%;height:34%;border-radius:50%;overflow:hidden;container-type:inline-size;display:grid;place-items:center;text-align:center}
+.label span{font:500 7.5cqw/1.2 var(--mono);padding:0 14%;transform:translateY(-26%)}
+html[data-theme=dark] .vinyl{box-shadow:0 0 0 1px #ffffff1f,0 18px 40px -16px #000}
+.stage.playing .vinyl{animation-play-state:running}
+@keyframes spin{to{transform:rotate(360deg)}}
+.stage-tools{display:flex;gap:8px;justify-content:center;margin-top:-28px;position:relative}
+.info h2{font-size:34px;line-height:1.15;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
+.info .by{font-size:20px;color:var(--m);margin-top:6px}
+.facts{display:grid;grid-template-columns:110px 1fr;gap:8px 16px;margin-top:28px;padding-top:20px;border-top:1px solid var(--cb);font-size:15px}
+.facts dt{color:var(--m)}
+.facts dd{margin:0}
+.note{margin-top:24px;font-size:15px;color:var(--m);max-width:44ch}
+.pn{display:flex;justify-content:space-between;gap:16px;margin-top:36px;font-size:15px}
+.pn a{max-width:48%}
+.pn a:last-child{text-align:right;margin-left:auto}
+.view[hidden]{display:none}
+
+@media(max-width:600px){
+  :root{--s:200px;--d:30px}
+  .page{padding:28px 16px 80px}
+  .shelf{margin:32px -16px 0;padding:20px 16px 0;scroll-padding:0 16px}
+  .shelf::after{width:16px}
+  .floor{margin:0 -16px}
+  .intro{margin-top:40px}
+  .info h2{font-size:28px}
+  .stage{--S:62vw;height:calc(var(--S) + 90px)}
+  .facts{grid-template-columns:96px 1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .rec,.rec .box,.sleeve,.sleeve.settle,.disc{transition:none}
+  .sleeve.arrive{animation:none}
+  .vinyl{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <h1>Records <span id="count"></span></h1>
+    <button class="icon" id="theme" aria-label="Toggle theme"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+  </header>
+
+  <main id="shelfView" class="view">
+    <div class="intro">
+      <p>What’s on the shelf at home</p>
+      <p>Stand-in records and made-up cover art until the real collection comes in</p>
+    </div>
+    <div class="sort" role="group" aria-label="Sort by">
+      <button class="btn" data-sort="artist">Artist</button>
+      <button class="btn" data-sort="year">Year</button>
+      <button class="btn" data-sort="added">Recently added</button>
+    </div>
+    <div class="shelf" id="shelf" role="list" aria-label="Records"></div>
+    <div class="floor"></div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+  </main>
+
+  <main id="detailView" class="view" hidden>
+    <a class="back" href="#">← All records</a>
+    <div class="detail" id="detail"></div>
+  </main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Stand-ins, shaped like a Discogs collection export row
+const RECORDS=[
+  {artist:'Lucinda Williams',title:'Car Wheels on a Gravel Road',year:1998,label:'Mercury',format:'LP',added:'2024-03-02',pal:['#c9803c','#2a1a10','#f3e4c8'],art:'sun'},
+  {artist:'Wilco',title:'Yankee Hotel Foxtrot',year:2002,label:'Nonesuch',format:'2×LP',added:'2023-11-18',pal:['#1f3b57','#e9e1d0','#8fb1c9'],art:'grid'},
+  {artist:'Gillian Welch',title:'Time (The Revelator)',year:2001,label:'Acony',format:'LP',added:'2025-06-14',pal:['#d9c9a3','#3d2f22','#9a6b3f'],art:'arch'},
+  {artist:'Jason Isbell',title:'Southeastern',year:2013,label:'Southeastern Records',format:'LP',added:'2022-08-09',pal:['#e8e4dc','#232323','#b23a2a'],art:'type'},
+  {artist:'Townes Van Zandt',title:'Live at the Old Quarter, Houston, Texas',year:1977,label:'Tomato',format:'2×LP',added:'2021-12-24',pal:['#2b2b2b','#e7d8b8','#b98a4a'],art:'rings'},
+  {artist:'Uncle Tupelo',title:'No Depression',year:1990,label:'Rockville',format:'LP',added:'2020-05-30',pal:['#6f7d5a','#f1ead8','#3a4430'],art:'bands'},
+  {artist:'Emmylou Harris',title:'Pieces of the Sky',year:1975,label:'Reprise',format:'LP',added:'2025-01-11',pal:['#a9c3cf','#28323a','#f4efe6'],art:'sun'},
+  {artist:'Gram Parsons',title:'Grievous Angel',year:1974,label:'Reprise',format:'LP',added:'2023-04-22',pal:['#efe3cf','#5a2a2a','#c79b5b'],art:'stripes'},
+  {artist:'Neil Young',title:'Harvest',year:1972,label:'Reprise',format:'LP',added:'2019-09-07',pal:['#e6d6b0','#4a3a26','#a8743a'],art:'rings'},
+  {artist:'Sturgill Simpson',title:'Metamodern Sounds in Country Music',year:2014,label:'High Top Mountain',format:'LP',added:'2024-10-05',pal:['#5b2f6b','#f2d36b','#e98a4f'],art:'grid'},
+  {artist:'Whiskeytown',title:'Strangers Almanac',year:1997,label:'Outpost',format:'LP',added:'2022-02-19',pal:['#33424a','#e4ddd0','#9fb0a8'],art:'stripes'},
+  {artist:'Margo Price',title:'Midwest Farmer’s Daughter',year:2016,label:'Third Man',format:'LP',added:'2025-09-27',pal:['#f0c84b','#1d1d1d','#d4472f'],art:'bands'},
+].map(r=>({...r,slug:(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}));
+
+// Made-up cover art: one of a few patterns in each record's colors
+function art(r){
+  const [bg,fg,ac]=r.pal;let g='';
+  if(r.art==='sun'){g=`<circle cx="50" cy="60" r="21" fill="${ac}"/>`;for(let i=0;i<6;i++)g+=`<rect x="0" y="${72+i*5}" width="100" height="${1.2+i*.5}" fill="${fg}" opacity=".85"/>`}
+  if(r.art==='grid'){for(let x=0;x<6;x++)for(let y=0;y<5;y++)g+=`<circle cx="${17+x*13.2}" cy="${38+y*13}" r="${(x+y)%3?3.2:5.4}" fill="${(x*y)%4?fg:ac}"/>`}
+  if(r.art==='arch'){for(let i=0;i<5;i++){const w=78-i*14;g+=`<path d="M${50-w/2} 100V${62-i*0}a${w/2} ${w/2} 0 0 1 ${w} 0V100z" fill="${i%2?bg:(i?ac:fg)}"/>`}}
+  if(r.art==='type'){g=`<text x="7" y="96" font-family="Instrument Sans,sans-serif" font-weight="500" font-size="54" fill="${ac}" letter-spacing="-3">${r.title[0]}</text><rect x="7" y="40" width="40" height="2" fill="${fg}"/>`}
+  if(r.art==='rings'){for(let i=6;i>0;i--)g+=`<circle cx="64" cy="66" r="${i*6}" fill="none" stroke="${i%2?ac:fg}" stroke-width="2.4"/>`}
+  if(r.art==='bands'){g=`<rect y="44" width="100" height="18" fill="${fg}"/><rect y="62" width="100" height="18" fill="${ac}"/><rect y="80" width="100" height="20" fill="${fg}" opacity=".6"/>`}
+  if(r.art==='stripes'){for(let i=-10;i<12;i++)g+=`<path d="M${i*10} 100L${i*10+60} 40" stroke="${i%3?fg:ac}" stroke-width="2.6"/>`;g+=`<rect width="100" height="40" fill="${bg}"/>`}
+  return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${g}</svg>`;
+}
+const coverHTML=r=>`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
+const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
+const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+// shelf
+const shelf=$('#shelf'),caption=$('#caption');
+let order=[...RECORDS],sortKey='artist',sel=null,lastPointer='mouse',mx=-1,my=-1;
+const sortName=a=>a.replace(/^the /i,'');
+function sortBy(k){
+  sortKey=k;
+  order=[...RECORDS].sort(k==='year'?(a,b)=>a.year-b.year:k==='added'?(a,b)=>b.added.localeCompare(a.added):(a,b)=>sortName(a.artist).localeCompare(sortName(b.artist)));
+  $$('.sort .btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sort===k));
+  drawShelf();
+}
+function drawShelf(){
+  shelf.innerHTML=order.map((r,i)=>`<div role="listitem"><button class="rec" data-i="${i}" aria-label="${r.artist}, ${r.title}, ${r.year}"><span class="box"><span class="face spine" style="background:${r.pal[0]}">${spineHTML(r)}</span><span class="face front">${coverHTML(r)}</span></span></button></div>`).join('');
+  $$('.rec',shelf).forEach(b=>{
+    // only a real mouse move selects, so the shelf shifting under a still cursor doesn't
+    b.addEventListener('mousemove',e=>{if(lastPointer!=='mouse'||(e.clientX===mx&&e.clientY===my))return;mx=e.clientX;my=e.clientY;select(+b.dataset.i)});
+    b.addEventListener('focus',()=>select(+b.dataset.i));
+    b.addEventListener('click',e=>{
+      const i=+b.dataset.i;
+      if(sel!==i){select(i);return}
+      location.hash='r/'+order[i].slug;
+    });
+  });
+  const keep=sel==null?0:Math.min(sel,order.length-1);sel=null;select(keep,true);
+}
+function select(i,quiet){
+  if(sel===i)return;sel=i;
+  $$('.rec',shelf).forEach((b,j)=>b.classList.toggle('on',j===i));
+  const r=order[i];
+  caption.innerHTML=`<b>${r.title}</b><br><span>${r.artist}, ${r.year}</span>`;
+  if(!quiet){const b=$$('.rec',shelf)[i];setTimeout(()=>b.scrollIntoView({block:'nearest',inline:'nearest',behavior:reduce?'auto':'smooth'}),260)}
+}
+addEventListener('pointerdown',e=>lastPointer=e.pointerType,true);
+shelf.addEventListener('keydown',e=>{
+  if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
+  e.preventDefault();const b=$$('.rec',shelf)[Math.max(0,Math.min(order.length-1,sel+(e.key==='ArrowRight'?1:-1)))];b.focus();
+});
+$$('.sort .btn').forEach(b=>b.onclick=()=>sortBy(b.dataset.sort));
+
+// detail
+const detail=$('#detail');let cleanup=null;
+function showDetail(slug){
+  const idx=order.findIndex(r=>r.slug===slug);if(idx<0){location.hash='';return}
+  const r=order[idx],prev=order[(idx-1+order.length)%order.length],next=order[(idx+1)%order.length];
+  detail.innerHTML=`
+  <div>
+    <div class="stage" id="stage">
+      <div class="holder"><div class="sleeve arrive" id="sleeve">
+        <div class="disc" id="disc" aria-hidden="true"><div class="vinyl"><div class="label" style="background:${r.pal[2]};color:${r.pal[1]}"><span>${r.artist}</span></div></div></div>
+        <div class="sf front">${coverHTML(r)}</div>
+        <div class="sf backc" style="background:${r.pal[0]};color:${r.pal[1]}"><div class="back-in"><div><b>${r.title}</b>${r.artist}</div><dl><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}, 33⅓ rpm</dd></dl></div></div>
+        <div class="sf left" style="background:${r.pal[0]}">${spineHTML(r)}</div>
+        <div class="sf topf" style="background:${r.pal[0]}"></div>
+        <div class="sf botf" style="background:${r.pal[0]}"></div>
+      </div></div>
+    </div>
+    <div class="stage-tools">
+      <button class="btn" id="flip">Turn over</button>
+      <button class="btn" id="play" aria-pressed="false">Spin</button>
+    </div>
+  </div>
+  <div class="info">
+    <h2>${r.title}</h2>
+    <p class="by">${r.artist}</p>
+    <dl class="facts">
+      <dt>Released</dt><dd>${r.year}</dd>
+      <dt>Label</dt><dd>${r.label}</dd>
+      <dt>Format</dt><dd>${r.format}</dd>
+      <dt>Added</dt><dd>${fmtDate(r.added)}</dd>
+    </dl>
+    <p class="note">Notes, condition and the tracklist come from the real collection</p>
+    <nav class="pn" aria-label="More records">
+      <a href="#r/${prev.slug}">← ${prev.title}</a>
+      <a href="#r/${next.slug}">${next.title} →</a>
+    </nav>
+  </div>`;
+  const stage=$('#stage'),sleeve=$('#sleeve');
+  let base=22,ry=base,rx=-4,drag=null;
+  const set=()=>sleeve.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+  const settle=()=>{sleeve.classList.add('settle');clearTimeout(settle.t);settle.t=setTimeout(()=>sleeve.classList.remove('settle'),900)};
+  sleeve.addEventListener('animationend',()=>{sleeve.classList.remove('arrive');set()},{once:true});
+  if(reduce){sleeve.classList.remove('arrive');set()}
+  requestAnimationFrame(()=>requestAnimationFrame(()=>sleeve.classList.add('out')));
+  stage.addEventListener('pointerdown',e=>{
+    if(e.target.closest('.disc'))return;
+    drag={x:e.clientX,ry,moved:false};stage.setPointerCapture(e.pointerId);
+    stage.classList.add('dragging');sleeve.classList.add('dragging');
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(drag){ry=drag.ry+(e.clientX-drag.x)*.6;rx=-4;set();return}
+    if(reduce||e.pointerType!=='mouse'||sleeve.classList.contains('arrive'))return;
+    const b=stage.getBoundingClientRect();
+    ry=base+((e.clientX-b.left)/b.width-.5)*16;rx=-4-((e.clientY-b.top)/b.height-.5)*10;set();
+  });
+  const end=()=>{
+    if(!drag)return;drag=null;stage.classList.remove('dragging');sleeve.classList.remove('dragging');
+    base=22+180*Math.round((ry-22)/180);ry=base;rx=-4;settle();set();
+    $('#flip').textContent=Math.round((base-22)/180)%2?'Turn back':'Turn over';
+  };
+  stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
+  stage.addEventListener('mouseleave',()=>{if(!drag&&!sleeve.classList.contains('arrive')){ry=base;rx=-4;settle();set()}});
+  const flip=()=>{base+=180;ry=base;rx=-4;settle();set();$('#flip').textContent=Math.round((base-22)/180)%2?'Turn back':'Turn over'};
+  $('#flip').onclick=flip;
+  const play=()=>{const on=stage.classList.toggle('playing');$('#play').setAttribute('aria-pressed',on);$('#play').textContent=on?'Stop':'Spin'};
+  $('#play').onclick=play;$('#disc').onclick=play;
+  const keys=e=>{
+    if(e.target.closest('input,textarea'))return;
+    if(e.key==='Escape')location.hash='';
+    if(e.key==='ArrowRight')location.hash='r/'+next.slug;
+    if(e.key==='ArrowLeft')location.hash='r/'+prev.slug;
+  };
+  addEventListener('keydown',keys);
+  cleanup=()=>removeEventListener('keydown',keys);
+  sel=null;select(idx,true);
+}
+
+function route(){
+  cleanup&&cleanup();cleanup=null;
+  const m=location.hash.match(/^#r\/(.+)$/);
+  $('#shelfView').hidden=!!m;$('#detailView').hidden=!m;
+  if(m){showDetail(m[1]);scrollTo(0,0);document.title=$('.info h2').textContent+' · Records'}
+  else{document.title='Records';const b=$$('.rec',shelf)[sel];b&&b.scrollIntoView({block:'nearest',inline:'nearest'})}
+}
+addEventListener('hashchange',route);
+
+$('#count').textContent=RECORDS.length;
+$('#theme').onclick=()=>{const d=document.documentElement;d.dataset.theme=d.dataset.theme==='dark'?'light':'dark'};
+sortBy('artist');route();
+</script>
+</body>
+</html>
