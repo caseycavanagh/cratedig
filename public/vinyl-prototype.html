@@ -39,15 +39,16 @@ button{font:inherit;color:inherit}
 /* the crate */
 .crate{position:relative;height:calc(var(--S)*1.95);margin-top:8px;perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% - var(--S)*1.13);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:none}
 .crate.dragging{cursor:grabbing}
-/* hover nudges the front record a little toward the pointer's side */
+/* hover nudges the front cover a few pixels toward the pointer's side (on the cover, so it never disturbs the crate's motion) */
 .crate:not(.pulling):not(.lifted) .rc.cur:hover{--hx:calc(var(--mx,0)*.5%);--hz:calc(var(--mx,0)*.25deg)}
+.rc .fr{translate:var(--hx,0%) 0;rotate:var(--hz,0deg);transition:translate .5s var(--flip),rotate .5s var(--flip)}
 .stack{position:absolute;left:50%;bottom:calc(50% - var(--S)/2);width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt,-16deg))}
-.rc{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;transform-style:preserve-3d;transition:transform .7s var(--flip),opacity .45s;cursor:pointer}
-.crate.lifted .rc:not(.cur){opacity:0;transition:transform .7s var(--flip),opacity .35s}
+.rc{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;transform-style:preserve-3d;transition:opacity .45s;cursor:pointer}
+.crate.lifted .rc:not(.cur){opacity:0;transition:opacity .35s}
+.crate.still .rc,.crate.still.lifted .rc:not(.cur){transition:none} /* cycling in the open view: the hidden crate changes without fading */
 .crate.lifted .floor{opacity:0}
 .floor{transition:opacity .4s}
 .rc.held{visibility:hidden}
-.crate.still .rc,.crate.still.lifted .rc:not(.cur){transition:none}
 .rc.gone{visibility:hidden}
 /* a flipped record sits in the shadow of the one it fell onto, darkest where they touch */
 .rc.fell .bk::after{background:linear-gradient(0deg,#00000070,#0000 22%),linear-gradient(180deg,#0000 70%,#0000002a),var(--shade,transparent)}
@@ -110,10 +111,7 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .lift.ghost{position:absolute;inset:0;pointer-events:none}
 .lift.moving{transition:transform .9s var(--flip)}
 .lift.back{transition:transform .55s cubic-bezier(.4,0,.2,1)}
-.sleeve{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .25s ease-out}
-.sleeve.settle{transition:transform .9s var(--flip)}
-.sleeve.back{transition:transform .55s cubic-bezier(.4,0,.2,1)}
-.sleeve.dragging{transition:none}
+.sleeve{position:relative;width:100%;height:100%;transform-style:preserve-3d}
 .sleeve{--T:max(3px,calc(var(--O)*.007));--W:var(--O)}
 .sleeve .face{border-radius:1px}
 /* one shadow behind each side, each seen only from its own side, so it turns with the sleeve and never shows in front */
@@ -134,7 +132,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 /* the details start tucked under the record and slide out to the right */
 .o-info{position:relative;z-index:1;flex:none;width:min(340px,30vw);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
-.open.in.swapping .o-info{opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
+.open.in.swapping .o-info{opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .1s}
 @media(max-width:860px){
   .o-grid{flex-direction:column;gap:32px}
   .o-info{width:var(--O);transform:translateY(-50%) scale(.96)}
@@ -152,7 +150,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
   :root{--R:min(78vw,50vh);--R:min(78vw,50svh)}
   .o-info h2{font-size:26px}
 }
-@media(prefers-reduced-motion:reduce){.peek,.open.in .peek.on,.open.in .peek.on:hover,.rc,.face::after,.sleeve,.sleeve.settle,.sleeve.back,.lift.moving,.lift.back,.o-info,.open.in .o-info{transition:none}}
+@media(prefers-reduced-motion:reduce){.peek,.open.in .peek.on,.open.in .peek.on:hover,.rc,.rc .fr,.lift.moving,.lift.back,.o-info,.open.in .o-info{transition:none}}
 /* loading: a quiet count, then the whole crate rises in at once */
 .loading{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;font:400 13px/1 var(--mono);color:var(--m);transition:opacity .3s;pointer-events:none}
 .loading .bar{width:120px;height:1px;background:var(--line);overflow:hidden}
@@ -161,19 +159,12 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .crate{opacity:0;transform:translateY(24px)}
 .ready .crate{opacity:1;transform:none;transition:opacity .5s .15s,transform 1s var(--flip) .15s}
 @media(prefers-reduced-motion:reduce){.ready .crate{transition:opacity .3s}}
-/* the name hangs on the wall behind the crate; the back records cover its feet */
-.page{position:relative}
-.wall{position:absolute;left:0;right:0;bottom:calc(50% + var(--S)*.53);z-index:0;margin:0;text-align:center;font:500 calc(var(--S)*.19)/1 'Instrument Sans',sans-serif;letter-spacing:-.035em;color:var(--fg);pointer-events:none;
-  opacity:0;transform:translateY(12px)}
-.ready .wall{opacity:1;transform:none;transition:opacity .5s .35s,transform 1s var(--flip)}
-.page .crate{z-index:1}
-.ready .page:has(.crate.lifted) .wall{opacity:0;transition:opacity .12s} /* gone while a record is out */
 </style>
 </head>
 <body>
 <div class="loading" id="loading" aria-live="polite"><span>Gathering records…</span><span class="bar"><i id="loadBar"></i></span><span id="loadN"></span></div>
 <main class="page">
-  <h1 class="wall">Casey’s crate</h1>
+  <h1 class="sr">Records</h1>
   <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record.">
     <div class="floor"></div>
     <div class="stack" id="stack"></div>
@@ -248,24 +239,43 @@ function build(){
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
 // a hair of disorder, the same every visit: each record sits slightly off true
 const jit=r=>{let h=0;for(const c of r.slug)h=(h*31+c.charCodeAt(0))|0;const f=k=>((Math.sin(h*(k+1)*12.9898)*43758.5453)%1+1)%1-.5;return{x:f(0)*1.6,z:f(1)*1.4,a:f(2)*1.6}};
+// One spring drives the crate: pos chases aim, so a flip can be interrupted, retargeted or dragged without restarting
+let pos=0,vel=0,aim=0,raf=0;
+const K=220,C=27;
+// where a record sits at a (fractional) distance d behind the front one
+function seat(d){
+  if(d>=1)return{z:-BEHIND-(d-1)*GAP,a:10+Math.min(d,6)*.5,m:1};
+  if(d>=0)return{z:-BEHIND*d,a:10+.5*d,m:.5+.5*d};
+  if(d>-1){const t=-d;return{z:AHEAD*t,a:10-70*t,m:.5+.5*t}} // falling forward
+  const k=-d-1;return{z:AHEAD+k*FGAP,a:-(60+Math.min(k,8)*1.2),m:1}; // flipped records pile up, fanned a little, leaning far enough to show only their backs
+}
+function render(){
+  $$('.rc',stack).forEach((n,j)=>{
+    if(n.classList.contains('gone'))return;
+    const p=seat(j-pos),q=jit(order[j]);
+    n.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg)`;
+  });
+}
+function tick(t){
+  const dt=tick.t?Math.min(.032,(t-tick.t)/1000):1/60;tick.t=t;
+  vel+=(-K*(pos-aim)-C*vel)*dt;pos+=vel*dt;
+  if(Math.abs(pos-aim)<.0005&&Math.abs(vel)<.005){pos=aim;vel=0;render();raf=0;tick.t=0;return}
+  render();raf=requestAnimationFrame(tick);
+}
+function kick(){if(reduce){pos=aim;vel=0;render();return}if(!raf){tick.t=0;raf=requestAnimationFrame(tick)}}
+// shading and classes follow the whole-number position, and snap (animating them repaints every cover)
 function place(){
   $$('.rc',stack).forEach((n,j)=>{
-    const d=j-cur;let z,a,shade;
-    // flipped records pile up leaning forward on each other: tight at the bottom, fanned a little at the top, the front ones darker
-    if(d<0){const k=-d-1;z=AHEAD+k*FGAP;a=-(54+Math.min(k,8)*1.3);shade=`rgb(0 0 0/${Math.min(.04*k,.25)})`}
-    else if(d===0){z=0;a=10;shade='#0000'}
-    else{z=-BEHIND-(d-1)*GAP;a=10+Math.min(d,6)*.5;shade=`rgb(0 0 0/${Math.min(.06*d,.4)})`}
-    const q=jit(order[j]),m=d===0?.5:d<0?2:1;
-    n.style.transform=`translateX(${(q.x*m).toFixed(2)}%) translateZ(${z}px) translateY(var(--up,0%)) rotateX(${(a+q.a*m).toFixed(2)}deg) translateX(var(--hx,0%)) rotateZ(calc(${(q.z*m).toFixed(2)}deg + var(--hz,0deg)))`;
-    n.style.zIndex=d<0?100+d:50-d;
-    n.style.setProperty('--shade',shade);
+    const d=j-cur;
+    n.style.setProperty('--shade',d<0?`rgb(0 0 0/${Math.min(.04*(-d-1),.25)})`:d===0?'#0000':`rgb(0 0 0/${Math.min(.06*d,.4)})`);
     n.classList.toggle('cur',d===0);n.classList.toggle('fell',d<0);
     n.classList.toggle('gone',d<-9||d>14);
   });
 }
 function go(i,now){
   i=Math.max(0,Math.min(order.length-1,i));
-  if(i===cur&&!now)return;cur=i;place();
+  if(now){cur=i;aim=pos=i;vel=0;place();render()}
+  else{aim=i;kick();if(i===cur)return;cur=i;place()}
   if(open.hidden)history.replaceState(null,'','#'+order[cur].slug);
   const r=order[cur];
   $('#pos').textContent=`${r.title}, ${r.artist}, ${r.year}. ${cur+1} of ${order.length}`;
@@ -277,12 +287,22 @@ const REST=-3,TILT=-1;
 const open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage'),lift=$('#lift');
 let base=REST,ry=base,rx=TILT,sdrag=null,busy=false,timers=[];
 const later=(f,ms)=>timers.push(setTimeout(f,ms));
-const setS=()=>sleeve.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
-const settle=()=>{sleeve.classList.add('settle');clearTimeout(settle.t);settle.t=setTimeout(()=>sleeve.classList.remove('settle'),900)};
-const turn=()=>{base+=180;ry=base;rx=TILT;settle();setS()};
+// the sleeve turns on a spring too: ry/rx say where it's headed, sv where it is now
+const sv={ry:REST,rx:TILT,vy:0,vx:0},SK=190,SC=24;let sraf=0;
+const paintS=()=>sleeve.style.transform=`rotateX(${sv.rx.toFixed(2)}deg) rotateY(${sv.ry.toFixed(2)}deg)`;
+const snapS=(y,x)=>{sv.ry=y;sv.rx=x;sv.vy=sv.vx=0;paintS()};
+function stick(t){
+  if(sdrag){sraf=0;return}
+  const dt=stick.t?Math.min(.032,(t-stick.t)/1000):1/60;stick.t=t;
+  sv.vy+=(-SK*(sv.ry-ry)-SC*sv.vy)*dt;sv.ry+=sv.vy*dt;sv.vx+=(-SK*(sv.rx-rx)-SC*sv.vx)*dt;sv.rx+=sv.vx*dt;
+  if(Math.abs(sv.ry-ry)<.02&&Math.abs(sv.vy)<.05&&Math.abs(sv.rx-rx)<.02&&Math.abs(sv.vx)<.05){snapS(ry,rx);sraf=0;stick.t=0;return}
+  paintS();sraf=requestAnimationFrame(stick);
+}
+const setS=()=>{if(reduce){snapS(ry,rx);return}if(!sraf){stick.t=0;sraf=requestAnimationFrame(stick)}};
+const turn=()=>{base+=180;ry=base;rx=TILT;setS()};
 // where the front record sits in the crate, as a transform of the lifted sleeve
-function fromCrate(){
-  const src=$('.rc.cur .fr',stack)?.getBoundingClientRect();if(!src)return'';
+function fromCrate(rect){
+  const src=rect||$('.rc.cur .fr',stack)?.getBoundingClientRect();if(!src)return'';
   const t=stage.getBoundingClientRect();
   const dx=src.left+src.width/2-(t.left+t.width/2),dy=src.top+src.height/2-(t.top+t.height/2);
   return `translate(${dx}px,${dy}px) scale(${src.width/t.width})`;
@@ -290,16 +310,19 @@ function fromCrate(){
 const prevP=$('#prevP'),nextP=$('#nextP');
 function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';if(r)b.title=`${r.title}, ${r.artist}`}
 prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
-function fill(r){
+function fill(r,noInfo){
   sleeve.innerHTML=`<div class="sh"></div><div class="sh b"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
   peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);
-  $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
-      <dl class="facts"><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}</dd><dt>Added</dt><dd>${fmtDate(r.added)}</dd></dl>
-    ${r.spotify?`<a class="btn spotify" href="https://open.spotify.com/album/${r.spotify}" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21Zm4.8 15.15a.66.66 0 0 1-.9.22c-2.48-1.5-5.6-1.85-9.27-1.01a.66.66 0 1 1-.3-1.28c4.02-.92 7.47-.52 10.25 1.17.31.19.41.6.22.9Zm1.28-2.85a.82.82 0 0 1-1.13.27c-2.84-1.75-7.17-2.25-10.53-1.23a.82.82 0 1 1-.48-1.57c3.84-1.16 8.6-.6 11.87 1.4.39.24.51.75.27 1.13Zm.11-2.97C14.78 8.8 9.15 8.6 5.9 9.6a.98.98 0 1 1-.57-1.88c3.74-1.13 9.96-.91 13.88 1.41a.98.98 0 0 1-1 1.7Z"/></svg>Play on Spotify<span class="sr"> (opens in a new tab)</span></a>`:''}`;
+  if(!noInfo)info(r);
   base=REST;ry=base;rx=TILT;
   document.title=`${r.title} · Records`;
 }
-function openRecord(deep){
+function info(r){
+  $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
+      <dl class="facts"><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}</dd></dl>
+    ${r.spotify?`<a class="btn spotify" href="https://open.spotify.com/album/${r.spotify}" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21Zm4.8 15.15a.66.66 0 0 1-.9.22c-2.48-1.5-5.6-1.85-9.27-1.01a.66.66 0 1 1-.3-1.28c4.02-.92 7.47-.52 10.25 1.17.31.19.41.6.22.9Zm1.28-2.85a.82.82 0 0 1-1.13.27c-2.84-1.75-7.17-2.25-10.53-1.23a.82.82 0 1 1-.48-1.57c3.84-1.16 8.6-.6 11.87 1.4.39.24.51.75.27 1.13Zm.11-2.97C14.78 8.8 9.15 8.6 5.9 9.6a.98.98 0 1 1-.57-1.88c3.74-1.13 9.96-.91 13.88 1.41a.98.98 0 0 1-1 1.7Z"/></svg>Play on Spotify<span class="sr"> (opens in a new tab)</span></a>`:''}`;
+}
+function openRecord(deep,from){
   const r=order[cur];fill(r);
   timers.forEach(clearTimeout);timers=[];
   open.hidden=false;open.scrollTop=0;
@@ -309,12 +332,12 @@ function openRecord(deep){
   crate.classList.add('lifted');
   if(reduce){held.classList.add('held');lift.style.transform='';setS();open.classList.add('in')}
   else{
-    busy=true;lift.className='lift';sleeve.className='sleeve';
-    lift.style.transform=fromCrate();sleeve.style.transform='rotateX(10deg) rotateY(0deg)';
+    busy=true;lift.className='lift';
+    lift.style.transform=fromCrate(from?.rect);from?.flipped?snapS(180,-20):snapS(0,10);
     held.classList.add('held');void lift.offsetWidth;
-    later(()=>{lift.classList.add('moving');lift.style.transform='';sleeve.classList.add('settle');setS()},120);
+    later(()=>{lift.classList.add('moving');lift.style.transform='';setS()},120);
     later(()=>open.classList.add('in'),380);
-    later(()=>{busy=false;lift.classList.remove('moving');sleeve.classList.remove('settle')},1100);
+    later(()=>{busy=false;lift.classList.remove('moving')},1100);
   }
   // each record gets its own address: #record/<slug>
   if(deep)history.replaceState(null,'','#record/'+r.slug);else if(!history.state?.open)history.pushState({open:1},'','#record/'+r.slug);
@@ -338,14 +361,14 @@ function swap(dir){
   const ghost=lift.cloneNode(true);ghost.removeAttribute('id');const gs=ghost.querySelector('.sleeve');gs.removeAttribute('id');
   ghost.className='lift ghost';ghost.style.transform='';stage.append(ghost);
   open.classList.add('swapping');
-  fill(r);lift.className='lift';lift.style.transition='none';lift.style.transform=edge(dir);lift.style.opacity='.45';
-  sleeve.className='sleeve';sleeve.style.transform='rotateX(0deg) rotateY(0deg)';
+  fill(r,true);later(()=>info(r),200);lift.className='lift';lift.style.transition='none';lift.style.transform=edge(dir);lift.style.opacity='.45';
+  snapS(0,0);
   void lift.offsetWidth;
   const ease='cubic-bezier(.3,.75,.2,1)',flat=360*Math.round(ry/360);
   ghost.style.transition=`transform .7s ${ease},opacity .7s`;ghost.style.transform=edge(-dir);ghost.style.opacity='.45';
   gs.className='sleeve';gs.style.transition=`transform .7s ${ease}`;gs.style.transform=`rotateX(0deg) rotateY(${flat}deg)`;
   lift.style.transition=`transform .7s ${ease},opacity .5s`;lift.style.transform='';lift.style.opacity='';
-  base=REST;ry=base;rx=TILT;settle();setS();
+  base=REST;ry=base;rx=TILT;setS();
   later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},700);
   later(()=>{lift.style.transition='';busy=false},760);
 }
@@ -354,27 +377,31 @@ function closeRecord(fromPop){
   if(!fromPop&&history.state?.open){history.back();return}
   if(!fromPop)history.replaceState(null,'','#'+order[cur].slug);
   timers.forEach(clearTimeout);timers=[];
-  const done=()=>{open.hidden=true;lift.className='lift';sleeve.className='sleeve';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
+  const done=()=>{open.hidden=true;lift.className='lift';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
     $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');busy=false;document.activeElement?.blur()};
   open.classList.remove('in');crate.classList.remove('still');
   if(reduce){done();return}
   // reverse: details tuck back under, the record drops back into the crate, the rest fades back in
   busy=true;
-  later(()=>{lift.className='lift back';sleeve.className='sleeve back';lift.style.transform=fromCrate();ry=360*Math.round(ry/360);sleeve.style.transform=`rotateX(10deg) rotateY(${ry}deg)`},140);
+  later(()=>{lift.className='lift back';lift.style.transform=fromCrate();ry=360*Math.round(sv.ry/360);rx=10;setS()},140);
   later(done,700);
   document.title='Records';
 }
 addEventListener('popstate',()=>{const m=location.hash.match(/^#record\/(.+)$/),j=m?order.findIndex(r=>r.slug===m[1]):-1;if(j>=0){go(j,true);openRecord(true)}else closeRecord(true)});
 $('#close').onclick=()=>closeRecord();
-stage.addEventListener('pointerdown',e=>{if(busy)return;sdrag={x:e.clientX,y:e.clientY,t:performance.now(),far:false,ry};stage.setPointerCapture(e.pointerId);stage.classList.add('dragging');sleeve.classList.add('dragging')});
+stage.addEventListener('pointerdown',e=>{if(busy)return;sdrag={x:e.clientX,y:e.clientY,t:performance.now(),lt:performance.now(),far:false,ry:sv.ry};stage.setPointerCapture(e.pointerId);stage.classList.add('dragging')});
 stage.addEventListener('pointermove',e=>{
-  if(sdrag){if(Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>5)sdrag.far=true;ry=sdrag.ry+(e.clientX-sdrag.x)*.6;rx=TILT;setS();return}
+  if(sdrag){if(Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>5)sdrag.far=true;
+    const now=performance.now(),y=sdrag.ry+(e.clientX-sdrag.x)*.6;sv.vy=.6*sv.vy+.4*(y-sv.ry)/Math.max(.008,(now-sdrag.lt)/1000);sdrag.lt=now;
+    ry=sv.ry=y;rx=sv.rx=TILT;paintS();return} // the sleeve follows your hand exactly
   if(reduce||busy||e.pointerType!=='mouse')return;
   const b=stage.getBoundingClientRect();ry=base+((e.clientX-b.left)/b.width-.5)*5;rx=TILT-((e.clientY-b.top)/b.height-.5)*3;setS();
 });
-const sEnd=()=>{if(!sdrag)return;const tap=!sdrag.far&&performance.now()-sdrag.t<400;sdrag=null;stage.classList.remove('dragging');sleeve.classList.remove('dragging');base=tap?base+180:REST+180*Math.round((ry-REST)/180);ry=base;rx=TILT;settle();setS()};
+// a tap turns it over; a drag lands on whichever side it's heading for, carrying its speed
+const sEnd=()=>{if(!sdrag)return;const tap=!sdrag.far&&performance.now()-sdrag.t<400;sdrag=null;stage.classList.remove('dragging');
+  if(tap)sv.vy=0;base=tap?base+180:REST+180*Math.round((sv.ry+sv.vy*.12-REST)/180);ry=base;rx=TILT;setS()};
 stage.addEventListener('pointerup',sEnd);stage.addEventListener('pointercancel',sEnd);
-stage.addEventListener('mouseleave',()=>{if(!sdrag&&!busy){ry=base;rx=TILT;settle();setS()}});
+stage.addEventListener('mouseleave',()=>{if(!sdrag&&!busy){ry=base;rx=TILT;setS()}});
 stage.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();turn()}});
 
 // scroll, drag, keys
@@ -392,10 +419,12 @@ crate.addEventListener('pointerdown',e=>{drag={y:e.clientY,x:e.clientX,i:cur,rc:
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
   const dy=e.clientY-drag.y;if(Math.abs(dy)>6&&!moved){moved=true;crate.classList.add('pulling')}
-  go(drag.i+Math.trunc(dy/48)); // pull toward you to flip forward
+  if(!moved)return;
+  aim=Math.max(0,Math.min(order.length-1,drag.i+dy/48));kick(); // pull toward you to flip forward
+  const j=Math.round(aim);if(j!==cur){cur=j;place();history.replaceState(null,'','#'+order[cur].slug)}
 });
 // a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
-const end=()=>{if(drag&&!moved&&drag.rc)openRecord();drag=null;moved=false;crate.classList.remove('dragging','pulling')};
+const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j,from={rect:drag.rc.querySelector('.fr').getBoundingClientRect(),flipped:j<cur};if(j!==cur)go(j);openRecord(false,from)}if(drag&&moved)go(cur,false);drag=null;moved=false;crate.classList.remove('dragging','pulling')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,iframe')||e.metaKey||e.ctrlKey)return;
@@ -407,13 +436,6 @@ addEventListener('keydown',e=>{
   if(e.key==='End'){e.preventDefault();go(order.length-1)}
 });
 
-// hang the name just above the tallest record behind the front one, so the crate covers only its feet
-function hang(){
-  const w=$('.wall'),page=$('.page'),lift=new DOMMatrix(getComputedStyle(crate).transform).m42;
-  const tops=$$('.rc',stack).filter((n,j)=>j>=cur&&!n.classList.contains('gone')).map(n=>n.getBoundingClientRect().top-lift);
-  if(!tops.length)return;
-  w.style.bottom=`${page.getBoundingClientRect().bottom-Math.min(...tops)-parseFloat(getComputedStyle(w).fontSize)*.08}px`;
-}
 function start(){
   const m=location.hash.match(/^#(record\/)?(.+)$/); // read the address before sorting rewrites it
   sortBy(sortKey);
@@ -434,7 +456,7 @@ fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(async 
   const tick=()=>{n++;$('#loadN').textContent=`${n} of ${srcs.length}`;$('#loadBar').style.transform=`scaleX(${n/srcs.length})`};
   const load=src=>{const i=new Image();i.src=src;return i.decode().catch(()=>{}).then(tick)};
   await Promise.race([Promise.all([...srcs.map(load),...RECORDS.filter(r=>r.front).map(async r=>r.spine=await edgeColor('vinyl/'+r.front))]),new Promise(r=>setTimeout(r,12000))]);
-  start();hang();addEventListener('resize',hang);
+  start();
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
 });
 </script>
