@@ -9,7 +9,7 @@
 <style>
 @font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
 @font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
-:root{--bg:#fcfcfc;--fg:#1a1a1a;--m:#6e6e6e;--line:#d0d0d0;--cb:#e6e6e6;--soft:#f2f2f0;--accent:#661864;--floor:#0000000f;--mono:'Paper Mono',ui-monospace,monospace;--spring:cubic-bezier(.2,1.4,.4,1);--s:260px;--d:34px}
+:root{--bg:#fcfcfc;--fg:#1a1a1a;--m:#6e6e6e;--line:#d0d0d0;--cb:#e6e6e6;--soft:#f2f2f0;--accent:#661864;--floor:#0000000f;--mono:'Paper Mono',ui-monospace,monospace;--spring:cubic-bezier(.2,1.4,.4,1);--s:320px;--d:10px}
 html[data-theme=dark]{--bg:#0f0f10;--fg:#e8e8e8;--m:#8a8a8f;--line:#3e3e43;--cb:#2a2a2e;--soft:#1b1b1d;--accent:#ca72c7;--floor:#ffffff10}
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
 *{font-variant-numeric:tabular-nums}
@@ -58,29 +58,34 @@ button{font:inherit;color:inherit}
 
 /* cover art */
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
+img.art{object-fit:cover}
 .cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
 .cover-type b{display:block;font:500 6cqw 'Instrument Sans',sans-serif}
 .cover-type i{display:block;font:400 4.4cqw var(--mono);font-style:normal;opacity:.85;margin-top:1.2cqw}
 .spine-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 0 10px;writing-mode:vertical-rl;font:400 11px/1 var(--mono);white-space:nowrap;overflow:hidden}
 .spine-in b{font-weight:500}
 .spine-in em{font-style:normal;opacity:.75}
+.rec .spine-in,.sf.left .spine-in{display:none}
 .spine::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0000002e,#0000 30%,#ffffff14 55%,#00000024)}
 .edge{background:linear-gradient(#0000,#0000)}
 
 /* detail */
-.detail{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:center;margin-top:40px}
+.detail{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:start;margin-top:40px}
+.detail>div:first-child{position:sticky;top:24px}
+@media(max-width:900px){.detail>div:first-child{position:static}}
 @media(max-width:900px){.detail{grid-template-columns:1fr;gap:8px}}
 .back{display:inline-block;margin-top:44px;font-size:15px}
-.stage{--S:min(380px,58vw);--D:14px;position:relative;height:calc(var(--S) + 120px);display:grid;place-items:center;perspective:1500px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.stage{--S:min(420px,72vw);--D:5px;position:relative;height:calc(var(--S) + 120px);display:grid;place-items:center;perspective:1500px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .stage.dragging{cursor:grabbing}
-.holder{position:relative;width:var(--S);height:var(--S);transform:translateX(calc(var(--S)*-.2));transform-style:preserve-3d}
+.holder{position:relative;width:var(--S);height:var(--S);transform-style:preserve-3d}
 .sleeve{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .25s ease-out}
 .sleeve.settle{transition:transform .9s var(--spring)}
 .sleeve.dragging{transition:none}
 .sleeve.arrive{animation:arrive 1s var(--spring)}
 @keyframes arrive{from{transform:translateY(28px) rotateY(-70deg) rotateX(6deg)}}
 .sf{position:absolute;backface-visibility:hidden;overflow:hidden}
-.sf.front{inset:0;width:auto;container-type:inline-size;transform:translateZ(calc(var(--D)/2));box-shadow:inset 0 0 0 1px #0000000d}
+.sf.front{inset:0;width:auto;container-type:inline-size;transform:translateZ(calc(var(--D)/2))}
+.sleeve-shadow{position:absolute;inset:3% 3% 0;box-shadow:0 30px 60px -20px #0007;transform:translateZ(-2px)}
 .sf.backc{inset:0;transform:rotateY(180deg) translateZ(calc(var(--D)/2));container-type:inline-size}
 .sf.left{top:0;height:100%;width:var(--D);left:calc(50% - var(--D)/2);transform:rotateY(-90deg) translateZ(calc(var(--S)/2))}
 .sf.topf,.sf.botf{left:0;width:100%;height:var(--D);top:calc(50% - var(--D)/2);filter:brightness(.82)}
@@ -93,25 +98,13 @@ button{font:inherit;color:inherit}
 .back-in dl{display:grid;grid-template-columns:auto 1fr;gap:.6cqw 4cqw}
 .back-in dt{opacity:.7}
 .back-in dd{margin:0}
-.disc{position:absolute;left:2%;top:2%;width:96%;height:96%;transform:translateX(0);transition:transform 1.3s var(--spring) .15s;cursor:pointer}
-.sleeve.out .disc{transform:translateX(44%)}
-.vinyl{position:absolute;inset:0;border-radius:50%;background:
-  radial-gradient(circle,#0000 0 31%,#0000 31%),
-  repeating-radial-gradient(circle,#161616 0 1.2px,#1d1d1d 1.6px 2.6px),
-  #141414;box-shadow:0 0 0 1px #0006 inset,0 18px 40px -16px #0009;animation:spin 1.8s linear infinite;animation-play-state:paused}
-.vinyl::before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,#fff0 0deg,#ffffff1c 30deg,#fff0 70deg,#fff0 180deg,#ffffff14 210deg,#fff0 250deg)}
-.vinyl::after{content:'';position:absolute;left:50%;top:50%;width:1.6%;height:1.6%;margin:-.8% 0 0 -.8%;border-radius:50%;background:var(--bg);z-index:2}
-.label{position:absolute;left:33%;top:33%;width:34%;height:34%;border-radius:50%;overflow:hidden;container-type:inline-size;display:grid;place-items:center;text-align:center}
-.label span{font:500 7.5cqw/1.2 var(--mono);padding:0 14%;transform:translateY(-26%)}
-html[data-theme=dark] .vinyl{box-shadow:0 0 0 1px #ffffff1f,0 18px 40px -16px #000}
-.stage.playing .vinyl{animation-play-state:running}
-@keyframes spin{to{transform:rotate(360deg)}}
 .stage-tools{display:flex;gap:8px;justify-content:center;margin-top:-28px;position:relative}
 .info h2{font-size:34px;line-height:1.15;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
 .info .by{font-size:20px;color:var(--m);margin-top:6px}
 .facts{display:grid;grid-template-columns:110px 1fr;gap:8px 16px;margin-top:28px;padding-top:20px;border-top:1px solid var(--cb);font-size:15px}
 .facts dt{color:var(--m)}
 .facts dd{margin:0}
+.player{display:block;width:100%;border:0;border-radius:12px;margin-top:28px;background:var(--soft)}
 .note{margin-top:24px;font-size:15px;color:var(--m);max-width:44ch}
 .pn{display:flex;justify-content:space-between;gap:16px;margin-top:36px;font-size:15px}
 .pn a{max-width:48%}
@@ -119,7 +112,7 @@ html[data-theme=dark] .vinyl{box-shadow:0 0 0 1px #ffffff1f,0 18px 40px -16px #0
 .view[hidden]{display:none}
 
 @media(max-width:600px){
-  :root{--s:200px;--d:30px}
+  :root{--s:240px;--d:8px}
   .page{padding:28px 16px 80px}
   .shelf{margin:32px -16px 0;padding:20px 16px 0;scroll-padding:0 16px}
   .shelf::after{width:16px}
@@ -130,9 +123,8 @@ html[data-theme=dark] .vinyl{box-shadow:0 0 0 1px #ffffff1f,0 18px 40px -16px #0
   .facts{grid-template-columns:96px 1fr}
 }
 @media(prefers-reduced-motion:reduce){
-  .rec,.rec .box,.sleeve,.sleeve.settle,.disc{transition:none}
+  .rec,.rec .box,.sleeve,.sleeve.settle{transition:none}
   .sleeve.arrive{animation:none}
-  .vinyl{animation:none}
 }
 </style>
 </head>
@@ -146,7 +138,7 @@ html[data-theme=dark] .vinyl{box-shadow:0 0 0 1px #ffffff1f,0 18px 40px -16px #0
   <main id="shelfView" class="view">
     <div class="intro">
       <p>What’s on the shelf at home</p>
-      <p>Stand-in records and made-up cover art until the real collection comes in</p>
+      <p>Stand-in records until the real collection comes in</p>
     </div>
     <div class="sort" role="group" aria-label="Sort by">
       <button class="btn" data-sort="artist">Artist</button>
@@ -196,7 +188,8 @@ function art(r){
   if(r.art==='stripes'){for(let i=-10;i<12;i++)g+=`<path d="M${i*10} 100L${i*10+60} 40" stroke="${i%3?fg:ac}" stroke-width="2.6"/>`;g+=`<rect width="100" height="40" fill="${bg}"/>`}
   return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${g}</svg>`;
 }
-const coverHTML=r=>`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
+const coverHTML=r=>r.front?`<img class="art" src="vinyl/${r.front}" alt="" decoding="async">`:`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
+const spineBg=r=>r.spine||r.pal[0];
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
 const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 
@@ -211,7 +204,7 @@ function sortBy(k){
   drawShelf();
 }
 function drawShelf(){
-  shelf.innerHTML=order.map((r,i)=>`<div role="listitem"><button class="rec" data-i="${i}" aria-label="${r.artist}, ${r.title}, ${r.year}"><span class="box"><span class="face spine" style="background:${r.pal[0]}">${spineHTML(r)}</span><span class="face front">${coverHTML(r)}</span></span></button></div>`).join('');
+  shelf.innerHTML=order.map((r,i)=>`<div role="listitem"><button class="rec" data-i="${i}" aria-label="${r.artist}, ${r.title}, ${r.year}"><span class="box"><span class="face spine" style="background:${spineBg(r)}">${spineHTML(r)}</span><span class="face front">${coverHTML(r)}</span></span></button></div>`).join('');
   $$('.rec',shelf).forEach(b=>{
     // only a real mouse move selects, so the shelf shifting under a still cursor doesn't
     b.addEventListener('mousemove',e=>{if(lastPointer!=='mouse'||(e.clientX===mx&&e.clientY===my))return;mx=e.clientX;my=e.clientY;select(+b.dataset.i)});
@@ -247,17 +240,16 @@ function showDetail(slug){
   <div>
     <div class="stage" id="stage">
       <div class="holder"><div class="sleeve arrive" id="sleeve">
-        <div class="disc" id="disc" aria-hidden="true"><div class="vinyl"><div class="label" style="background:${r.pal[2]};color:${r.pal[1]}"><span>${r.artist}</span></div></div></div>
+        <div class="sleeve-shadow"></div>
         <div class="sf front">${coverHTML(r)}</div>
-        <div class="sf backc" style="background:${r.pal[0]};color:${r.pal[1]}"><div class="back-in"><div><b>${r.title}</b>${r.artist}</div><dl><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}, 33⅓ rpm</dd></dl></div></div>
-        <div class="sf left" style="background:${r.pal[0]}">${spineHTML(r)}</div>
-        <div class="sf topf" style="background:${r.pal[0]}"></div>
-        <div class="sf botf" style="background:${r.pal[0]}"></div>
+        <div class="sf backc" style="background:${spineBg(r)};color:${r.pal[1]}">${r.back?`<img class="art" src="vinyl/${r.back}" alt="">`:`<div class="back-in"><div><b>${r.title}</b>${r.artist}</div><dl><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}, 33⅓ rpm</dd></dl></div>`}</div>
+        <div class="sf left" style="background:${spineBg(r)}">${spineHTML(r)}</div>
+        <div class="sf topf" style="background:${spineBg(r)}"></div>
+        <div class="sf botf" style="background:${spineBg(r)}"></div>
       </div></div>
     </div>
     <div class="stage-tools">
       <button class="btn" id="flip">Turn over</button>
-      <button class="btn" id="play" aria-pressed="false">Spin</button>
     </div>
   </div>
   <div class="info">
@@ -269,7 +261,8 @@ function showDetail(slug){
       <dt>Format</dt><dd>${r.format}</dd>
       <dt>Added</dt><dd>${fmtDate(r.added)}</dd>
     </dl>
-    <p class="note">Notes, condition and the tracklist come from the real collection</p>
+    ${r.spotify?`<iframe class="player" src="https://open.spotify.com/embed/album/${r.spotify}" height="352" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Play ${r.title} on Spotify"></iframe>`:''}
+    <p class="note">${r.front?'Covers from the Cover Art Archive. ':''}Notes and condition come from the real collection</p>
     <nav class="pn" aria-label="More records">
       <a href="#r/${prev.slug}">← ${prev.title}</a>
       <a href="#r/${next.slug}">${next.title} →</a>
@@ -281,9 +274,7 @@ function showDetail(slug){
   const settle=()=>{sleeve.classList.add('settle');clearTimeout(settle.t);settle.t=setTimeout(()=>sleeve.classList.remove('settle'),900)};
   sleeve.addEventListener('animationend',()=>{sleeve.classList.remove('arrive');set()},{once:true});
   if(reduce){sleeve.classList.remove('arrive');set()}
-  requestAnimationFrame(()=>requestAnimationFrame(()=>sleeve.classList.add('out')));
   stage.addEventListener('pointerdown',e=>{
-    if(e.target.closest('.disc'))return;
     drag={x:e.clientX,ry,moved:false};stage.setPointerCapture(e.pointerId);
     stage.classList.add('dragging');sleeve.classList.add('dragging');
   });
@@ -302,8 +293,6 @@ function showDetail(slug){
   stage.addEventListener('mouseleave',()=>{if(!drag&&!sleeve.classList.contains('arrive')){ry=base;rx=-4;settle();set()}});
   const flip=()=>{base+=180;ry=base;rx=-4;settle();set();$('#flip').textContent=Math.round((base-22)/180)%2?'Turn back':'Turn over'};
   $('#flip').onclick=flip;
-  const play=()=>{const on=stage.classList.toggle('playing');$('#play').setAttribute('aria-pressed',on);$('#play').textContent=on?'Stop':'Spin'};
-  $('#play').onclick=play;$('#disc').onclick=play;
   const keys=e=>{
     if(e.target.closest('input,textarea'))return;
     if(e.key==='Escape')location.hash='';
@@ -326,6 +315,13 @@ addEventListener('hashchange',route);
 
 $('#count').textContent=RECORDS.length;
 $('#theme').onclick=()=>{const d=document.documentElement;d.dataset.theme=d.dataset.theme==='dark'?'light':'dark'};
+// Real covers, fetched by scripts/vinyl-covers.mjs; the spine takes its color from the cover's left edge
+function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d');x.drawImage(i,0,0,i.naturalWidth*.03,i.naturalHeight,0,0,4,64);const d=x.getImageData(0,0,4,64).data;let r=0,g=0,b=0;for(let k=0;k<d.length;k+=4){r+=d[k];g+=d[k+1];b+=d[k+2]}const n=d.length/4;res(`rgb(${r/n|0},${g/n|0},${b/n|0})`)}catch{res(null)}};i.onerror=()=>res(null);i.src=src})}
+fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(async m=>{
+  RECORDS.forEach(r=>Object.assign(r,m[r.slug]||{}));
+  await Promise.all(RECORDS.filter(r=>r.front).map(async r=>r.spine=await edgeColor('vinyl/'+r.front)));
+  sortBy(sortKey);route();
+});
 sortBy('artist');route();
 </script>
 </body>
