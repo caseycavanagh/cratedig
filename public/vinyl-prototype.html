@@ -332,20 +332,76 @@ html.phone .play-m a:active{background:var(--soft);transform:none}
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const RECORDS=[
-  {artist:'Lucinda Williams',title:'Car Wheels on a Gravel Road',year:1998,label:'Mercury',format:'LP',added:'2024-03-02',pal:['#c9803c','#2a1a10','#f3e4c8'],art:'sun'},
-  {artist:'Wilco',title:'Yankee Hotel Foxtrot',year:2002,label:'Nonesuch',format:'2×LP',added:'2023-11-18',pal:['#1f3b57','#e9e1d0','#8fb1c9'],art:'grid'},
-  {artist:'Gillian Welch',title:'Time (The Revelator)',year:2001,label:'Acony',format:'LP',added:'2025-06-14',pal:['#d9c9a3','#3d2f22','#9a6b3f'],art:'arch'},
-  {artist:'Jason Isbell',title:'Southeastern',year:2013,label:'Southeastern Records',format:'LP',added:'2022-08-09',pal:['#e8e4dc','#232323','#b23a2a'],art:'type'},
-  {artist:'Townes Van Zandt',title:'Live at the Old Quarter, Houston, Texas',year:1977,label:'Tomato',format:'2×LP',added:'2021-12-24',pal:['#2b2b2b','#e7d8b8','#b98a4a'],art:'rings'},
-  {artist:'Uncle Tupelo',title:'No Depression',year:1990,label:'Rockville',format:'LP',added:'2020-05-30',pal:['#6f7d5a','#f1ead8','#3a4430'],art:'bands'},
-  {artist:'Emmylou Harris',title:'Pieces of the Sky',year:1975,label:'Reprise',format:'LP',added:'2025-01-11',pal:['#a9c3cf','#28323a','#f4efe6'],art:'sun'},
-  {artist:'Gram Parsons',title:'Grievous Angel',year:1974,label:'Reprise',format:'LP',added:'2023-04-22',pal:['#efe3cf','#5a2a2a','#c79b5b'],art:'stripes'},
-  {artist:'Neil Young',title:'Harvest',year:1972,label:'Reprise',format:'LP',added:'2019-09-07',pal:['#e6d6b0','#4a3a26','#a8743a'],art:'rings'},
-  {artist:'Sturgill Simpson',title:'Metamodern Sounds in Country Music',year:2014,label:'High Top Mountain',format:'LP',added:'2024-10-05',pal:['#5b2f6b','#f2d36b','#e98a4f'],art:'grid'},
-  {artist:'Whiskeytown',title:'Strangers Almanac',year:1997,label:'Outpost',format:'LP',added:'2022-02-19',pal:['#33424a','#e4ddd0','#9fb0a8'],art:'stripes'},
-  {artist:'Margo Price',title:'Midwest Farmer’s Daughter',year:2016,label:'Third Man',format:'LP',added:'2025-09-27',pal:['#f0c84b','#1d1d1d','#d4472f'],art:'bands'},
-].map(r=>({...r,slug:(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}));
+const RECORDS=[ // Casey's records. Years, labels, formats, covers and links come from vinyl/covers.json (scripts/vinyl-covers.mjs); a value here wins
+  {artist:'Allison Russell',title:'The Returner'},
+  {artist:'Various artists',title:'Amerikinda: 20 Years of Dualtone',sortAs:'Amerikinda'},
+  {artist:'The Arcs',title:'Yours, Dreamily,'},
+  {artist:'The Avett Brothers',title:'Emotionalism'},
+  {artist:'The Band',title:'The Best of The Band'},
+  {artist:'Barbra Streisand',title:'Wet'},
+  {artist:'The Beach Boys',title:'Pet Sounds'},
+  {artist:'The Beatles',title:'Sgt. Pepper’s Lonely Hearts Club Band'},
+  {artist:'The Beatles',title:'Magical Mystery Tour'},
+  {artist:'Becca Mancari',title:'Left Hand'},
+  {artist:'Billy Joel',title:'Piano Man'},
+  {artist:'Blake Mills',title:'Heigh Ho'},
+  {artist:'Bob Dylan',title:'New Morning'},
+  {artist:'Bon Iver',title:'For Emma, Forever Ago'},
+  {artist:'Bonny Light Horseman',title:'Bonny Light Horseman'},
+  {artist:'boygenius',title:'boygenius'},
+  {artist:'Bruce Springsteen',title:'Nebraska'},
+  {artist:'Bruce Springsteen',title:'Born in the U.S.A.'},
+  {artist:'The Charlie Daniels Band',title:'Fire on the Mountain'},
+  {artist:'Chris Stapleton',title:'Traveller'},
+  {artist:'The Civil Wars',title:'Live at Eddie’s Attic'},
+  {artist:'Creedence Clearwater Revival',title:'Bayou Country'},
+  {artist:'Creedence Clearwater Revival',title:'Green River'},
+  {artist:'Creedence Clearwater Revival',title:'Willy and the Poor Boys'},
+  {artist:'Creedence Clearwater Revival',title:'Pendulum'},
+  {artist:'Crosby, Stills & Nash',title:'Crosby, Stills & Nash'},
+  {artist:'Daughter',title:'If You Leave'},
+  {artist:'David Ramirez',title:'Fables'},
+  {artist:'Dawes',title:'Nothing Is Wrong'},
+  {artist:'Dawes',title:'All Your Favorite Bands'},
+  {artist:'The Doobie Brothers',title:'The Captain and Me'},
+  {artist:'Eagles',title:'Their Greatest Hits 1971–1975'},
+  {artist:'Edward Sharpe & the Magnetic Zeros',title:'Up from Below'},
+  {artist:'Erin Rae',title:'Putting on Airs'},
+  {artist:'Ethan Gruska',title:'En Garde'},
+  {artist:'Father John Misty',title:'Fear Fun'},
+  {artist:'Fleetwood Mac',title:'Rumours'},
+  {artist:'Foxwarren',title:'Foxwarren'},
+  {artist:'Gram Parsons',title:'Grievous Angel'},
+  {artist:'Gregory Alan Isakov',title:'This Empty Northern Hemisphere'},
+  {artist:'Gregory Alan Isakov',title:'Appaloosa Bones'},
+  {artist:'Hayley Williams',title:'Ego Death at a Bachelorette Party'},
+  {artist:'Hiss Golden Messenger',title:'Lateness of Dancers'},
+  {artist:'Hiss Golden Messenger',title:'Hallelujah Anyhow'},
+  {artist:'Hiss Golden Messenger',title:'Terms of Surrender'},
+  {artist:'Hiss Golden Messenger',title:'Quietly Blowing It'},
+  {artist:'Hiss Golden Messenger',title:'For the Love of Western North Carolina'},
+  {artist:'Illiterate Light',title:'Illiterate Light'},
+  {artist:'Ivan & Alyosha',title:'All the Times We Had'},
+  {artist:'James Taylor',title:'JT'},
+  {artist:'Jason Isbell',title:'Southeastern'},
+  {artist:'Jimmy Eat World',title:'Futures'},
+  {artist:'John Moreland',title:'High on Tulsa Heat'},
+  {artist:'John Paul White',title:'Beulah'},
+  {artist:'John Prine and Friends',title:'Live at Newport Folk 2017'},
+  {artist:'Jon Batiste',title:'World Music Radio'},
+  {artist:'Joni Mitchell',title:'At Newport'},
+  {artist:'Joseph',title:'Good Luck, Kid'},
+  {artist:'Various artists',title:'Anchored in Love: A Tribute to June Carter Cash',sortAs:'June Carter Cash'},
+  {artist:'Kacey Musgraves',title:'Same Trailer Different Park'},
+  {artist:'Kevin Morby',title:'Little Wide Open'},
+  {artist:'Linda Ronstadt',title:'Greatest Hits'},
+  {artist:'The Lone Bellow',title:'The Lone Bellow'},
+  {artist:'The Lone Bellow',title:'Then Came the Morning'},
+  {artist:'Lord Huron',title:'Lonesome Dreams'},
+  {artist:'Lucius',title:'Wildewoman'},
+  {artist:'Lucius',title:'Second Nature'},
+  {artist:'Lucius',title:'Lucius'},
+].map(r=>({pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...r,slug:(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}));
 
 // Made-up cover art: one of a few patterns in each record's colors
 function art(r){
@@ -361,12 +417,14 @@ function art(r){
 }
 // local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
 const img=f=>/^https?:/.test(f)?f:'vinyl/'+f;
-const coverHTML=r=>r.front?`<img class="art" src="${img(r.front)}" alt="" decoding="sync" draggable="false">`:`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
+// a lazy image waits in data-src until its record comes near the front (see place)
+const imgHTML=(f,lazy)=>`<img class="art" ${lazy?'data-src':'src'}="${img(f)}" alt="" decoding="sync" draggable="false">`;
+const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
 const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
 const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-const backHTML=r=>r.back?`<img class="art" src="${img(r.back)}" alt="" decoding="sync" draggable="false">`:`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
+const backHTML=(r,lazy)=>r.back?imgHTML(r.back,lazy):`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
 
 // crate geometry, in px
 const GAP=7,AHEAD=8,BEHIND=16,FGAP=3.5;
@@ -375,16 +433,18 @@ const stack=$('#stack'),crate=$('#crate');
 
 function sortBy(k){
   sortKey=k;const keep=order[cur];
-  const name=a=>a.replace(/^the /i,'');
+  const name=r=>(r.sortAs||r.artist).replace(/^the /i,''); // a compilation files under its title or the artist it honors
   // by artist (a leading "The" doesn't count), then each artist's records oldest first; a record without a year goes after that artist's dated ones
   const yr=r=>+r.year||9999;
-  order=[...RECORDS].sort(k==='year'?(a,b)=>a.year-b.year:k==='added'?(a,b)=>b.added.localeCompare(a.added):(a,b)=>name(a.artist).localeCompare(name(b.artist),'en',{sensitivity:'base'})||yr(a)-yr(b)||a.title.localeCompare(b.title));
+  order=[...RECORDS].sort(k==='year'?(a,b)=>a.year-b.year:k==='added'?(a,b)=>b.added.localeCompare(a.added):(a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||yr(a)-yr(b)||a.title.localeCompare(b.title));
   build();go(0,true);
 }
-let nodes=[],jits=[],shown=[],frontBox=null;
+let nodes=[],jits=[],shown=[],lazy=[],frontBox=null;
 function build(){
-  stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div></div>`).join('');
+  // until its cover arrives, a record is a plain jacket in its spine color
+  stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr" style="background:${spineBg(r)}">${coverHTML(r,true)}</div><div class="face bk" style="background:${spineBg(r)}">${backHTML(r,true)}</div></div>`).join('');
   nodes=[...stack.children];jits=order.map(jit);shown=nodes.map(()=>true); // cached so each frame does no lookups
+  lazy=nodes.map(n=>[...n.querySelectorAll('img[data-src]')]);
 }
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
 // a hair of disorder, the same every visit: each record sits slightly off true
@@ -444,9 +504,12 @@ function kick(){if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);render();retu
 // shading and classes follow the whole-number position, and snap (animating them repaints every cover)
 // Only records you could see are drawn: the pile hides all but its top few, and past 10 deep nothing shows.
 // Shading is two flat steps (behind, flipped), so a flip repaints only the records that change sides.
+// Covers load a few records beyond what's drawn, so one is always decoded before it shows; a phone's pile never shows a back.
 function place(rest){
+  const [lo,hi]=PHONE?[-4,12]:[-6,16];
   nodes.forEach((n,j)=>{
     const d=j-cur;let show=PHONE?d>=-2&&d<=7:d>=-3&&d<=10;
+    if(d>=lo&&d<=hi&&lazy[j].length)lazy[j]=lazy[j].filter(i=>{if(PHONE&&i.parentNode.classList.contains('bk'))return true;i.src=i.dataset.src;i.removeAttribute('data-src');return false});
     // on a phone the pile only gains or drops records at rest, out of sight: changing what's drawn mid-flip can make iOS flash the whole pile
     if(PHONE&&!rest&&show!==shown[j]&&(d<-1||d>3))show=shown[j];
     const shade=PHONE?'#0000':d<0?'rgb(0 0 0/.06)':d===0?'#0000':'rgb(0 0 0/.16)'; // the pile goes unshaded: no record brightens as it reaches the top
@@ -821,7 +884,7 @@ function start(){
   if(j>0)go(j,true);
   if(j>=0&&m[1])openRecord(true);
 }
-// Real covers and Spotify IDs, fetched by scripts/vinyl-covers.mjs; spines take their color from the cover's left edge
+// Real covers, facts and Spotify IDs, fetched by scripts/vinyl-covers.mjs; spines take their color from the cover's left edge
 // grain: one 128px tile of soft noise, drawn once
 {const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),d=x.createImageData(128,128);
  for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=14}x.putImageData(d,0,0);
@@ -830,13 +893,14 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 // Casey's crate, or a visitor's crate when the address carries one (vinyl-make.html builds those links)
 Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null)]).then(async([m,v])=>{
   if(v&&v.records.length){RECORDS.splice(0,RECORDS.length,...v.records);document.title=VisitorCrate.crateName(v.name)}
-  else RECORDS.forEach(r=>Object.assign(r,m[r.slug]||{}));
-  // hold the crate back until every cover, front and back, is decoded, so it arrives whole
-  const srcs=RECORDS.flatMap(r=>[r.front,r.back].filter(Boolean)).map(img);let n=0;
-  const tick=()=>{n++;$('#loadN').textContent=`${n} of ${srcs.length}`;$('#loadBar').style.transform=`scaleX(${n/srcs.length})`};
-  const load=src=>{const i=new Image();i.src=src;return i.decode().catch(()=>{}).then(tick)};
-  await Promise.race([Promise.all([...srcs.map(load),...RECORDS.filter(r=>r.front).map(async r=>r.spine=await edgeColor(img(r.front)))]),new Promise(r=>setTimeout(r,12000))]);
+  else RECORDS.forEach(r=>Object.assign(r,{...m[r.slug],...r})); // a value written in RECORDS wins
+  // a visitor's crate reads its spine colors from the covers; Casey's come with covers.json
+  await Promise.race([Promise.all(RECORDS.filter(r=>r.front&&!r.spine).map(async r=>r.spine=await edgeColor(img(r.front)))),new Promise(r=>setTimeout(r,8000))]);
   start();
+  // hold the crate back until the covers on screen are decoded, so it arrives whole; the rest load as you flip toward them
+  const imgs=[...nodes.filter((_,j)=>shown[j]).flatMap(n=>[...n.querySelectorAll('img[src]')]),...$$('img',open.hidden?document.createElement('i'):open)];let n=0;
+  const tick=()=>{n++;$('#loadN').textContent=`${n} of ${imgs.length}`;$('#loadBar').style.transform=`scaleX(${n/imgs.length})`};
+  await Promise.race([Promise.all(imgs.map(i=>i.decode().catch(()=>{}).then(tick))),new Promise(r=>setTimeout(r,12000))]);
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
 });
 </script>

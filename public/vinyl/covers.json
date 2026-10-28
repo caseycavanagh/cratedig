@@ -1,131 +1,1017 @@
 {
-  "lucinda-williams-car-wheels-on-a-gravel-road": {
-    "spotify": "3iC6dJobZulVXp0F4Bojig",
-    "release": "f23a6c29-be3e-4c82-94f0-2ab075beb302",
-    "front": "lucinda-williams-car-wheels-on-a-gravel-road-front.jpg",
-    "back": "lucinda-williams-car-wheels-on-a-gravel-road-back.jpg",
-    "frontSource": "apple",
-    "links": {
-      "appleMusic": "https://music.apple.com/us/album/car-wheels-on-a-gravel-road/1440915686",
-      "deezer": "https://www.deezer.com/album/161620"
-    }
-  },
-  "wilco-yankee-hotel-foxtrot": {
-    "spotify": "0rPtXOMN42nsLDiShvGamv",
-    "release": "790cb86e-52b0-4c3d-a8d2-c5fa57b74076",
-    "front": "wilco-yankee-hotel-foxtrot-front.jpg",
-    "back": "wilco-yankee-hotel-foxtrot-back.jpg",
-    "links": {
-      "appleMusic": "https://music.apple.com/us/album/yankee-hotel-foxtrot-expanded-edition/1777509024",
-      "deezer": "https://www.deezer.com/album/271542"
-    },
-    "frontSource": "apple"
-  },
-  "gillian-welch-time-the-revelator": {
-    "spotify": "4MvnpOua97k2qtkvNIZYaA",
-    "release": "917a723a-9449-4517-83be-1bc8a56ae64b",
-    "front": "gillian-welch-time-the-revelator-front.jpg",
-    "back": "gillian-welch-time-the-revelator-back.jpg",
-    "links": {
-      "appleMusic": "https://music.apple.com/us/album/time-the-revelator/79765126",
-      "deezer": "https://www.deezer.com/album/61217552"
-    },
-    "frontSource": "apple"
-  },
   "jason-isbell-southeastern": {
     "spotify": "1bg476ZQn7hmcXaU05SHV4",
     "release": "68687279-e748-4ee8-8f3d-e940462d8929",
-    "front": "jason-isbell-southeastern-front.jpg",
-    "back": "jason-isbell-southeastern-back.jpg",
+    "front": "jason-isbell-southeastern-front.webp",
+    "back": "jason-isbell-southeastern-back.webp",
     "links": {
       "appleMusic": "https://music.apple.com/us/album/southeastern-10-year-anniversary-edition/1704740898",
       "deezer": "https://www.deezer.com/album/6649319"
     },
-    "frontSource": "apple"
-  },
-  "townes-van-zandt-live-at-the-old-quarter-houston-texas": {
-    "spotify": "1SXpC0UH36YNCRSQMVRsoC",
-    "release": "8ddf71dd-6e0e-463f-8ce7-f37da0104bc4",
-    "front": "townes-van-zandt-live-at-the-old-quarter-houston-texas-front.jpg",
-    "back": "townes-van-zandt-live-at-the-old-quarter-houston-texas-back.jpg",
     "frontSource": "apple",
-    "links": {
-      "appleMusic": "https://music.apple.com/us/album/live-at-the-old-quarter-houston-texas/1079243361",
-      "deezer": "https://www.deezer.com/album/14585566"
-    }
-  },
-  "uncle-tupelo-no-depression": {
-    "spotify": "4khnycwIKJXlo2ToImlQCf",
-    "release": "3950d762-f987-46ac-8044-86d90e40dd5d",
-    "front": "uncle-tupelo-no-depression-front.jpg",
-    "back": "uncle-tupelo-no-depression-back.jpg",
-    "frontSource": "apple",
-    "links": {
-      "appleMusic": "https://music.apple.com/us/album/no-depression/192705668",
-      "deezer": "https://www.deezer.com/album/77153"
-    }
-  },
-  "emmylou-harris-pieces-of-the-sky": {
-    "spotify": "04TlWfr3EnQE47HyNTBnex",
-    "release": "f0d81055-5de5-4bf6-a746-e00a0619c057",
-    "front": "emmylou-harris-pieces-of-the-sky-front.jpg",
-    "back": "emmylou-harris-pieces-of-the-sky-back.jpg",
-    "frontSource": "apple",
-    "links": {
-      "appleMusic": "https://music.apple.com/us/album/pieces-of-the-sky-remastered/5559908",
-      "deezer": "https://www.deezer.com/album/85888"
-    }
+    "year": 2013,
+    "label": "Southeastern Records",
+    "format": "LP",
+    "group": "47e4fe0d-8be7-4bdc-b5e7-5b0409ed6afc",
+    "spine": "#212122"
   },
   "gram-parsons-grievous-angel": {
     "spotify": "6UQujMGmR5MbFsML9amCuN",
     "release": "2fdf1fb4-607f-3276-b6b1-7d7d169ad5bc",
-    "front": "gram-parsons-grievous-angel-front.jpg",
-    "back": "gram-parsons-grievous-angel-back.jpg",
+    "front": "gram-parsons-grievous-angel-front.webp",
+    "back": "gram-parsons-grievous-angel-back.webp",
     "frontSource": "apple",
     "links": {
       "appleMusic": "https://music.apple.com/us/album/grievous-angel/304907551",
       "deezer": "https://www.deezer.com/album/273177"
-    }
+    },
+    "year": 1974,
+    "label": "Reprise Records",
+    "format": "LP",
+    "group": "eeb6a226-8323-327e-9116-1dc51e2fcb23",
+    "spine": "#34869f"
   },
-  "neil-young-harvest": {
-    "spotify": "2l3QxNo4QubBNmVKxLeum0",
-    "release": "2488e872-0b64-429e-b32f-116637399160",
-    "front": "neil-young-harvest-front.jpg",
-    "back": "neil-young-harvest-back.jpg",
-    "frontSource": "apple",
+  "allison-russell-the-returner": {
+    "year": 2023,
+    "label": "Fantasy",
+    "group": "b692549c-16bf-4ca0-aa5d-32023a326d60",
+    "release": "d24f9426-9871-4259-a59f-dec7955d9822",
+    "spotify": "2rzetXorcdU2BH86aoqHmw",
     "links": {
-      "appleMusic": "https://music.apple.com/us/album/harvest-50th-anniversary-edition/1648841033",
-      "deezer": "https://www.deezer.com/album/356690"
-    }
+      "appleMusic": "https://music.apple.com/us/album/the-returner/1689486716",
+      "deezer": "https://www.deezer.com/album/447263535"
+    },
+    "front": "allison-russell-the-returner-front.webp",
+    "frontSource": "apple",
+    "spine": "#8a7f81",
+    "back": "allison-russell-the-returner-back.webp"
   },
-  "sturgill-simpson-metamodern-sounds-in-country-music": {
-    "spotify": "5N1kfa3omZENLwlVhEgqHF",
-    "front": "sturgill-simpson-metamodern-sounds-in-country-music-front.jpg",
-    "frontSource": "apple",
+  "various-artists-amerikinda-20-years-of-dualtone": {
+    "year": 2021,
+    "label": "Dualtone",
+    "format": "LP",
+    "group": "45373027-1ce5-4d89-9baa-87426f0bce9e",
+    "release": "5d8065bd-54cb-4d02-b2ee-9f33cd42f6ff",
+    "spotify": "6Y79pcuMwz0UFxIuMYWF16",
     "links": {
-      "appleMusic": "https://music.apple.com/us/album/metamodern-sounds-in-country-music/1887707089",
-      "deezer": "https://www.deezer.com/album/946804331"
-    }
+      "appleMusic": "https://music.apple.com/us/album/amerikinda-20-years-of-dualtone/1749148732",
+      "deezer": "https://www.deezer.com/album/236632892"
+    },
+    "front": "various-artists-amerikinda-20-years-of-dualtone-front.webp",
+    "frontSource": "apple",
+    "spine": "#1d1913"
   },
-  "whiskeytown-strangers-almanac": {
-    "spotify": "29gnqAHOpVJJL3h8wPrlMl",
-    "release": "15b149ae-0c53-4c6f-bc22-5e7c449a81c2",
-    "front": "whiskeytown-strangers-almanac-front.jpg",
-    "back": "whiskeytown-strangers-almanac-back.jpg",
-    "frontSource": "apple",
+  "the-arcs-yours-dreamily": {
+    "year": 2015,
+    "label": "Nonesuch",
+    "group": "c2acf959-928c-4a60-9f39-9ade28fbe74e",
+    "release": "3a26f4f5-9390-47a6-a092-d42aff1d5cac",
+    "spotify": "7GcnWeopUkyCwFFEt6RrsA",
     "links": {
-      "appleMusic": "https://music.apple.com/us/album/strangers-almanac-deluxe-edition/1456285661",
-      "deezer": "https://www.deezer.com/album/103262"
-    }
+      "appleMusic": "https://music.apple.com/us/album/yours-dreamily/999637611",
+      "deezer": "https://www.deezer.com/album/11091074"
+    },
+    "front": "the-arcs-yours-dreamily-front.webp",
+    "frontSource": "apple",
+    "spine": "#685342"
   },
-  "margo-price-midwest-farmers-daughter": {
-    "spotify": "1RV9pacIcXvkUiAD0EjTdL",
-    "release": "f2aef3f3-352b-4a05-91db-58ee4f5f6675",
-    "front": "margo-price-midwest-farmers-daughter-front.jpg",
-    "frontSource": "apple",
+  "the-avett-brothers-emotionalism": {
+    "year": 2007,
+    "label": "Ramseur Records",
+    "group": "f1191982-2671-36f7-95a9-7ad8edc4ff1c",
+    "release": "4b1daaa7-b9a0-45e3-a852-6d83d3f0e42a",
+    "spotify": "4pb5b6XKuzzh5CqPFOzptQ",
     "links": {
-      "appleMusic": "https://music.apple.com/us/album/midwest-farmers-daughter/1072852186",
-      "deezer": "https://www.deezer.com/album/861644062"
-    }
+      "appleMusic": "https://music.apple.com/us/album/emotionalism/927508215",
+      "deezer": "https://www.deezer.com/album/9352942"
+    },
+    "front": "the-avett-brothers-emotionalism-front.webp",
+    "frontSource": "apple",
+    "spine": "#232223",
+    "back": "the-avett-brothers-emotionalism-back.webp"
+  },
+  "the-band-the-best-of-the-band": {
+    "year": 1976,
+    "label": "Capitol Records",
+    "format": "LP",
+    "group": "d336e906-d4ed-4129-91b2-2f93b34be770",
+    "release": "761bc982-f445-4cc7-be4e-c71044debb01",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/the-best-of-the-band/716292773"
+    },
+    "front": "the-band-the-best-of-the-band-front.webp",
+    "frontSource": "apple",
+    "spine": "#ebe9dc",
+    "back": "the-band-the-best-of-the-band-back.webp"
+  },
+  "barbra-streisand-wet": {
+    "year": 1979,
+    "label": "Columbia",
+    "format": "LP",
+    "group": "990ee257-d314-350f-8a4f-c0628f59a57f",
+    "release": "0d7787cf-2707-4225-849c-0657814a8390",
+    "spotify": "1S6hSxuHEJpLenTqPnLhql",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/wet/185393510",
+      "deezer": "https://www.deezer.com/album/115472"
+    },
+    "front": "barbra-streisand-wet-front.webp",
+    "frontSource": "apple",
+    "spine": "#564840",
+    "back": "barbra-streisand-wet-back.webp"
+  },
+  "the-beach-boys-pet-sounds": {
+    "year": 1966,
+    "label": "Capitol Records",
+    "format": "LP",
+    "group": "fdd96703-7b21-365e-bdea-38029fbeb84e",
+    "release": "4ac8b3ca-2139-430f-9715-a1736be1102b",
+    "spotify": "2CNEkSE8TADXRT2AzcEt1b",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/the-pet-sounds-sessions-deluxe-edition/1886916918",
+      "deezer": "https://www.deezer.com/album/13308901"
+    },
+    "front": "the-beach-boys-pet-sounds-front.webp",
+    "frontSource": "apple",
+    "spine": "#3e5c45",
+    "back": "the-beach-boys-pet-sounds-back.webp"
+  },
+  "the-beatles-sgt-peppers-lonely-hearts-club-band": {
+    "year": 1967,
+    "label": "Capitol Records",
+    "format": "LP",
+    "group": "9f7a4c28-8fa2-3113-929c-c47a9f7982c3",
+    "release": "c60b8b80-01be-4844-af15-df04375d316d",
+    "spotify": "6QaVfG1pHYl1z15ZxkvVDW",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/sgt-peppers-lonely-hearts-club-band-2017-mix/1573250333",
+      "deezer": "https://www.deezer.com/album/12047960"
+    },
+    "front": "the-beatles-sgt-peppers-lonely-hearts-club-band-front.webp",
+    "frontSource": "apple",
+    "spine": "#907f5d",
+    "back": "the-beatles-sgt-peppers-lonely-hearts-club-band-back.webp"
+  },
+  "the-beatles-magical-mystery-tour": {
+    "year": 1967,
+    "label": "Capitol Records",
+    "format": "LP",
+    "group": "6e514645-fbee-34ac-97e0-c2120a4a5644",
+    "release": "6ed3e250-d338-4cee-af5d-8e535d59d398",
+    "spotify": "2BtE7qm1qzM80p9vLSiXkj",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/magical-mystery-tour/1441163490",
+      "deezer": "https://www.deezer.com/album/12047938"
+    },
+    "front": "the-beatles-magical-mystery-tour-front.webp",
+    "frontSource": "apple",
+    "spine": "#bda67c",
+    "back": "the-beatles-magical-mystery-tour-back.webp"
+  },
+  "becca-mancari-left-hand": {
+    "year": 2023,
+    "label": "Captured Tracks",
+    "group": "dcb931a1-0a8e-4967-87eb-abb49ecd8676",
+    "release": "56117179-bfb0-43ed-8fb9-59f4aea77099",
+    "spotify": "7FbW06hAT1lVSoCrN3lU7G",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/left-hand/6789812844",
+      "deezer": "https://www.deezer.com/album/1030570972"
+    },
+    "front": "becca-mancari-left-hand-front.webp",
+    "frontSource": "apple",
+    "spine": "#3f3027"
+  },
+  "billy-joel-piano-man": {
+    "year": 1973,
+    "label": "Columbia",
+    "format": "LP",
+    "group": "7866f536-a9c7-32eb-8eed-bb49132432fa",
+    "release": "58c16e0b-47a5-3fc6-8217-19c9b14038d8",
+    "spotify": "77ErLrVvYETIlQJHAwhfIH",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/piano-man/158617297",
+      "deezer": "https://www.deezer.com/album/1442408"
+    },
+    "front": "billy-joel-piano-man-front.webp",
+    "frontSource": "apple",
+    "spine": "#262429",
+    "back": "billy-joel-piano-man-back.webp"
+  },
+  "blake-mills-heigh-ho": {
+    "year": 2014,
+    "label": "Verve",
+    "format": "2×LP",
+    "group": "c597050b-2c14-4f92-9ae2-7a13407667f0",
+    "release": "9bbd64cc-99ef-487f-8975-786183bcef1a",
+    "spotify": "05oav7mCaoTnTpuIFSv7T6",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/heigh-ho/1444145447",
+      "deezer": "https://www.deezer.com/album/8493459"
+    },
+    "front": "blake-mills-heigh-ho-front.webp",
+    "frontSource": "apple",
+    "spine": "#a18d33",
+    "back": "blake-mills-heigh-ho-back.webp"
+  },
+  "bob-dylan-new-morning": {
+    "year": 1970,
+    "label": "Columbia",
+    "format": "LP",
+    "group": "4f2b915f-cc82-3c18-ac9b-05f3d4df622d",
+    "release": "2006ff8a-dc81-4ffa-910d-91b0b5b0550a",
+    "spotify": "48efaobqOTbvnlxbETstey",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/new-morning/538555591",
+      "deezer": "https://www.deezer.com/album/5557641"
+    },
+    "front": "bob-dylan-new-morning-front.webp",
+    "frontSource": "apple",
+    "spine": "#99835d",
+    "back": "bob-dylan-new-morning-back.webp"
+  },
+  "bon-iver-for-emma-forever-ago": {
+    "year": 2007,
+    "label": "Jagjaguwar",
+    "format": "LP",
+    "group": "187935b5-a0a4-3e6f-9684-48b67a5190a1",
+    "release": "4f5c2bff-a5f0-32f6-8199-190bf22872aa",
+    "spotify": "7EJ0OT5ZqybXxcYRa6mccM",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/for-emma-forever-ago/947059824",
+      "deezer": "https://www.deezer.com/album/7291105"
+    },
+    "front": "bon-iver-for-emma-forever-ago-front.webp",
+    "frontSource": "apple",
+    "spine": "#89897f",
+    "back": "bon-iver-for-emma-forever-ago-back.webp"
+  },
+  "bonny-light-horseman-bonny-light-horseman": {
+    "year": 2020,
+    "label": "37d03d",
+    "group": "a259fb18-a782-43e6-a40f-7517c85891dd",
+    "release": "9ccda725-fc35-4e51-b164-98994f7aca73",
+    "spotify": "0FDyqe94Dh9j7U1Xyf3d8G",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/bonny-light-horseman-feat-eric-d-johnson-josh-kaufman/1480433371",
+      "deezer": "https://www.deezer.com/album/120182322"
+    },
+    "front": "bonny-light-horseman-bonny-light-horseman-front.webp",
+    "frontSource": "apple",
+    "spine": "#8e897f"
+  },
+  "boygenius-boygenius": {
+    "year": 2018,
+    "label": "Matador",
+    "format": "EP",
+    "group": "93ac0ca3-6e5c-4a97-98ed-c17c1defffca",
+    "release": "3af19b6b-5607-48be-8968-bf0b0fc83155",
+    "spotify": "6RjlLIuDFC8Dw91yRAdPz9",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/boygenius-ep/1667033726",
+      "deezer": "https://www.deezer.com/album/75551992"
+    },
+    "front": "boygenius-boygenius-front.webp",
+    "frontSource": "apple",
+    "spine": "#2f2a2d"
+  },
+  "bruce-springsteen-nebraska": {
+    "year": 1982,
+    "label": "Columbia",
+    "format": "LP",
+    "group": "324aee0c-36ec-35c1-9c93-b67a1d428037",
+    "release": "0c147efb-e22e-4715-94d9-f28f7b93a414",
+    "spotify": "6yskFQZNlLYhkchAxELHi6",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/nebraska/185798980",
+      "deezer": "https://www.deezer.com/album/1398519"
+    },
+    "front": "bruce-springsteen-nebraska-front.webp",
+    "frontSource": "apple",
+    "spine": "#634b4f",
+    "back": "bruce-springsteen-nebraska-back.webp"
+  },
+  "bruce-springsteen-born-in-the-u-s-a": {
+    "year": 1984,
+    "label": "Columbia",
+    "format": "LP",
+    "group": "3c39a076-8e52-38f2-8076-260d0672fb23",
+    "release": "01dfa267-9c84-4411-a2da-ea27cc0eb317",
+    "spotify": "0PMasrHdpaoIRuHuhHp72O",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/born-in-the-u-s-a/203708420",
+      "deezer": "https://www.deezer.com/album/1440805"
+    },
+    "front": "bruce-springsteen-born-in-the-u-s-a-front.webp",
+    "frontSource": "apple",
+    "spine": "#8c6467",
+    "back": "bruce-springsteen-born-in-the-u-s-a-back.webp"
+  },
+  "the-charlie-daniels-band-fire-on-the-mountain": {
+    "year": 1974,
+    "label": "Kama Sutra",
+    "format": "LP",
+    "group": "3db9dc89-88a6-3aed-8e75-aa247aeaff84",
+    "release": "5a67eb75-072e-4588-8094-a9325f07e8f4",
+    "spotify": "4HOpqelpeX8blsVRZuMfW7",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/fire-on-the-mountain/186248376",
+      "deezer": "https://www.deezer.com/album/116730"
+    },
+    "front": "the-charlie-daniels-band-fire-on-the-mountain-front.webp",
+    "frontSource": "apple",
+    "spine": "#685935"
+  },
+  "chris-stapleton-traveller": {
+    "year": 2015,
+    "label": "Mercury Nashville",
+    "format": "2×LP",
+    "group": "69a03496-ba64-4d55-a01e-2f2f34f36a61",
+    "release": "2e19151b-4e1e-4a44-8779-1710a1f6d353",
+    "spotify": "7lxHnls3yQNl8B9bILmHj7",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/traveller/1440827477",
+      "deezer": "https://www.deezer.com/album/10127538"
+    },
+    "front": "chris-stapleton-traveller-front.webp",
+    "frontSource": "apple",
+    "spine": "#969696",
+    "back": "chris-stapleton-traveller-back.webp"
+  },
+  "the-civil-wars-live-at-eddies-attic": {
+    "year": 2009,
+    "label": "sensibility",
+    "format": "LP",
+    "group": "0e1fdc39-8852-4001-894a-98a707cbc165",
+    "release": "ac37adc7-98a3-4204-88d3-1cf35a46a6c1",
+    "spotify": "40LvDRa8e5cdgUFsKgSUzq",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/live-at-eddies-attic/1581862082",
+      "deezer": "https://www.deezer.com/album/261202452"
+    },
+    "front": "the-civil-wars-live-at-eddies-attic-front.webp",
+    "frontSource": "apple",
+    "spine": "#161516"
+  },
+  "creedence-clearwater-revival-bayou-country": {
+    "year": 1969,
+    "label": "Fantasy",
+    "format": "LP",
+    "group": "ef55850c-7b38-30fc-8f8d-d10f28784094",
+    "release": "b79f935c-cf73-46d9-b389-71c90710b636",
+    "spotify": "7F76o5x7W6dgfmgcVDeBH0",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/bayou-country/1440946816",
+      "deezer": "https://www.deezer.com/album/118498"
+    },
+    "front": "creedence-clearwater-revival-bayou-country-front.webp",
+    "frontSource": "apple",
+    "spine": "#45422b",
+    "back": "creedence-clearwater-revival-bayou-country-back.webp"
+  },
+  "creedence-clearwater-revival-green-river": {
+    "year": 1969,
+    "label": "Fantasy",
+    "format": "LP",
+    "group": "6c08878c-d6a1-37b6-84c3-9566748545c1",
+    "release": "4f410df0-eab0-40e3-80bf-3b87e29e5bff",
+    "spotify": "0i9mOB6mPGqwVvtJEXiwPG",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/green-river/1440952818",
+      "deezer": "https://www.deezer.com/album/326313317"
+    },
+    "front": "creedence-clearwater-revival-green-river-front.webp",
+    "frontSource": "apple",
+    "spine": "#876b5c",
+    "back": "creedence-clearwater-revival-green-river-back.webp"
+  },
+  "creedence-clearwater-revival-willy-and-the-poor-boys": {
+    "year": 1969,
+    "label": "Fantasy",
+    "format": "LP",
+    "group": "5fdea541-32fc-3b17-b7c4-50b40f65203d",
+    "release": "83b1ae4f-e66d-4a3a-a13a-bf99397c3284",
+    "spotify": "31q47gQszFt0CddSyMksgO",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/willy-and-the-poor-boys/1440950503",
+      "deezer": "https://www.deezer.com/album/336070627"
+    },
+    "front": "creedence-clearwater-revival-willy-and-the-poor-boys-front.webp",
+    "frontSource": "apple",
+    "spine": "#56544c",
+    "back": "creedence-clearwater-revival-willy-and-the-poor-boys-back.webp"
+  },
+  "creedence-clearwater-revival-pendulum": {
+    "year": 1970,
+    "label": "Fantasy",
+    "format": "LP",
+    "group": "da556835-e464-3389-881f-362ef8f984b3",
+    "release": "71792d4a-5e49-4c59-a07d-ebf6af5fd652",
+    "spotify": "3tbpe74iBR23O8uiQlLrXC",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/pendulum/1440948020",
+      "deezer": "https://www.deezer.com/album/124286"
+    },
+    "front": "creedence-clearwater-revival-pendulum-front.webp",
+    "frontSource": "apple",
+    "spine": "#694838",
+    "back": "creedence-clearwater-revival-pendulum-back.webp"
+  },
+  "crosby-stills-nash-crosby-stills-nash": {
+    "year": 1969,
+    "label": "Atlantic",
+    "format": "LP",
+    "group": "a2735d5f-27c0-3176-85df-e77f669dcca1",
+    "release": "098c69f0-058d-4351-a7dc-4252f3fe856f",
+    "spotify": "6vUWpE8qciYHOhf7mgaGny",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/crosby-stills-nash/908303090",
+      "deezer": "https://www.deezer.com/album/339096"
+    },
+    "front": "crosby-stills-nash-crosby-stills-nash-front.webp",
+    "frontSource": "apple",
+    "spine": "#908180",
+    "back": "crosby-stills-nash-crosby-stills-nash-back.webp"
+  },
+  "daughter-if-you-leave": {
+    "year": 2013,
+    "label": "Glassnote",
+    "format": "LP",
+    "group": "997612ed-a41b-4715-8ea4-8650e2d9468d",
+    "release": "2310ea7c-7e24-4cec-b57a-34a6455a6abd",
+    "spotify": "5lrUQ48dUvtgK8u8zwiEn4",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/if-you-leave/1771703059",
+      "deezer": "https://www.deezer.com/album/650763951"
+    },
+    "front": "daughter-if-you-leave-front.webp",
+    "frontSource": "apple",
+    "spine": "#75736b",
+    "back": "daughter-if-you-leave-back.webp"
+  },
+  "david-ramirez-fables": {
+    "year": 2015,
+    "label": "Thirty Tigers",
+    "format": "LP",
+    "group": "f81cc60d-11ab-4696-8dde-c54536706267",
+    "release": "9c45513b-c696-4936-bbd6-cb8ad124dae6",
+    "spotify": "3eI4JXB2jYDasGE9Fus6O0",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/fables/1695863917",
+      "deezer": "https://www.deezer.com/album/461074145"
+    },
+    "front": "david-ramirez-fables-front.webp",
+    "frontSource": "apple",
+    "spine": "#343838"
+  },
+  "dawes-nothing-is-wrong": {
+    "year": 2011,
+    "label": "ATO Records",
+    "format": "2×LP",
+    "group": "8fa94bab-293b-46a3-a4b1-25670c39f772",
+    "release": "8259f7a8-6334-4fba-a1b9-31adbb1e8571",
+    "spotify": "1F5LRA5j0ulzRkD6y6bubI",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/nothing-is-wrong-10th-anniversary-deluxe-edition/1744428620",
+      "deezer": "https://www.deezer.com/album/581189371"
+    },
+    "front": "dawes-nothing-is-wrong-front.webp",
+    "frontSource": "apple",
+    "spine": "#d5c6b4",
+    "back": "dawes-nothing-is-wrong-back.webp"
+  },
+  "dawes-all-your-favorite-bands": {
+    "year": 2015,
+    "label": "HUB Records",
+    "format": "LP",
+    "group": "0aa8e955-60f8-4662-ba66-c7f91f8a7aa8",
+    "release": "9b2f56db-7ea8-4e58-ad11-af3b8cd2118f",
+    "spotify": "4lv4CsM3M3t0KwmqCadtFK",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/all-your-favorite-bands/1744429611",
+      "deezer": "https://www.deezer.com/album/581189431"
+    },
+    "front": "dawes-all-your-favorite-bands-front.webp",
+    "frontSource": "apple",
+    "spine": "#c8b7a8"
+  },
+  "the-doobie-brothers-the-captain-and-me": {
+    "year": 1973,
+    "label": "Warner Bros. Records",
+    "format": "LP",
+    "group": "023d4049-d7ce-3d2c-a6db-7bf675bf5dc2",
+    "release": "6e25a4a6-575d-43d4-a232-ae0c9c77dfc6",
+    "spotify": "0M2KWMbvY5x1sUnIKNpyUt",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/the-captain-and-me-remastered/1110986101",
+      "deezer": "https://www.deezer.com/album/341052"
+    },
+    "front": "the-doobie-brothers-the-captain-and-me-front.webp",
+    "frontSource": "apple",
+    "spine": "#6d7081",
+    "back": "the-doobie-brothers-the-captain-and-me-back.webp"
+  },
+  "eagles-their-greatest-hits-1971-1975": {
+    "year": 1976,
+    "label": "Asylum Records",
+    "format": "LP",
+    "group": "56ecf5cb-ad82-3d7e-82bf-1904cc16f451",
+    "release": "9b7d7e0f-4979-4d7a-811b-8c0dc12ae872",
+    "spotify": "2Lgsa7jbu86SK5zJVFCh3S",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/their-greatest-hits-1971-1975/635829435",
+      "deezer": "https://www.deezer.com/album/6670386"
+    },
+    "front": "eagles-their-greatest-hits-1971-1975-front.webp",
+    "frontSource": "apple",
+    "spine": "#6181a3",
+    "back": "eagles-their-greatest-hits-1971-1975-back.webp"
+  },
+  "edward-sharpe-the-magnetic-zeros-up-from-below": {
+    "year": 2009,
+    "label": "Community Records",
+    "format": "LP",
+    "group": "c73f6578-c16e-4f81-910c-feb49e8f6afe",
+    "release": "efc820cc-9d5d-4aff-9791-1b6e17340804",
+    "spotify": "2tLdKDCv86cEamk2nrL7q9",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/up-from-below/1759968490",
+      "deezer": "https://www.deezer.com/album/621929531"
+    },
+    "front": "edward-sharpe-the-magnetic-zeros-up-from-below-front.webp",
+    "frontSource": "apple",
+    "spine": "#af7f76"
+  },
+  "erin-rae-putting-on-airs": {
+    "year": 2018,
+    "label": "Single Lock Records",
+    "group": "b0fb0e79-4808-44f1-8d11-ea6af299daf0",
+    "release": "2b8f7558-32d7-4c75-985d-b505ac6d33b8",
+    "spotify": "5y03U2xxe0NBrI5KSr2jGK",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/putting-on-airs/1534392054",
+      "deezer": "https://www.deezer.com/album/185534702"
+    },
+    "front": "erin-rae-putting-on-airs-front.webp",
+    "frontSource": "apple",
+    "spine": "#937152"
+  },
+  "ethan-gruska-en-garde": {
+    "year": 2020,
+    "label": "Warner Records",
+    "group": "e930eea0-e0d9-4596-9956-18d2b32332d0",
+    "release": "d52a3874-7447-4609-b5aa-7478c8ed03c5",
+    "spotify": "2lgquOKqwJNvCg7UwvsjJy",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/en-garde/1482847720",
+      "deezer": "https://www.deezer.com/album/127780052"
+    },
+    "front": "ethan-gruska-en-garde-front.webp",
+    "frontSource": "apple",
+    "spine": "#6e6f71"
+  },
+  "father-john-misty-fear-fun": {
+    "year": 2012,
+    "label": "Sub Pop Records",
+    "format": "LP",
+    "group": "d76ee58c-cabb-4aec-b793-326ce29a7d65",
+    "release": "49d3fd73-7d94-44bb-a13c-46538d049197",
+    "spotify": "2CXVonfqGwTQu8dgr2qkNS",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/fear-fun/669285159",
+      "deezer": "https://www.deezer.com/album/185282152"
+    },
+    "front": "father-john-misty-fear-fun-front.webp",
+    "frontSource": "apple",
+    "spine": "#a78a73"
+  },
+  "fleetwood-mac-rumours": {
+    "year": 1977,
+    "label": "Warner Bros. Records",
+    "format": "LP",
+    "group": "416bb5e5-c7d1-3977-8fd7-7c9daf6c2be6",
+    "release": "2aaa32d6-9c4f-45e1-a2d1-9233addb354f",
+    "spotify": "1bt6q2SruMsBtcerNVtpZB",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/rumours-2001-remaster/1483708628",
+      "deezer": "https://www.deezer.com/album/6237061"
+    },
+    "front": "fleetwood-mac-rumours-front.webp",
+    "frontSource": "apple",
+    "spine": "#cecdc1",
+    "back": "fleetwood-mac-rumours-back.webp"
+  },
+  "gregory-alan-isakov-this-empty-northern-hemisphere": {
+    "year": 2009,
+    "label": "Suitcase Town Music",
+    "group": "8e1fbc06-1a15-4645-a41e-f80d3b08dd23",
+    "release": "a9f1fa02-8290-449a-95ee-e88c53a3e60b",
+    "spotify": "06UoTVgpPiGnRPGjowrG3g",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/this-empty-northern-hemisphere/316335828",
+      "deezer": "https://www.deezer.com/album/877751"
+    },
+    "front": "gregory-alan-isakov-this-empty-northern-hemisphere-front.webp",
+    "frontSource": "apple",
+    "spine": "#322534"
+  },
+  "gregory-alan-isakov-appaloosa-bones": {
+    "year": 2023,
+    "label": "Dualtone",
+    "group": "c674c9f7-a347-49b4-9fe2-d6f307a4c862",
+    "release": "9f330e8c-62e3-48c9-8aee-c729f25f1ac3",
+    "spotify": "73VuXbDamMLEdq8Yzd79dM",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/appaloosa-bones/1753320228",
+      "deezer": "https://www.deezer.com/album/424041577"
+    },
+    "front": "gregory-alan-isakov-appaloosa-bones-front.webp",
+    "frontSource": "apple",
+    "spine": "#f9f1e3"
+  },
+  "hayley-williams-ego-death-at-a-bachelorette-party": {
+    "year": 2025,
+    "label": "Post Atlantic",
+    "format": "2×LP",
+    "group": "15c3b397-9652-4537-a14b-7eb8489092ff",
+    "release": "a5e766b8-650c-40ce-a19f-3dc3c865a3e2",
+    "spotify": "3MROTtttK946gHaTkXeP8b",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/ego-death-at-a-bachelorette-party/1850011909",
+      "deezer": "https://www.deezer.com/album/848097372"
+    },
+    "front": "hayley-williams-ego-death-at-a-bachelorette-party-front.webp",
+    "frontSource": "apple",
+    "spine": "#686667"
+  },
+  "hiss-golden-messenger-lateness-of-dancers": {
+    "year": 2014,
+    "label": "Merge Records",
+    "format": "LP",
+    "group": "1d49617a-8167-48e6-9dff-41912bb41085",
+    "release": "c5f97e39-ed91-4cdb-b2f4-43a1bee2a980",
+    "spotify": "2SkGobHGUpQZhreKT7G7Gg",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/lateness-of-dancers/1839122233",
+      "deezer": "https://www.deezer.com/album/819786401"
+    },
+    "front": "hiss-golden-messenger-lateness-of-dancers-front.webp",
+    "frontSource": "apple",
+    "spine": "#4d4b42",
+    "back": "hiss-golden-messenger-lateness-of-dancers-back.webp"
+  },
+  "hiss-golden-messenger-hallelujah-anyhow": {
+    "year": 2017,
+    "label": "Merge Records",
+    "group": "11ea45dd-82a9-4094-8303-efc3cdc3b7eb",
+    "release": "1b0d0394-e662-4250-b8de-c9fb8060233a",
+    "spotify": "15uCWEPVnzf1pTiypzo0RZ",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/hallelujah-anyhow/1839113444",
+      "deezer": "https://www.deezer.com/album/819702881"
+    },
+    "front": "hiss-golden-messenger-hallelujah-anyhow-front.webp",
+    "frontSource": "apple",
+    "spine": "#767c6b"
+  },
+  "hiss-golden-messenger-terms-of-surrender": {
+    "year": 2019,
+    "label": "Merge Records",
+    "format": "LP",
+    "group": "128e4e08-8d32-4016-84a7-fa14eb65e831",
+    "release": "0e40869e-b74f-4117-a85e-a1e38974a46c",
+    "spotify": "0rT5sRJ1ZJXRSfT7TGQCJe",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/terms-of-surrender/1839030286",
+      "deezer": "https://www.deezer.com/album/819404011"
+    },
+    "front": "hiss-golden-messenger-terms-of-surrender-front.webp",
+    "frontSource": "apple",
+    "spine": "#161310"
+  },
+  "hiss-golden-messenger-quietly-blowing-it": {
+    "year": 2021,
+    "label": "Merge Records",
+    "group": "815b56bf-2d68-4839-b42d-8c4604558deb",
+    "release": "5cd61bb9-996c-4c8c-b95e-f10c8c5984ae",
+    "spotify": "1irn9lHUq0qLh91yUVoOsm",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/quietly-blowing-it/1839150260",
+      "deezer": "https://www.deezer.com/album/819945411"
+    },
+    "front": "hiss-golden-messenger-quietly-blowing-it-front.webp",
+    "frontSource": "apple",
+    "spine": "#72726d"
+  },
+  "hiss-golden-messenger-for-the-love-of-western-north-carolina": {
+    "links": {}
+  },
+  "illiterate-light-illiterate-light": {
+    "year": 2019,
+    "label": "Atlantic",
+    "group": "3a3ee4ee-d466-4fdd-879c-b657c5a9dfb1",
+    "release": "1d76018f-5673-429f-9bdb-a3d1175e706f",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/illiterate-light/1474010145",
+      "deezer": "https://www.deezer.com/album/114075362"
+    },
+    "front": "illiterate-light-illiterate-light-front.webp",
+    "frontSource": "apple",
+    "spine": "#ab7c37"
+  },
+  "ivan-alyosha-all-the-times-we-had": {
+    "year": 2013,
+    "label": "Dualtone",
+    "group": "4b491923-82a3-4fad-b70d-ead5f6b7cd67",
+    "release": "99ab72f5-5020-4d00-9b7c-c036b04a7aff",
+    "spotify": "1JRjLshwmFs5WNb22MjsVI",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/all-the-times-we-had/1613976168",
+      "deezer": "https://www.deezer.com/album/302357727"
+    },
+    "front": "ivan-alyosha-all-the-times-we-had-front.webp",
+    "frontSource": "apple",
+    "spine": "#9e9d96"
+  },
+  "james-taylor-jt": {
+    "year": 1977,
+    "label": "Columbia",
+    "format": "LP",
+    "group": "10539dc3-557c-3cc3-95ec-dd8b0f5d5340",
+    "release": "e43d0427-b820-4e5e-8ff8-c32cf40f950c",
+    "spotify": "0Pbc9Jq12a47mQ1z9yIuhn",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/jt/190448222",
+      "deezer": "https://www.deezer.com/album/96024"
+    },
+    "front": "james-taylor-jt-front.webp",
+    "frontSource": "apple",
+    "spine": "#9c958f",
+    "back": "james-taylor-jt-back.webp"
+  },
+  "jimmy-eat-world-futures": {
+    "year": 2004,
+    "label": "Interscope Records",
+    "format": "LP",
+    "group": "2aad83d4-eee8-3616-84d0-d2afa569cc9e",
+    "release": "52234d58-c557-4ef2-a605-b13020ec02b1",
+    "spotify": "2EDsu3fuAiflZczcFZTr4y",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/futures/1454825406",
+      "deezer": "https://www.deezer.com/album/257852412"
+    },
+    "front": "jimmy-eat-world-futures-front.webp",
+    "frontSource": "apple",
+    "spine": "#18191b",
+    "back": "jimmy-eat-world-futures-back.webp"
+  },
+  "john-moreland-high-on-tulsa-heat": {
+    "year": 2015,
+    "label": "Old Omens",
+    "group": "283410b3-3138-4825-8f35-d40ec1c4d936",
+    "release": "35cb4dde-d58e-4277-87a1-6facea511098",
+    "spotify": "1NvW80mVflSphrro6oWLuP",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/high-on-tulsa-heat/968599286",
+      "deezer": "https://www.deezer.com/album/9762788"
+    },
+    "front": "john-moreland-high-on-tulsa-heat-front.webp",
+    "frontSource": "apple",
+    "spine": "#516267",
+    "back": "john-moreland-high-on-tulsa-heat-back.webp"
+  },
+  "john-paul-white-beulah": {
+    "year": 2016,
+    "label": "Single Lock Records",
+    "group": "610a4819-6c4e-4eba-8fd1-8e61c094ee7e",
+    "release": "bd7c987d-f112-4f84-a56f-10cdba27adc1",
+    "spotify": "21hpzo9hs56n3Rh8KvslmI",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/beulah/1534519799",
+      "deezer": "https://www.deezer.com/album/185537772"
+    },
+    "front": "john-paul-white-beulah-front.webp",
+    "frontSource": "apple",
+    "spine": "#75acc5",
+    "back": "john-paul-white-beulah-back.webp"
+  },
+  "john-prine-and-friends-live-at-newport-folk-2017": {
+    "year": 2022,
+    "label": "Newport Folk Recordings",
+    "format": "2×LP",
+    "group": "bafdeb6e-096c-435c-9a5b-dd75809361f4",
+    "release": "eaefa2e9-c5bb-4b45-93b4-0c6e16f057cd",
+    "links": {},
+    "front": "john-prine-and-friends-live-at-newport-folk-2017-front.webp",
+    "frontSource": "caa",
+    "spine": "#969595"
+  },
+  "jon-batiste-world-music-radio": {
+    "year": 2023,
+    "label": "Interscope Records",
+    "format": "2×LP",
+    "group": "4c894acb-b0fd-49ce-93ad-7cea649d8ab8",
+    "release": "c3653ce6-bc06-4154-a0e3-ee6c76975121",
+    "spotify": "0cX1ODY38Nd2LuijmfuSjF",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/world-music-radio/1693046146",
+      "deezer": "https://www.deezer.com/album/475060515"
+    },
+    "front": "jon-batiste-world-music-radio-front.webp",
+    "frontSource": "apple",
+    "spine": "#889cb3",
+    "back": "jon-batiste-world-music-radio-back.webp"
+  },
+  "joni-mitchell-at-newport": {
+    "year": 2023,
+    "label": "Rhino",
+    "group": "d86ec4bc-1f64-44e8-8b2f-f68e8aa85b6e",
+    "release": "15735280-f3a0-4fd6-a696-d4d39173b7ee",
+    "spotify": "7zMajDJncG6FmjICSlU9Oe",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/joni-mitchell-at-newport-live/1686570727",
+      "deezer": "https://www.deezer.com/album/464732395"
+    },
+    "front": "joni-mitchell-at-newport-front.webp",
+    "frontSource": "apple",
+    "spine": "#a49889"
+  },
+  "joseph-good-luck-kid": {
+    "year": 2019,
+    "label": "ATO Records",
+    "format": "LP",
+    "group": "d3ed8696-d4f8-49c7-a16a-c9dd515cdfc5",
+    "release": "6ce8c66a-213a-4292-ac35-8d03658fbf1c",
+    "spotify": "2DROF4ntHCrfJ2A04KXCJy",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/good-luck-kid/1471029285",
+      "deezer": "https://www.deezer.com/album/270282892"
+    },
+    "front": "joseph-good-luck-kid-front.webp",
+    "frontSource": "apple",
+    "spine": "#8f6056"
+  },
+  "various-artists-anchored-in-love-a-tribute-to-june-carter-cash": {
+    "year": 2007,
+    "label": "Dualtone",
+    "group": "3f5b7f3b-fce0-3e4a-a138-96e6918d3b65",
+    "release": "2c54ef2d-fd89-4b0f-b976-63b5a61641ff",
+    "spotify": "7oKkXPF0CRH5ki1D3E8KlJ",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/anchored-in-love-a-tribute-to-june-carter-cash/1750367718",
+      "deezer": "https://www.deezer.com/album/596963992"
+    },
+    "front": "various-artists-anchored-in-love-a-tribute-to-june-carter-cash-front.webp",
+    "frontSource": "apple",
+    "spine": "#9c7a54"
+  },
+  "kacey-musgraves-same-trailer-different-park": {
+    "year": 2013,
+    "label": "Mercury Records",
+    "format": "LP",
+    "group": "71758d87-635d-4d2f-9e5f-acbafbe2a928",
+    "release": "605508b6-e56d-4c75-b44d-e724c4cadbeb",
+    "spotify": "6IGpQUt0KNi5rBUXZZOFI6",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/same-trailer-different-park/1440858493",
+      "deezer": "https://www.deezer.com/album/6398248"
+    },
+    "front": "kacey-musgraves-same-trailer-different-park-front.webp",
+    "frontSource": "apple",
+    "spine": "#7b6957",
+    "back": "kacey-musgraves-same-trailer-different-park-back.webp"
+  },
+  "kevin-morby-little-wide-open": {
+    "year": 2026,
+    "label": "Dead Oceans",
+    "group": "a2647d6a-fc8f-49da-98c2-2a7d3a760e67",
+    "release": "06358c32-f254-41e7-9dc8-99931238e4c0",
+    "spotify": "4SE1kVQva7akjFCMxFiP7U",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/little-wide-open/1870715298",
+      "deezer": "https://www.deezer.com/album/901569392"
+    },
+    "front": "kevin-morby-little-wide-open-front.webp",
+    "frontSource": "apple",
+    "spine": "#6b5332",
+    "back": "kevin-morby-little-wide-open-back.webp"
+  },
+  "linda-ronstadt-greatest-hits": {
+    "year": 1976,
+    "label": "Asylum Records",
+    "format": "LP",
+    "group": "fecc17e4-e9a3-3e38-93a4-93b05daf5104",
+    "release": "86aae80f-8095-4ae8-bdb1-f8c341d43f55",
+    "spotify": "1OLaHAb4ZU4epzZ3k7JV0T",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/greatest-hits-2015-remastered/1028814908",
+      "deezer": "https://www.deezer.com/album/10982478"
+    },
+    "front": "linda-ronstadt-greatest-hits-front.webp",
+    "frontSource": "apple",
+    "spine": "#797c7d",
+    "back": "linda-ronstadt-greatest-hits-back.webp"
+  },
+  "the-lone-bellow-the-lone-bellow": {
+    "year": 2013,
+    "label": "Descendant Records",
+    "format": "LP",
+    "group": "a5c92772-9e5a-459c-baf6-a0421e494105",
+    "release": "89307837-a88f-4ca4-bbe8-f1a8c0e37683",
+    "spotify": "3inGHKOz7EFUwJPuSAPwZB",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/the-lone-bellow/586750119",
+      "deezer": "https://www.deezer.com/album/6251511"
+    },
+    "front": "the-lone-bellow-the-lone-bellow-front.webp",
+    "frontSource": "apple",
+    "spine": "#58514c",
+    "back": "the-lone-bellow-the-lone-bellow-back.webp"
+  },
+  "the-lone-bellow-then-came-the-morning": {
+    "year": 2015,
+    "label": "Descendant Records",
+    "group": "a0bcbf08-9316-4763-a479-8eabee207656",
+    "release": "42e8c5f3-e6e8-4460-a8d2-70ad89383e53",
+    "spotify": "5HU6Z7afYcN23XAegZ3EQA",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/then-came-the-morning/940648065",
+      "deezer": "https://www.deezer.com/album/9146133"
+    },
+    "front": "the-lone-bellow-then-came-the-morning-front.webp",
+    "frontSource": "apple",
+    "spine": "#503d35"
+  },
+  "lord-huron-lonesome-dreams": {
+    "year": 2012,
+    "label": "IAMSOUND Records",
+    "group": "56174f36-62c3-4c68-87d3-0052a09a7132",
+    "release": "15052674-7126-44fd-bbf4-f58139cd530c",
+    "spotify": "4YRpE1Scu5m6nCDdHZZP2M",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/lonesome-dreams-bonus-track-version/1758066410",
+      "deezer": "https://www.deezer.com/album/617296071"
+    },
+    "front": "lord-huron-lonesome-dreams-front.webp",
+    "frontSource": "apple",
+    "spine": "#626a60"
+  },
+  "lucius-wildewoman": {
+    "year": 2013,
+    "label": "Mom+Pop",
+    "group": "5e5c8b95-d04c-432f-8cd2-c1c8d99e6e5a",
+    "release": "3d05f20a-4961-42e9-a20e-cfb5482ce656",
+    "spotify": "6O0F7OuT3ujXXU8wdvw7pR",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/wildewoman-expanded-edition/1881659005",
+      "deezer": "https://www.deezer.com/album/930962311"
+    },
+    "front": "lucius-wildewoman-front.webp",
+    "frontSource": "apple",
+    "spine": "#b99e8a"
+  },
+  "lucius-second-nature": {
+    "year": 2022,
+    "label": "Mom+Pop",
+    "group": "6c4b7a49-a3cd-4241-8a2a-4779f9a93452",
+    "release": "6bc22583-2caf-4f60-ae77-f36104bb73a5",
+    "spotify": "2o4leL3SEDhm34hMJjUaBU",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/second-nature/1599395964",
+      "deezer": "https://www.deezer.com/album/796700171"
+    },
+    "front": "lucius-second-nature-front.webp",
+    "frontSource": "apple",
+    "spine": "#422230",
+    "back": "lucius-second-nature-back.webp"
+  },
+  "lucius-lucius": {
+    "year": 2025,
+    "label": "Fantasy",
+    "group": "fceb3f64-2674-4a53-8ccb-114bbe7e32a0",
+    "release": "54ed6278-6a3e-4a8a-a9df-a6efcc7e672a",
+    "spotify": "06JimjqlVKRMI05IhQt2kN",
+    "links": {
+      "deezer": "https://www.deezer.com/album/1044822562"
+    },
+    "front": "lucius-lucius-front.webp",
+    "frontSource": "caa",
+    "spine": "#875e4c"
+  },
+  "foxwarren-foxwarren": {
+    "year": 2018,
+    "label": "Anti‐",
+    "format": "LP",
+    "group": "05204afc-39ab-4ead-bbe6-4d73f1dc69cf",
+    "release": "8d0f0c9d-f429-43da-9d78-7a2481b08104",
+    "spotify": "27NP9XgsqFi9sfV9RZaqOa",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/foxwarren/1485073663",
+      "deezer": "https://www.deezer.com/album/79397742"
+    },
+    "front": "foxwarren-foxwarren-front.webp",
+    "frontSource": "apple",
+    "spine": "#e6b6ad",
+    "back": "foxwarren-foxwarren-back.webp"
   }
 }
