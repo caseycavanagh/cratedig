@@ -39,6 +39,7 @@ button{font:inherit;color:inherit}
 /* the crate */
 .crate{position:relative;height:calc(var(--S)*1.95);margin-top:8px;perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% - var(--S)*1.13);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:none}
 .crate.dragging{cursor:grabbing}
+.crate:not(.dragging):not(.lifted) .rc.cur:hover{--up:-4%;--lean:4deg}
 .stack{position:absolute;left:50%;bottom:calc(50% - var(--S)/2);width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt,-16deg))}
 .rc{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;transform-style:preserve-3d;transition:transform .7s var(--flip),opacity .45s;cursor:pointer}
 .crate.lifted .rc:not(.cur){opacity:0;transition:transform .7s var(--flip),opacity .35s}
@@ -80,7 +81,7 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .open.in #close{opacity:1}
 .o-page{min-height:100%;display:grid;place-items:center;padding:80px 24px}
 .o-grid{display:flex;align-items:center;justify-content:center;gap:64px}
-.stage{--O:var(--R);position:relative;z-index:2;flex:none;width:var(--O);height:var(--O);perspective:1600px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.stage{--O:var(--R);position:relative;z-index:2;flex:none;width:var(--O);height:var(--O);perspective:1600px;perspective-origin:78% 50%;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .stage.dragging{cursor:grabbing}
 .stage:focus-visible{outline:none}
 .lift{width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 50%}
@@ -90,11 +91,34 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .sleeve.settle{transition:transform .9s var(--flip)}
 .sleeve.back{transition:transform .55s cubic-bezier(.4,0,.2,1)}
 .sleeve.dragging{transition:none}
-.sleeve .face{border-radius:2px}
-.sleeve .bk{transform:rotateY(180deg)}
-.sleeve .edge{position:absolute;top:0;left:calc(50% - 2px);width:4px;height:100%;transform:rotateY(-90deg) translateZ(calc(var(--O)/2));filter:brightness(.7)}
-.sleeve .sh{position:absolute;inset:3% 3% 0;box-shadow:0 34px 60px -24px #0008;transform:translateZ(-2px);opacity:0;transition:opacity .6s}
+.sleeve{--T:max(9px,calc(var(--O)*.028))}
+.sleeve .face{border-radius:1px}
+.sleeve .fr{transform:translateZ(calc(var(--T)/2))}
+.sleeve .bk{transform:rotateY(180deg) translateZ(calc(var(--T)/2))}
+.sleeve .edge{position:absolute;top:0;left:calc(50% - var(--T)/2);width:var(--T);height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.sleeve .edge::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0000,#fff2 45%,#0000 55%,#0003)}
+.sleeve .edge.l{transform:rotateY(-90deg) translateZ(calc(var(--O)/2));filter:brightness(.62)}
+.sleeve .edge.r{transform:rotateY(90deg) translateZ(calc(var(--O)/2));filter:brightness(.72)}
+.sleeve .edge.t,.sleeve .edge.b{left:0;top:calc(50% - var(--T)/2);width:100%;height:var(--T)}
+.sleeve .edge.t{transform:rotateX(90deg) translateZ(calc(var(--O)/2));filter:brightness(.9)}
+.sleeve .edge.b{transform:rotateX(-90deg) translateZ(calc(var(--O)/2));filter:brightness(.5)}
+.sleeve .sh{position:absolute;inset:3% 3% 0;box-shadow:0 1px 2px #0002,0 6px 12px -4px #0002,0 24px 40px -14px #0005,0 60px 100px -36px #0008;transform:translateZ(calc(var(--T)/-2 - 1px));opacity:0;transition:opacity .6s}
 .open.in .sleeve .sh{opacity:1}
+/* a little light across the cardboard */
+.sleeve .face::after{background:linear-gradient(115deg,#ffffff14,#0000 35%,#0000 70%,#00000014)}
+html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #000a,0 60px 100px -36px #000d}
+/* the neighbors peek in from the page edges; hover pulls one out a little further */
+.peek{all:unset;position:fixed;top:50%;z-index:2;width:calc(var(--R)*.72);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
+  transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s;box-shadow:0 20px 40px -20px #0006}
+.peek img,.peek>div{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.peek.prev{left:0;--x:calc(-100% + 28px);--h:calc(-100% + 96px);--r:-1.5deg}
+.peek.next{right:0;--x:calc(100% - 28px);--h:calc(100% - 96px);--r:1.5deg}
+.peek{transform:translate(var(--x),-50%) rotate(var(--r))}
+.open.in .peek.on{opacity:.45;pointer-events:auto;transition:transform .85s var(--flip),opacity .5s .25s}
+.open.in .peek.on:hover{opacity:1;transform:translate(var(--h),-50%) rotate(0deg);transition:transform .6s var(--flip),opacity .25s}
+.open.in .peek.on:active{transform:translate(var(--h),-50%) scale(.96)}
+.open.in.swapping .peek{opacity:0;transition:opacity .15s}
+@media(max-width:860px){.peek{width:calc(var(--R)*.5)}}
 /* the details start tucked under the record and slide out to the right */
 .o-info{position:relative;z-index:1;flex:none;width:min(340px,30vw);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
@@ -105,7 +129,7 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 }
 .o-info h2{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
 .o-info .by{font-size:19px;color:var(--m);margin-top:4px}
-.facts{display:grid;grid-template-columns:96px 1fr;gap:6px 16px;margin-top:22px;font-size:15px}
+.facts{display:grid;grid-template-columns:96px 1fr;gap:6px 16px;margin-top:22px;font:400 14px/1.5 var(--mono)}
 .facts dt{color:var(--m)}
 .facts dd{margin:0}
 .spotify{margin-top:28px;height:40px;padding:0 18px;font-size:15px}
@@ -116,7 +140,7 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
   :root{--R:min(78vw,50vh);--R:min(78vw,50svh)}
   .o-info h2{font-size:26px}
 }
-@media(prefers-reduced-motion:reduce){.rc,.face::after,.sleeve,.sleeve.settle,.sleeve.back,.lift.moving,.lift.back,.o-info,.open.in .o-info{transition:none}}
+@media(prefers-reduced-motion:reduce){.peek,.open.in .peek.on,.open.in .peek.on:hover,.rc,.face::after,.sleeve,.sleeve.settle,.sleeve.back,.lift.moving,.lift.back,.o-info,.open.in .o-info{transition:none}}
 </style>
 </head>
 <body>
@@ -130,6 +154,8 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 </main>
 
 <div class="open" id="open" hidden tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="oTitle">
+  <button class="peek prev" id="prevP" tabindex="-1" aria-hidden="true"></button>
+  <button class="peek next" id="nextP" tabindex="-1" aria-hidden="true"></button>
   <div class="o-page">
     <button class="btn" id="close">← Back to the crate</button>
     <div class="o-grid">
@@ -191,13 +217,16 @@ function build(){
   stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div></div>`).join('');
 }
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
+// a hair of disorder, the same every visit: each record sits slightly off true
+const jit=r=>{let h=0;for(const c of r.slug)h=(h*31+c.charCodeAt(0))|0;const f=k=>((Math.sin(h*(k+1)*12.9898)*43758.5453)%1+1)%1-.5;return{x:f(0)*1.6,z:f(1)*1.4,a:f(2)*1.6}};
 function place(){
   $$('.rc',stack).forEach((n,j)=>{
     const d=j-cur;let z,a,shade;
     if(d<0){const k=-d-1;z=AHEAD+k*GAP;a=-(58+Math.min(k,8)*2);shade=`#00000000`}
     else if(d===0){z=0;a=10;shade='#0000'}
     else{z=-BEHIND-(d-1)*GAP;a=10+Math.min(d,6)*.5;shade=`rgb(0 0 0/${Math.min(.06*d,.4)})`}
-    n.style.transform=`translateZ(${z}px) rotateX(${a}deg)`;
+    const q=jit(order[j]),m=d===0?.5:1;
+    n.style.transform=`translateX(${(q.x*m).toFixed(2)}%) translateZ(${z}px) translateY(var(--up,0%)) rotateX(calc(${(a+q.a*m).toFixed(2)}deg - var(--lean,0deg))) rotateZ(${(q.z*m).toFixed(2)}deg)`;
     n.style.zIndex=d<0?100+d:50-d;
     n.style.setProperty('--shade',shade);
     n.classList.toggle('cur',d===0);
@@ -214,7 +243,7 @@ function go(i,now){
 
 // Pull a record out: big sleeve to turn over (drag, click, arrow keys), details and a Spotify link beside it
 // resting angle of a pulled-out sleeve: barely turned, unless you turn it
-const REST=5,TILT=-1;
+const REST=-10,TILT=-2;
 const open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage'),lift=$('#lift');
 let base=REST,ry=base,rx=TILT,sdrag=null,busy=false,timers=[];
 const later=(f,ms)=>timers.push(setTimeout(f,ms));
@@ -228,8 +257,12 @@ function fromCrate(){
   const dx=src.left+src.width/2-(t.left+t.width/2),dy=src.top+src.height/2-(t.top+t.height/2);
   return `translate(${dx}px,${dy}px) scale(${src.width/t.width})`;
 }
+const prevP=$('#prevP'),nextP=$('#nextP');
+function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';if(r)b.title=`${r.title}, ${r.artist}`}
+prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
 function fill(r){
-  sleeve.innerHTML=`<div class="sh"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div><div class="edge" style="background:${spineBg(r)}"></div>`;
+  sleeve.innerHTML=`<div class="sh"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${['l','r','t','b'].map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('')}`;
+  peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
       <dl class="facts"><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}</dd><dt>Added</dt><dd>${fmtDate(r.added)}</dd></dl>
     ${r.spotify?`<a class="btn spotify" href="https://open.spotify.com/album/${r.spotify}" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21Zm4.8 15.15a.66.66 0 0 1-.9.22c-2.48-1.5-5.6-1.85-9.27-1.01a.66.66 0 1 1-.3-1.28c4.02-.92 7.47-.52 10.25 1.17.31.19.41.6.22.9Zm1.28-2.85a.82.82 0 0 1-1.13.27c-2.84-1.75-7.17-2.25-10.53-1.23a.82.82 0 1 1-.48-1.57c3.84-1.16 8.6-.6 11.87 1.4.39.24.51.75.27 1.13Zm.11-2.97C14.78 8.8 9.15 8.6 5.9 9.6a.98.98 0 1 1-.57-1.88c3.74-1.13 9.96-.91 13.88 1.41a.98.98 0 0 1-1 1.7Z"/></svg>Play on Spotify<span class="sr"> (opens in a new tab)</span></a>`:''}`;
@@ -301,7 +334,7 @@ stage.addEventListener('pointermove',e=>{
   if(reduce||busy||e.pointerType!=='mouse')return;
   const b=stage.getBoundingClientRect();ry=base+((e.clientX-b.left)/b.width-.5)*6;rx=TILT-((e.clientY-b.top)/b.height-.5)*4;setS();
 });
-const sEnd=()=>{if(!sdrag)return;const tap=Math.abs(ry-sdrag.ry)<2;sdrag=null;stage.classList.remove('dragging');sleeve.classList.remove('dragging');base=tap?base:REST+180*Math.round((ry-REST)/180);ry=base;rx=TILT;settle();setS()};
+const sEnd=()=>{if(!sdrag)return;const tap=Math.abs(ry-sdrag.ry)<2;sdrag=null;stage.classList.remove('dragging');sleeve.classList.remove('dragging');base=tap?base+180:REST+180*Math.round((ry-REST)/180);ry=base;rx=TILT;settle();setS()};
 stage.addEventListener('pointerup',sEnd);stage.addEventListener('pointercancel',sEnd);
 stage.addEventListener('mouseleave',()=>{if(!sdrag&&!busy){ry=base;rx=TILT;settle();setS()}});
 stage.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();turn()}});

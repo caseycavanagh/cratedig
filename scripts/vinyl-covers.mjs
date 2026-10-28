@@ -2,7 +2,9 @@
 // Cover Art Archive (MusicBrainz) into public/directions/vinyl/, resized to
 // 800px with sips, looks up each album's Spotify ID for the embed player
 // (SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET from .env.local), and writes
-// covers.json for the prototype to read.
+// covers.json for the prototype to read. Fronts come from Apple Music's
+// artwork (clean, label-supplied) when it has the album; backs stay with the
+// Cover Art Archive.
 // Run on a Mac: node scripts/vinyl-covers.mjs   (add --force to refetch)
 import {mkdir, writeFile, readFile, access} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
@@ -74,11 +76,11 @@ async function findCovers(artist, title) {
 }
 
 async function save(img, file) {
-  const url = img.thumbnails?.['1200'] || img.thumbnails?.large || img.image;
+  const url = typeof img === 'string' ? img : img.thumbnails?.['1200'] || img.thumbnails?.large || img.image;
   const buf = await get(url, false);
   const tmp = path.join(OUT, '.tmp-' + path.basename(file));
   await writeFile(tmp, buf);
-  execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '80', '-Z', '800', tmp, '--out', file], {stdio: 'ignore'});
+  execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '80', '-Z', '1200', tmp, '--out', file], {stdio: 'ignore'});
   execFileSync('rm', [tmp]);
 }
 
@@ -105,6 +107,15 @@ async function spotifyAlbum(artist, title) {
   return hit?.id || null;
 }
 
+// Apple Music: the iTunes Search API needs no key; artwork URLs take any size up to the master
+async function appleFront(artist, title) {
+  const r = await get('https://itunes.apple.com/search?entity=album&limit=10&country=us&term=' + encodeURIComponent(`${q(artist)} ${q(title)}`));
+  const a = norm(artist), t = norm(title);
+  const hit = (r?.results || []).find(i => norm(i.artistName) === a && norm(i.collectionName) === t)
+    || (r?.results || []).find(i => norm(i.artistName) === a && norm(i.collectionName).startsWith(t));
+  return hit?.artworkUrl100?.replace(/\/\d+x\d+bb\.(jpg|png)$/, '/1500x1500bb.jpg') || null;
+}
+
 await mkdir(OUT, {recursive: true});
 const manifestPath = path.join(OUT, 'covers.json');
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8').catch(() => '{}'));
@@ -117,12 +128,21 @@ for (const [artist, title] of RECORDS) {
     if (id) manifest[s] = {...manifest[s], spotify: id};
     console.log(id ? 'spotify' : 'no spotify', s);
   }
-  if (!force && manifest[s]?.front && await exists(path.join(OUT, manifest[s].front))) { console.log('have covers', s); continue; }
+  if (force || manifest[s]?.frontSource !== 'apple') {
+    const url = await appleFront(artist, title).catch(() => null);
+    if (url) {
+      const front = `${s}-front.jpg`;
+      await save(url, path.join(OUT, front));
+      manifest[s] = {...manifest[s], front, frontSource: 'apple'};
+    }
+    console.log(url ? 'apple front' : 'no apple front', s);
+  }
+  if (!force && manifest[s]?.front && (manifest[s].back || manifest[s].release) && await exists(path.join(OUT, manifest[s].front))) { console.log('have covers', s); continue; }
   try {
     const c = await findCovers(artist, title);
     if (!c) { console.log('none', s); continue; }
-    const entry = {...manifest[s], release: c.release, front: `${s}-front.jpg`};
-    await save(c.front, path.join(OUT, entry.front));
+    const entry = {...manifest[s], release: c.release};
+    if (entry.frontSource !== 'apple') { entry.front = `${s}-front.jpg`; await save(c.front, path.join(OUT, entry.front)); }
     if (c.back) { entry.back = `${s}-back.jpg`; await save(c.back, path.join(OUT, entry.back)); }
     manifest[s] = entry;
     console.log(c.back ? 'front+back' : 'front', s);
