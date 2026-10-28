@@ -197,7 +197,7 @@ function place(){
 function go(i,now){
   i=Math.max(0,Math.min(order.length-1,i));
   if(i===cur&&!now)return;cur=i;place();
-  history.replaceState(null,'','#'+order[cur].slug);
+  if(open.hidden)history.replaceState(null,'','#'+order[cur].slug);
   const r=order[cur];
   $('#pos').textContent=`${r.title}, ${r.artist}, ${r.year}. ${cur+1} of ${order.length}`;
 }
@@ -208,7 +208,7 @@ let base=18,ry=base,rx=-3,sdrag=null;
 const setS=()=>sleeve.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
 const settle=()=>{sleeve.classList.add('settle');clearTimeout(settle.t);settle.t=setTimeout(()=>sleeve.classList.remove('settle'),900)};
 const turnLabel=()=>$('#turn').textContent=Math.round((base-18)/180)%2?'Turn back over':'Turn over';
-function openRecord(){
+function openRecord(deep){
   const r=order[cur];
   sleeve.innerHTML=`<div class="sh"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div><div class="edge" style="background:${spineBg(r)}"></div>`;
   base=18;ry=base;rx=-3;turnLabel();
@@ -222,17 +222,19 @@ function openRecord(){
   sleeve.classList.remove('arrive');void sleeve.offsetWidth;
   if(!reduce)sleeve.classList.add('arrive');setS();
   document.title=`${r.title} · Records`;
-  if(!history.state?.open)history.pushState({open:1},'','#'+r.slug);
+  // each record gets its own address: #record/<slug>
+  if(deep)history.replaceState(null,'','#record/'+r.slug);else if(!history.state?.open)history.pushState({open:1},'','#record/'+r.slug);
   $('#close').focus({preventScroll:true});
 }
 function closeRecord(fromPop){
   if(open.hidden)return;
   if(!fromPop&&history.state?.open){history.back();return}
+  if(!fromPop)history.replaceState(null,'','#'+order[cur].slug);
   const done=()=>{open.hidden=true;open.classList.remove('leaving');$('#oinfo').innerHTML='';document.documentElement.style.overflow='';crate.focus({preventScroll:true})};
   if(reduce)done();else{open.classList.add('leaving');setTimeout(done,180)}
   document.title='Records';
 }
-addEventListener('popstate',()=>closeRecord(true));
+addEventListener('popstate',()=>{const m=location.hash.match(/^#record\/(.+)$/),j=m?order.findIndex(r=>r.slug===m[1]):-1;if(j>=0){go(j,true);openRecord(true)}else closeRecord(true)});
 $('#close').onclick=()=>closeRecord();
 sleeve.addEventListener('animationend',()=>sleeve.classList.remove('arrive'));
 stage.addEventListener('pointerdown',e=>{sdrag={x:e.clientX,ry};stage.setPointerCapture(e.pointerId);stage.classList.add('dragging');sleeve.classList.add('dragging')});
@@ -277,16 +279,16 @@ addEventListener('keydown',e=>{
 
 function start(){
   sortBy(sortKey);
-  const j=order.findIndex(r=>r.slug===location.hash.slice(1));if(j>0)go(j,true);
+  const m=location.hash.match(/^#(record\/)?(.+)$/),j=m?order.findIndex(r=>r.slug===m[2]):-1;
+  if(j>0)go(j,true);
+  if(j>=0&&m[1])openRecord(true);
 }
 // Real covers and Spotify IDs, fetched by scripts/vinyl-covers.mjs; spines take their color from the cover's left edge
 function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d');x.drawImage(i,0,0,i.naturalWidth*.03,i.naturalHeight,0,0,4,64);const d=x.getImageData(0,0,4,64).data;let r=0,g=0,b=0;for(let k=0;k<d.length;k+=4){r+=d[k];g+=d[k+1];b+=d[k+2]}const n=d.length/4;res(`rgb(${r/n|0},${g/n|0},${b/n|0})`)}catch{res(null)}};i.onerror=()=>res(null);i.src=src})}
-start();
 fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(async m=>{
-  if(!Object.keys(m).length)return;
   RECORDS.forEach(r=>Object.assign(r,m[r.slug]||{}));
   await Promise.all(RECORDS.filter(r=>r.front).map(async r=>r.spine=await edgeColor('vinyl/'+r.front)));
-  const keep=order[cur].slug;sortBy(sortKey);go(order.findIndex(r=>r.slug===keep),true);
+  start();
 });
 </script>
 </body>
