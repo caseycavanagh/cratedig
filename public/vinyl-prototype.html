@@ -51,7 +51,7 @@ button{font:inherit;color:inherit}
 .crate.lifted .floor{opacity:0}
 .floor{transition:opacity .4s}
 .rc.held{visibility:hidden}
-.rc.gone{visibility:hidden}
+.rc.gone{display:none} /* out of sight: no layer at all */
 /* a flipped record sits in the shadow of the one it fell onto, darkest where they touch */
 .rc.fell .bk::after{background:linear-gradient(0deg,#00000070,#0000 22%),linear-gradient(180deg,#0000 70%,#0000002a),var(--shade,transparent)}
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:2px;container-type:inline-size}
@@ -131,6 +131,17 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .open.in .peek.on{opacity:.45;pointer-events:auto;transition:transform .85s var(--flip),opacity .5s .25s}
 .open.in .peek.on:hover{opacity:1;transform:translate(var(--h),-50%);transition:transform .6s var(--flip),opacity .25s}
 .open.in.swapping .peek{opacity:0;transition:none}
+/* hovering a peek names it, quietly, just below the edge it's peeking from */
+.phint{position:fixed;top:calc(50% + var(--R)/2 + 18px);z-index:2;display:grid;gap:2px;max-width:min(260px,40vw);pointer-events:none;opacity:0;transition:opacity .15s,transform .2s;font-size:14px;line-height:1.3}
+.phint.prev{left:28px;transform:translateX(-6px)}
+.phint.next{right:28px;text-align:right;transform:translateX(6px)}
+.phint b{font-weight:500}
+.phint i{font-style:normal;color:var(--m)}
+.phint.prev::before,.phint.next::before{font:400 12px/1 var(--mono);color:var(--m);margin-bottom:6px}
+.phint.prev::before{content:'← Previous'}
+.phint.next::before{content:'Next →'}
+.open.in:not(.swapping) .peek.prev.on:hover~.phint.prev,.open.in:not(.swapping) .peek.next.on:hover~.phint.next{opacity:1;transform:none;transition:opacity .25s .05s,transform .5s var(--flip) .05s}
+@media(hover:none){.phint{display:none}}
 /* the details start tucked under the record and slide out to the right */
 .o-info{position:relative;z-index:1;flex:none;width:min(340px,30vw);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
@@ -177,6 +188,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 <div class="open" id="open" hidden tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="oTitle">
   <button class="peek prev" id="prevP" tabindex="-1" aria-hidden="true"></button>
   <button class="peek next" id="nextP" tabindex="-1" aria-hidden="true"></button>
+  <span class="phint prev" aria-hidden="true"></span><span class="phint next" aria-hidden="true"></span>
   <div class="o-page">
     <button class="btn" id="close">← Back to the crate</button>
     <div class="o-grid">
@@ -186,6 +198,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
   </div>
 </div>
 
+<script src="vinyl/visitor-crate.js"></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -217,12 +230,14 @@ function art(r){
   if(r.art==='stripes'){for(let i=-10;i<12;i++)g+=`<path d="M${i*10} 100L${i*10+60} 40" stroke="${i%3?fg:ac}" stroke-width="2.6"/>`;g+=`<rect width="100" height="40" fill="${bg}"/>`}
   return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${g}</svg>`;
 }
-const coverHTML=r=>r.front?`<img class="art" src="vinyl/${r.front}" alt="" decoding="async" draggable="false">`:`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
+// local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
+const img=f=>/^https?:/.test(f)?f:'vinyl/'+f;
+const coverHTML=r=>r.front?`<img class="art" src="${img(r.front)}" alt="" decoding="async" draggable="false">`:`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
 const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
 const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-const backHTML=r=>r.back?`<img class="art" src="vinyl/${r.back}" alt="" decoding="async" draggable="false">`:`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
+const backHTML=r=>r.back?`<img class="art" src="${img(r.back)}" alt="" decoding="async" draggable="false">`:`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
 
 // crate geometry, in px
 const GAP=7,AHEAD=8,BEHIND=16,FGAP=3.5;
@@ -235,8 +250,10 @@ function sortBy(k){
   order=[...RECORDS].sort(k==='year'?(a,b)=>a.year-b.year:k==='added'?(a,b)=>b.added.localeCompare(a.added):(a,b)=>name(a.artist).localeCompare(name(b.artist)));
   build();go(0,true);
 }
+let nodes=[],jits=[],shown=[],frontBox=null;
 function build(){
   stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div></div>`).join('');
+  nodes=[...stack.children];jits=order.map(jit);shown=nodes.map(()=>true); // cached so each frame does no lookups
 }
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
 // a hair of disorder, the same every visit: each record sits slightly off true
@@ -252,9 +269,10 @@ function seat(d){
   const k=-d-1;return{z:AHEAD+k*FGAP,a:-(60+Math.min(k,8)*1.2),m:1}; // flipped records pile up, fanned a little, leaning far enough to show only their backs
 }
 function render(){
-  $$('.rc',stack).forEach((n,j)=>{
-    if(n.classList.contains('gone'))return;
-    const p=seat(j-pos),q=jit(order[j]);
+  frontBox=null;
+  nodes.forEach((n,j)=>{
+    if(!shown[j])return;
+    const p=seat(j-pos),q=jits[j];
     n.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg)`;
   });
 }
@@ -266,19 +284,23 @@ function tick(t){
 }
 function kick(){if(reduce){pos=aim;vel=0;render();return}if(!raf){tick.t=0;raf=requestAnimationFrame(tick)}}
 // shading and classes follow the whole-number position, and snap (animating them repaints every cover)
+// Only records you could see are drawn: the pile hides all but its top few, and past 10 deep nothing shows.
+// Shading is two flat steps (behind, flipped), so a flip repaints only the records that change sides.
 function place(){
-  $$('.rc',stack).forEach((n,j)=>{
-    const d=j-cur;
-    n.style.setProperty('--shade',d<0?`rgb(0 0 0/${Math.min(.04*(-d-1),.25)})`:d===0?'#0000':`rgb(0 0 0/${Math.min(.06*d,.4)})`);
+  nodes.forEach((n,j)=>{
+    const d=j-cur,show=d>=-3&&d<=10;
+    const shade=d<0?'rgb(0 0 0/.06)':d===0?'#0000':'rgb(0 0 0/.16)';
+    if(n.dataset.shade!==shade){n.dataset.shade=shade;n.style.setProperty('--shade',shade)}
     n.classList.toggle('cur',d===0);n.classList.toggle('fell',d<0);
-    n.classList.toggle('gone',d<-9||d>14);
+    if(shown[j]!==show){shown[j]=show;n.classList.toggle('gone',!show)}
   });
 }
+const setHash=()=>{clearTimeout(setHash.t);setHash.t=setTimeout(()=>{if(open.hidden)history.replaceState(null,'','#'+order[cur].slug)},250)};
 function go(i,now){
   i=Math.max(0,Math.min(order.length-1,i));
   if(now){cur=i;aim=pos=i;vel=0;place();render()}
   else{aim=i;kick();if(i===cur)return;cur=i;place()}
-  if(open.hidden)history.replaceState(null,'','#'+order[cur].slug);
+  if(open.hidden)setHash();
   const r=order[cur];
   $('#pos').textContent=`${r.title}, ${r.artist}, ${r.year}. ${cur+1} of ${order.length}`;
 }
@@ -310,7 +332,7 @@ function fromCrate(rect){
   return `translate(${dx}px,${dy}px) scale(${src.width/t.width})`;
 }
 const prevP=$('#prevP'),nextP=$('#nextP');
-function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';if(r)b.title=`${r.title}, ${r.artist}`}
+function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';const h=b.nextElementSibling.nextElementSibling;h.innerHTML=r?`<b>${r.title}</b><i>${r.artist}</i>`:''}
 prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
 function fill(r,noInfo){
   sleeve.innerHTML=`<div class="sh"></div><div class="sh b"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
@@ -321,8 +343,8 @@ function fill(r,noInfo){
 }
 function info(r){
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
-      <dl class="facts"><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}</dd></dl>
-    ${r.spotify?`<a class="btn spotify" href="https://open.spotify.com/album/${r.spotify}" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21Zm4.8 15.15a.66.66 0 0 1-.9.22c-2.48-1.5-5.6-1.85-9.27-1.01a.66.66 0 1 1-.3-1.28c4.02-.92 7.47-.52 10.25 1.17.31.19.41.6.22.9Zm1.28-2.85a.82.82 0 0 1-1.13.27c-2.84-1.75-7.17-2.25-10.53-1.23a.82.82 0 1 1-.48-1.57c3.84-1.16 8.6-.6 11.87 1.4.39.24.51.75.27 1.13Zm.11-2.97C14.78 8.8 9.15 8.6 5.9 9.6a.98.98 0 1 1-.57-1.88c3.74-1.13 9.96-.91 13.88 1.41a.98.98 0 0 1-1 1.7Z"/></svg>Play on Spotify<span class="sr"> (opens in a new tab)</span></a>`:''}`;
+      <dl class="facts">${[['Released',r.year],['Label',r.label],['Format',r.format]].filter(f=>f[1]).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+    ${r.spotify?`<a class="btn spotify" href="https://open.spotify.com/album/${r.spotify}" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21Zm4.8 15.15a.66.66 0 0 1-.9.22c-2.48-1.5-5.6-1.85-9.27-1.01a.66.66 0 1 1-.3-1.28c4.02-.92 7.47-.52 10.25 1.17.31.19.41.6.22.9Zm1.28-2.85a.82.82 0 0 1-1.13.27c-2.84-1.75-7.17-2.25-10.53-1.23a.82.82 0 1 1-.48-1.57c3.84-1.16 8.6-.6 11.87 1.4.39.24.51.75.27 1.13Zm.11-2.97C14.78 8.8 9.15 8.6 5.9 9.6a.98.98 0 1 1-.57-1.88c3.74-1.13 9.96-.91 13.88 1.41a.98.98 0 0 1-1 1.7Z"/></svg>Play on Spotify<span class="sr"> (opens in a new tab)</span></a>`:r.apple?`<a class="btn spotify" href="${r.apple}" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.7c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.5 1.3-.1 1.7-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.2-1.2 3-2.5 1-1.4 1.4-2.8 1.4-2.8s-2.6-1-2.6-4.2ZM14 5.4c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4Z"/></svg>Play on Apple Music<span class="sr"> (opens in a new tab)</span></a>`:''}`;
 }
 function openRecord(deep,from){
   const r=order[cur];fill(r);
@@ -416,14 +438,17 @@ crate.addEventListener('wheel',e=>{
   acc+=e.deltaY;if(Math.abs(acc)>=45){go(cur+Math.sign(acc));acc=0}
 },{passive:false});
 let drag=null,moved=false;
-let mxF=0;crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||mxF)return;mxF=requestAnimationFrame(()=>{mxF=0;const n=$('.rc.cur',stack),b=n?.querySelector('.fr').getBoundingClientRect();if(b)n.style.setProperty('--mx',Math.max(-1,Math.min(1,((e.clientX-b.left)/b.width-.5)*2)).toFixed(1))})});
+// a pull of a record's worth flips one; a short, deliberate pull still flips one; only a long pull riffles several
+const PULL=120,pulled=dy=>{const n=Math.abs(dy)/PULL;return Math.sign(dy)*(n<1?(n>.25?1:0):Math.round(n))};
+let mxF=0;addEventListener('resize',()=>frontBox=null);
+crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||mxF||raf)return;mxF=requestAnimationFrame(()=>{mxF=0;const n=nodes[cur];if(!n)return;const b=frontBox||=n.querySelector('.fr').getBoundingClientRect();const mx=Math.max(-1,Math.min(1,((e.clientX-b.left)/b.width-.5)*2)).toFixed(1);if(n.dataset.mx!==mx){n.dataset.mx=mx;n.style.setProperty('--mx',mx)}})});
 crate.addEventListener('pointerdown',e=>{drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc')};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
   const dy=e.clientY-drag.y;if(Math.abs(dy)>6&&!moved){moved=true;crate.classList.add('pulling')}
   if(!moved)return;
-  aim=Math.max(0,Math.min(order.length-1,drag.i+dy/48));kick(); // pull toward you to flip forward
-  const j=Math.round(aim);if(j!==cur){cur=j;place();history.replaceState(null,'','#'+order[cur].slug)}
+  aim=Math.max(0,Math.min(order.length-1,drag.i+dy/PULL));kick(); // pull toward you to flip forward
+  const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
 // a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
 const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j,from={rect:drag.rc.querySelector('.fr').getBoundingClientRect(),flipped:j<cur};if(j!==cur)go(j);openRecord(false,from)}if(drag&&moved)go(cur,false);drag=null;moved=false;crate.classList.remove('dragging','pulling')};
@@ -450,14 +475,16 @@ function start(){
 {const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),d=x.createImageData(128,128);
  for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=14}x.putImageData(d,0,0);
  document.documentElement.style.setProperty('--grain',`url(${c.toDataURL()})`)}
-function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d');x.drawImage(i,0,0,i.naturalWidth*.03,i.naturalHeight,0,0,4,64);const d=x.getImageData(0,0,4,64).data;let r=0,g=0,b=0;for(let k=0;k<d.length;k+=4){r+=d[k];g+=d[k+1];b+=d[k+2]}const n=d.length/4;res(`rgb(${r/n|0},${g/n|0},${b/n|0})`)}catch{res(null)}};i.onerror=()=>res(null);i.src=src})}
-fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(async m=>{
-  RECORDS.forEach(r=>Object.assign(r,m[r.slug]||{}));
+function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d');x.drawImage(i,0,0,i.naturalWidth*.03,i.naturalHeight,0,0,4,64);const d=x.getImageData(0,0,4,64).data;let r=0,g=0,b=0;for(let k=0;k<d.length;k+=4){r+=d[k];g+=d[k+1];b+=d[k+2]}const n=d.length/4;res(`rgb(${r/n|0},${g/n|0},${b/n|0})`)}catch{res(null)}};i.onerror=()=>res(null);i.crossOrigin='anonymous';i.src=src})}
+// Casey's crate, or a visitor's crate when the address carries one (vinyl-make.html builds those links)
+Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null)]).then(async([m,v])=>{
+  if(v&&v.records.length){RECORDS.splice(0,RECORDS.length,...v.records);document.title=VisitorCrate.crateName(v.name)}
+  else RECORDS.forEach(r=>Object.assign(r,m[r.slug]||{}));
   // hold the crate back until every cover, front and back, is decoded, so it arrives whole
-  const srcs=RECORDS.flatMap(r=>[r.front,r.back].filter(Boolean)).map(f=>'vinyl/'+f);let n=0;
+  const srcs=RECORDS.flatMap(r=>[r.front,r.back].filter(Boolean)).map(img);let n=0;
   const tick=()=>{n++;$('#loadN').textContent=`${n} of ${srcs.length}`;$('#loadBar').style.transform=`scaleX(${n/srcs.length})`};
   const load=src=>{const i=new Image();i.src=src;return i.decode().catch(()=>{}).then(tick)};
-  await Promise.race([Promise.all([...srcs.map(load),...RECORDS.filter(r=>r.front).map(async r=>r.spine=await edgeColor('vinyl/'+r.front))]),new Promise(r=>setTimeout(r,12000))]);
+  await Promise.race([Promise.all([...srcs.map(load),...RECORDS.filter(r=>r.front).map(async r=>r.spine=await edgeColor(img(r.front)))]),new Promise(r=>setTimeout(r,12000))]);
   start();
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
 });
