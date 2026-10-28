@@ -39,7 +39,8 @@ button{font:inherit;color:inherit}
 /* the crate */
 .crate{position:relative;height:calc(var(--S)*1.95);margin-top:8px;perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% - var(--S)*1.13);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:none}
 .crate.dragging{cursor:grabbing}
-.crate:not(.dragging):not(.lifted) .rc.cur:hover{--up:-4%;--lean:4deg}
+/* hover nudges the front record a little toward the pointer's side */
+.crate:not(.dragging):not(.lifted) .rc.cur:hover{--hx:calc(var(--mx,0)*2.2%);--hz:calc(var(--mx,0)*.8deg);--up:-.6%}
 .stack{position:absolute;left:50%;bottom:calc(50% - var(--S)/2);width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt,-16deg))}
 .rc{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;transform-style:preserve-3d;transition:transform .7s var(--flip),opacity .45s;cursor:pointer}
 .crate.lifted .rc:not(.cur){opacity:0;transition:transform .7s var(--flip),opacity .35s}
@@ -51,6 +52,27 @@ button{font:inherit;color:inherit}
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:2px;container-type:inline-size}
 .face::after{content:'';position:absolute;inset:0;background:var(--shade,transparent);transition:background .7s;pointer-events:none}
 .bk{transform:rotateY(180deg)}
+/* every jacket has thickness: faces pushed apart, cardboard edges between them */
+.rc{--T:max(2px,calc(var(--S)*.005));--W:var(--S)}
+.rc .face,.sleeve .face{border-radius:1px}
+.rc .fr,.sleeve .fr{transform:translateZ(calc(var(--T)/2))}
+.rc .bk,.sleeve .bk{transform:rotateY(180deg) translateZ(calc(var(--T)/2))}
+.edge{position:absolute;top:0;left:calc(50% - var(--T)/2);width:var(--T);height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.edge::after{content:'';position:absolute;inset:0}
+.rc .edge::before{content:'';position:absolute;inset:0;background:var(--shade,transparent);transition:background .7s}
+.edge.l{transform:rotateY(-90deg) translateZ(calc(var(--W)/2));filter:brightness(.62)}
+.edge.r{transform:rotateY(90deg) translateZ(calc(var(--W)/2));filter:brightness(.72)}
+.edge.t,.edge.b{left:0;top:calc(50% - var(--T)/2);width:100%;height:var(--T)}
+.edge.t{transform:rotateX(90deg) translateZ(calc(var(--W)/2));filter:brightness(.92)}
+.edge.b{transform:rotateX(-90deg) translateZ(calc(var(--W)/2));filter:brightness(.5)}
+/* cardboard: a fine grain, light from the top left, and worn edges that catch it */
+:root{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.rc .face::before,.sleeve .face::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
+  background:var(--grain),linear-gradient(115deg,#ffffff16,#0000 35%,#0000 70%,#0000001c);background-size:160px,auto;mix-blend-mode:overlay;
+  box-shadow:inset 1px 1px 0 #ffffff40,inset -1px -1px 0 #00000030,inset 0 0 0 2px #ffffff0d,inset 0 0 calc(var(--W)*.02) #00000024}
+.edge{background-blend-mode:multiply}
+.edge::after{background:var(--grain),linear-gradient(90deg,#0000003a,#ffffff30 40%,#ffffff12 60%,#00000040);background-size:120px,auto}
+.edge.t::after{background:var(--grain),linear-gradient(180deg,#00000030,#ffffff4a 45%,#ffffff1a 60%,#00000038);background-size:120px,auto}
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
 img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none}
 .cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
@@ -85,30 +107,20 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .stage.dragging{cursor:grabbing}
 .stage:focus-visible{outline:none}
 .lift{width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 50%}
+.lift.ghost{position:absolute;inset:0;pointer-events:none}
 .lift.moving{transition:transform .9s var(--flip)}
 .lift.back{transition:transform .55s cubic-bezier(.4,0,.2,1)}
 .sleeve{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .25s ease-out}
 .sleeve.settle{transition:transform .9s var(--flip)}
 .sleeve.back{transition:transform .55s cubic-bezier(.4,0,.2,1)}
 .sleeve.dragging{transition:none}
-.sleeve{--T:max(9px,calc(var(--O)*.028))}
+.sleeve{--T:max(3px,calc(var(--O)*.007));--W:var(--O)}
 .sleeve .face{border-radius:1px}
-.sleeve .fr{transform:translateZ(calc(var(--T)/2))}
-.sleeve .bk{transform:rotateY(180deg) translateZ(calc(var(--T)/2))}
-.sleeve .edge{position:absolute;top:0;left:calc(50% - var(--T)/2);width:var(--T);height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.sleeve .edge::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0000,#fff2 45%,#0000 55%,#0003)}
-.sleeve .edge.l{transform:rotateY(-90deg) translateZ(calc(var(--O)/2));filter:brightness(.62)}
-.sleeve .edge.r{transform:rotateY(90deg) translateZ(calc(var(--O)/2));filter:brightness(.72)}
-.sleeve .edge.t,.sleeve .edge.b{left:0;top:calc(50% - var(--T)/2);width:100%;height:var(--T)}
-.sleeve .edge.t{transform:rotateX(90deg) translateZ(calc(var(--O)/2));filter:brightness(.9)}
-.sleeve .edge.b{transform:rotateX(-90deg) translateZ(calc(var(--O)/2));filter:brightness(.5)}
 .sleeve .sh{position:absolute;inset:3% 3% 0;box-shadow:0 1px 2px #0002,0 6px 12px -4px #0002,0 24px 40px -14px #0005,0 60px 100px -36px #0008;transform:translateZ(calc(var(--T)/-2 - 1px));opacity:0;transition:opacity .6s}
 .open.in .sleeve .sh{opacity:1}
-/* a little light across the cardboard */
-.sleeve .face::after{background:linear-gradient(115deg,#ffffff14,#0000 35%,#0000 70%,#00000014)}
 html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #000a,0 60px 100px -36px #000d}
 /* the neighbors peek in from the page edges; hover pulls one out a little further */
-.peek{all:unset;position:fixed;top:50%;z-index:2;width:calc(var(--R)*.72);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
+.peek{all:unset;position:fixed;top:50%;z-index:2;width:var(--R);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
   transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s;box-shadow:0 20px 40px -20px #0006}
 .peek img,.peek>div{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
 .peek.prev{left:0;--x:calc(-100% + 28px);--h:calc(-100% + 96px);--r:-1.5deg}
@@ -116,9 +128,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .peek{transform:translate(var(--x),-50%) rotate(var(--r))}
 .open.in .peek.on{opacity:.45;pointer-events:auto;transition:transform .85s var(--flip),opacity .5s .25s}
 .open.in .peek.on:hover{opacity:1;transform:translate(var(--h),-50%) rotate(0deg);transition:transform .6s var(--flip),opacity .25s}
-.open.in .peek.on:active{transform:translate(var(--h),-50%) scale(.96)}
-.open.in.swapping .peek{opacity:0;transition:opacity .15s}
-@media(max-width:860px){.peek{width:calc(var(--R)*.5)}}
+.open.in.swapping .peek{opacity:0;transition:none}
 /* the details start tucked under the record and slide out to the right */
 .o-info{position:relative;z-index:1;flex:none;width:min(340px,30vw);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
@@ -198,9 +208,10 @@ function art(r){
 }
 const coverHTML=r=>r.front?`<img class="art" src="vinyl/${r.front}" alt="" decoding="async" draggable="false">`:`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
+const edgesHTML=r=>['l','r','t','b'].map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
 const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-const backHTML=r=>r.back?`<img class="art" src="vinyl/${r.back}" alt="" decoding="async" draggable="false">`:`<div class="back-in" style="background:${spineBg(r)};color:${r.pal[1]}"><div><b>${r.title}</b>${r.artist}</div><dl><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}, 33⅓ rpm</dd></dl></div>`;
+const backHTML=r=>r.back?`<img class="art" src="vinyl/${r.back}" alt="" decoding="async" draggable="false">`:`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
 
 // crate geometry, in px
 const GAP=7,AHEAD=26,BEHIND=16;
@@ -214,7 +225,7 @@ function sortBy(k){
   build();go(0,true);
 }
 function build(){
-  stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div></div>`).join('');
+  stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}</div>`).join('');
 }
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
 // a hair of disorder, the same every visit: each record sits slightly off true
@@ -226,7 +237,7 @@ function place(){
     else if(d===0){z=0;a=10;shade='#0000'}
     else{z=-BEHIND-(d-1)*GAP;a=10+Math.min(d,6)*.5;shade=`rgb(0 0 0/${Math.min(.06*d,.4)})`}
     const q=jit(order[j]),m=d===0?.5:1;
-    n.style.transform=`translateX(${(q.x*m).toFixed(2)}%) translateZ(${z}px) translateY(var(--up,0%)) rotateX(calc(${(a+q.a*m).toFixed(2)}deg - var(--lean,0deg))) rotateZ(${(q.z*m).toFixed(2)}deg)`;
+    n.style.transform=`translateX(${(q.x*m).toFixed(2)}%) translateZ(${z}px) translateY(var(--up,0%)) rotateX(${(a+q.a*m).toFixed(2)}deg) translateX(var(--hx,0%)) rotateZ(calc(${(q.z*m).toFixed(2)}deg + var(--hz,0deg)))`;
     n.style.zIndex=d<0?100+d:50-d;
     n.style.setProperty('--shade',shade);
     n.classList.toggle('cur',d===0);
@@ -261,7 +272,7 @@ const prevP=$('#prevP'),nextP=$('#nextP');
 function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';if(r)b.title=`${r.title}, ${r.artist}`}
 prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
 function fill(r){
-  sleeve.innerHTML=`<div class="sh"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${['l','r','t','b'].map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('')}`;
+  sleeve.innerHTML=`<div class="sh"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
   peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
       <dl class="facts"><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}</dd><dt>Added</dt><dd>${fmtDate(r.added)}</dd></dl>
@@ -300,16 +311,20 @@ function swap(dir){
   const r=order[cur];
   history.replaceState(history.state,'','#record/'+r.slug);
   if(reduce){fill(r);setS();return}
+  // the record travels out to the edge it came from and becomes the peek; the neighbor travels in from its edge
   busy=true;
-  lift.className='lift';lift.style.transition='transform .28s cubic-bezier(.4,0,1,1),opacity .2s';
-  lift.style.transform=`translateX(${-dir*35}%) rotateY(${-dir*8}deg)`;lift.style.opacity='0';
+  const W=stage.offsetWidth,sc=stage.getBoundingClientRect(),cx=sc.left+W/2;
+  const edgeX=side=>side<0?28-W/2-cx:innerWidth-28+W/2-cx;
+  const ghost=lift.cloneNode(true);ghost.removeAttribute('id');ghost.querySelector('.sleeve').removeAttribute('id');
+  ghost.className='lift ghost';ghost.style.transform='';stage.append(ghost);
   open.classList.add('swapping');
-  later(()=>{
-    fill(r);lift.style.transition='none';lift.style.transform=`translateX(${dir*35}%) rotateY(${dir*8}deg)`;setS();void lift.offsetWidth;
-    lift.style.transition='transform .8s var(--flip),opacity .3s';lift.style.transform='';lift.style.opacity='';
-    open.classList.remove('swapping');
-  },280);
-  later(()=>{lift.style.transition='';busy=false},1050);
+  fill(r);lift.className='lift';lift.style.transition='none';lift.style.transform=`translateX(${edgeX(dir)}px)`;lift.style.opacity='.45';setS();
+  void lift.offsetWidth;
+  const ease='cubic-bezier(.3,.75,.2,1)';
+  ghost.style.transition=`transform .7s ${ease},opacity .7s`;ghost.style.transform=`translateX(${edgeX(-dir)}px)`;ghost.style.opacity='.45';
+  lift.style.transition=`transform .7s ${ease},opacity .5s`;lift.style.transform='';lift.style.opacity='';
+  later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},700);
+  later(()=>{lift.style.transition='';busy=false},760);
 }
 function closeRecord(fromPop){
   if(open.hidden)return;
@@ -349,6 +364,7 @@ crate.addEventListener('wheel',e=>{
   acc+=e.deltaY;if(Math.abs(acc)>=45){go(cur+Math.sign(acc));acc=0}
 },{passive:false});
 let drag=null,moved=false;
+crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag)return;const b=$('.rc.cur .fr',stack)?.getBoundingClientRect();if(b)crate.style.setProperty('--mx',Math.max(-1,Math.min(1,((e.clientX-b.left)/b.width-.5)*2)).toFixed(2))});
 crate.addEventListener('pointerdown',e=>{drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc')};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
