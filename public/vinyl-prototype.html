@@ -196,7 +196,8 @@ html[data-theme=dark] .play-m{box-shadow:0 12px 32px -12px #000c}
 /* Phones: the crate becomes a pile of records facing you; an open record stacks its details underneath, Play within reach of a thumb */
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 270px));-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 html.phone .page{padding:0}
-html.phone .crate{perspective:1600px;perspective-origin:50% 40%;cursor:default;-webkit-touch-callout:none}
+/* eye level with the bottom of the pile, so a record tipped all the way toward you is edge on and gone, not lying there */
+html.phone .crate{perspective:1500px;perspective-origin:50% calc(50% - 44px + var(--S)/2);cursor:default;-webkit-touch-callout:none}
 html.phone .stack{transform:none;bottom:calc(50% + 44px - var(--S)/2)}
 html.phone .rc{transform-origin:50% 50%}
 html.phone .floor{display:none}
@@ -275,6 +276,7 @@ html.phone .play-m a:active{background:var(--soft);transform:none}
 @media(max-height:500px){
   html.phone{--S:calc(100svh - 150px)}
   html.phone .stack{bottom:calc(50% + 34px - var(--S)/2)}
+  html.phone .crate{perspective-origin:50% calc(50% - 34px + var(--S)/2)}
   html.phone .dcap{top:calc(50% - 34px + var(--S)/2 + 16px)}
   html.phone .dhint{display:none}
   html.phone .open{--O:calc(100svh - 72px)}
@@ -303,7 +305,7 @@ html.phone .play-m a:active{background:var(--soft);transform:none}
   <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record.">
     <div class="floor"></div>
     <div class="stack" id="stack"></div>
-    <div class="dcap" id="dcap" aria-hidden="true"><div class="t"><b></b><span></span></div><i></i><p class="dhint">Swipe to flip through, tap to pull one out</p></div>
+    <div class="dcap" id="dcap" aria-hidden="true"><div class="t"><b></b><span></span></div><i></i><p class="dhint">Pull down to flip through, tap to pull one out</p></div>
     <div class="veil" id="veil"></div>
   </section>
   <p class="sr" id="pos" aria-live="polite"></p>
@@ -383,15 +385,16 @@ function build(){
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
 // a hair of disorder, the same every visit: each record sits slightly off true
 const jit=r=>{let h=0;for(const c of r.slug)h=(h*31+c.charCodeAt(0))|0;const f=k=>((Math.sin(h*(k+1)*12.9898)*43758.5453)%1+1)%1-.5;return{x:f(0)*1.6,z:f(1)*1.4,a:f(2)*1.6}};
-// Phones: a pile of records facing you. Swipe the top one away for the next, swipe back for the one before, tap or push it up to pull it out.
+// Phones: a pile of records facing you. Pull the top one down and it tips toward you, out of the way, the way a record flips in the crate;
+// push up to stand the last one back up; tap to pull one out.
 const root=document.documentElement,phoneQ=matchMedia(PHONE_Q);
-let PHONE=phoneQ.matches,span=0,dd=null;
-// the top record can also leave its track under your finger: a little give past either end, a push up to open; it springs back
+let PHONE=phoneQ.matches,deckS=0,dd=null;
+// the top record can also leave its track under your finger: a little give before the first one; it springs back
 const off={x:0,y:0,vx:0,vy:0};
-// where a record sits at a (fractional) distance d below the top of the pile; gone ones fly off to the left
+// where a record sits at a (fractional) distance d below the top of the pile; a flipped one tips toward you on its bottom edge until it's edge on, gone
 function deckSeat(d,q){
-  if(d>=0){const k=Math.min(d,4),w=Math.min(d,1);return{x:q.x*5*w,y:-Math.min(k,3)*14,z:-k*3,s:1-k*.035,r:q.z*2.4*w}}
-  const t=-d,u=Math.min(t,1);return{x:-t*span,y:u*36,z:10-Math.min(t,3),s:1+Math.sin(Math.PI*u)*.03,r:-u*14};
+  if(d>=0){const k=Math.min(d,4),w=Math.min(d,1);return{x:q.x*5*w,y:-Math.min(k,3)*14,z:-k*3,s:1-k*.035,r:q.z*2.4*w,a:0}}
+  return{x:0,y:0,z:1,s:1,r:0,a:-Math.acos(1-Math.min(-d,1))*180/Math.PI}; // its top edge keeps pace with your finger
 }
 // One spring drives the crate: pos chases aim, so a flip can be interrupted, retargeted or dragged without restarting
 let pos=0,vel=0,aim=0,raf=0;
@@ -406,11 +409,13 @@ function seat(d){
 function render(){
   frontBox=null;
   if(PHONE){
-    if(!span)span=(innerWidth+(nodes[cur]?.offsetWidth||0)*1.25)/2+24; // far enough that a gone record, tilted, is off the screen
+    if(!deckS)deckS=nodes[cur]?.offsetWidth||0;
+    const h=deckS/2;
     nodes.forEach((n,j)=>{
       if(!shown[j])return;
       const p=deckSeat(j-pos,jits[j]),o=j===cur?off:{x:0,y:0},s=p.s*(1+Math.max(0,-o.y)/4000);
-      n.style.transform=`translate3d(${(p.x+o.x).toFixed(1)}px,${(p.y+o.y).toFixed(1)}px,${p.z.toFixed(1)}px) rotate(${(p.r+o.x/40).toFixed(2)}deg) scale(${s.toFixed(4)})`;
+      const tip=p.a?` translateY(${h}px) rotateX(${p.a.toFixed(2)}deg) translateY(${-h}px)`:''; // hinged on the bottom edge
+      n.style.transform=`translate3d(${(p.x+o.x).toFixed(1)}px,${(p.y+o.y).toFixed(1)}px,${p.z.toFixed(1)}px)${tip} rotate(${p.r.toFixed(2)}deg) scale(${s.toFixed(4)})`;
     });
     return;
   }
@@ -709,7 +714,7 @@ crate.addEventListener('wheel',e=>{
 let drag=null,moved=false;
 // a pull of a record's worth flips one; a short, deliberate pull still flips one; only a long pull riffles several
 const PULL=120,pulled=dy=>{const n=Math.abs(dy)/PULL;return Math.sign(dy)*(n<1?(n>.25?1:0):Math.round(n))};
-let mxF=0;addEventListener('resize',()=>{frontBox=null;span=0;if(PHONE){if(nodes.length&&!raf)render();if(!open.hidden)aimPeeks()}});
+let mxF=0;addEventListener('resize',()=>{frontBox=null;deckS=0;if(PHONE){if(nodes.length&&!raf)render();if(!open.hidden)aimPeeks()}});
 crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||mxF||raf)return;mxF=requestAnimationFrame(()=>{mxF=0;const n=nodes[cur];if(!n)return;const b=frontBox||=n.querySelector('.fr').getBoundingClientRect();const mx=Math.max(-1,Math.min(1,((e.clientX-b.left)/b.width-.5)*2)).toFixed(1);if(n.dataset.mx!==mx){n.dataset.mx=mx;n.style.setProperty('--mx',mx)}})});
 crate.addEventListener('pointerdown',e=>{if(PHONE)return;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc')};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
 crate.addEventListener('pointermove',e=>{
@@ -722,7 +727,7 @@ crate.addEventListener('pointermove',e=>{
 // a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
 const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j,from={rect:drag.rc.querySelector('.fr').getBoundingClientRect(),flipped:j<cur};if(j!==cur)go(j);openRecord(false,from)}if(drag&&moved)go(cur,false);drag=null;moved=false;crate.classList.remove('dragging','pulling')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
-// a finger on the pile: sideways swipes through it, up pulls the top record out, a tap opens it
+// a finger on the pile: down flips the top record toward you, up stands the last one back up, a tap opens it; sideways does nothing
 const openTop=()=>{const r=nodes[cur].querySelector('.fr').getBoundingClientRect();off.x=off.y=off.vx=off.vy=0;openRecord(false,{rect:r});render()};
 const rub=e=>e*.3/(1+Math.abs(e)/300); // past the ends the pile gives, less the further you go
 crate.addEventListener('pointerdown',e=>{
@@ -737,21 +742,20 @@ crate.addEventListener('pointermove',e=>{
   const dx=e.clientX-dd.x,dy=e.clientY-dd.y,now=performance.now(),dt=Math.max(8,now-dd.lt);
   dd.vx=.5*dd.vx+.5*(e.clientX-dd.lx)/dt;dd.vy=.5*dd.vy+.5*(e.clientY-dd.ly)/dt;dd.lt=now;dd.lx=e.clientX;dd.ly=e.clientY;
   if(!dd.ax){if(Math.hypot(dx,dy)<8)return;dd.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';crate.classList.remove('pressing')}
-  if(dd.ax==='x'){
-    const hi=order.length-1;let p=dd.p-dx/span;off.x=0;
-    if(p<0){off.x=rub(-p*span);p=0}
-    if(p>hi){off.x=-rub((p-hi)*span);p=hi}
-    pos=p;vel=0;
-    const j=Math.round(p);if(j!==cur){cur=j;aim=j;place();setHash();say()} // the caption changes as the next record takes the top
-  }else off.y=dy<0?dy:rub(dy);
+  if(dd.ax!=='y')return;
+  const hi=order.length-1;let p=dd.p+dy/deckS;off.y=0;
+  if(p<0){off.y=-rub(-p*deckS);p=0} // nothing before the first: it lifts a little
+  if(p>hi)p=hi+rub((p-hi)*deckS)/deckS; // nothing after the last: it tips a little and stands back up
+  pos=p;vel=0;
+  const j=Math.min(hi,Math.round(p));if(j!==cur){cur=j;aim=j;place();setHash();say()} // the caption changes as the next record takes the top
   render();
 });
 const deckEnd=e=>{
   if(!dd)return;const s=dd;dd=null;crate.classList.remove('pressing');
   if(!s.ax){if(e.type==='pointerup'&&performance.now()-s.t<500&&Math.abs(s.p-s.b)<.05)openTop();else kick();return}
-  if(s.ax==='y'){if(off.y<-90||s.vy<-.5&&off.y<-24)openTop();else kick();return}
-  // one swipe, one record: far enough or fast enough and the next one comes up, carrying the flick's speed
-  const v=-s.vx*1000/span,moved=pos-s.p;let to=s.b;
+  if(s.ax!=='y'){kick();return}
+  // one pull, one record: far enough or fast enough and it flips, carrying the flick's speed
+  const v=s.vy*1000/deckS,moved=pos-s.p;let to=s.b;
   if(moved>.2||v>.9&&moved>.02)to=s.b+1;else if(moved<-.2||v<-.9&&moved<-.02)to=s.b-1;
   to=Math.max(0,Math.min(order.length-1,to));
   vel=Math.max(-12,Math.min(12,v));
@@ -767,7 +771,7 @@ function buzz(){
   document.head.append(l);l.click();l.remove();
 }
 // a window narrowed past a phone's width becomes one, and back
-phoneQ.addEventListener('change',()=>{PHONE=phoneQ.matches;restFor();root.classList.toggle('phone',PHONE);span=0;off.x=off.y=0;if(nodes.length){place();render();say()}});
+phoneQ.addEventListener('change',()=>{PHONE=phoneQ.matches;restFor();root.classList.toggle('phone',PHONE);deckS=0;off.x=off.y=0;if(nodes.length){place();render();say()}});
 addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,iframe')||e.metaKey||e.ctrlKey)return;
   if(!open.hidden&&playMenu()){
