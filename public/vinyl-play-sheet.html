@@ -91,6 +91,7 @@ html[data-theme=dark] .pg{--vb:#121212;--vf:#ecebe8;--vm:#8f8f93;--vl:#3a3a3d;--
 .dotted .more{margin-left:-1px}
 .t-outline .dotted .b:first-child{border-right-color:transparent}
 .t-outline .dotted .b:first-child:hover,.t-outline .dotted .b:first-child.h{border-right-color:var(--vm)}
+.lg{flex:none;display:block}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
 .named{display:inline-flex;align-items:center;gap:14px}
 .chg{all:unset;cursor:pointer;font-size:14px;color:var(--vm);border-radius:3px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);transition:color .2s,text-decoration-color .2s,transform .5s var(--flip)}
@@ -149,27 +150,34 @@ html[data-theme=dark] .menu{box-shadow:0 12px 32px -12px #000c}
     <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy picks</button><button class="pill" id="clear" type="button">Clear</button><span id="tt"></span></div></div>
   <h2 class="grp">The button</h2><p>How Play looks and feels before anyone has picked. Each one uses the M1 menu and R1 once picked.</p><div class="sheet" id="B"></div>
   <h2 class="grp">The menu</h2><p>Where the services show up. Each one uses the B1 button.</p><div class="sheet" id="M"></div>
-  <h2 class="grp">After a pick</h2><p>Play goes straight to the service you picked last; these are the ways to show that and to switch. Each one uses B1 and M1.</p><div class="sheet" id="R"></div>
+  <h2 class="grp">After a pick</h2><p>Play goes straight to the service you picked last; these are the ways to show that and to switch. Each one uses B1; R5 to R7 put the logos in the menu too.</p><div class="sheet" id="R"></div>
 </div>
 <script src="/directions/lib-widgets-v1.js"></script>
 <script>
 const PI='<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M2.5 1.2v9.6c0 .5.5.8.9.5l7.4-4.8a.6.6 0 0 0 0-1L3.4.7c-.4-.3-.9 0-.9.5Z"/></svg>';
 const CHEV='<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5l3-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const SV=[['spotify','Spotify','#1ed760'],['appleMusic','Apple Music','#fa243c'],['deezer','Deezer','#a238ff']];
+// service marks (Simple Icons; Deezer's is its pre-2023 equalizer, the current heart isn't published as an SVG)
+const MARK={spotify:'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z',
+  appleMusic:'M23.994 6.124a9.23 9.23 0 00-.24-2.19c-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 00-1.877-.726 10.496 10.496 0 00-1.564-.15c-.04-.003-.083-.01-.124-.013H5.986c-.152.01-.303.017-.455.026-.747.043-1.49.123-2.193.4-1.336.53-2.3 1.452-2.865 2.78-.192.448-.292.925-.363 1.408-.056.392-.088.785-.1 1.18 0 .032-.007.062-.01.093v12.223c.01.14.017.283.027.424.05.815.154 1.624.497 2.373.65 1.42 1.738 2.353 3.234 2.801.42.127.856.187 1.293.228.555.053 1.11.06 1.667.06h11.03a12.5 12.5 0 001.57-.1c.822-.106 1.596-.35 2.295-.81a5.046 5.046 0 001.88-2.207c.186-.42.293-.87.37-1.324.113-.675.138-1.358.137-2.04-.002-3.8 0-7.595-.003-11.393zm-6.423 3.99v5.712c0 .417-.058.827-.244 1.206-.29.59-.76.962-1.388 1.14-.35.1-.706.157-1.07.173-.95.045-1.773-.6-1.943-1.536a1.88 1.88 0 011.038-2.022c.323-.16.67-.25 1.018-.324.378-.082.758-.153 1.134-.24.274-.063.457-.23.51-.516a.904.904 0 00.02-.193c0-1.815 0-3.63-.002-5.443a.725.725 0 00-.026-.185c-.04-.15-.15-.243-.304-.234-.16.01-.318.035-.475.066-.76.15-1.52.303-2.28.456l-2.325.47-1.374.278c-.016.003-.032.01-.048.013-.277.077-.377.203-.39.49-.002.042 0 .086 0 .13-.002 2.602 0 5.204-.003 7.805 0 .42-.047.836-.215 1.227-.278.64-.77 1.04-1.434 1.233-.35.1-.71.16-1.075.172-.96.036-1.755-.6-1.92-1.544-.14-.812.23-1.685 1.154-2.075.357-.15.73-.232 1.108-.31.287-.06.575-.116.86-.177.383-.083.583-.323.6-.714v-.15c0-2.96 0-5.922.002-8.882 0-.123.013-.25.042-.37.07-.285.273-.448.546-.518.255-.066.515-.112.774-.165.733-.15 1.466-.296 2.2-.444l2.27-.46c.67-.134 1.34-.27 2.01-.403.22-.043.442-.088.663-.106.31-.025.523.17.554.482.008.073.012.148.012.223.002 1.91.002 3.822 0 5.732z',
+  deezer:'M18.81 4.16v3.03H24V4.16h-5.19zM6.27 8.38v3.027h5.189V8.38h-5.19zm12.54 0v3.027H24V8.38h-5.19zM6.27 12.594v3.027h5.189v-3.027h-5.19zm6.271 0v3.027h5.19v-3.027h-5.19zm6.27 0v3.027H24v-3.027h-5.19zM0 16.81v3.029h5.19v-3.03H0zm6.27 0v3.029h5.189v-3.03h-5.19zm6.271 0v3.029h5.19v-3.03h-5.19zm6.27 0v3.029H24v-3.03h-5.19Z'};
+const mark=(k,color)=>`<svg class="lg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="${color?SV.find(x=>x[0]===k)[2]:'currentColor'}" d="${MARK[k]}"/></svg>`;
+const LOGO={logo:0,logoc:1};
 
 // the control's markup for a variant {t,m,r} in a state {picked,open,h,p,f,mi,mf}
 function playHTML(v,s={}){
   const st=k=>(s.h===k?' h':'')+(s.p===k?' p':'')+(s.f===k?' f':'');
   const pk=SV.find(x=>x[0]===s.picked),ex=!!s.open;
-  const word=v.t==='disc'?`<i class="disc">${PI}</i>Play`:v.t==='icon'?`${PI}<span class="lbl">Play</span>`:`${PI}Play`;
+  const word=pk&&v.r in LOGO?`${mark(pk[0],LOGO[v.r])}Play`:v.t==='disc'?`<i class="disc">${PI}</i>Play`:v.t==='icon'?`${PI}<span class="lbl">Play</span>`:`${PI}Play`;
   const more=inner=>`<button class="b more${st('more')}" data-a="toggle" aria-expanded="${ex}" aria-label="Play somewhere else">${inner}</button>`;
   let trig;
   if(!pk)trig=`<button class="b${st('b')}" data-a="toggle" aria-expanded="${ex}"${v.t==='icon'?' aria-label="Play"':''}>${word}</button>`;
   else if(v.r==='named')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${PI}Play on ${pk[1]}</button><button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
   else if(v.r==='caption')trig=`<button class="b${st('b')}" data-a="go"${v.t==='icon'?' aria-label="Play"':''}>${word}</button><span class="cap">${pk[1]} · <button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
+  else if(v.r==='logoswitch')trig=`<span class="split dotted"><button class="b${st('b')}" data-a="go">${word}</button>${more(`${mark(pk[0],1)}${CHEV}`)}</span>`;
   else if(v.r==='dot')trig=`<span class="split dotted"><button class="b${st('b')}" data-a="go">${word}</button>${more(`<i class="dot" style="--c:${pk[2]}"></i>${CHEV}`)}</span>`;
   else trig=`<span class="split"><button class="b${st('b')}" data-a="go"${v.t==='icon'?' aria-label="Play"':''}>${word}</button>${more(CHEV)}</span>`;
-  const items=SV.map(([k,n,c],i)=>`<button class="mi${s.mi===i?' h':''}${s.mf===i?' f':''}" data-a="pick" data-k="${k}" style="--i:${i}"${k===s.picked?' aria-current="true"':''}>${v.m==='mono'?`<span class="num">${i+1}</span>`:''}${v.m==='dots'?`<i class="dot" style="--c:${c}"></i>`:''}<span>${n}</span>${v.m==='drawer'?'<span class="arr">→</span>':''}</button>`).join('');
+  const items=SV.map(([k,n,c],i)=>`<button class="mi${s.mi===i?' h':''}${s.mf===i?' f':''}" data-a="pick" data-k="${k}" style="--i:${i}"${k===s.picked?' aria-current="true"':''}>${v.m==='mono'?`<span class="num">${i+1}</span>`:''}${v.m==='dots'?`<i class="dot" style="--c:${c}"></i>`:''}${v.m==='logos'||v.m==='logosc'?mark(k,v.m==='logosc'):''}<span>${n}</span>${v.m==='drawer'?'<span class="arr">→</span>':''}</button>`).join('');
   const menu=v.m==='inline'?`<div class="mrow">${items}<button class="x" data-a="close" aria-label="Close">×</button></div>`
     :`<div class="menu"><div class="in">${v.m==='mono'?'<span class="mh">Play on</span>':''}${items}</div></div>`;
   return `<div class="play${ex?' on':''}">${trig}${menu}</div>`;
@@ -189,7 +197,10 @@ const M=[['Popover (live)','pop','A small card under the button. It arrives on a
 const R=[['Split arrow (live)','split','Play goes to your pick and the arrow beside it reopens the menu. Quiet, but doesn’t say where Play goes'],
  ['Named','named','The button names the service, “Play on Apple Music”, with a quiet Change beside it'],
  ['Caption','caption','Play stays one word, and the service sits under it in mono with Change'],
- ['Brand dot','dot','Split like R1, with your service’s color as a dot by the arrow']];
+ ['Brand dot','dot','Split like R1, with your service’s color as a dot by the arrow'],
+ ['Logo for the triangle','logo','The service’s logo takes the triangle’s place, in ink, so the button reads as “Play on Spotify” without saying it. The menu wears the logos too','logos'],
+ ['Logo in color','logoc','The same in each brand’s color: the one spot of color on the page','logosc'],
+ ['Logo by the arrow','logoswitch','Play keeps its triangle; the colored logo sits with the arrow, marking where Play goes and how to change it','logosc']];
 
 const ALL={},demos=new Map();
 const cell=(label,v,s,tall)=>`<div class="cell${tall?' tall':''}${tall===2?' tall2':''}" inert><span class="k">${label}</span><div class="t-${v.t} m-${v.m}">${playHTML(v,s)}</div></div>`;
@@ -206,8 +217,9 @@ B.forEach(([n,t,use],i)=>{const v={t,m:'pop',r:'split'};sticker('#B','B'+(i+1),n
   ['Rest',v,{}],['Hover',v,{h:'b'}],['Pressed',v,{h:'b',p:'b'}],['Focus',v,{f:'b'}],['Open',v,{open:1,h:'b'},1],['Picked',v,{picked:'appleMusic'}]],3)});
 M.forEach(([n,m,use],i)=>{const v={t:'outline',m,r:'split'};sticker('#M','M'+(i+1),n,v,use,[
   ['Open',v,{open:1},tall(v)],['Hovering a service',v,{open:1,mi:1},tall(v)],['Keyboard',v,{open:1,mf:0},tall(v)],['Reopened after a pick',v,{open:1,picked:'appleMusic'},tall(v)]],m==='inline'?1:2)});
-R.forEach(([n,r,use],i)=>{const v={t:'outline',m:'pop',r};sticker('#R','R'+(i+1),n,v,use,[
-  ['Rest',v,{picked:'appleMusic'}],['Hover Play',v,{picked:'appleMusic',h:'b'}],['Hover switch',v,{picked:'appleMusic',h:'more'}],['Switching',v,{picked:'appleMusic',open:1,h:'more'},1]])});
+R.forEach(([n,r,use,m='pop'],i)=>{const v={t:'outline',m,r};sticker('#R','R'+(i+1),n,v,use,m==='pop'?[
+  ['Rest',v,{picked:'appleMusic'}],['Hover Play',v,{picked:'appleMusic',h:'b'}],['Hover switch',v,{picked:'appleMusic',h:'more'}],['Switching',v,{picked:'appleMusic',open:1,h:'more'},1]]:[
+  ['Spotify',v,{picked:'spotify'}],['Apple Music',v,{picked:'appleMusic'}],['Deezer',v,{picked:'deezer'}],['Hover Play',v,{picked:'spotify',h:'b'}],['Hover switch',v,{picked:'spotify',h:'more'}],['Switching',v,{picked:'spotify',open:1,h:'more'},1]])});
 
 // the live sticker: open, pick, play
 function paint(d){$('.slot',d.live).innerHTML=playHTML(d.v,{picked:d.picked});$('.forget',d.live).classList.toggle('on',!!d.picked)}
