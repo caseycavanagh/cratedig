@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Records, styled</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/directions/lib-widgets-v1.css">
+<!-- sheet only: production would self-host subsets of whichever face gets picked -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Fraunces:opsz,wght@9..144,400..600&display=swap">
+<style>
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
+:root{--m:#6e6e6e;--accent:#661864;--mono:'Paper Mono',ui-monospace,monospace;--grot:'Archivo',sans-serif;--serif:'Fraunces',serif;--sq:cubic-bezier(.2,1.4,.4,1);--flip:cubic-bezier(.25,1.2,.4,1);--crate:#6d3fc0}
+html[data-theme=dark]{--m:#8a8a8f;--accent:#ca72c7}
+*{font-variant-numeric:tabular-nums}
+body{font-family:'Instrument Sans',sans-serif;font-size:18px}
+.picks{font-family:var(--mono);color:var(--m);font-size:12px}
+.wrap{max-width:1400px;margin:0 auto;padding:56px 28px 96px}
+@media(max-width:680px){.wrap{padding:40px 16px 80px}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:28px;font-size:15px}
+.top h1{font-size:16px;font-weight:500}.top p{color:var(--m);margin-top:4px;max-width:720px}
+.tools{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.pill{all:unset;cursor:pointer;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--cb);background:var(--tile);display:inline-flex;align-items:center;font-size:13px;transition:transform .5s var(--sq)}
+.pill:hover{border-color:var(--m)}.pill:active{transform:scale(.99);transition-duration:.08s}.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grp{font-size:16px;font-weight:500;margin:52px 0 4px}.grp:first-of-type{margin-top:0}
+.grp+p{font-size:15px;color:var(--m);margin-bottom:16px;max-width:720px}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:18px;align-items:start}
+.sheet.wide{grid-template-columns:repeat(auto-fill,minmax(min(100%,620px),1fr))}
+.st{position:relative;border-radius:18px;background:var(--soft);padding:46px 14px 14px;min-width:0}
+@media(max-width:680px){.st{padding:46px 8px 12px}}
+.st .id{position:absolute;top:14px;left:18px;right:44px;font:500 11px var(--mono);color:var(--m)}.st .id b{color:var(--fg);font-weight:500;margin-right:6px}
+.st .use{display:block;margin:12px 6px 2px;font-size:13px;color:var(--m);line-height:1.45}
+.star{all:unset;cursor:pointer;position:absolute;top:9px;right:10px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;color:var(--m);font-size:15px;z-index:5;transition:transform .5s var(--sq)}
+.star:hover{background:var(--tile);color:var(--fg)}.star:active{transform:scale(.96);transition-duration:.08s}.star:focus-visible{outline:2px solid var(--accent)}
+.st.picked{box-shadow:inset 0 0 0 2px var(--accent)}.st.picked .star{color:var(--accent)}
+.pad{container-type:inline-size;background:var(--tile);border-radius:12px;padding:24px;display:grid;place-items:center;min-height:220px;gap:14px;position:relative;overflow:hidden}
+.pad.dk{background:#141414;color:#eee}
+
+/* ---------- the crate illustration ---------- */
+.crt{display:block;width:100%;height:auto;overflow:visible}
+
+/* ---------- a page mock: one screen of the records site ---------- */
+.fr{--bg:#f4f2ee;--fg:#1a1a1a;--fm:#6b6b6b;--ln:#d3cfc8;--s:30cqw;position:relative;container-type:inline-size;aspect-ratio:16/10;border-radius:12px;overflow:hidden;background:var(--bg);color:var(--fg);font-family:'Instrument Sans',sans-serif;isolation:isolate}
+.fr.ph{aspect-ratio:9/17;max-width:300px;margin:0 auto;border-radius:22px;--s:66cqw}
+.fr *{box-sizing:border-box}
+html[data-theme=dark] .fr.k-paper{--bg:#121212;--fg:#ecebe8;--fm:#8f8f93;--ln:#3a3a3d}
+/* a few covers in perspective: the crate, seen from just above */
+.mc{position:absolute;z-index:1;left:50%;top:50%;width:var(--s);aspect-ratio:1;translate:-50% -40%;perspective:calc(var(--s)*2.6);perspective-origin:50% -110%;transform-style:preserve-3d}
+.mc i{position:absolute;inset:0;background:#888 center/cover;border-radius:1px;transform-origin:50% 100%;transform:translateZ(calc(var(--k)*var(--s)*-.13)) rotateX(-14deg);box-shadow:inset 1px 1px 0 #ffffff38,inset -1px -1px 0 #00000038}
+.mc i::after{content:'';position:absolute;inset:0;background:#000;opacity:calc(var(--k)*.09)}
+.mc .fl{position:absolute;left:0;right:0;bottom:-2%;height:30%;background:radial-gradient(50% 40% at 50% 0,#0000002e,#0000);transform:translateY(60%)}
+.mc .box{position:absolute;left:-12%;right:-12%;bottom:-6%;transform:translateZ(calc(var(--s)*.26))}
+/* chrome inside a mock */
+.fr .c{position:absolute;z-index:20;font-size:1.75cqw;line-height:1.3;display:flex;align-items:center;gap:1.4cqw}
+.fr.ph .c{font-size:4.2cqw;gap:3cqw}
+.fr .c.tl{top:3.2cqw;left:3.6cqw}.fr .c.tr{top:3.2cqw;right:3.6cqw}.fr .c.bl{bottom:3.2cqw;left:3.6cqw}.fr .c.br{bottom:3.2cqw;right:3.6cqw}
+.fr .c.bc{bottom:3.2cqw;left:50%;translate:-50% 0}.fr .c.tc{top:3.2cqw;left:50%;translate:-50% 0}
+.fr.ph .c.tl{top:6cqw;left:6cqw}.fr.ph .c.tr{top:6cqw;right:6cqw}.fr.ph .c.bl{bottom:6cqw;left:6cqw}.fr.ph .c.br{bottom:6cqw;right:6cqw}.fr.ph .c.bc{bottom:6cqw}
+.fr .q{color:var(--fm)}
+.fr .mo{font-family:var(--mono)}.fr .c.mo{font-size:1.55cqw}.fr.ph .c.mo{font-size:3.6cqw}
+.fr button,.fr a.b{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:.6em;border-radius:999px;transition:transform .5s var(--flip),opacity .3s,background-color .2s}
+.fr button:active,.fr a.b:active{transform:scale(.97);transition-duration:.08s}
+.fr button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fr .ol{border:1px solid var(--ln);padding:.45em 1em}
+.fr .ol:hover{border-color:var(--fm)}
+.fr .ic{width:2.9cqw;height:2.9cqw;justify-content:center;border-radius:50%;color:var(--fm)}
+.fr.ph .ic{width:8cqw;height:8cqw}
+.fr .ic:hover{color:var(--fg)}
+.fr .ic svg,.fr button svg{width:1.05em;height:1.05em;flex:none}
+.fr .mk{width:3.2cqw;display:block}.fr.ph .mk{width:8.5cqw}
+.fr .ghost{opacity:.4}
+/* overlays opened by the chrome */
+.fr .ov{position:absolute;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
+.fr.on .ov{opacity:1;pointer-events:auto;transition:opacity .25s}
+.fr .scrim{position:absolute;inset:0;z-index:25;background:color-mix(in srgb,var(--bg) 70%,transparent);opacity:0;pointer-events:none;transition:opacity .25s}
+.fr.on .scrim{opacity:1;pointer-events:auto}
+.fr .crate-dim{transition:opacity .35s,filter .35s}
+.fr.on .crate-dim{opacity:.25}
+.ab h3{font:500 2.3cqw/1.2 'Instrument Sans',sans-serif;margin-bottom:1.2cqw}
+.ab p{font-size:1.7cqw;line-height:1.5}.ab p+p{margin-top:1cqw}
+.ab .cr{color:var(--fm);font-family:var(--mono);font-size:1.35cqw;margin-top:2cqw;line-height:1.6}
+.fr.ph .ab h3{font-size:6cqw}.fr.ph .ab p{font-size:4.2cqw}.fr.ph .ab .cr{font-size:3.4cqw}
+.toast{position:absolute;z-index:40;left:50%;bottom:9cqw;translate:-50% 1cqw;background:var(--fg);color:var(--bg);font-size:1.6cqw;padding:.6em 1.1em;border-radius:999px;opacity:0;transition:opacity .2s,translate .5s var(--flip);pointer-events:none}
+.toast.on{opacity:1;translate:-50% 0}
+.fr.ph .toast{font-size:4cqw;bottom:22cqw}
+
+/* looks */
+.k-crate{--bg:#efece6;--fg:#24123f;--fm:#6a5a86;--ln:#cfc5df}
+html[data-theme=dark] .k-crate{--bg:#141019;--fg:#ece6f7;--fm:#9a8fb0;--ln:#3a3150}
+.k-room{--bg:#1d1612;--fg:#f1e3cc;--fm:#a8957a;--ln:#4a3a2c;font-family:var(--serif)}
+.k-room::before{content:'';position:absolute;inset:0;background:radial-gradient(60% 70% at 50% 18%,#f3b9662e,#0000 70%),radial-gradient(40% 18% at 50% 88%,#0000008c,#0000);z-index:0}
+.k-cover{--fg:#fff;--fm:#ffffffb8;--ln:#ffffff55;transition:background-color .6s}
+.k-night{--bg:#050505;--fg:#e9e9e9;--fm:#8a8a8a;--ln:#333}
+.k-night::before{content:'';position:absolute;inset:0;background:radial-gradient(34% 52% at 50% 46%,#ffffff1f,#0000 70%);z-index:0}
+.k-bin{--bg:#c9ab80;--fg:#2a1c0e;--fm:#5d452a;--ln:#8a6c48}
+.k-bin::before{content:'';position:absolute;inset:0;opacity:.35;background:repeating-linear-gradient(93deg,#0000 0 3px,#00000010 3px 4px),repeating-linear-gradient(-2deg,#0000 0 9px,#ffffff14 9px 10px);z-index:0}
+.k-gallery{--bg:#fff;--fg:#111;--fm:#8a8a8a;--ln:#e2e2e2;--s:22cqw}
+.big-t{position:absolute;z-index:0;font-family:var(--grot);font-weight:900;font-stretch:75%;line-height:.82;letter-spacing:-.02em}
+.dv{position:absolute;z-index:2;width:calc(var(--s)*.34);height:calc(var(--s)*.2);border-radius:1.2cqw 1.2cqw 0 0;background:#e9dcc4;color:#3a2a16;display:grid;place-items:center;font:700 2.4cqw var(--grot);box-shadow:inset 0 0 0 1px #0000001a}
+
+/* open record mock */
+.orec{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:5cqw;z-index:2}
+.orec .cv{width:36cqw;aspect-ratio:1;background:center/cover;box-shadow:0 2cqw 4cqw -1.5cqw #0006;rotate:-1.5deg}
+.orec .inf{font-family:var(--mono);font-size:1.5cqw;line-height:1.7;min-width:26cqw}
+.orec .inf b{display:block;font:500 2.6cqw/1.2 'Instrument Sans',sans-serif;margin-bottom:.3cqw}
+.orec .inf .ar{display:block;font:400 1.9cqw 'Instrument Sans',sans-serif;color:var(--fm);margin-bottom:1.6cqw}
+.orec .inf .row{display:flex;gap:1cqw;margin-top:2cqw;align-items:center;font-family:'Instrument Sans',sans-serif;font-size:1.7cqw}
+.orec .play{background:var(--fg);color:var(--bg);padding:.55em 1.2em;border-radius:999px;display:inline-flex;align-items:center;gap:.5em}.orec .play svg{width:.9em;height:.9em}
+
+/* og cards */
+.og{aspect-ratio:1200/630;border-radius:10px;overflow:hidden;position:relative;container-type:inline-size;width:100%}
+
+
+/* cursors */
+.zones{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.zn{aspect-ratio:1;border-radius:10px;background:var(--soft);display:grid;place-items:end center;padding-bottom:8px;font:400 11px var(--mono);color:var(--m);position:relative;user-select:none}
+.zn svg{position:absolute;top:22%;left:50%;width:34px;height:34px;translate:-50% 0}
+.zn.spin{cursor:none;overflow:hidden}
+.zn.spin:not(:hover) .dsc{opacity:0}
+.dsc{position:absolute;left:0;top:0;width:28px;height:28px;margin:-14px 0 0 -14px;pointer-events:none;transition:opacity .15s}
+.dsc i{display:block;width:100%;height:100%;border-radius:50%;animation:spin 1.1s linear infinite;
+  background:radial-gradient(circle,var(--lb,#e7c04a) 0 22%,#111 23% 26%,#0000 27%),repeating-radial-gradient(circle,#161616 0 1.2px,#222 1.2px 2px),#111;box-shadow:0 1px 3px #0006}
+.dsc i::after{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,#0000 0 10%,#ffffff30 14%,#0000 20% 60%,#ffffff22 64%,#0000 70%)}
+.dsc i{position:relative}
+.dsc.cr i{--lb:var(--crate)}
+.dsc.chip{width:auto;height:auto;margin:-14px 0 0 -14px;display:flex;align-items:center;gap:6px;font:400 11px var(--mono);color:var(--fg)}
+.dsc.chip i{width:24px;height:24px;flex:none}
+@keyframes spin{to{transform:rotate(1turn)}}
+@media(prefers-reduced-motion:reduce){.dsc i{animation-duration:4s}}
+/* favicon tabs */
+.tabs{display:flex;flex-direction:column;gap:10px;width:100%}
+.tab{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:9px 9px 0 0;background:#dedcd8;color:#222;font:13px system-ui,sans-serif;width:210px}
+.tab.d{background:#2b2b2e;color:#ddd}
+.tab svg{width:16px;height:16px;flex:none}
+.fv-big{display:flex;gap:18px;align-items:end}
+.fv-big svg{display:block}
+
+/* loading */
+.ld{display:grid;justify-items:center;gap:14px;width:100%}
+.ld .n{font:400 12px var(--mono);color:var(--m)}
+.ld .w{width:min(180px,60%)}
+@keyframes hop{0%,100%{transform:translateY(0)}18%{transform:translateY(-9%) rotate(-2deg)}36%{transform:translateY(0)}46%{transform:translateY(-3%) rotate(1deg)}56%{transform:translateY(0)}}
+.hop{animation:hop 1.4s var(--flip) infinite;transform-origin:50% 100%}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){.hop{animation:none}.fr *,.fr{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>Records, styled</h1><p>Getting the records crate ready for its own home at vinyl.caseycavanagh.com. It doesn't have to look like the main site, so these go further. Everything stays sparse: the crate is the page, and the rest is a few quiet things around it. Star one or two from each group; the about and share stickers open when you click them. All copy is placeholder.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy picks</button><button class="pill" id="clear" type="button">Clear</button><span id="tt"></span></div></div>
+
+  <h2 class="grp">The crate, drawn</h2><p>Riffs on the milk crate you sent: one drawing that becomes the logo, the favicon and the loading state. The lattice is cut out, so whatever sits behind it shows through.</p><div class="sheet" id="D"></div>
+  <h2 class="grp">Crate color</h2><p>The one color the whole experiment wears.</p><div class="sheet" id="P"></div>
+  <h2 class="grp">Logo</h2><p>How the project signs itself, top left or in the link preview.</p><div class="sheet" id="W"></div>
+  <h2 class="grp">Favicon</h2><p>At real size in a light and a dark tab, then 4×.</p><div class="sheet" id="F"></div>
+  <h2 class="grp">Loading</h2><p>Replaces "Gathering records…" while the covers decode. Each one is live and loops.</p><div class="sheet" id="L"></div>
+  <h2 class="grp">Cursors</h2><p>Hover each square to try the cursor for real; hold the mouse down on Grab. Browsers don’t animate cursors, so the spinning record is drawn on the page and follows the pointer (the real cursor hides while it shows).</p><div class="sheet" id="U"></div>
+  <h2 class="grp">The look</h2><p>The whole screen, crate and all. Same navigation in each (C1 from below) so you're only judging the look.</p><div class="sheet wide" id="K"></div>
+  <h2 class="grp">Navigation</h2><p>What sits around the crate: a way back to caseycavanagh.com, About, Share, and later Make your own. Shown on the plain look.</p><div class="sheet wide" id="C"></div>
+  <h2 class="grp">Crate, grid, list</h2><p>Three ways to see the same records, and five ways to switch between them. Each one is live: click the views. Grid and list are sorted like the crate (artist, then oldest first).</p><div class="sheet wide" id="V"></div>
+  <h2 class="grp">Finding a record</h2><p>Where you are in the crate, and a way to jump.</p><div class="sheet wide" id="J"></div>
+  <h2 class="grp">About this project</h2><p>Click About in each one.</p><div class="sheet wide" id="A"></div>
+  <h2 class="grp">Liner notes</h2><p>The colophon as the back of a record: what's in it, who made it, what it's made with. Could replace About, or sit behind it.</p><div class="sheet wide" id="N"></div>
+  <h2 class="grp">Share</h2><p>Sharing the crate, and sharing one record. Click Share.</p><div class="sheet wide" id="S"></div>
+  <h2 class="grp">Link previews</h2><p>What shows up when the link lands in a text or a post.</p><div class="sheet wide" id="O"></div>
+  <h2 class="grp">Make your own (later)</h2><p>Where the door to a visitor's own crate could go, and how their crate shows it's theirs.</p><div class="sheet wide" id="M"></div>
+  <h2 class="grp">Phone</h2><p>The pile on a phone with the same few things.</p><div class="sheet" id="H"></div>
+</div>
+<script src="/directions/lib-widgets-v1.js"></script>
+<script>
+const R=[
+  ['lucinda-williams-car-wheels-on-a-gravel-road','Lucinda Williams','Car Wheels on a Gravel Road',1998,'#c9803c'],
+  ['wilco-yankee-hotel-foxtrot','Wilco','Yankee Hotel Foxtrot',2002,'#1f3b57'],
+  ['gillian-welch-time-the-revelator','Gillian Welch','Time (The Revelator)',2001,'#9a6b3f'],
+  ['jason-isbell-southeastern','Jason Isbell','Southeastern',2013,'#5c5a55'],
+  ['townes-van-zandt-live-at-the-old-quarter-houston-texas','Townes Van Zandt','Live at the Old Quarter, Houston, Texas',1977,'#2b2b2b'],
+  ['uncle-tupelo-no-depression','Uncle Tupelo','No Depression',1990,'#6f7d5a'],
+  ['emmylou-harris-pieces-of-the-sky','Emmylou Harris','Pieces of the Sky',1975,'#5f7f8f'],
+  ['gram-parsons-grievous-angel','Gram Parsons','Grievous Angel',1974,'#7a3a2a'],
+  ['neil-young-harvest','Neil Young','Harvest',1972,'#a8743a'],
+  ['sturgill-simpson-metamodern-sounds-in-country-music','Sturgill Simpson','Metamodern Sounds in Country Music',2014,'#5b2f6b'],
+  ['whiskeytown-strangers-almanac','Whiskeytown','Strangers Almanac',1997,'#33424a'],
+  ['margo-price-midwest-farmers-daughter','Margo Price','Midwest Farmer’s Daughter',2016,'#b8892f'],
+];
+const img=(i,side='front')=>`/directions/vinyl/${R[i][0]}-${side}.jpg`;
+const ALL={};let uid=0;
+
+/* ---------- the crate, front on (viewBox 120×112). Holes are cut with a mask so the page shows through ---------- */
+function crate({c='var(--crate)',label='',lf='#fff',holes=true,line=false,disc=false,lat=12,fill=1,band=null,short=false}={}){
+  const id='m'+(++uid),W=120,H=112;
+  const lattice=(x,y,w,h)=>{let s='';for(let k=-h;k<w+h;k+=lat){s+=`<path d="M${x+k} ${y}l${h} ${h}M${x+k+h} ${y}l${-h} ${h}"/>`}return`<clipPath id="${id}c${y}"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath><g clip-path="url(#${id}c${y})" stroke="#fff" stroke-width="2.3">${s}</g>`};
+  const mask=`<mask id="${id}" maskUnits="userSpaceOnUse" x="-2" y="-2" width="${W+4}" height="${H+4}">
+    <rect x="1" y="3" width="118" height="108" rx="4" fill="#fff"/>
+    ${holes?`<rect x="13" y="18" width="94" height="34" rx="2" fill="#000"/>${lattice(13,18,94,34)}
+    <rect x="40" y="16.5" width="40" height="17" rx="8.5" fill="#fff"/><rect x="44" y="20" width="32" height="10" rx="5" fill="#000"/>
+    <rect x="13" y="70" width="94" height="20" rx="2" fill="#000"/>${lattice(13,70,94,20)}
+    ${[[20,8],[33,5],[43,16],[64,5],[74,16],[95,5],[104,4]].map(([x,w])=>`<rect x="${x-2}" y="96" width="${w}" height="3.6" rx=".8" fill="#000"/>`).join('')}`:''}
+  </mask>`;
+  const ribs=`<g stroke="#000" stroke-opacity=".22" stroke-width=".8" fill="none"><path d="M1 14.5h118M1 53.5h118M1 68.5h118M1 91.5h118M12.5 14.5v77M107.5 14.5v77"/></g><g stroke="#fff" stroke-opacity=".18" stroke-width=".8"><path d="M1 4.5h118M1 54.5h118M1 92.5h118"/></g>`;
+  const body=line
+    ?`<g fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round"><rect x="2" y="4" width="116" height="106" rx="4"/><path d="M2 14.5h116M2 53.5h116M2 68.5h116M2 91.5h116M12.5 14.5v77M107.5 14.5v77"/><rect x="44" y="20" width="32" height="10" rx="5"/></g>`
+    :`<g mask="url(#${id})"><rect x="0" y="0" width="120" height="112" fill="${c}"/>${band!==null?`<rect x="1" y="54" width="${118*band}" height="14" fill="#fff" fill-opacity=".28"/>`:''}${ribs}</g>`;
+  const d=disc?`<g><circle cx="78" cy="10" r="26" fill="#161616"/><circle cx="78" cy="10" r="8" fill="#e7c04a"/><circle cx="78" cy="10" r="1.4" fill="#161616"/></g><rect x="30" y="-12" width="30" height="30" rx="1" fill="#e8dcc6" transform="rotate(-6 45 3)"/>`:'';
+  const t=label?`<text x="60" y="64.6" text-anchor="middle" font-family="Archivo,sans-serif" font-weight="900" font-stretch="88%" font-size="10.5" letter-spacing="-.2" fill="${lf}">${label}</text>`:'';
+  return`<svg class="crt"${short?' style="overflow:hidden"':''} viewBox="${short?'0 53 120 59':`0 ${disc?-18:0} ${W} ${H+(disc?18:0)}`}" aria-hidden="true"><defs>${mask}</defs>${d}${body}${t}</svg>`;
+}
+/* the favicon-size crate (32×32), simplified to what survives at 16px */
+function mark(v,c='var(--crate)',bg='transparent'){
+  const id='f'+(++uid);
+  const cut={
+    slot:`<rect x="10" y="7" width="12" height="4" rx="2" fill="#000"/><rect x="5" y="15" width="22" height="3" fill="#000"/><rect x="5" y="22" width="22" height="3" fill="#000"/>`,
+    lattice:`<rect x="10" y="6.5" width="12" height="4" rx="2" fill="#000"/><path d="M5 14l5 5 5-5 5 5 5-5 2 2v-2" fill="none"/><g fill="#000"><path d="M5 14h22v12H5z"/></g><clipPath id="${id}w"><rect x="5" y="14" width="22" height="12"/></clipPath><g clip-path="url(#${id}w)" stroke="#fff" stroke-width="1.8"><path d="M3 14l12 12M11 14l12 12M19 14l12 12M-5 14l12 12M29 14l-12 12M21 14l-12 12M13 14l-12 12M37 14l-12 12"/></g>`,
+    handle:`<rect x="9" y="8" width="14" height="5" rx="2.5" fill="#000"/>`,
+    disc:`<rect x="10" y="17" width="12" height="4" rx="2" fill="#000"/>`,
+  }[v];
+  const disc=v==='disc'?`<circle cx="16" cy="9" r="9" fill="#161616"/><circle cx="16" cy="9" r="3" fill="#e7c04a"/>`:'';
+  const top=v==='disc'?12:3;
+  return`<svg viewBox="0 0 32 32" aria-hidden="true">${bg!=='transparent'?`<rect width="32" height="32" rx="7" fill="${bg}"/>`:''}<defs><mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32"><rect x="2" y="${top}" width="28" height="${30-top}" rx="3" fill="#fff"/>${cut}</mask></defs>${disc}<rect width="32" height="32" fill="${c}" mask="url(#${id})"/></svg>`;
+}
+
+/* ---------- page mock pieces ---------- */
+const stack=(start=1,n=5,box='')=>`<div class="mc crate-dim">${Array.from({length:n},(_,k)=>`<i style="--k:${k};z-index:${n-k};background-image:url(${img((start+k)%12)})"></i>`).join('')}<span class="fl"></span>${box?`<div class="box">${box}</div>`:''}</div>`;
+const IC={
+  share:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V2M5 4.5 8 1.5l3 3M3.5 7.5v6h9v-6"/></svg>',
+  info:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.8v.1"/></svg>',
+  link:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1"/></svg>',
+  plus:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>',
+  dots:'<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.5" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.5" cy="8" r="1.3"/></svg>',
+  play:'<svg viewBox="0 0 12 12"><path fill="currentColor" d="M2.5 1.2v9.6c0 .5.5.8.9.5l7.4-4.8a.6.6 0 0 0 0-1L3.4.7c-.4-.3-.9 0-.9.5Z"/></svg>',
+  x:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+};
+const markS=(c)=>`<span class="mk">${mark('lattice',c)}</span>`;
+const ABOUT=`<h3>Records</h3><p>The records I keep coming back to, in a crate you can flip through. Pull one out to turn it over or play it.</p><p>Mostly alt-country. Twelve so far.</p><p class="cr">Covers from Apple Music and the Cover Art Archive<br>Made by Casey Cavanagh</p>`;
+// default chrome (C1): mark top left, About top right, Share bottom right, count bottom left
+const C1=(o={})=>`<div class="c tl"><a class="b" href="#" onclick="return false" aria-label="caseycavanagh.com">${markS(o.c)}</a><span class="q">Records</span></div><div class="c tr"><button class="q">About</button></div><div class="c bl q mo">4 of 12</div><div class="c br"><button class="q">${IC.share}Share</button></div>`;
+const frame=(cls,inner,attrs='')=>`<div class="fr ${cls}"${attrs}>${inner}</div>`;
+
+/* ---------- sticker plumbing ---------- */
+function add(sec,id,name,use,html,init){ALL[id]=name;const s=el(`<div class="st" data-id="${id}"><span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id} ${name}">★</button>${html}<span class="use">${use}</span></div>`);$('#'+sec).append(s);init&&init(s)}
+// any [data-open] toggles its frame's .on; the scrim and [data-close] shut it
+document.addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]'),fr=e.target.closest('.fr');
+  if(o&&fr){e.preventDefault();fr.classList.toggle('on');fr.dataset.which=o.dataset.open;return}
+  if(fr&&(e.target.closest('[data-close]')||e.target.classList.contains('scrim'))){fr.classList.remove('on')}
+  const cp=e.target.closest('[data-copy]');
+  if(cp){const f=cp.closest('.fr'),t=$('.toast',f);if(t){t.textContent=cp.dataset.copy||'Link copied';t.classList.add('on');clearTimeout(t.h);t.h=setTimeout(()=>t.classList.remove('on'),1400)}f.classList.remove('on')}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$$('.fr.on').forEach(f=>f.classList.remove('on'))});
+
+/* ---------- D: the crate drawn ---------- */
+add('D','D1','Front on, like the photo','Every rib, the handle and both lattice panels. The hero: loading screen, about panel, link preview.',`<div class="pad"><div style="width:62%">${crate({label:'Records'})}</div></div>`);
+add('D','D2','With a record poking out','A sleeve and a black disc rise out of the top, so it says records and not milk.',`<div class="pad"><div style="width:62%">${crate({label:'Records',disc:true})}</div></div>`);
+add('D','D3','Linework','One stroke weight, no fill. Lighter on the page; reads like a stamp.',`<div class="pad"><div style="width:62%">${crate({line:true,holes:false})}</div></div>`);
+add('D','D4','Name on the band','The band carries an owner like the Butter crate: Casey’s here, Sam’s on a visitor’s crate.',`<div class="pad"><div style="width:62%">${crate({label:'Casey’s'})}</div></div>`);
+add('D','D5','Coarse lattice','Fewer, bigger diamonds so it holds up small (favicon, nav mark).',`<div class="pad"><div style="width:62%">${crate({lat:24})}</div></div>`);
+
+/* ---------- P: color ---------- */
+[['P1','Milk crate purple','#6d3fc0','Straight from the photo. Loud and plastic.'],['P2','Plum','#661864','The main site’s accent, so the two feel related.'],['P3','Dairy blue','#2b5fb4','The classic crate behind every record store.'],['P4','Crate red','#c3322b','Warm, shouts a bit, good with old country covers.'],['P5','Mint','#3f9d7f','Softer, a little 70s.'],['P6','Black','#222','Lets the covers do all the color.']].forEach(([id,n,c,u])=>
+  add('P',id,n,u,`<div class="pad"><div style="width:44%">${crate({c,label:'Records'})}</div><div style="display:flex;gap:8px;align-items:center;font:12px var(--mono);color:var(--m)"><span style="width:14px;height:14px;border-radius:50%;background:${c}"></span>${c}</div></div>`));
+
+/* ---------- W: logo ---------- */
+add('W','W1','Mark and word','The crate mark beside Records in a heavy, narrow grotesk.',`<div class="pad"><div style="display:flex;align-items:center;gap:12px"><span style="width:44px">${mark('lattice')}</span><span style="font:900 34px var(--grot);font-stretch:80%;letter-spacing:-.02em;color:var(--crate)">Records</span></div></div>`);
+add('W','W2','The crate is the logo','D4 at small size: the name lives on the band, no words beside it.',`<div class="pad"><div style="width:96px">${crate({label:'Casey’s',lat:16})}</div></div>`);
+add('W','W3','Stamp','Mono type circling the crate, like a shop sticker on the sleeve.',`<div class="pad"><svg viewBox="0 0 200 200" width="150" aria-hidden="true"><defs><path id="ring" d="M100 100m-78 0a78 78 0 1 1 156 0a78 78 0 1 1-156 0"/></defs><text font-family="Paper Mono,monospace" font-size="11.5" letter-spacing="1.4" fill="var(--crate)"><textPath href="#ring">Casey’s records · flip through · Casey’s records · flip through ·</textPath></text><foreignObject x="60" y="62" width="80" height="76">${crate({lat:16})}</foreignObject></svg></div>`);
+add('W','W4','Lowercase and mono','Linework crate with a quiet mono name. The calmest of the four.',`<div class="pad"><div style="display:flex;align-items:center;gap:12px"><span style="width:40px">${crate({line:true,holes:false})}</span><span style="font:400 20px var(--mono)">records</span></div></div>`);
+add('W','W5','Big word, crate as the dot','Records set huge, the crate standing in for the period. For the about panel and link preview.',`<div class="pad"><div style="display:flex;align-items:flex-end;gap:4px"><span style="font:900 56px/0.8 var(--grot);font-stretch:70%;letter-spacing:-.03em">Records</span><span style="width:30px;margin-bottom:1px">${mark('handle')}</span></div></div>`);
+
+/* ---------- F: favicon ---------- */
+[['F1','Handle and slats','slot','The handle slot and two slots. Reads at 16px.'],['F2','Lattice','lattice','The diamond cross-hatch, cut out. Busiest; still a crate at 16px.'],['F3','Handle only','handle','Just the box and its handle. Plainest.'],['F4','Record in the crate','disc','A black disc with a yellow label rising out of the crate.']].forEach(([id,n,v,u])=>
+  add('F',id,n,u,`<div class="pad"><div class="tabs"><div class="tab">${mark(v)}Records</div><div class="tab d">${mark(v,'#a98be3')}Records</div></div><div class="fv-big"><span style="width:64px">${mark(v)}</span><span style="width:64px">${mark(v,'#fff','var(--crate)')}</span><span style="width:32px">${mark(v)}</span><span style="width:16px">${mark(v)}</span></div></div>`));
+
+/* ---------- L: loading (fake progress loops) ---------- */
+function loop(s,step,ms=260){let n=0;const go=()=>{n=(n+1)%17;step(Math.min(n,12),n>12)};go();setInterval(go,ms)}
+add('L','L1','Records drop in','A sleeve drops into the crate for each cover that’s ready. The count sits under it.',`<div class="pad"><div class="ld"><div class="w" style="position:relative"><div class="sl" style="position:absolute;left:12%;right:12%;bottom:30%;height:70%"></div><div style="position:relative">${crate({label:'Records'})}</div></div><span class="n">Gathering records… <b>0</b> of 12</span></div></div>`,s=>{
+  const sl=$('.sl',s);sl.innerHTML=R.map((r,i)=>`<i style="position:absolute;left:${(i%4)*3}%;right:${(3-i%4)*3}%;bottom:${i*2}%;height:80%;background:${r[4]} url(${img(i)}) center/cover;transform:translateY(-140%);opacity:0;transition:transform .6s var(--flip),opacity .2s;border-radius:1px"></i>`).join('');
+  loop(s,(n,hold)=>{$$('i',sl).forEach((x,i)=>{const on=i<n;x.style.transform=on?'none':'translateY(-140%)';x.style.opacity=on?1:0});$('.n b',s).textContent=n})});
+add('L','L2','The band fills','The label band is the progress bar. Nothing moves but the band.',`<div class="pad"><div class="ld"><div class="w bf"></div><span class="n">Gathering records… <b>0</b> of 12</span></div></div>`,s=>loop(s,n=>{$('.bf',s).innerHTML=crate({label:'Records',band:n/12});$('.n b',s).textContent=n}));
+add('L','L3','Hop','The crate hops like someone set it down. No number.',`<div class="pad"><div class="ld"><div class="w hop">${crate({disc:true})}</div><span class="n">Gathering records…</span></div></div>`);
+add('L','L4','Draws itself','The linework crate draws in, then fills when every cover is ready.',`<div class="pad"><div class="ld"><div class="w dr"></div><span class="n">Gathering records…</span></div></div>`,s=>{
+  const w=$('.dr',s);let t=0;const run=()=>{w.innerHTML=crate({line:true,holes:false});$$('rect,path',w).forEach(p=>{const L=p.getTotalLength?.()||300;p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.style.animation=`draw 1.8s ${Math.random()*.4}s ease forwards`});clearTimeout(t);t=setTimeout(()=>{w.innerHTML=crate({label:'Records'})},2600)};run();setInterval(run,4200)});
+add('L','L5','Fills from the bottom','The lattice fills with cover colors from the bottom up, one diamond row at a time.',`<div class="pad"><div class="ld"><div class="w" style="position:relative"><div class="lq" style="position:absolute;left:2%;right:2%;bottom:3%;height:0;background:linear-gradient(90deg,${R.slice(0,6).map(r=>r[4]).join(',')});transition:height .4s"></div><div style="position:relative">${crate({label:'Records'})}</div></div><span class="n"><b>0</b> of 12</span></div></div>`,s=>loop(s,n=>{$('.lq',s).style.height=n/12*94+'%';$('.n b',s).textContent=n}));
+
+
+/* ---------- U: cursors ---------- */
+// shapes are drawn twice: outlines first (thick stroke), fills on top, so overlaps merge into one silhouette
+const HANDS={
+  pointer:{hot:[13,3],sh:`<rect x="11" y="2.5" width="5" height="15" rx="2.5"/><rect x="9" y="13" width="16" height="15" rx="5"/><rect x="15.5" y="11" width="4.5" height="8" rx="2.25"/><rect x="19.5" y="12" width="4.5" height="8" rx="2.25"/><rect x="4.5" y="15" width="8" height="4.5" rx="2.25" transform="rotate(35 8.5 17.2)"/>`},
+  grab:{hot:[16,14],sh:`<rect x="8" y="14" width="17" height="14" rx="5"/><rect x="8.5" y="5.5" width="4" height="14" rx="2"/><rect x="12.7" y="3" width="4" height="15" rx="2"/><rect x="16.9" y="4" width="4" height="15" rx="2"/><rect x="21.1" y="7" width="4" height="13" rx="2"/><rect x="2.5" y="14" width="9" height="4.5" rx="2.25" transform="rotate(40 7 16.2)"/>`},
+  grabbing:{hot:[16,16],sh:`<rect x="7" y="11" width="18" height="16" rx="6"/><rect x="7.5" y="8" width="4.5" height="8" rx="2.25"/><rect x="12" y="7" width="4.5" height="8" rx="2.25"/><rect x="16.5" y="7.5" width="4.5" height="8" rx="2.25"/><rect x="21" y="9" width="4.5" height="8" rx="2.25"/><rect x="5" y="15" width="10" height="4.5" rx="2.25"/>`},
+  flick:{hot:[12,4],sh:`<g transform="rotate(-18 16 18)"><rect x="11" y="2.5" width="5" height="15" rx="2.5"/><rect x="9" y="13" width="16" height="15" rx="5"/><rect x="15.5" y="11" width="4.5" height="8" rx="2.25"/><rect x="19.5" y="12" width="4.5" height="8" rx="2.25"/><rect x="4.5" y="15" width="8" height="4.5" rx="2.25" transform="rotate(35 8.5 17.2)"/></g>`,extra:'<path d="M20 3.5c3 .3 5.5 2 6.8 4.6M21.5 .8c4 .5 7.4 3 9 6.4" fill="none" stroke-width="1.6" stroke-linecap="round"/>'},
+  tip:{hot:[16,16],sh:`<rect x="7" y="13" width="18" height="16" rx="1.5"/>`,extra:'<path d="M9 9.5c3-5 11-5 14 0" fill="none" stroke-width="1.8" stroke-linecap="round"/><path d="M23.5 5.5l-.5 4.4-4.3-.9" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'},
+};
+function hand(k,fill,line,px=32){const h=HANDS[k];return`<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="-1 -1 34 34"><g fill="${line}" stroke="${line}" stroke-width="3.2" stroke-linejoin="round">${h.sh}</g><g fill="${fill}">${h.sh}</g>${h.extra?`<g stroke="${line}">${h.extra}</g>`:''}</svg>`}
+const cur=(k,fill,line,fb)=>`url("data:image/svg+xml,${encodeURIComponent(hand(k,fill,line))}") ${HANDS[k].hot.join(' ')}, ${fb}`;
+function cursorSet(id,name,use,fill,line,dark){
+  const z=[['pointer','Click','pointer'],['grab','Grab','grab'],['flick','Flick','grab'],['tip','Dig','grab']];
+  add('U',id,name,use,`<div class="pad${dark?' dk':''}"><div class="zones">${z.map(([k,t,fb])=>`<div class="zn" data-k="${k}" style="cursor:${cur(k,fill,line,fb)}${dark?';background:#222;color:#999':''}">${hand(k,fill,line)}${t}</div>`).join('')}</div></div>`,s=>{
+    // grabbing while held
+    const g=$('[data-k=grab]',s),open=g.style.cursor,shut=cur('grabbing',fill,line,'grabbing');
+    g.addEventListener('pointerdown',()=>{g.style.cursor=shut;$('svg',g).outerHTML=hand('grabbing',fill,line)});
+    addEventListener('pointerup',()=>{if(g.style.cursor===shut){g.style.cursor=open;$('svg',g).outerHTML=hand('grab',fill,line)}});
+  });
+}
+cursorSet('U1','Chunky crate color','Filled in the crate color with a dark outline, like the drawing. Click, grab (hold to grip), a finger flick for the crate, and a tip arrow as another way to say dig.','#6d3fc0','#1a1a1a');
+cursorSet('U2','Classic','White with a black outline, the system hand redrawn rounder. Disappears into the page in the best way.','#fff','#111');
+cursorSet('U3','Ink, for dark looks','Black hands with a cream outline for K3 and K5.','#1a1a1a','#f1e3cc',true);
+add('U','U4','Spinning record','The wait cursor: a little record spinning in place of the arrow while covers load or a record opens.',`<div class="pad"><div class="zones" style="grid-template-columns:repeat(3,1fr)"><div class="zn spin"><span class="dsc"><i></i></span>Black label</div><div class="zn spin"><span class="dsc cr"><i></i></span>Crate label</div><div class="zn spin"><span class="dsc chip"><i></i>Loading</span>With a word</div></div></div>`,s=>{
+  $$('.zn.spin',s).forEach(z=>z.addEventListener('pointermove',e=>{const r=z.getBoundingClientRect(),d=$('.dsc',z);d.style.transform=`translate(${e.clientX-r.left}px,${e.clientY-r.top}px)`}));
+});
+
+/* ---------- K: looks ---------- */
+add('K','K1','Paper (today)','Today’s look: warm paper, small sans, nothing else. The baseline.',frame('k-paper',stack()+C1()));
+add('K','K2','In the crate','The records stand in a drawn crate; the lattice shows the covers through it. The crate color is the only accent. Cheap: one static SVG in front of the stack.',frame('k-crate',stack(1,5,crate({label:'Casey’s',short:true}))+C1()));
+add('K','K3','Listening room','Dark walnut, a lamp glow from above, cream serif type. Feels like evening.',frame('k-room',stack()+C1({c:'#e3b57a'})));
+add('K','K4','Takes the cover’s color','The page turns the color of the front record as you flip (click the mock to flip). One background color change, nothing else.',frame('k-cover',stack()+C1({c:'#fff'}),` data-cv="1" style="background:${R[1][4]}"`),s=>{const f=$('.fr',s);let i=1;f.addEventListener('click',e=>{if(e.target.closest('button,a'))return;i=(i+1)%12;f.style.background=R[i][4];$$('.mc i',f).forEach((x,k)=>x.style.backgroundImage=`url(${img((i+k)%12)})`);$('.bl',f).textContent=`${i+1} of 12`})});
+add('K','K5','Night','Black, one soft spotlight on the crate. The covers glow.',frame('k-night',stack()+C1({c:'#bfa6ef'})));
+add('K','K6','Record store bin','Kraft paper and letter dividers sticking up out of the crate, like a shop bin.',frame('k-bin',`<span class="dv" style="left:calc(50% - var(--s)*.38);top:calc(50% - var(--s)*.62)">W</span>`+stack()+C1({c:'#3a2a16'})));
+add('K','K7','Poster','White, the word Records set huge behind a smaller crate. Loudest type.',frame('k-gallery',`<span class="big-t" style="left:3.6cqw;bottom:2cqw;font-size:21cqw;color:var(--crate);opacity:.95">Records</span>`+stack()+`<div class="c tr"><button class="q">About</button><button class="q">Share</button></div>`));
+
+/* ---------- C: navigation ---------- */
+add('C','C1','Four corners','Mark and name top left (goes home), About top right, count bottom left, Share bottom right. Nothing in the middle but the crate.',frame('k-paper',stack()+C1()));
+add('C','C2','One pill','Everything in one floating pill at the bottom: mark, About, Share. The count lives in the crate’s label.',frame('k-paper',stack()+`<div class="c bc" style="background:var(--bg);border:1px solid var(--ln);border-radius:999px;padding:.5em .6em .5em .9em;box-shadow:0 1cqw 3cqw -1.5cqw #0003">${markS()}<span class="q mo">4 / 12</span><span style="width:1px;height:1.2em;background:var(--ln)"></span><button class="q" style="padding:0 .4em">About</button><button class="q" style="padding:0 .4em">Share</button></div>`));
+add('C','C3','Just the crate mark','Only the mark, top left. Click it for a small menu: About, Share, Make your own, caseycavanagh.com. Sparsest.',frame('k-paper',stack()+`<div class="c tl"><button data-open="m" aria-label="Menu" style="padding:.3em;border-radius:.6em">${markS()}</button></div><div class="ov" style="top:8.4cqw;left:3.6cqw;background:var(--bg);border:1px solid var(--ln);border-radius:1.4cqw;padding:1cqw;display:grid;gap:.2cqw;min-width:24cqw;box-shadow:0 2cqw 4cqw -2cqw #0004;font-size:1.75cqw">${['About','Share','Make your own crate','caseycavanagh.com ↗'].map((t,i)=>`<button style="padding:.6em .8em;border-radius:.6em"${i===2?' class="ghost"':''}>${t}</button>`).join('')}</div>`));
+add('C','C4','Footer line','One mono line at the bottom, like the small print on a jacket. No icons.',frame('k-paper',stack()+`<div class="c bc mo q" style="white-space:nowrap;font-size:1.5cqw">Casey’s records · 12 LPs · <button>About</button> · <button>Share</button> · <button>caseycavanagh.com</button></div>`));
+add('C','C5','Shows up when you move','The screen is only the crate. Move the pointer and C1 fades in; it fades out after two seconds still. Hover the mock.',frame('k-paper hidechrome',stack()+C1()),s=>{const f=$('.fr',s),cs=$$('.c',f);const hide=()=>cs.forEach(c=>c.style.opacity=0);hide();let t;f.addEventListener('pointermove',()=>{cs.forEach(c=>{c.style.transition='opacity .25s';c.style.opacity=1});clearTimeout(t);t=setTimeout(()=>{cs.forEach(c=>c.style.transition='opacity .8s');hide()},2000)})});
+add('C','C6','Dividers in the crate','About and Share are divider tabs standing in the crate behind the records. Click a tab.',frame('k-paper',`<span class="dv" data-open="a" style="cursor:pointer;left:calc(50% - var(--s)*.46);top:calc(50% - var(--s)*.66);font:500 1.6cqw 'Instrument Sans'">About</span><span class="dv" style="cursor:pointer;left:calc(50% + var(--s)*.12);top:calc(50% - var(--s)*.7);font:500 1.6cqw 'Instrument Sans'">Share</span>`+stack()+`<div class="c tl">${markS()}<span class="q">Records</span></div><div class="scrim"></div><div class="ov ab" style="inset:auto 0 0 0;padding:4cqw 6cqw;background:var(--bg);border-top:1px solid var(--ln)">${ABOUT}</div>`));
+
+/* ---------- V: three views ---------- */
+const byArtist=R.map((r,i)=>[r,i]).sort((a,b)=>a[0][1].replace(/^The /,'').localeCompare(b[0][1].replace(/^The /,''))||a[0][3]-b[0][3]);
+const VIEWS={
+  crate:()=>stack(),
+  grid:()=>`<div style="position:absolute;inset:10cqw 9cqw 7cqw;display:grid;grid-template-columns:repeat(6,1fr);gap:1.6cqw;align-content:center">${byArtist.map(([r,i])=>`<i title="${r[1]}, ${r[2]}" style="aspect-ratio:1;background:${r[4]} url(${img(i)}) center/cover;display:block;border-radius:.2cqw;box-shadow:0 .4cqw 1cqw -.5cqw #0005"></i>`).join('')}</div>`,
+  list:()=>`<div style="position:absolute;inset:9cqw 14cqw 5cqw;display:grid;align-content:center;font-size:1.5cqw">${byArtist.slice(0,10).map(([r,i])=>`<div style="display:grid;grid-template-columns:3cqw 1fr 1.3fr 5cqw;gap:1.8cqw;align-items:center;padding:.5cqw 0;border-top:1px solid var(--ln)"><i style="width:3cqw;aspect-ratio:1;background:url(${img(i)}) center/cover;display:block"></i><span>${r[1]}</span><span class="q">${r[2]}</span><span class="q mo" style="text-align:right">${r[3]}</span></div>`).join('')}</div>`,
+};
+const VI={
+  crate:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M2 6h12v8H2zM4 6V2.5h8V6"/></svg>',
+  grid:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="5" height="5"/><rect x="9" y="2" width="5" height="5"/><rect x="2" y="9" width="5" height="5"/><rect x="9" y="9" width="5" height="5"/></svg>',
+  list:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg>',
+};
+const NAMES={crate:'Crate',grid:'Grid',list:'List'};
+// a frame whose [data-view] buttons swap what's in .vw; the pressed one gets aria-pressed
+function views(id,name,use,sw,cls='k-paper'){
+  add('V',id,name,use,frame(cls,`<div class="vw" style="position:absolute;inset:0">${VIEWS.crate()}</div>`+sw),s=>{
+    const f=$('.fr',s),set=v=>{$('.vw',f).innerHTML=VIEWS[v]();$$('[data-view]',f).forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v));f.dataset.v=v};
+    f.addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)set(b.dataset.view)});set('crate');
+  });
+}
+const vbtn=(v,inner,st='')=>`<button data-view="${v}" style="${st}">${inner}</button>`;
+const vStyle=`<style>.fr [data-view][aria-pressed=true]{color:var(--fg)!important}.fr [data-view][aria-pressed=false]{color:var(--fm)}.fr .seg [data-view][aria-pressed=true]{background:var(--fg);color:var(--bg)!important}.und [aria-pressed=true]{text-decoration:underline;text-underline-offset:.35em;text-decoration-thickness:1px}</style>`;
+views('V1','Words, top center','Crate, Grid, List as plain words at the top, the current one dark and underlined. Click to switch.',vStyle+`<div class="c tl">${markS()}</div><div class="c tc und" style="gap:2.4cqw">${Object.keys(NAMES).map(v=>vbtn(v,NAMES[v])).join('')}</div><div class="c tr"><button class="q">About</button></div><div class="c br"><button class="q">${IC.share}Share</button></div>`);
+views('V2','Icon segments','Three small icons in a segmented pill, top right with About. Compact; no words.',vStyle+`<div class="c tl">${markS()}<span class="q">Records</span></div><div class="c tr"><span class="seg" style="display:inline-flex;border:1px solid var(--ln);border-radius:999px;padding:.2em">${Object.keys(NAMES).map(v=>vbtn(v,VI[v],'width:2.8cqw;height:2.2cqw;justify-content:center;border-radius:999px')).join('')}</span><button class="q">About</button></div><div class="c br"><button class="q">${IC.share}Share</button></div>`);
+views('V3','In the bottom pill','C2’s pill with the three views in it: mark, Crate · Grid · List, then About and Share.',vStyle+`<div class="c bc" style="background:var(--bg);border:1px solid var(--ln);border-radius:999px;padding:.45em .6em .45em .9em;box-shadow:0 1cqw 3cqw -1.5cqw #0003;gap:1.2cqw">${markS()}<span class="seg" style="display:inline-flex;gap:.2em">${Object.keys(NAMES).map(v=>vbtn(v,NAMES[v],'padding:.25em .8em')).join('')}</span><span style="width:1px;height:1.2em;background:var(--ln)"></span><button class="q">About</button><button class="q">${IC.share}</button></div>`);
+views('V4','Bin labels','Crate / Grid / List set in the heavy grotesk, stacked in the top left like labels on a bin. Goes with K2 and K7.',vStyle+`<div class="c tl" style="flex-direction:column;align-items:flex-start;gap:.2cqw;font:900 2.6cqw/1 var(--grot);font-stretch:78%">${Object.keys(NAMES).map(v=>vbtn(v,NAMES[v])).join('')}</div><div class="c tr"><button class="q">About</button><button class="q">${IC.share}Share</button></div>`,'k-crate');
+views('V5','Cycle with the mark','One button beside the mark shows the current view; click cycles crate → grid → list. Fewest things on screen.',vStyle+`<div class="c tl">${markS()}<button class="q ol cyc" data-view="grid">${VI.crate}Crate</button></div><div class="c tr"><button class="q">About</button></div><div class="c br"><button class="q">${IC.share}Share</button></div>`);
+// V5: the one button points at the next view and shows the current one
+$('[data-id="V5"] .fr').addEventListener('click',e=>{const b=e.target.closest('.cyc');if(!b)return;const order=['crate','grid','list'],cur=b.dataset.view,next=order[(order.indexOf(cur)+1)%3];setTimeout(()=>{b.dataset.view=next;b.innerHTML=VI[cur]+NAMES[cur]},0)});
+
+/* ---------- J: finding ---------- */
+const letters=[...new Set(R.map(r=>r[1].replace(/^The /,'')[0]))];
+add('J','J1','Count','Just “4 of 12” in a corner. Today’s behavior, with nothing to click.',frame('k-paper',stack()+`<div class="c bl q mo">4 of 12</div>`));
+add('J','J2','Letter dividers','A–Z along the bottom; letters you own are dark and jump there, the rest are faint. Shop-bin behavior.',frame('k-paper',stack()+`<div class="c bc mo" style="gap:.9cqw;font-size:1.45cqw">${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>`<button style="padding:.2em .25em;${letters.includes(l)?'':'opacity:.25;pointer-events:none'};${l==='G'?'background:var(--fg);color:var(--bg);border-radius:.3em':''}">${l}</button>`).join('')}</div>`));
+add('J','J3','A tick per record','One tick per record under the crate, the current one tall. Drag along it to scrub.',frame('k-paper',stack()+`<div class="c bc" style="gap:.55cqw;align-items:flex-end;height:3cqw">${R.map((_,i)=>`<i style="width:.25cqw;height:${i===3?2.6:1.1}cqw;background:${i===3?'var(--fg)':'var(--ln)'};display:block"></i>`).join('')}</div>`));
+add('J','J4','Spines','The crate seen from above as a strip of thin spines in each cover’s color. Hover one for its name.',frame('k-paper',stack()+`<div class="c bc" style="gap:0;height:2.4cqw;border-radius:.3cqw;overflow:hidden">${R.map((r,i)=>`<i title="${r[1]}, ${r[2]}" style="width:2.2cqw;height:100%;background:${r[4]};display:block;${i===3?'box-shadow:inset 0 0 0 .25cqw var(--fg)':''}"></i>`).join('')}</div>`));
+
+/* ---------- A: about ---------- */
+const aboutBtn=`<div class="c tl">${markS()}<span class="q">Records</span></div><div class="c tr"><button class="q" data-open="a">About</button></div>`;
+add('A','A1','Sheet from the bottom','Slides up over the bottom third. The crate stays in view above it.',frame('k-paper',stack()+aboutBtn+`<div class="scrim" style="background:transparent"></div><div class="ov ab" style="left:0;right:0;bottom:0;padding:3.6cqw 8cqw 4cqw;background:var(--bg);border-top:1px solid var(--ln);display:grid;grid-template-columns:12cqw 1fr;gap:4cqw;align-items:center"><div>${crate({label:'Casey’s'})}</div><div>${ABOUT}</div><button data-close class="ic" style="position:absolute;top:2cqw;right:2.6cqw" aria-label="Close">${IC.x}</button></div>`));
+add('A','A2','About is a record','The first record in the crate is a plain jacket with the crate drawn on it. Pull it out like any other; the back is liner notes.',frame('k-paper',stack(1,4)+`<div class="mc" style="pointer-events:none"><i data-open="a" style="--k:-1;z-index:20;pointer-events:auto;cursor:pointer;background:#efe9de;display:grid;place-items:center;padding:22%"></i></div>`+`<div class="c tl">${markS()}<span class="q">Records</span></div><div class="c bl q mo">Click the front record</div><div class="scrim"></div><div class="ov" style="inset:0;display:grid;place-items:center"><div class="ab" style="width:40cqw;aspect-ratio:1;background:#efe9de;color:#2a2117;padding:4cqw;box-shadow:0 2cqw 5cqw -2cqw #0006;font-family:var(--mono);rotate:1deg"><div style="--fm:#6f6252">${ABOUT.replace('<h3>','<h3 style="font-family:var(--grot);font-weight:900;font-size:3.4cqw">')}</div></div></div>`),s=>{$('.mc [data-open]',s).innerHTML=crate({label:'Casey’s',c:'#6d3fc0'})});
+add('A','A3','Side panel','A narrow panel from the right, in small type. The crate slides left to make room.',frame('k-paper',`<div class="sh" style="position:absolute;inset:0;transition:translate .6s var(--flip)">${stack()}</div>`+aboutBtn+`<div class="ov ab" style="top:0;bottom:0;right:0;width:34cqw;padding:9cqw 4cqw 4cqw;background:var(--bg);border-left:1px solid var(--ln);transition:opacity .25s,translate .6s var(--flip);translate:6cqw 0">${ABOUT}<button data-close class="ic" style="position:absolute;top:2.6cqw;right:2.6cqw" aria-label="Close">${IC.x}</button></div><style>.fr.on .sh{translate:-14cqw 0}.fr.on .ov.ab{translate:0 0!important}</style>`));
+add('A','A4','Inner sleeve','A paper card in the middle, the crate faded behind it. Click outside to close.',frame('k-paper',stack()+aboutBtn+`<div class="scrim"></div><div class="ov ab" style="left:50%;top:50%;translate:-50% -50%;width:44cqw;padding:4cqw;background:var(--bg);border:1px solid var(--ln);border-radius:1cqw;box-shadow:0 3cqw 6cqw -3cqw #0005">${ABOUT}</div>`));
+add('A','A5','Under the crate','About opens a short paragraph right under the crate, no layer on top.',frame('k-paper',`<div class="sh" style="position:absolute;inset:0;transition:translate .6s var(--flip)">${stack()}</div>`+aboutBtn+`<div class="ov ab" style="left:50%;bottom:4cqw;translate:-50% 0;width:56cqw;text-align:center;transition:opacity .3s .1s"><p>The records I keep coming back to, in a crate you can flip through. Mostly alt-country, twelve so far.</p><p class="cr" style="margin-top:1cqw">Covers from Apple Music and the Cover Art Archive · Made by Casey Cavanagh</p></div><style>.fr.on .sh{translate:0 -9cqw}</style>`));
+
+
+/* ---------- N: liner notes (colophon) ---------- */
+const CREDITS=[['Design and code','Casey Cavanagh'],['Covers','Apple Music, Cover Art Archive'],['Record data','MusicBrainz'],['Plays on','Spotify, Apple Music, Deezer'],['Type','Archivo, Paper Mono'],['Built with','Next.js, hosted on Vercel'],['Recorded in','Annapolis, MD']];
+const SIDES=[['Side A',['The crate','Grid','List']],['Side B',['Pull one out','Share a record','Make your own']]];
+add('N','N1','Back of the jacket','A record back: tracklist as the site’s parts on Side A and B, credits under it, a catalog number and barcode in the corner.',`<div class="pad" style="padding:0;background:#ece4d4;color:#2a2117"><div style="container-type:inline-size;width:100%;aspect-ratio:1;max-width:520px;padding:7cqw;display:grid;grid-template-rows:auto auto 1fr auto;gap:5cqw;font-family:var(--mono);font-size:2.6cqw;line-height:1.6">
+<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font:900 9cqw/0.85 var(--grot);font-stretch:72%;color:var(--crate)">Records</div><div style="width:14cqw">${crate({label:'Casey’s',lat:16})}</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:4cqw">${SIDES.map(([h,t],k)=>`<div><div style="font-weight:600;margin-bottom:1cqw">${h}</div>${t.map((x,i)=>`<div>${k*3+i+1}. ${x}</div>`).join('')}</div>`).join('')}</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:.4cqw 3cqw;font-size:2.3cqw;align-content:start">${CREDITS.map(([a,b])=>`<span style="opacity:.6">${a}</span><span>${b}</span>`).join('')}</div>
+<div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:2cqw;opacity:.75"><span>CC-001 · 12 LPs · 2026</span><span style="display:flex;gap:.35cqw;height:6cqw;align-items:stretch">${[2,1,1,3,1,2,1,1,2,3,1,1,2,1,3,1,2].map(w=>`<i style="width:${w*.3}cqw;background:#2a2117"></i>`).join('')}</span></div></div></div>`);
+add('N','N2','Inner sleeve','The paper sleeve the record slides out of: a short note from Casey in a warm serif, credits in small mono at the bottom.',`<div class="pad" style="padding:0;background:#f6f1e7;color:#2a2117"><div style="container-type:inline-size;width:100%;max-width:520px;aspect-ratio:1;padding:9cqw;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden"><span style="position:absolute;left:50%;top:50%;width:44cqw;aspect-ratio:1;border-radius:50%;translate:-50% -50%;border:1px solid #2a211714"></span><div style="font-family:var(--serif);font-size:4cqw;line-height:1.45;position:relative">A short note from you goes here: why these records, where they came from, what to play first.<div style="margin-top:3cqw;font-style:italic">Casey</div></div><div style="font:2.2cqw/1.7 var(--mono);opacity:.75;position:relative;columns:2;column-gap:5cqw">${CREDITS.map(([a,b])=>`<div>${a}: ${b}</div>`).join('')}</div></div></div>`);
+add('N','N3','Credits roll','Just credits, the way the small print reads: “Produced by”, “Pressed by”. The jokes stay small.',`<div class="pad dk" style="padding:0"><div style="container-type:inline-size;width:100%;max-width:520px;aspect-ratio:1;padding:9cqw;display:grid;align-content:center;gap:2.2cqw;text-align:center;font:3cqw/1.5 var(--mono)">${[['Produced by','Casey Cavanagh'],['Covers courtesy of','Apple Music and the Cover Art Archive'],['Liner data','MusicBrainz'],['Set in','Archivo and Paper Mono'],['Pressed by','Next.js, on Vercel'],['Recorded in','Annapolis, MD']].map(([a,b])=>`<div><div style="opacity:.5;font-size:2.4cqw">${a}</div><div>${b}</div></div>`).join('')}<div style="width:10cqw;margin:3cqw auto 0">${crate({c:'#bfa6ef',lat:16})}</div></div></div>`);
+
+/* ---------- S: share ---------- */
+const shareTop=`<div class="c tl">${markS()}<span class="q">Records</span></div><div class="c tr"><button class="q">About</button></div>`;
+add('S','S1','One button','Share opens the phone’s share sheet; on a computer it copies the link and says so.',frame('k-paper',stack()+shareTop+`<div class="c br"><button class="q" data-copy="Link copied">${IC.share}Share</button></div><div class="toast"></div>`));
+add('S','S2','Small menu','Copy link, Bluesky, Threads, Email. A menu above the button.',frame('k-paper',stack()+shareTop+`<div class="c br"><button class="q" data-open="s">${IC.share}Share</button></div><div class="ov" style="right:3.6cqw;bottom:7.6cqw;background:var(--bg);border:1px solid var(--ln);border-radius:1.4cqw;padding:1cqw;display:grid;gap:.2cqw;min-width:22cqw;box-shadow:0 2cqw 4cqw -2cqw #0004;font-size:1.75cqw">${['Copy link','Bluesky','Threads','Email'].map(t=>`<button style="padding:.6em .8em;border-radius:.6em" data-copy="${t==='Copy link'?'Link copied':'Opens '+t}">${t}</button>`).join('')}</div><div class="toast"></div>`));
+add('S','S3','Share this record','In the open record, a share icon beside Play links to that record (vinyl.caseycavanagh.com/harvest) so it opens pulled out.',frame('k-paper',`<div class="orec"><div class="cv" style="background-image:url(${img(8)})"></div><div class="inf"><b>Harvest</b><span class="ar">Neil Young</span>1972<br>Reprise<br>LP<div class="row"><span class="b play">${IC.play}Play</span><button class="ic ol" style="width:3.6cqw;height:3.6cqw" data-copy="Link to Harvest copied" aria-label="Share this record">${IC.share}</button></div></div></div><div class="c tl"><button class="q">← Crate</button></div><div class="toast"></div>`));
+add('S','S4','Copy link, nothing else','A link icon in the corner. Click copies. No menu, no sheet.',frame('k-paper',stack()+shareTop+`<div class="c br"><button class="ic" data-copy="Link copied" aria-label="Copy link">${IC.link}</button></div><div class="toast"></div>`));
+
+/* ---------- O: link previews ---------- */
+add('O','O1','The crate','The drawn crate on paper, name beside it. For the whole crate.',`<div class="og" style="background:#efece6;display:grid;grid-template-columns:38% 1fr;align-items:center;gap:6cqw;padding:0 8cqw;color:#24123f"><div>${crate({label:'Casey’s'})}</div><div><div style="font:900 9cqw/0.9 var(--grot);font-stretch:75%">Records</div><div style="font:400 2.6cqw var(--mono);margin-top:2cqw;color:#6a5a86">12 LPs · vinyl.caseycavanagh.com</div></div></div>`);
+add('O','O2','Covers in the crate','The real front records standing in the crate. Changes as the collection does.',`<div class="og" style="background:#efece6"><div class="fr" style="position:absolute;inset:0;aspect-ratio:auto;border-radius:0;background:transparent;--s:30cqw">${stack(8,5,crate({label:'Casey’s',short:true}))}</div><div style="position:absolute;left:5cqw;top:4.5cqw;font:400 2.4cqw var(--mono);color:#6a5a86">vinyl.caseycavanagh.com</div></div>`);
+add('O','O3','One record','For a shared record: the cover, its name, and whose crate it came from.',`<div class="og" style="background:#1d1612;color:#f1e3cc;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6cqw;padding:0 7cqw"><div style="width:38cqw;aspect-ratio:1;background:url(${img(8)}) center/cover;box-shadow:0 2cqw 4cqw #0008"></div><div style="font-family:var(--serif)"><div style="font-size:6cqw;line-height:1.05">Harvest</div><div style="font-size:3cqw;opacity:.75;margin-top:.6cqw">Neil Young, 1972</div><div style="display:flex;align-items:center;gap:1.4cqw;margin-top:4cqw;font:400 2.2cqw var(--mono);opacity:.8"><span style="width:4cqw">${mark('lattice','#e3b57a')}</span>From Casey’s crate</div></div></div>`);
+
+/* ---------- M: make your own ---------- */
+add('M','M1','Empty slot at the back','Flip past the last record and there’s an empty jacket with a plus: Make your own crate.',frame('k-paper',`<div class="mc"><i style="--k:0;z-index:5;background:var(--bg);border:.25cqw dashed var(--ln);box-shadow:none;display:grid;place-items:center;color:var(--fm);font-size:1.8cqw;text-align:center">${IC.plus.replace('<svg','<svg style="width:3cqw;height:3cqw;display:block;margin:0 auto 1cqw"')}Make your own crate</i>${[1,2,3].map(k=>`<i style="--k:${k};z-index:${5-k};background:#ddd"></i>`).join('')}</div>`+`<div class="c tl">${markS()}<span class="q">Records</span></div><div class="c bl q mo">13 of 12</div>`));
+add('M','M2','In the menu','A line in C3’s menu or at the end of About. Out of the way until someone looks for it.',frame('k-paper on',stack()+`<div class="c tl"><button data-open="m" style="padding:.3em;border-radius:.6em">${markS()}</button></div><div class="ov" style="top:8.4cqw;left:3.6cqw;background:var(--bg);border:1px solid var(--ln);border-radius:1.4cqw;padding:1cqw;display:grid;gap:.2cqw;min-width:24cqw;box-shadow:0 2cqw 4cqw -2cqw #0004;font-size:1.75cqw">${['About','Share','Make your own crate','caseycavanagh.com ↗'].map((t,i)=>`<button style="padding:.6em .8em;border-radius:.6em;${i===2?'background:color-mix(in srgb,var(--crate) 12%,transparent);color:var(--crate)':''}">${t}</button>`).join('')}</div>`));
+add('M','M3','A visitor’s crate','Sam’s crate: their name on the crate’s band, and the corner offers “Casey’s crate” and “Make your own”.',frame('k-crate',stack(5,5,crate({label:'Sam’s',short:true}))+`<div class="c tl">${markS()}<span>Sam’s records</span></div><div class="c tr"><button class="q">Casey’s crate</button><button class="q ol">${IC.plus}Make your own</button></div><div class="c br"><button class="q">${IC.share}Share</button></div>`));
+
+/* ---------- H: phone ---------- */
+add('H','H1','Mark and one dot menu','Mark top left, a dots button top right for About and Share. The pile owns the rest.',frame('k-paper ph',stack()+`<div class="c tl">${markS()}</div><div class="c tr"><button class="ic" aria-label="More">${IC.dots}</button></div>`));
+add('H','H2','Bottom bar','About and Share in a bar at the bottom, in thumb reach.',frame('k-paper ph',stack()+`<div class="c tl">${markS()}<span class="q">Records</span></div><div class="c bc" style="gap:6cqw"><button class="q">${IC.info}About</button><button class="q">${IC.share}Share</button></div>`));
+add('H','H3','In the crate','K2 on a phone: the pile stands in the drawn crate, the band says whose it is.',frame('k-crate ph',stack(1,5,crate({label:'Casey’s',short:true}))+`<div class="c tr"><button class="ic" aria-label="More">${IC.dots}</button></div>`));
+
+/* ---------- picks ---------- */
+let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-style-picks')||'[]'))}catch(e){}
+const save=()=>{try{localStorage.setItem('vinyl-style-picks',JSON.stringify([...picks]))}catch(e){}};
+const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
+$$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{navigator.clipboard?.writeText([...picks].sort().map(id=>`${id} ${ALL[id]}`).join(', ')).catch(()=>{});$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1200)};
+$('#clear').onclick=()=>{picks.clear();save();show()};
+// the crate color follows a starred P sticker
+const tint=()=>{const p=[...picks].find(id=>id[0]==='P');const c={P1:'#6d3fc0',P2:'#661864',P3:'#2b5fb4',P4:'#c3322b',P5:'#3f9d7f',P6:'#222'}[p];document.documentElement.style.setProperty('--crate',c||'#6d3fc0')};
+$$('.st').forEach(s=>$('.star',s).addEventListener('click',tint));tint();
+$('#tt').innerHTML=TOGGLE;$('.tt').onclick=()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'};
+document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';show();
+</script>
+</body>
+</html>
