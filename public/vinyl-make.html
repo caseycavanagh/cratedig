@@ -111,7 +111,7 @@ function render(){
   const name=$('#name').value,n=crate.length;
   $('#mineH').textContent=V.crateName(name);
   $('#count').textContent=n===1?'1 record':`${n} records`;
-  $('#row').innerHTML=crate.map(r=>`<div class="mini" role="listitem"><img src="${esc(r.thumb)}" alt="${esc(r.title)} by ${esc(r.artist)}" width="96" height="96"><button class="x" data-k="${key(r)}" aria-label="Remove ${esc(r.title)}">×</button></div>`).join('');
+  $('#row').innerHTML=crate.map(r=>`<div class="mini" role="listitem"><img src="${esc(r.thumb)}"${r.fallback?` data-fallback="${esc(r.fallback)}"`:''} alt="${esc(r.title)} by ${esc(r.artist)}" width="96" height="96"><button class="x" data-k="${key(r)}" aria-label="Remove ${esc(r.title)}">×</button></div>`).join('');
   const url=n?V.link(name,crate):'';
   $('#openC').toggleAttribute('href',!!n);if(n)$('#openC').href=url;
   $('#openC').setAttribute('aria-disabled',!n);$('#copy').setAttribute('aria-disabled',!n);
@@ -123,7 +123,7 @@ function render(){
 let results=[],timer=0,seq=0;const cache={};
 function show(list){
   results=list;
-  $('#grid').innerHTML=list.map(r=>`<li><button class="alb" data-k="${key(r)}" aria-pressed="false"><span class="cv"><img src="${esc(r.thumb)}" alt="" loading="lazy"><span class="tag">Add</span></span><span class="t">${esc(r.title)}</span><span class="a">${esc(r.artist)} <span class="y">${esc(r.year)}</span></span></button></li>`).join('');
+  $('#grid').innerHTML=list.map(r=>`<li><button class="alb" data-k="${key(r)}" aria-pressed="false"><span class="cv"><img src="${esc(r.thumb)}" alt="" loading="lazy"${r.fallback?` data-fallback="${esc(r.fallback)}"`:''}><span class="tag">Add</span></span><span class="t">${esc(r.title)}</span><span class="a">${esc(r.artist)} <span class="y">${esc(r.year)}</span></span></button></li>`).join('');
   render();
 }
 async function find(term){
@@ -137,6 +137,8 @@ async function find(term){
     $('#status').textContent=list.length?'':'No records found. Try the artist’s name.';
   }catch{if(id===seq)$('#status').textContent='Search isn’t answering. Try again in a minute.'}
 }
+// a pressing without its own cover borrows the album's; with neither, the square stays blank
+document.addEventListener('error',e=>{const i=e.target;if(i.dataset?.fallback){i.src=i.dataset.fallback;delete i.dataset.fallback}else if(i.tagName==='IMG')i.style.visibility='hidden'},true);
 $('#q').addEventListener('input',e=>{clearTimeout(timer);timer=setTimeout(()=>find(e.target.value.trim()),450)});
 
 $('#grid').addEventListener('click',e=>{
@@ -161,7 +163,7 @@ $('#copy').addEventListener('click',async()=>{
 // start from a crate in the address (an edit link), or the last one made on this browser
 (async()=>{
   const p=new URLSearchParams(location.search);
-  if(p.get('d')||p.get('c')){
+  if(p.get('d')||p.get('m')||p.get('c')){
     $('#name').value=p.get('by')||'';$('#status').textContent='Gathering records…';
     try{crate=await V.fromAddress(p);$('#status').textContent=''}catch{$('#status').textContent='Couldn’t load that crate. Try again in a minute.'}
   }else{

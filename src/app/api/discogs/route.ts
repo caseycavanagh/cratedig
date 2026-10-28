@@ -7,6 +7,7 @@
 //   ?img=<url>        a Discogs image, passed through so the crate can read its colors
 
 import { connection, type NextRequest } from "next/server";
+import { spotifyAlbum } from "@/lib/spotify";
 
 const API = "https://api.discogs.com";
 const UA = "caseycavanagh.com-records/1.0 (https://caseycavanagh.com)";
@@ -24,10 +25,8 @@ type Release = {
   discogs: string;
 };
 
-// releases and Spotify matches, kept between requests
+// releases, kept between requests
 const releases = new Map<number, Release>();
-const albums = new Map<string, string | null>();
-let token: { value: string; expires: number } | null = null;
 
 const discogs = (path: string) =>
   fetch(API + path, {
@@ -37,40 +36,6 @@ const discogs = (path: string) =>
 
 // "Neil Young (2)" and "Lucinda Williams*" are Discogs' ways of telling artists apart
 const name = (s: string) => s.replace(/ \(\d+\)$/, "").replace(/\*$/, "");
-
-async function spotifyToken() {
-  const id = process.env.SPOTIFY_CLIENT_ID;
-  const secret = process.env.SPOTIFY_CLIENT_SECRET;
-  if (!id || !secret) return null;
-  if (token && token.expires > Date.now() + 60_000) return token.value;
-  const res = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString("base64")}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: "grant_type=client_credentials",
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  token = { value: data.access_token, expires: Date.now() + data.expires_in * 1000 };
-  return token.value;
-}
-
-async function spotifyAlbum(title: string, artist: string) {
-  const key = `${artist}\u0000${title}`.toLowerCase();
-  if (albums.has(key)) return albums.get(key)!;
-  const auth = await spotifyToken();
-  if (!auth) return null;
-  const url = new URL("https://api.spotify.com/v1/search");
-  url.search = new URLSearchParams({ q: `album:${title} artist:${artist}`, type: "album", limit: "1" }).toString();
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${auth}` }, cache: "no-store" });
-  if (!res.ok) return null; // not kept, so a rate limit is retried next time
-  const id: string | null = (await res.json())?.albums?.items?.[0]?.id ?? null;
-  albums.set(key, id);
-  return id;
-}
 
 async function release(id: number, origin: string): Promise<Release | null> {
   if (releases.has(id)) return releases.get(id)!;
