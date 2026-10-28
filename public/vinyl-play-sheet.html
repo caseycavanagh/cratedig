@@ -92,6 +92,16 @@ html[data-theme=dark] .pg{--vb:#121212;--vf:#ecebe8;--vm:#8f8f93;--vl:#3a3a3d;--
 .t-outline .dotted .b:first-child{border-right-color:transparent}
 .t-outline .dotted .b:first-child:hover,.t-outline .dotted .b:first-child.h{border-right-color:var(--vm)}
 .lg{flex:none;display:block}
+.alts{display:inline-flex;gap:2px}
+.alt,.sw{all:unset;cursor:pointer;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--vm);transition:transform .5s var(--flip),background-color .2s,color .2s}
+.alt .lg path{fill:var(--vm);transition:fill .2s}
+.alt:hover,.alt.h,.sw:hover,.sw.h{background:var(--vs);color:var(--vf)}
+.alt:hover .lg path,.alt.h .lg path{fill:var(--c)}
+.alt:active,.alt.p,.sw:active,.sw.p{transform:scale(.96);transition-duration:.08s}
+.alt:focus-visible,.sw:focus-visible,.alt.f,.sw.f{outline:2px solid var(--accent);outline-offset:2px}
+.sw[aria-expanded=true]{color:var(--vf)}
+.t-outline .b.tint{background:color-mix(in srgb,var(--c) 10%,var(--vb));border-color:color-mix(in srgb,var(--c) 40%,var(--vl))}
+.t-outline .b.tint:hover,.t-outline .b.tint.h{border-color:var(--c)}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
 .named{display:inline-flex;align-items:center;gap:14px}
 .chg{all:unset;cursor:pointer;font-size:14px;color:var(--vm);border-radius:3px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);transition:color .2s,text-decoration-color .2s,transform .5s var(--flip)}
@@ -148,6 +158,7 @@ html[data-theme=dark] .menu{box-shadow:0 12px 32px -12px #000c}
 <div class="wrap">
   <div class="top"><div><h1>Play button</h1><p>The Play button on the records page, in three parts: the button, the menu of services, and how it looks once you've picked one. Each sticker is live (click Play, pick a service, then click Play again), with every state laid out below it. Star one from each group.</p></div>
     <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy picks</button><button class="pill" id="clear" type="button">Clear</button><span id="tt"></span></div></div>
+  <h2 class="grp">Logo in the button, no split</h2><p>New, after your note: once you’ve picked, the button carries the service’s logo and stays one piece. Each one is a different way to switch. Before a pick, Play opens the menu with logos.</p><div class="sheet" id="L"></div>
   <h2 class="grp">The button</h2><p>How Play looks and feels before anyone has picked. Each one uses the M1 menu and R1 once picked.</p><div class="sheet" id="B"></div>
   <h2 class="grp">The menu</h2><p>Where the services show up. Each one uses the B1 button.</p><div class="sheet" id="M"></div>
   <h2 class="grp">After a pick</h2><p>Play goes straight to the service you picked last; these are the ways to show that and to switch. Each one uses B1; R5 to R7 put the logos in the menu too.</p><div class="sheet" id="R"></div>
@@ -162,7 +173,8 @@ const MARK={spotify:'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12
   appleMusic:'M23.994 6.124a9.23 9.23 0 00-.24-2.19c-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 00-1.877-.726 10.496 10.496 0 00-1.564-.15c-.04-.003-.083-.01-.124-.013H5.986c-.152.01-.303.017-.455.026-.747.043-1.49.123-2.193.4-1.336.53-2.3 1.452-2.865 2.78-.192.448-.292.925-.363 1.408-.056.392-.088.785-.1 1.18 0 .032-.007.062-.01.093v12.223c.01.14.017.283.027.424.05.815.154 1.624.497 2.373.65 1.42 1.738 2.353 3.234 2.801.42.127.856.187 1.293.228.555.053 1.11.06 1.667.06h11.03a12.5 12.5 0 001.57-.1c.822-.106 1.596-.35 2.295-.81a5.046 5.046 0 001.88-2.207c.186-.42.293-.87.37-1.324.113-.675.138-1.358.137-2.04-.002-3.8 0-7.595-.003-11.393zm-6.423 3.99v5.712c0 .417-.058.827-.244 1.206-.29.59-.76.962-1.388 1.14-.35.1-.706.157-1.07.173-.95.045-1.773-.6-1.943-1.536a1.88 1.88 0 011.038-2.022c.323-.16.67-.25 1.018-.324.378-.082.758-.153 1.134-.24.274-.063.457-.23.51-.516a.904.904 0 00.02-.193c0-1.815 0-3.63-.002-5.443a.725.725 0 00-.026-.185c-.04-.15-.15-.243-.304-.234-.16.01-.318.035-.475.066-.76.15-1.52.303-2.28.456l-2.325.47-1.374.278c-.016.003-.032.01-.048.013-.277.077-.377.203-.39.49-.002.042 0 .086 0 .13-.002 2.602 0 5.204-.003 7.805 0 .42-.047.836-.215 1.227-.278.64-.77 1.04-1.434 1.233-.35.1-.71.16-1.075.172-.96.036-1.755-.6-1.92-1.544-.14-.812.23-1.685 1.154-2.075.357-.15.73-.232 1.108-.31.287-.06.575-.116.86-.177.383-.083.583-.323.6-.714v-.15c0-2.96 0-5.922.002-8.882 0-.123.013-.25.042-.37.07-.285.273-.448.546-.518.255-.066.515-.112.774-.165.733-.15 1.466-.296 2.2-.444l2.27-.46c.67-.134 1.34-.27 2.01-.403.22-.043.442-.088.663-.106.31-.025.523.17.554.482.008.073.012.148.012.223.002 1.91.002 3.822 0 5.732z',
   deezer:'M18.81 4.16v3.03H24V4.16h-5.19zM6.27 8.38v3.027h5.189V8.38h-5.19zm12.54 0v3.027H24V8.38h-5.19zM6.27 12.594v3.027h5.189v-3.027h-5.19zm6.271 0v3.027h5.19v-3.027h-5.19zm6.27 0v3.027H24v-3.027h-5.19zM0 16.81v3.029h5.19v-3.03H0zm6.27 0v3.029h5.189v-3.03h-5.19zm6.271 0v3.029h5.19v-3.03h-5.19zm6.27 0v3.029H24v-3.03h-5.19Z'};
 const mark=(k,color)=>`<svg class="lg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="${color?SV.find(x=>x[0]===k)[2]:'currentColor'}" d="${MARK[k]}"/></svg>`;
-const LOGO={logo:0,logoc:1};
+const LOGO={logo:0,logoc:1,lchange:1,lcaption:1,lothers:1,lswap:1,lhold:1,ltint:1};
+const SWAP='<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 4.5h9m0 0L8.5 2M11 4.5 8.5 7M12 9.5H3m0 0L5.5 7M3 9.5 5.5 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 // the control's markup for a variant {t,m,r} in a state {picked,open,h,p,f,mi,mf}
 function playHTML(v,s={}){
@@ -174,6 +186,12 @@ function playHTML(v,s={}){
   if(!pk)trig=`<button class="b${st('b')}" data-a="toggle" aria-expanded="${ex}"${v.t==='icon'?' aria-label="Play"':''}>${word}</button>`;
   else if(v.r==='named')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${PI}Play on ${pk[1]}</button><button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
   else if(v.r==='caption')trig=`<button class="b${st('b')}" data-a="go"${v.t==='icon'?' aria-label="Play"':''}>${word}</button><span class="cap">${pk[1]} · <button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
+  else if(v.r==='lchange')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${word}</button><button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
+  else if(v.r==='lcaption')trig=`<button class="b${st('b')}" data-a="go">${word}</button><span class="cap">${pk[1]} · <button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
+  else if(v.r==='lothers')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${word}</button><span class="alts">${SV.filter(x=>x!==pk).map(([k,n,c],i)=>`<button class="alt${i===0?st('more'):''}" data-a="pick" data-k="${k}" style="--c:${c}" aria-label="Play on ${n} instead">${mark(k,1)}</button>`).join('')}</span></span>`;
+  else if(v.r==='lswap')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${word}</button><button class="sw${st('more')}" data-a="toggle" aria-expanded="${ex}" aria-label="Play somewhere else">${SWAP}</button></span>`;
+  else if(v.r==='lhold')trig=`<button class="b${st('b')}${s.open?' p':''}" data-a="go" data-hold aria-expanded="${ex}" aria-description="Hold, right-click or press the down arrow for other services">${word}</button><span class="cap">Hold for more</span>`;
+  else if(v.r==='ltint')trig=`<span class="named"><button class="b tint${st('b')}" data-a="go" style="--c:${pk[2]}">${word}</button><button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
   else if(v.r==='logoswitch')trig=`<span class="split dotted"><button class="b${st('b')}" data-a="go">${word}</button>${more(`${mark(pk[0],1)}${CHEV}`)}</span>`;
   else if(v.r==='dot')trig=`<span class="split dotted"><button class="b${st('b')}" data-a="go">${word}</button>${more(`<i class="dot" style="--c:${pk[2]}"></i>${CHEV}`)}</span>`;
   else trig=`<span class="split"><button class="b${st('b')}" data-a="go"${v.t==='icon'?' aria-label="Play"':''}>${word}</button>${more(CHEV)}</span>`;
@@ -202,6 +220,12 @@ const R=[['Split arrow (live)','split','Play goes to your pick and the arrow bes
  ['Logo in color','logoc','The same in each brand’s color: the one spot of color on the page','logosc'],
  ['Logo by the arrow','logoswitch','Play keeps its triangle; the colored logo sits with the arrow, marking where Play goes and how to change it','logosc']];
 
+const L=[['Change beside it','lchange','One pill with the logo, and a quiet Change link beside it that opens the menu'],
+ ['Caption under it','lcaption','One pill with the logo; the service’s name and Change sit under it in mono'],
+ ['The others beside it','lothers','The other services wait beside Play as small gray logos that take their color on hover. Click one to play there; it becomes your pick. No menu after the first time'],
+ ['Swap icon','lswap','One pill with the logo, and a small round swap icon beside it, apart from the pill, that opens the menu'],
+ ['Hold for more','lhold','Just the pill. A click plays; holding it, right-clicking or pressing the down arrow opens the menu. A small mono hint says so'],
+ ['Tinted','ltint','The pill takes a faint wash of the brand’s color, with Change beside it']];
 const ALL={},demos=new Map();
 const cell=(label,v,s,tall)=>`<div class="cell${tall?' tall':''}${tall===2?' tall2':''}" inert><span class="k">${label}</span><div class="t-${v.t} m-${v.m}">${playHTML(v,s)}</div></div>`;
 function sticker(box,id,name,v,use,cells,n=2){
@@ -213,6 +237,9 @@ function sticker(box,id,name,v,use,cells,n=2){
   const d={v,live:$('.live',s),picked:null};demos.set(d.live,d);paint(d);
 }
 const tall=v=>v.m==='inline'||v.m==='drawer'?0:v.m==='mono'?2:1;
+L.forEach(([n,r,use],i)=>{const v={t:'outline',m:'logosc',r},sp={picked:'spotify'};sticker('#L','L'+(i+1),n,v,use,r==='lothers'?[
+  ['Spotify',v,{picked:'spotify'}],['Apple Music',v,{picked:'appleMusic'}],['Deezer',v,{picked:'deezer'}],['Hover Play',v,{...sp,h:'b'}],['Hover another',v,{...sp,h:'more'}],['Before a pick',v,{}]]:[
+  ['Spotify',v,{picked:'spotify'}],['Apple Music',v,{picked:'appleMusic'}],['Deezer',v,{picked:'deezer'}],['Hover Play',v,{...sp,h:'b'}],[r==='lhold'?'Pressed':'Hover switch',v,{...sp,...(r==='lhold'?{h:'b',p:'b'}:{h:'more'})}],['Switching',v,{...sp,open:1,...(r==='lhold'?{}:{h:'more'})},1]])});
 B.forEach(([n,t,use],i)=>{const v={t,m:'pop',r:'split'};sticker('#B','B'+(i+1),n,v,use,[
   ['Rest',v,{}],['Hover',v,{h:'b'}],['Pressed',v,{h:'b',p:'b'}],['Focus',v,{f:'b'}],['Open',v,{open:1,h:'b'},1],['Picked',v,{picked:'appleMusic'}]],3)});
 M.forEach(([n,m,use],i)=>{const v={t:'outline',m,r:'split'};sticker('#M','M'+(i+1),n,v,use,[
@@ -225,9 +252,9 @@ R.forEach(([n,r,use,m='pop'],i)=>{const v={t:'outline',m,r};sticker('#R','R'+(i+
 function paint(d){$('.slot',d.live).innerHTML=playHTML(d.v,{picked:d.picked});$('.forget',d.live).classList.toggle('on',!!d.picked)}
 const playOf=d=>$('.play',d.live);
 function toggle(d,show,focus){
-  const p=playOf(d);p.classList.toggle('on',show);$$('[data-a=toggle]',p).forEach(b=>b.setAttribute('aria-expanded',show));
+  const p=playOf(d);p.classList.toggle('on',show);$$('[aria-expanded]',p).forEach(b=>b.setAttribute('aria-expanded',show));
   if(show&&focus)$('.mi',p).focus();
-  if(!show&&focus)$('[data-a=toggle]',p).focus();
+  if(!show&&focus)$('[aria-expanded]',p)?.focus();
 }
 function say(d,t){const n=$('.note',d.live);n.textContent=t;n.classList.add('on');clearTimeout(n.t);n.t=setTimeout(()=>n.classList.remove('on'),1400)}
 function pick(d,k,kb){
@@ -240,10 +267,15 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('[data-a]')?.dataset.a,kb=e.detail===0;
   if(a==='toggle')toggle(d,!playOf(d).classList.contains('on'),kb);
   if(a==='close')toggle(d,false,kb);
-  if(a==='pick')pick(d,e.target.closest('.mi').dataset.k,kb);
+  if(a==='pick')pick(d,e.target.closest('[data-k]').dataset.k,kb);
+  if(a==='go'&&e.target.closest('[data-hold]')?.dataset.held){delete e.target.closest('[data-hold]').dataset.held;return}
   if(a==='go')say(d,'→ Opens '+SV.find(x=>x[0]===d.picked)[1]);
   if(e.target.closest('.forget')){d.picked=null;paint(d);say(d,'Forgot the pick')}
 });
+// L5: a long press, a right click or the down arrow opens the menu; a click plays
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-hold]'),d=b&&demos.get(b.closest('.live'));if(!d||e.button)return;clearTimeout(b.t);b.t=setTimeout(()=>{b.dataset.held=1;toggle(d,true)},450);const up=()=>{clearTimeout(b.t);removeEventListener('pointerup',up)};addEventListener('pointerup',up)});
+document.addEventListener('contextmenu',e=>{const b=e.target.closest('[data-hold]'),d=b&&demos.get(b.closest('.live'));if(d){e.preventDefault();toggle(d,true)}});
+document.addEventListener('keydown',e=>{const b=e.target.closest?.('[data-hold]'),d=b&&demos.get(b.closest('.live'));if(d&&e.key==='ArrowDown'&&!playOf(d).classList.contains('on')){e.preventDefault();e.stopImmediatePropagation();toggle(d,true,true)}});
 document.addEventListener('pointerdown',e=>demos.forEach(d=>{if(playOf(d).classList.contains('on')&&!playOf(d).contains(e.target))toggle(d,false)}));
 document.addEventListener('keydown',e=>{
   const d=[...demos.values()].find(d=>playOf(d).classList.contains('on'));if(!d)return;
