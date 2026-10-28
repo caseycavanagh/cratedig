@@ -167,7 +167,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .play .mk{flex:none;display:block}
 /* after a pick: Play carries the service's logo, and a small round button beside it switches */
 .pair{display:inline-flex;align-items:center;gap:6px}
-.pm-h,.o-count,.dcap{display:none}
+.pm-h,.o-count,.dhint{display:none}
 .sw{all:unset;cursor:pointer;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--m);transition:transform .5s var(--flip),background-color .2s,color .2s}
 .sw:hover,.sw[aria-expanded=true]{background:var(--soft);color:var(--fg)}
 .sw:active{transform:scale(.96);transition-duration:.08s}
@@ -194,26 +194,19 @@ html[data-theme=dark] .play-m{box-shadow:0 12px 32px -12px #000c}
   .o-info h2{font-size:26px}
 }
 /* Phones: the crate becomes a pile of records facing you; an open record stacks its details underneath, Play within reach of a thumb */
-html.phone{--S:min(calc(100vw - 48px),calc(100svh - 270px));-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html.phone{--S:min(calc(100vw - 48px),calc(100svh - 200px));-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 html.phone .page{padding:0}
 /* eye level with the bottom of the pile, so a record tipped all the way toward you is edge on and gone, not lying there */
-html.phone .crate{perspective:1500px;perspective-origin:50% calc(50% - 44px + var(--S)/2);cursor:default;-webkit-touch-callout:none}
-html.phone .stack{transform:none;bottom:calc(50% + 44px - var(--S)/2)}
+html.phone .crate{perspective:1500px;perspective-origin:50% calc(50% + 12px + var(--S)/2);cursor:default;-webkit-touch-callout:none}
+html.phone .stack{transform:none;bottom:calc(50% - 12px - var(--S)/2)} /* the pile, with the records peeking out above, sits dead center */
 html.phone .rc{transform-origin:50% 50%}
 html.phone .floor{display:none}
 html.phone .rc .fr{box-shadow:0 1px 2px #0000001f,0 14px 28px -14px #00000059;transition:scale .5s var(--flip),opacity .4s}
 html.phone[data-theme=dark] .rc .fr{box-shadow:0 1px 2px #0000008c,0 14px 28px -12px #000000b3}
-html.phone .rc .face::after{transition:background-color .3s}
 html.phone .crate.pressing .rc.cur .fr{scale:.985;transition:scale .08s}
-html.phone .dcap{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;position:absolute;left:calc(50% - var(--S)/2);width:var(--S);top:calc(50% - 44px + var(--S)/2 + 26px);pointer-events:none;transition:opacity .3s}
-.dcap .t{min-width:0}
-.dcap b,.dcap .t span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dcap b{font-weight:500;font-size:18px;line-height:1.3}
-.dcap .t span{color:var(--m);font-size:15px;line-height:1.4}
-.dcap i{font:400 13px/23px var(--mono);font-style:normal;color:var(--m)}
-.dhint{grid-column:1/-1;margin-top:18px;font:400 12px/1.4 var(--mono);color:var(--m);transition:opacity .4s}
-.crate.swiped .dhint{opacity:0}
-.crate.lifted .dcap{opacity:0}
+/* no labels on the pile, only a first-time hint that goes once you've flipped */
+html.phone .dhint{display:block;position:absolute;left:0;right:0;top:calc(50% + 12px + var(--S)/2 + 28px);text-align:center;font:400 12px/1.4 var(--mono);color:var(--m);pointer-events:none;transition:opacity .4s}
+.crate.swiped .dhint,.crate.lifted .dhint{opacity:0}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - 330px))}
 html.phone .o-page{display:flex;padding:calc(env(safe-area-inset-top) + 64px) 24px calc(env(safe-area-inset-bottom) + 20px)}
 html.phone .o-grid{flex:1;flex-direction:column;justify-content:flex-start;gap:22px}
@@ -240,7 +233,7 @@ html.sliding .open.in .peek.on{transition:none}
 /* pulling the record down fades the rest of the view and brings the pile back */
 html.pulldown .open .o-info,html.pulldown .open.in #close,html.pulldown .open.in .o-count{opacity:calc(1 - var(--pull,0)*3);transition:none}
 html.pulldown .open.in .peek.on{opacity:0;transition:opacity .15s}
-html.pulldown .crate.lifted .rc:not(.cur) .face,html.pulldown .crate.lifted .dcap{opacity:1;transition:none}
+html.pulldown .crate.lifted .rc:not(.cur) .face{opacity:1;transition:none}
 /* the pile comes back from under a veil in the page color: all at once, never cover through cover, and cheap to fade */
 .veil{display:none}
 html.pulldown .veil{display:block;position:absolute;inset:0;background:var(--bg);pointer-events:none;will-change:opacity}
@@ -274,10 +267,7 @@ html.phone .play-m a:active{background:var(--soft);transform:none}
 }
 /* phones on their side: the pile shrinks to fit, the details sit beside the record again */
 @media(max-height:500px){
-  html.phone{--S:calc(100svh - 150px)}
-  html.phone .stack{bottom:calc(50% + 34px - var(--S)/2)}
-  html.phone .crate{perspective-origin:50% calc(50% - 34px + var(--S)/2)}
-  html.phone .dcap{top:calc(50% - 34px + var(--S)/2 + 16px)}
+  html.phone{--S:calc(100svh - 90px)}
   html.phone .dhint{display:none}
   html.phone .open{--O:calc(100svh - 72px)}
   html.phone .o-page{padding:36px calc(env(safe-area-inset-right) + 32px) 36px calc(env(safe-area-inset-left) + 32px)}
@@ -286,7 +276,7 @@ html.phone .play-m a:active{background:var(--soft);transform:none}
   html.phone .open.in.swapping .o-info{transform:translateX(-24px) scale(.98)}
   html.phone .play{margin-top:24px;padding-top:0}
 }
-@media(prefers-reduced-motion:reduce){html.phone .play-m,html.phone .play.on .play-m,html.phone .open.in.swapping .o-info,html.phone .rc .face::after{transition:none}}
+@media(prefers-reduced-motion:reduce){html.phone .play-m,html.phone .play.on .play-m,html.phone .open.in.swapping .o-info}
 @media(prefers-reduced-motion:reduce){.peek,.open.in .peek.on,.open.in .peek.on:hover,.rc,.rc .fr,.lift.moving,.lift.back,.o-info,.open.in .o-info,.play-m,.play.on .play-m,.sw svg{transition:none}}
 /* loading: a quiet count, then the whole crate rises in at once */
 .loading{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;font:400 13px/1 var(--mono);color:var(--m);transition:opacity .3s;pointer-events:none}
@@ -305,7 +295,7 @@ html.phone .play-m a:active{background:var(--soft);transform:none}
   <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record.">
     <div class="floor"></div>
     <div class="stack" id="stack"></div>
-    <div class="dcap" id="dcap" aria-hidden="true"><div class="t"><b></b><span></span></div><i></i><p class="dhint">Pull down to flip through, tap to pull one out</p></div>
+    <p class="dhint" aria-hidden="true">Pull down to flip through, tap to pull one out</p>
     <div class="veil" id="veil"></div>
   </section>
   <p class="sr" id="pos" aria-live="polite"></p>
@@ -359,12 +349,12 @@ function art(r){
 }
 // local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
 const img=f=>/^https?:/.test(f)?f:'vinyl/'+f;
-const coverHTML=r=>r.front?`<img class="art" src="${img(r.front)}" alt="" decoding="async" draggable="false">`:`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
+const coverHTML=r=>r.front?`<img class="art" src="${img(r.front)}" alt="" decoding="sync" draggable="false">`:`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
 const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
 const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-const backHTML=r=>r.back?`<img class="art" src="${img(r.back)}" alt="" decoding="async" draggable="false">`:`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
+const backHTML=r=>r.back?`<img class="art" src="${img(r.back)}" alt="" decoding="sync" draggable="false">`:`<div class="art" style="background:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color
 
 // crate geometry, in px
 const GAP=7,AHEAD=8,BEHIND=16,FGAP=3.5;
@@ -393,7 +383,7 @@ let PHONE=phoneQ.matches,deckS=0,dd=null;
 const off={x:0,y:0,vx:0,vy:0};
 // where a record sits at a (fractional) distance d below the top of the pile; a flipped one tips toward you on its bottom edge until it's edge on, gone
 function deckSeat(d,q){
-  if(d>=0){const k=Math.min(d,4),w=Math.min(d,1);return{x:q.x*5*w,y:-Math.min(k,3)*14,z:-k*3,s:1-k*.035,r:q.z*2.4*w,a:0}}
+  if(d>=0){const k=Math.min(d,4),w=Math.min(d,1,Math.max(0,4-d));return{x:q.x*5*w,y:-Math.min(k,3)*14,z:-k*3,s:1-k*.035,r:q.z*2.4*w,a:0}} // past the third, a record squares up and shrinks out of sight behind it
   return{x:0,y:0,z:1,s:1,r:0,a:-Math.acos(1-Math.min(-d,1))*180/Math.PI}; // its top edge keeps pace with your finger
 }
 // One spring drives the crate: pos chases aim, so a flip can be interrupted, retargeted or dragged without restarting
@@ -433,40 +423,34 @@ function tick(t){
     off.vx+=(-K*off.x-C*off.vx)*dt;off.x+=off.vx*dt;off.vy+=(-K*off.y-C*off.vy)*dt;off.y+=off.vy*dt;
     if(Math.abs(off.x)+Math.abs(off.y)<.1&&Math.abs(off.vx)+Math.abs(off.vy)<1)off.x=off.y=off.vx=off.vy=0;else rest=false;
   }
-  if(rest){pos=aim;vel=0;render();raf=0;tick.t=0;return}
+  if(rest){pos=aim;vel=0;render();raf=0;tick.t=0;if(PHONE)place(true);return}
   render();raf=requestAnimationFrame(tick);
 }
-function kick(){if(reduce){pos=aim;vel=0;off.x=off.y=0;render();return}if(!raf){tick.t=0;raf=requestAnimationFrame(tick)}}
+function kick(){if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);render();return}if(!raf){tick.t=0;raf=requestAnimationFrame(tick)}}
 // shading and classes follow the whole-number position, and snap (animating them repaints every cover)
 // Only records you could see are drawn: the pile hides all but its top few, and past 10 deep nothing shows.
 // Shading is two flat steps (behind, flipped), so a flip repaints only the records that change sides.
-function place(){
+function place(rest){
   nodes.forEach((n,j)=>{
-    const d=j-cur,show=PHONE?d>=-2&&d<=4:d>=-3&&d<=10;
-    const shade=PHONE?(d>0?'rgb(0 0 0/.14)':'#0000'):d<0?'rgb(0 0 0/.06)':d===0?'#0000':'rgb(0 0 0/.16)';
+    const d=j-cur;let show=PHONE?d>=-2&&d<=7:d>=-3&&d<=10;
+    // on a phone the pile only gains or drops records at rest, out of sight: changing what's drawn mid-flip can make iOS flash the whole pile
+    if(PHONE&&!rest&&show!==shown[j]&&(d<-1||d>3))show=shown[j];
+    const shade=PHONE?'#0000':d<0?'rgb(0 0 0/.06)':d===0?'#0000':'rgb(0 0 0/.16)'; // the pile goes unshaded: no record brightens as it reaches the top
     if(n.dataset.shade!==shade){n.dataset.shade=shade;n.style.setProperty('--shade',shade)}
-    n.classList.toggle('cur',d===0);n.classList.toggle('fell',d<0);
+    n.classList.toggle('cur',d===0);n.classList.toggle('fell',!PHONE&&d<0);
     if(shown[j]!==show){shown[j]=show;n.classList.toggle('gone',!show)}
   });
 }
 const setHash=()=>{clearTimeout(setHash.t);setHash.t=setTimeout(()=>{if(open.hidden)history.replaceState(null,'','#'+order[cur].slug)},250)};
 function go(i,now){
   i=Math.max(0,Math.min(order.length-1,i));
-  if(now){cur=i;aim=pos=i;vel=0;place();render()}
+  if(now){cur=i;aim=pos=i;vel=0;place(true);render()}
   else{aim=i;kick();if(i===cur)return;cur=i;place()}
   if(open.hidden)setHash();
   say();
 }
-// the record on top, for screen readers, and on phones under the pile
-const dcap=$('#dcap');
-function say(){
-  const r=order[cur];
-  $('#pos').textContent=`${r.title}, ${r.artist}, ${r.year}. ${cur+1} of ${order.length}`;
-  if(!PHONE)return;
-  const b=$('.t b',dcap),same=b.textContent===r.title;
-  b.textContent=r.title;$('.t span',dcap).textContent=r.artist;$('i',dcap).textContent=`${cur+1} of ${order.length}`;
-  if(!same&&!reduce&&document.body.classList.contains('ready'))$('.t',dcap).animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.2,.8,.2,1)'});
-}
+// the record on top, for screen readers
+function say(){const r=order[cur];$('#pos').textContent=`${r.title}, ${r.artist}, ${r.year}. ${cur+1} of ${order.length}`}
 
 // Pull a record out: big sleeve to turn over (drag, click, arrow keys), details and a Spotify link beside it
 // resting angle of a pulled-out sleeve: barely turned, unless you turn it
@@ -614,7 +598,8 @@ function swap(dir,o=0){
   // a peek at rest: a sliver showing at the page edge, centered on the viewport (on a phone, level with the record); o carries a swipe already under way
   const edge=(side,o=0)=>`translate(${(side<0?PK-W/2-cx:innerWidth-PK+W/2-cx)+o}px,${PHONE?0:innerHeight/2-cy}px)`;
   const flat=360*Math.round(sv.ry/360); // the nearest front, from where the sleeve is turned now
-  const ghost=lift.cloneNode(true);ghost.removeAttribute('id');const gs=ghost.querySelector('.sleeve');gs.removeAttribute('id');
+  // the record that leaves takes its own images along, already drawn, rather than copies that might draw a frame late
+  const ghost=lift.cloneNode(false),gs=sleeve.cloneNode(false);ghost.removeAttribute('id');gs.removeAttribute('id');gs.append(...sleeve.childNodes);ghost.append(gs);
   ghost.className='lift ghost';if(!o)ghost.style.transform='';stage.append(ghost);
   open.classList.add('swapping','hush');open.style.setProperty('--dx','0px');root.classList.remove('sliding');
   fill(r,true);later(()=>info(r),T*.3);lift.className='lift';lift.style.transition='none';lift.style.transform=edge(dir,o);lift.style.opacity='.45';
@@ -747,7 +732,7 @@ crate.addEventListener('pointermove',e=>{
   if(p<0){off.y=-rub(-p*deckS);p=0} // nothing before the first: it lifts a little
   if(p>hi)p=hi+rub((p-hi)*deckS)/deckS; // nothing after the last: it tips a little and stands back up
   pos=p;vel=0;
-  const j=Math.min(hi,Math.round(p));if(j!==cur){cur=j;aim=j;place();setHash();say()} // the caption changes as the next record takes the top
+  const j=Math.min(hi,Math.round(p));if(j!==cur){cur=j;aim=j;place();setHash();say()} // the next record takes the top halfway through
   render();
 });
 const deckEnd=e=>{
@@ -771,7 +756,7 @@ function buzz(){
   document.head.append(l);l.click();l.remove();
 }
 // a window narrowed past a phone's width becomes one, and back
-phoneQ.addEventListener('change',()=>{PHONE=phoneQ.matches;restFor();root.classList.toggle('phone',PHONE);deckS=0;off.x=off.y=0;if(nodes.length){place();render();say()}});
+phoneQ.addEventListener('change',()=>{PHONE=phoneQ.matches;restFor();root.classList.toggle('phone',PHONE);deckS=0;off.x=off.y=0;if(nodes.length){place(true);render();say()}});
 addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,iframe')||e.metaKey||e.ctrlKey)return;
   if(!open.hidden&&playMenu()){
