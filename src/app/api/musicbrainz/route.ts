@@ -1,7 +1,8 @@
 // MusicBrainz and the Cover Art Archive for visitor crates (public/directions/vinyl-make.html):
 // no key needed, so it's the source until DISCOGS_TOKEN is set. MusicBrainz asks for at most
 // one request a second, so the crate page loads every record in one search by ID.
-//   ?q=harvest        vinyl releases matching a search, one per album
+//   ?q=harvest        albums (release groups) matching a search
+//   ?pick=<group id>  the album's best pressing: vinyl with a scanned back if there is one
 //   ?ids=<mbid>,...   those releases with label, format, front and back, and a Spotify ID
 //   ?img=<path>       a Cover Art Archive image, passed through so the crate can read its colors
 
@@ -21,6 +22,14 @@ type MbRelease = {
   "release-group"?: { id: string; "primary-type"?: string };
   media?: { format?: string }[];
   "label-info"?: { label?: { name: string } }[];
+  "cover-art-archive"?: { front: boolean; back: boolean };
+};
+type MbGroup = {
+  id: string;
+  title: string;
+  "first-release-date"?: string;
+  "primary-type"?: string;
+  "artist-credit"?: { name: string; joinphrase?: string }[];
 };
 type CaaImage = { front: boolean; back: boolean; image: string; thumbnails: Record<string, string> };
 
@@ -35,7 +44,7 @@ async function mb(path: string) {
   return fetch(`${MB}${path}&fmt=json`, { headers: { "User-Agent": UA, Accept: "application/json" }, cache: "no-store" });
 }
 
-const artistOf = (r: MbRelease) => (r["artist-credit"] ?? []).map((a) => a.name + (a.joinphrase ?? "")).join("");
+const artistOf = (r: MbRelease | MbGroup) => (r["artist-credit"] ?? []).map((a) => a.name + (a.joinphrase ?? "")).join("");
 const isVinyl = (r: MbRelease) => (r.media ?? []).some((m) => /vinyl/i.test(m.format ?? ""));
 const format = (r: MbRelease) => {
   const vinyl = (r.media ?? []).filter((m) => /vinyl/i.test(m.format ?? "")).length;
@@ -64,30 +73,39 @@ export async function GET(request: NextRequest) {
 
   const q = p.get("q")?.trim();
   if (q) {
-    // dismax searches titles and artists together, so "neil young harvest" works
-    const res = await mb(`release?query=${encodeURIComponent(q)}&dismax=true&limit=100`);
+    // whole albums, not pressings: a release search buries albums under dozens of CD and
+    // digital editions. dismax searches titles and artists together, so "neil young harvest" works
+    const res = await mb(`release-group?query=${encodeURIComponent(q)}&dismax=true&limit=40`);
     if (!res.ok) return Response.json({ results: [] }, { status: res.status === 503 ? 429 : 502 });
-    const seen = new Set<string>();
-    const results = ((await res.json()).releases ?? [])
-      .filter((r: MbRelease) => {
-        const g = r["release-group"];
-        if (!isVinyl(r) || (g?.["primary-type"] && g["primary-type"] !== "Album")) return false;
-        const k = g?.id ?? r.id; // many pressings of one album: keep the first
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
-      })
+    const results = ((await res.json())["release-groups"] ?? [])
+      .filter((g: MbGroup) => !g["primary-type"] || g["primary-type"] === "Album" || g["primary-type"] === "EP")
       .slice(0, 24)
-      .map((r: MbRelease) => ({
-        id: r.id,
-        artist: artistOf(r),
-        title: r.title,
-        year: (r.date ?? "").slice(0, 4),
-        // the release's own front, or any front for the album when this pressing has none
-        thumb: img(`release/${r.id}/front-250`),
-        fallback: r["release-group"] ? img(`release-group/${r["release-group"].id}/front-250`) : "",
+      .map((g: MbGroup) => ({
+        id: g.id,
+        artist: artistOf(g),
+        title: g.title,
+        year: (g["first-release-date"] ?? "").slice(0, 4),
+        thumb: img(`release-group/${g.id}/front-250`),
       }));
     return Response.json({ results }, { headers: { "Cache-Control": "public, s-maxage=86400" } });
+  }
+
+  const group = p.get("pick");
+  if (group) {
+    if (!MBID.test(group)) return new Response(null, { status: 400 });
+    const res = await mb(`release?release-group=${group}&inc=media+labels&limit=100`);
+    if (!res.ok) return Response.json({}, { status: res.status === 503 ? 429 : 502 });
+    const list: MbRelease[] = (await res.json()).releases ?? [];
+    const art = (r: MbRelease) => r["cover-art-archive"] ?? { front: false, back: false };
+    // vinyl with both sides scanned, then vinyl with a front, then anything with a front
+    const best =
+      list.find((r) => isVinyl(r) && art(r).front && art(r).back) ??
+      list.find((r) => isVinyl(r) && art(r).front) ??
+      list.find((r) => isVinyl(r)) ??
+      list.find((r) => art(r).front && art(r).back) ??
+      list.find((r) => art(r).front) ??
+      list[0];
+    return Response.json({ id: best?.id ?? null }, { headers: { "Cache-Control": "public, s-maxage=86400" } });
   }
 
   const ids = (p.get("ids") ?? "").split(",").filter((id) => MBID.test(id)).slice(0, 100);
@@ -113,6 +131,7 @@ export async function GET(request: NextRequest) {
           const artist = artistOf(r);
           releases.set(r.id, {
             id: r.id,
+            group: r["release-group"]?.id ?? "",
             artist,
             title: r.title,
             year: (r.date ?? "").slice(0, 4),

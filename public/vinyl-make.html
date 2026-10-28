@@ -103,7 +103,7 @@ const $=(s,r=document)=>r.querySelector(s);
 const V=window.VisitorCrate,KEY='vinyl-make';
 let crate=[]; // records in the order they were added
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const key=r=>(r.src||'a')+r.id; // Discogs and Apple IDs can collide
+const key=r=>r.src==='m'&&r.group?'g'+r.group:(r.src||'a')+r.id; // one per album; Discogs and Apple IDs can collide
 const has=k=>crate.some(r=>key(r)===k);
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify({name:$('#name').value,crate}))}catch{}}
@@ -141,12 +141,20 @@ async function find(term){
 document.addEventListener('error',e=>{const i=e.target;if(i.dataset?.fallback){i.src=i.dataset.fallback;delete i.dataset.fallback}else if(i.tagName==='IMG')i.style.visibility='hidden'},true);
 $('#q').addEventListener('input',e=>{clearTimeout(timer);timer=setTimeout(()=>find(e.target.value.trim()),450)});
 
-$('#grid').addEventListener('click',e=>{
+const adding=new Set();
+$('#grid').addEventListener('click',async e=>{
   const b=e.target.closest('.alb');if(!b)return;
   const k=b.dataset.k;
-  if(has(k))crate=crate.filter(r=>key(r)!==k);
-  else if(crate.length<V.MAX)crate.push(results.find(r=>key(r)===k));
-  else{$('#status').textContent=`A crate holds ${V.MAX} records.`;return}
+  if(adding.has(k))return;
+  if(has(k)){crate=crate.filter(r=>key(r)!==k);render();return}
+  if(crate.length>=V.MAX){$('#status').textContent=`A crate holds ${V.MAX} records.`;return}
+  let r=results.find(r=>key(r)===k);
+  if(r.group){ // a MusicBrainz album: find its best pressing first
+    adding.add(k);b.querySelector('.tag').textContent='Adding…';
+    try{r=await V.pick(r)}catch{$('#status').textContent='Couldn’t add that one. Try again in a moment.';adding.delete(k);render();return}
+    adding.delete(k);
+  }
+  if(!has(k)&&crate.length<V.MAX)crate.push(r);
   render();
 });
 $('#row').addEventListener('click',e=>{

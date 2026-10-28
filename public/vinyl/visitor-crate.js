@@ -55,9 +55,15 @@
       if(d)return d.results.map(r=>({...r,src:'d',pal:PAL}));
     }
     const m=await api('m',q).catch(()=>null);
-    if(m)return m.results.map(r=>({...r,src:'m',pal:PAL}));
+    if(m)return m.results.map(r=>({...r,src:'m',group:r.id,pal:PAL})); // an album, until pick() chooses its pressing
     const d=await jsonp(ITUNES+'search?media=music&entity=album&limit=24&term='+encodeURIComponent(term));
     return (d.results||[]).filter(a=>a.collectionType==='Album'&&a.artworkUrl100).map(toRecord);
+  }
+  // the pressing to keep for a MusicBrainz album: its release ID
+  async function pick(r){
+    const d=await api('m','pick='+r.group);
+    if(!d?.id)throw new Error('no release');
+    return {...r,id:d.id};
   }
   async function apiLookup(src,ids){
     if(!ids.length)return [];
@@ -101,7 +107,7 @@
   };
   const crateName=n=>n.trim()?n.trim()+(/s$/i.test(n.trim())?'’':'’s')+' crate':'My crate';
 
-  window.VisitorCrate={MAX,search,fromAddress,link,crateName,};
+  window.VisitorCrate={MAX,search,pick,fromAddress,link,crateName,};
 
   // On the crate page: resolves to {name, records} when the address holds a crate, null for Casey's own
   const p=new URLSearchParams(location.search);
