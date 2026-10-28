@@ -174,6 +174,13 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sw svg{transition:transform .45s var(--flip)}
 .sw[aria-expanded=true] svg{transform:rotate(180deg)}
+/* where there's hover, the caret waits tucked behind Play and slides out when you come near it (or tab to it); it leaves on a quick fade */
+@media(hover:hover){
+  html:not(.phone) .pair .btn{position:relative;z-index:1;background:var(--bg)}
+  html:not(.phone) .pair .sw{opacity:0;translate:-26px 0;transition:opacity .12s,translate 0s .12s,transform .5s var(--flip),background-color .2s,color .2s}
+  html:not(.phone) .pair:hover .sw,html:not(.phone) .pair:focus-within .sw,html:not(.phone) .pair .sw[aria-expanded=true]{opacity:1;translate:0;transition:opacity .2s,translate .55s var(--flip),transform .5s var(--flip),background-color .2s,color .2s}
+}
+@media(hover:hover) and (prefers-reduced-motion:reduce){html:not(.phone) .pair .sw{translate:0}}
 /* Play opens a short list of services; it arrives on a spring and leaves on a quick fade */
 .play-m{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;display:grid;padding:6px;border-radius:14px;background:var(--bg);border:1px solid var(--line);
   box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
