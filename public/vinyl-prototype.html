@@ -8,6 +8,7 @@
 <script>document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'</script>
 <style>
 @font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Fraunces Title';src:url('/fonts/fraunces-title.woff2') format('woff2');font-weight:800;font-display:block}
 @font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
 :root{--bg:#f4f2ee;--fg:#1a1a1a;--m:#666;--line:#cfccc6;--soft:#ebe8e2;--accent:#661864;--mono:'Paper Mono',ui-monospace,monospace;--flip:cubic-bezier(.25,1.2,.4,1);--R:min(62vh,46vw);--R:min(62svh,46vw);--S:calc(var(--R)*.965)}
 html[data-theme=dark]{--bg:#121212;--fg:#ecebe8;--m:#8f8f93;--line:#3a3a3d;--soft:#1c1c1e;--accent:#ca72c7}
@@ -52,7 +53,7 @@ button{font:inherit;color:inherit}
 /* a flipped record sits in the shadow of the one it fell onto, darkest where they touch */
 .rc.fell .bk::after{background:linear-gradient(0deg,#00000070,#0000 22%),linear-gradient(180deg,#0000 70%,#0000002a),var(--shade,transparent)}
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:2px;container-type:inline-size}
-.face::after{content:'';position:absolute;inset:0;background:var(--shade,transparent);transition:background .7s;pointer-events:none}
+.face::after{content:'';position:absolute;inset:0;background:var(--shade,transparent);pointer-events:none;box-shadow:inset 1px 1px 0 #ffffff30,inset -1px -1px 0 #0000002e}
 .bk{transform:rotateY(180deg)}
 /* every jacket has thickness: faces pushed apart, cardboard edges between them */
 .rc{--T:max(2px,calc(var(--S)*.005));--W:var(--S)}
@@ -70,7 +71,7 @@ button{font:inherit;color:inherit}
 .edge.t::after{background:var(--grain),linear-gradient(180deg,#00000030,#ffffff4a 45%,#ffffff1a 60%,#00000038),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
 .edge.b{transform:rotateX(-90deg) translateZ(calc(var(--W)/2));--dk:#00000080}
 /* cardboard: a fine grain, light from the top left, and worn edges that catch it */
-.rc .face::before,.sleeve .face::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
+.sleeve .face::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
   background:var(--grain),linear-gradient(115deg,#ffffff16,#0000 35%,#0000 70%,#0000001c);background-size:128px,auto;
   box-shadow:inset 1px 1px 0 #ffffff40,inset -1px -1px 0 #00000030,inset 0 0 0 2px #ffffff0d}
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -116,10 +117,11 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .sleeve.dragging{transition:none}
 .sleeve{--T:max(3px,calc(var(--O)*.007));--W:var(--O)}
 .sleeve .face{border-radius:1px}
-/* the shadow sits under the sleeve, outside it, so it stays behind whichever side faces you */
-.lift .sh{position:absolute;inset:3% 3% 0;box-shadow:0 1px 2px #0002,0 6px 12px -4px #0002,0 24px 40px -14px #0005,0 60px 100px -36px #0008;transform:translateZ(-24px);opacity:0;transition:opacity .6s}
-.open.in .lift .sh{opacity:1}
-html[data-theme=dark] .lift .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #000a,0 60px 100px -36px #000d}
+/* one shadow behind each side, each seen only from its own side, so it turns with the sleeve and never shows in front */
+.sleeve .sh{position:absolute;inset:3% 3% 0;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 1px 2px #0002,0 6px 12px -4px #0002,0 24px 40px -14px #0005,0 60px 100px -36px #0008;transform:translateZ(calc(var(--T)/-2 - 1px));opacity:0;transition:opacity .6s}
+.sleeve .sh.b{transform:rotateY(180deg) translateZ(calc(var(--T)/-2 - 1px))}
+.open.in .sleeve .sh{opacity:1}
+html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #000a,0 60px 100px -36px #000d}
 /* the neighbors peek in from the page edges; hover pulls one out a little further */
 .peek{all:unset;position:fixed;top:50%;z-index:2;width:var(--R);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
   transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s;box-shadow:0 20px 40px -20px #0006}
@@ -160,12 +162,18 @@ html[data-theme=dark] .lift .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #00
 .crate{opacity:0;transform:translateY(24px)}
 .ready .crate{opacity:1;transform:none;transition:opacity .5s .15s,transform 1s var(--flip) .15s}
 @media(prefers-reduced-motion:reduce){.ready .crate{transition:opacity .3s}}
+/* the name hangs on the wall behind the crate; the back records cover its feet */
+.page{position:relative}
+.wall{position:absolute;left:0;right:0;bottom:calc(50% + var(--S)*.53);z-index:0;margin:0;text-align:center;font:800 calc(var(--S)*.2)/1 'Fraunces Title',Georgia,serif;letter-spacing:-.01em;color:var(--fg);pointer-events:none;
+  opacity:0;transform:translateY(12px)}
+.ready .wall{opacity:1;transform:none;transition:opacity .6s,transform 1s var(--flip)}
+.page .crate{z-index:1}
 </style>
 </head>
 <body>
-<div class="loading" id="loading" aria-live="polite"><span>Pulling records</span><span class="bar"><i id="loadBar"></i></span><span id="loadN"></span></div>
+<div class="loading" id="loading" aria-live="polite"><span>Gathering records…</span><span class="bar"><i id="loadBar"></i></span><span id="loadN"></span></div>
 <main class="page">
-  <h1 class="sr">Records</h1>
+  <h1 class="wall">Casey’s crate</h1>
   <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record.">
     <div class="floor"></div>
     <div class="stack" id="stack"></div>
@@ -179,7 +187,7 @@ html[data-theme=dark] .lift .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #00
   <div class="o-page">
     <button class="btn" id="close">← Back to the crate</button>
     <div class="o-grid">
-      <div class="stage" id="stage" tabindex="0" role="button" aria-label="Turn the sleeve over"><div class="lift" id="lift"><div class="sh"></div><div class="sleeve" id="sleeve"></div></div></div>
+      <div class="stage" id="stage" tabindex="0" role="button" aria-label="Turn the sleeve over"><div class="lift" id="lift"><div class="sleeve" id="sleeve"></div></div></div>
       <div class="o-info" id="oinfo"></div>
     </div>
   </div>
@@ -235,7 +243,7 @@ function sortBy(k){
   build();go(0,true);
 }
 function build(){
-  stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r,['t'])}</div>`).join('');
+  stack.innerHTML=order.map((r,j)=>`<div class="rc" data-j="${j}"><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div></div>`).join('');
 }
 // Records you've flipped past lean toward you, back cover up; the rest stand behind
 // a hair of disorder, the same every visit: each record sits slightly off true
@@ -283,7 +291,7 @@ const prevP=$('#prevP'),nextP=$('#nextP');
 function peek(b,r){b.classList.toggle('on',!!r);b.innerHTML=r?coverHTML(r):'';if(r)b.title=`${r.title}, ${r.artist}`}
 prevP.onclick=()=>swap(-1);nextP.onclick=()=>swap(1);
 function fill(r){
-  sleeve.innerHTML=`<div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
+  sleeve.innerHTML=`<div class="sh"></div><div class="sh b"></div><div class="face fr">${coverHTML(r)}</div><div class="face bk">${backHTML(r)}</div>${edgesHTML(r)}`;
   peek(prevP,order[cur-1]);peek(nextP,order[cur+1]);
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${r.artist}</p>
       <dl class="facts"><dt>Released</dt><dd>${r.year}</dd><dt>Label</dt><dd>${r.label}</dd><dt>Format</dt><dd>${r.format}</dd><dt>Added</dt><dd>${fmtDate(r.added)}</dd></dl>
@@ -399,6 +407,13 @@ addEventListener('keydown',e=>{
   if(e.key==='End'){e.preventDefault();go(order.length-1)}
 });
 
+// hang the name just above the tallest record behind the front one, so the crate covers only its feet
+function hang(){
+  const w=$('.wall'),page=$('.page'),lift=new DOMMatrix(getComputedStyle(crate).transform).m42;
+  const tops=$$('.rc',stack).filter((n,j)=>j>=cur&&!n.classList.contains('gone')).map(n=>n.getBoundingClientRect().top-lift);
+  if(!tops.length)return;
+  w.style.bottom=`${page.getBoundingClientRect().bottom-Math.min(...tops)-parseFloat(getComputedStyle(w).fontSize)*.16}px`;
+}
 function start(){
   const m=location.hash.match(/^#(record\/)?(.+)$/); // read the address before sorting rewrites it
   sortBy(sortKey);
@@ -419,7 +434,7 @@ fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(async 
   const tick=()=>{n++;$('#loadN').textContent=`${n} of ${srcs.length}`;$('#loadBar').style.transform=`scaleX(${n/srcs.length})`};
   const load=src=>{const i=new Image();i.src=src;return i.decode().catch(()=>{}).then(tick)};
   await Promise.race([Promise.all([...srcs.map(load),...RECORDS.filter(r=>r.front).map(async r=>r.spine=await edgeColor('vinyl/'+r.front))]),new Promise(r=>setTimeout(r,12000))]);
-  start();
+  start();hang();addEventListener('resize',hang);
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
 });
 </script>
