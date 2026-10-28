@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play button</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/directions/lib-widgets-v1.css">
+<style>
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
+:root{--m:#6e6e6e;--line:#929292;--accent:#661864;--mono:'Paper Mono',ui-monospace,monospace;--sq:cubic-bezier(.2,1.4,.4,1);--flip:cubic-bezier(.25,1.2,.4,1)}
+html[data-theme=dark]{--m:#828287;--line:#636368;--accent:#ca72c7}
+*{font-variant-numeric:tabular-nums}
+body{font-family:'Instrument Sans',sans-serif;font-size:18px}
+.picks{font-family:var(--mono);color:var(--m);font-size:12px}
+.wrap{max-width:1400px;margin:0 auto;padding:56px 28px 96px}
+@media(max-width:680px){.wrap{padding:40px 16px 80px}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:28px;font-size:15px}
+.top h1{font-size:16px;font-weight:500}.top p{color:var(--m);margin-top:4px;max-width:680px}
+.tools{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.pill{all:unset;cursor:pointer;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--cb);background:var(--tile);display:inline-flex;align-items:center;font-size:13px;transition:transform .5s var(--sq)}
+.pill:hover{border-color:var(--m)}.pill:active{transform:scale(.99);transition-duration:.08s}.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grp{font-size:16px;font-weight:500;margin:44px 0 4px}.grp:first-of-type{margin-top:0}
+.grp+p{font-size:15px;color:var(--m);margin-bottom:16px;max-width:680px}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,620px),1fr));gap:18px;align-items:start}
+.st{position:relative;border-radius:18px;background:var(--soft);padding:46px 18px 18px;min-width:0}
+@media(max-width:680px){.st{padding:46px 8px 14px}.cells{--n:1!important}.live{padding:24px 18px 22px}}
+.st .id{position:absolute;top:14px;left:18px;right:44px;font:500 11px var(--mono);color:var(--m)}.st .id b{color:var(--fg);font-weight:500;margin-right:6px}
+.st .use{display:block;margin:14px 4px 2px;font-size:13px;color:var(--m);line-height:1.45}
+.star{all:unset;cursor:pointer;position:absolute;top:9px;right:10px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;color:var(--m);font-size:15px;z-index:5;transition:transform .5s var(--sq)}
+.star:hover{background:var(--tile);color:var(--fg)}.star:active{transform:scale(.96);transition-duration:.08s}.star:focus-visible{outline:2px solid var(--accent)}
+.st.picked{box-shadow:inset 0 0 0 2px var(--accent)}.st.picked .star{color:var(--accent)}
+
+/* the records page's own palette, inside each sticker */
+.pg{--vb:#f4f2ee;--vf:#1a1a1a;--vm:#666;--vl:#cfccc6;--vs:#ebe8e2;border-radius:12px;background:var(--vl);padding:1px;display:grid;gap:1px;overflow:hidden;color:var(--vf)}
+html[data-theme=dark] .pg{--vb:#121212;--vf:#ecebe8;--vm:#8f8f93;--vl:#3a3a3d;--vs:#1c1c1e}
+.live{position:relative;background:var(--vb);padding:28px 28px 24px;min-height:300px;border-radius:11px 11px 0 0}
+.live .k,.cell .k{font:400 11px var(--mono);color:var(--vm)}
+.ctx{margin:14px 0 22px}.ctx b{display:block;font-size:22px;font-weight:500;letter-spacing:-.01em;line-height:1.2}.ctx span{color:var(--vm)}
+.note{position:absolute;left:28px;bottom:18px;font:400 12px var(--mono);color:var(--vm);opacity:0;transition:opacity .3s}
+.note.on{opacity:1;transition-duration:.1s}
+.forget{all:unset;cursor:pointer;position:absolute;right:20px;bottom:16px;font:400 12px var(--mono);color:var(--vm);text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:3px;opacity:0;pointer-events:none;transition:opacity .2s}
+.forget.on{opacity:1;pointer-events:auto}.forget:hover{color:var(--vf);text-decoration-color:currentColor}.forget:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+.cells{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:1px;border-radius:0 0 11px 11px;overflow:hidden}
+.cell{min-width:0;position:relative;background:var(--vb);padding:34px 16px 18px;min-height:104px}
+.cell .k{position:absolute;top:10px;left:16px}
+.cell.tall{padding-bottom:178px}
+.cell.tall.tall2{padding-bottom:196px}
+
+/* ---------- the control ---------- */
+.play{position:relative;display:inline-flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px}
+.b{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 20px 0 16px;border-radius:999px;white-space:nowrap;
+  transition:transform .5s var(--flip),background-color .2s,border-color .2s,color .2s,box-shadow .2s,text-decoration-color .2s}
+.b svg{flex:none}
+.b:active,.b.p{transform:scale(.99);transition-duration:.08s}
+.b:focus-visible,.b.f,.mi:focus-visible,.mi.f,.chg:focus-visible,.chg.f{outline:2px solid var(--accent);outline-offset:2px}
+/* looks */
+.t-outline .b{border:1px solid var(--vl)}
+.t-outline .b:hover,.t-outline .b.h{border-color:var(--vm)}
+.t-ink .b{background:var(--vf);color:var(--vb)}
+.t-ink .b:hover,.t-ink .b.h{background:color-mix(in srgb,var(--vf) 84%,var(--vb))}
+.t-quiet .b{background:var(--vs)}
+.t-quiet .b:hover,.t-quiet .b.h{background:color-mix(in srgb,var(--vf) 9%,var(--vs))}
+.t-disc .b{height:auto;padding:0 4px 0 0;gap:12px}
+.t-disc .disc{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--vf);color:var(--vb);transition:transform .5s var(--flip),background-color .2s}
+.t-disc .b:hover .disc,.t-disc .b.h .disc{background:color-mix(in srgb,var(--vf) 84%,var(--vb))}
+.t-disc .b:active,.t-disc .b.p{transform:none}
+.t-disc .b:active .disc,.t-disc .b.p .disc{transform:scale(.96);transition-duration:.08s}
+.t-disc .disc svg{margin-left:2px}
+.t-text .b{height:auto;padding:4px 0;border-radius:4px;gap:7px;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px;text-decoration-color:color-mix(in srgb,var(--vf) 25%,transparent)}
+.t-text .b:hover,.t-text .b.h{text-decoration-color:var(--vf)}
+.t-icon .b{width:auto;min-width:40px;padding:0 13px;gap:0;border:1px solid var(--vl);justify-content:center}
+.t-icon .b svg{margin-left:1px}
+.t-icon .lbl{display:inline-block;max-width:0;opacity:0;overflow:hidden;transition:max-width .45s var(--flip),opacity .2s,margin .45s var(--flip)}
+.t-icon .b:hover,.t-icon .b.h,.t-icon .b:focus-visible,.t-icon .b.f{border-color:var(--vm)}
+.t-icon .b:hover .lbl,.t-icon .b.h .lbl,.t-icon .b:focus-visible .lbl,.t-icon .b.f .lbl,.t-icon .play.on .lbl{max-width:48px;opacity:1;margin-left:8px}
+/* after a pick: Play and a way to switch */
+.split{display:inline-flex}
+.t-outline .split .b:first-child,.t-ink .split .b:first-child,.t-quiet .split .b:first-child{border-top-right-radius:0;border-bottom-right-radius:0;padding-right:16px}
+.t-outline .split .more,.t-ink .split .more,.t-quiet .split .more{border-top-left-radius:0;border-bottom-left-radius:0;padding:0 14px 0 12px;color:var(--vm);gap:7px}
+.t-outline .split .more{margin-left:-1px}.t-ink .split .more,.t-quiet .split .more{margin-left:1px}
+.t-ink .split .more{color:color-mix(in srgb,var(--vb) 70%,var(--vf))}
+.split .b:hover,.split .b.h{position:relative;z-index:1}
+.t-disc .split,.t-text .split,.t-icon .split{gap:6px;align-items:center}
+.t-disc .split .more,.t-text .split .more,.t-icon .split .more{all:unset;cursor:pointer;display:grid;place-items:center;grid-auto-flow:column;gap:6px;height:30px;min-width:30px;padding:0 8px;box-sizing:border-box;border-radius:999px;color:var(--vm);transition:transform .5s var(--flip),background-color .2s,color .2s}
+.t-disc .split .more:hover,.t-text .split .more:hover,.t-icon .split .more:hover,.t-disc .split .more.h,.t-text .split .more.h,.t-icon .split .more.h{background:var(--vs);color:var(--vf)}
+.split .more:active,.split .more.p{transform:scale(.96);transition-duration:.08s}
+.split .more:focus-visible,.split .more.f{outline:2px solid var(--accent);outline-offset:2px}
+.split .more[aria-expanded=true]{color:var(--vf)}
+.dotted .more{margin-left:-1px}
+.t-outline .dotted .b:first-child{border-right-color:transparent}
+.t-outline .dotted .b:first-child:hover,.t-outline .dotted .b:first-child.h{border-right-color:var(--vm)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.named{display:inline-flex;align-items:center;gap:14px}
+.chg{all:unset;cursor:pointer;font-size:14px;color:var(--vm);border-radius:3px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);transition:color .2s,text-decoration-color .2s,transform .5s var(--flip)}
+.chg:hover,.chg.h{color:var(--vf);text-decoration-color:currentColor}
+.chg:active,.chg.p{transform:scale(.99);transition-duration:.08s}
+.cap{font:400 12px var(--mono);color:var(--vm);padding-left:2px}
+.cap .chg{font:inherit}
+
+/* ---------- the menu: arrives on a spring, leaves on a quick fade ---------- */
+.menu{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;padding:6px;border-radius:14px;background:var(--vb);border:1px solid var(--vl);
+  box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
+  transition:opacity .12s,visibility 0s .12s,transform 0s .12s}
+html[data-theme=dark] .menu{box-shadow:0 12px 32px -12px #000c}
+.play.on .menu{opacity:1;visibility:visible;transform:none;transition:opacity .18s,transform .45s var(--flip)}
+.menu .in{display:grid}
+.mi{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:14px;transition:transform .5s var(--flip),background-color .15s}
+.mi:hover,.mi.h{background:var(--vs)}
+.mi:active,.mi.p{transform:scale(.99);transition-duration:.08s}
+.mi:focus-visible,.mi.f{outline-offset:-2px}
+.mi[aria-current]::after{content:'✓';margin-left:auto;padding-left:16px;color:var(--vm)}
+/* M3: the services take Play's place in a row */
+.mrow{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;visibility:hidden;pointer-events:none}
+.mrow .mi{height:40px;padding:0 15px;white-space:nowrap;border-radius:999px;border:1px solid var(--vl);opacity:0;transform:translateX(-8px);transition:opacity .12s,transform 0s .12s,background-color .15s,border-color .2s}
+.mrow .mi:hover,.mrow .mi.h{background:none;border-color:var(--vm)}
+.mrow .mi[aria-current]{border-color:var(--vf)}.mrow .mi[aria-current]::after{display:none}
+.mrow .x{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--vm);opacity:0;transition:opacity .12s,transform .5s var(--flip)}
+.mrow .x:hover{color:var(--vf);background:var(--vs)}.mrow .x:active{transform:scale(.96)}.mrow .x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.m-inline .play>*:not(.mrow){transition:opacity .15s,transform .45s var(--flip)}
+.m-inline .play.on>*:not(.mrow){opacity:0;transform:scale(.97);pointer-events:none}
+.m-inline .play.on .mrow{visibility:visible;pointer-events:auto}
+.m-inline .play.on .mrow .mi{opacity:1;transform:none;transition:opacity .2s calc(var(--i)*40ms),transform .5s var(--flip) calc(var(--i)*40ms),background-color .15s,border-color .2s}
+.m-inline .play.on .mrow .x{opacity:1;transition:opacity .2s .15s}
+/* M4: mono and numbered */
+.m-mono .menu{font-family:var(--mono);min-width:210px}
+.m-mono .mi{font-size:13px;padding:8px 12px}
+.m-mono .num{color:var(--vm);width:12px}
+.m-mono .mh{display:block;padding:6px 12px 4px;font-size:11px;color:var(--vm)}
+/* M5: rows unfold below, no card */
+.m-drawer .menu{position:static;min-width:260px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;display:grid;grid-template-rows:0fr;transform:none;
+  transition:grid-template-rows .25s cubic-bezier(.4,0,.2,1),opacity .12s,visibility 0s .25s}
+.m-drawer .play.on .menu{grid-template-rows:1fr;transform:none;transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1),opacity .2s}
+.m-drawer .menu .in{overflow:hidden;min-height:0;border-top:1px solid var(--vl)}
+.m-drawer .mi{border-radius:0;padding:11px 4px;border-bottom:1px solid var(--vl)}
+.m-drawer .mi:hover,.m-drawer .mi.h{background:none;padding-left:8px}
+.m-drawer .mi{transition:padding .4s var(--flip),transform .5s var(--flip)}
+.m-drawer .arr{margin-left:auto;color:var(--vm)}
+.m-drawer .mi:focus-visible,.m-drawer .mi.f{border-radius:6px}
+.m-drawer .mi[aria-current]::after{order:-1;margin-left:0;padding-left:0}
+.m-drawer .mi[aria-current] .arr{margin-left:auto}
+@media(prefers-reduced-motion:reduce){.b,.menu,.play.on .menu,.mi,.mrow .mi,.m-inline .play.on .mrow .mi,.t-icon .lbl,.disc{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>Play button</h1><p>The Play button on the records page, in three parts: the button, the menu of services, and how it looks once you've picked one. Each sticker is live (click Play, pick a service, then click Play again), with every state laid out below it. Star one from each group.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy picks</button><button class="pill" id="clear" type="button">Clear</button><span id="tt"></span></div></div>
+  <h2 class="grp">The button</h2><p>How Play looks and feels before anyone has picked. Each one uses the M1 menu and R1 once picked.</p><div class="sheet" id="B"></div>
+  <h2 class="grp">The menu</h2><p>Where the services show up. Each one uses the B1 button.</p><div class="sheet" id="M"></div>
+  <h2 class="grp">After a pick</h2><p>Play goes straight to the service you picked last; these are the ways to show that and to switch. Each one uses B1 and M1.</p><div class="sheet" id="R"></div>
+</div>
+<script src="/directions/lib-widgets-v1.js"></script>
+<script>
+const PI='<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M2.5 1.2v9.6c0 .5.5.8.9.5l7.4-4.8a.6.6 0 0 0 0-1L3.4.7c-.4-.3-.9 0-.9.5Z"/></svg>';
+const CHEV='<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5l3-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SV=[['spotify','Spotify','#1ed760'],['appleMusic','Apple Music','#fa243c'],['deezer','Deezer','#a238ff']];
+
+// the control's markup for a variant {t,m,r} in a state {picked,open,h,p,f,mi,mf}
+function playHTML(v,s={}){
+  const st=k=>(s.h===k?' h':'')+(s.p===k?' p':'')+(s.f===k?' f':'');
+  const pk=SV.find(x=>x[0]===s.picked),ex=!!s.open;
+  const word=v.t==='disc'?`<i class="disc">${PI}</i>Play`:v.t==='icon'?`${PI}<span class="lbl">Play</span>`:`${PI}Play`;
+  const more=inner=>`<button class="b more${st('more')}" data-a="toggle" aria-expanded="${ex}" aria-label="Play somewhere else">${inner}</button>`;
+  let trig;
+  if(!pk)trig=`<button class="b${st('b')}" data-a="toggle" aria-expanded="${ex}"${v.t==='icon'?' aria-label="Play"':''}>${word}</button>`;
+  else if(v.r==='named')trig=`<span class="named"><button class="b${st('b')}" data-a="go">${PI}Play on ${pk[1]}</button><button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
+  else if(v.r==='caption')trig=`<button class="b${st('b')}" data-a="go"${v.t==='icon'?' aria-label="Play"':''}>${word}</button><span class="cap">${pk[1]} · <button class="chg${st('more')}" data-a="toggle" aria-expanded="${ex}">Change</button></span>`;
+  else if(v.r==='dot')trig=`<span class="split dotted"><button class="b${st('b')}" data-a="go">${word}</button>${more(`<i class="dot" style="--c:${pk[2]}"></i>${CHEV}`)}</span>`;
+  else trig=`<span class="split"><button class="b${st('b')}" data-a="go"${v.t==='icon'?' aria-label="Play"':''}>${word}</button>${more(CHEV)}</span>`;
+  const items=SV.map(([k,n,c],i)=>`<button class="mi${s.mi===i?' h':''}${s.mf===i?' f':''}" data-a="pick" data-k="${k}" style="--i:${i}"${k===s.picked?' aria-current="true"':''}>${v.m==='mono'?`<span class="num">${i+1}</span>`:''}${v.m==='dots'?`<i class="dot" style="--c:${c}"></i>`:''}<span>${n}</span>${v.m==='drawer'?'<span class="arr">→</span>':''}</button>`).join('');
+  const menu=v.m==='inline'?`<div class="mrow">${items}<button class="x" data-a="close" aria-label="Close">×</button></div>`
+    :`<div class="menu"><div class="in">${v.m==='mono'?'<span class="mh">Play on</span>':''}${items}</div></div>`;
+  return `<div class="play${ex?' on':''}">${trig}${menu}</div>`;
+}
+
+const B=[['Outline (live)','outline','A hairline pill, the one on the page now. Hover darkens the line and a press squishes it to 99%'],
+ ['Ink','ink','A solid ink pill, the loudest thing in the details, so Play reads as the one thing to do'],
+ ['Quiet fill','quiet','A soft gray pill with no line; hover deepens the gray'],
+ ['Play disc','disc','A round ink disc with the word beside it, like the play key on a deck. The disc squishes when pressed'],
+ ['Just text','text','The triangle and the word with a faint underline that turns solid on hover. Smallest footprint'],
+ ['Icon that opens','icon','A round button with only the triangle; hover or focus slides the word out on a spring']];
+const M=[['Popover (live)','pop','A small card under the button. It arrives on a spring and leaves on a quick fade; a check marks your pick'],
+ ['Brand dots','dots','The same card with each service’s color as a dot, so you find yours by color before you read it'],
+ ['Inline row','inline','No card: Play steps aside and the services slide out in a row where it was'],
+ ['Mono, numbered','mono','Paper Mono like the facts above it, numbered. Press 1, 2 or 3 while it’s open'],
+ ['Drawer','drawer','Rows unfold below the button with hairlines and arrows. Nothing floats; it’s the last thing in the details']];
+const R=[['Split arrow (live)','split','Play goes to your pick and the arrow beside it reopens the menu. Quiet, but doesn’t say where Play goes'],
+ ['Named','named','The button names the service, “Play on Apple Music”, with a quiet Change beside it'],
+ ['Caption','caption','Play stays one word, and the service sits under it in mono with Change'],
+ ['Brand dot','dot','Split like R1, with your service’s color as a dot by the arrow']];
+
+const ALL={},demos=new Map();
+const cell=(label,v,s,tall)=>`<div class="cell${tall?' tall':''}${tall===2?' tall2':''}" inert><span class="k">${label}</span><div class="t-${v.t} m-${v.m}">${playHTML(v,s)}</div></div>`;
+function sticker(box,id,name,v,use,cells,n=2){
+  ALL[id]=name.replace(' (live)','');
+  const s=el(`<div class="st" data-id="${id}"><span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id} ${name}">★</button>
+    <div class="pg"><div class="live t-${v.t} m-${v.m}"><span class="k">Try it</span><div class="ctx"><b>Harvest</b><span>Neil Young</span></div><div class="slot"></div><span class="note" aria-live="polite"></span><button class="forget" type="button">Forget pick</button></div>
+    <div class="cells" style="--n:${n}">${cells.map(c=>cell(...c)).join('')}</div></div><span class="use">${use}</span></div>`);
+  $(box).append(s);
+  const d={v,live:$('.live',s),picked:null};demos.set(d.live,d);paint(d);
+}
+const tall=v=>v.m==='inline'||v.m==='drawer'?0:v.m==='mono'?2:1;
+B.forEach(([n,t,use],i)=>{const v={t,m:'pop',r:'split'};sticker('#B','B'+(i+1),n,v,use,[
+  ['Rest',v,{}],['Hover',v,{h:'b'}],['Pressed',v,{h:'b',p:'b'}],['Focus',v,{f:'b'}],['Open',v,{open:1,h:'b'},1],['Picked',v,{picked:'appleMusic'}]],3)});
+M.forEach(([n,m,use],i)=>{const v={t:'outline',m,r:'split'};sticker('#M','M'+(i+1),n,v,use,[
+  ['Open',v,{open:1},tall(v)],['Hovering a service',v,{open:1,mi:1},tall(v)],['Keyboard',v,{open:1,mf:0},tall(v)],['Reopened after a pick',v,{open:1,picked:'appleMusic'},tall(v)]],m==='inline'?1:2)});
+R.forEach(([n,r,use],i)=>{const v={t:'outline',m:'pop',r};sticker('#R','R'+(i+1),n,v,use,[
+  ['Rest',v,{picked:'appleMusic'}],['Hover Play',v,{picked:'appleMusic',h:'b'}],['Hover switch',v,{picked:'appleMusic',h:'more'}],['Switching',v,{picked:'appleMusic',open:1,h:'more'},1]])});
+
+// the live sticker: open, pick, play
+function paint(d){$('.slot',d.live).innerHTML=playHTML(d.v,{picked:d.picked});$('.forget',d.live).classList.toggle('on',!!d.picked)}
+const playOf=d=>$('.play',d.live);
+function toggle(d,show,focus){
+  const p=playOf(d);p.classList.toggle('on',show);$$('[data-a=toggle]',p).forEach(b=>b.setAttribute('aria-expanded',show));
+  if(show&&focus)$('.mi',p).focus();
+  if(!show&&focus)$('[data-a=toggle]',p).focus();
+}
+function say(d,t){const n=$('.note',d.live);n.textContent=t;n.classList.add('on');clearTimeout(n.t);n.t=setTimeout(()=>n.classList.remove('on'),1400)}
+function pick(d,k,kb){
+  d.picked=k;toggle(d,false);say(d,'→ Opens '+SV.find(x=>x[0]===k)[1]);
+  // once the menu has faded, Play becomes the pick
+  setTimeout(()=>{paint(d);if(kb)$('[data-a=go]',d.live)?.focus()},150);
+}
+document.addEventListener('click',e=>{
+  const live=e.target.closest('.live'),d=live&&demos.get(live);if(!d)return;
+  const a=e.target.closest('[data-a]')?.dataset.a,kb=e.detail===0;
+  if(a==='toggle')toggle(d,!playOf(d).classList.contains('on'),kb);
+  if(a==='close')toggle(d,false,kb);
+  if(a==='pick')pick(d,e.target.closest('.mi').dataset.k,kb);
+  if(a==='go')say(d,'→ Opens '+SV.find(x=>x[0]===d.picked)[1]);
+  if(e.target.closest('.forget')){d.picked=null;paint(d);say(d,'Forgot the pick')}
+});
+document.addEventListener('pointerdown',e=>demos.forEach(d=>{if(playOf(d).classList.contains('on')&&!playOf(d).contains(e.target))toggle(d,false)}));
+document.addEventListener('keydown',e=>{
+  const d=[...demos.values()].find(d=>playOf(d).classList.contains('on'));if(!d)return;
+  const items=$$('.mi',playOf(d)),i=items.indexOf(document.activeElement);
+  if(e.key==='Escape'){e.preventDefault();toggle(d,false,true)}
+  const k={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];
+  if(k){e.preventDefault();items[(i+k+items.length)%items.length].focus()}
+  if(d.v.m==='mono'&&items[+e.key-1]){e.preventDefault();pick(d,items[+e.key-1].dataset.k,true)}
+});
+document.addEventListener('focusout',e=>{const d=demos.get(e.target.closest?.('.live'));if(d&&e.relatedTarget&&!playOf(d).contains(e.relatedTarget))toggle(d,false)});
+
+let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-play-picks')||'[]'))}catch(e){}
+const save=()=>{try{localStorage.setItem('vinyl-play-picks',JSON.stringify([...picks]))}catch(e){}};
+const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
+$$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{navigator.clipboard?.writeText([...picks].sort().map(id=>`${id} ${ALL[id]}`).join(', ')).catch(()=>{});$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1200)};
+$('#clear').onclick=()=>{picks.clear();save();show()};
+$('#tt').innerHTML=TOGGLE;$('.tt').onclick=()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'};
+document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';show();
+</script>
+</body>
+</html>
