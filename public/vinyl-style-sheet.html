@@ -113,6 +113,11 @@ html[data-theme=dark] .k-crate{--bg:#141019;--fg:#ece6f7;--fm:#9a8fb0;--ln:#3a31
 .og{aspect-ratio:1200/630;border-radius:10px;overflow:hidden;position:relative;container-type:inline-size;width:100%}
 
 
+
+/* blank jackets */
+.jk{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%}
+.jc{aspect-ratio:1;container-type:inline-size;position:relative;overflow:hidden;border-radius:2px;box-shadow:0 6px 14px -8px #0007,inset 1px 1px 0 #ffffff40,inset -1px -1px 0 #0000002a}
+.jc *{box-sizing:border-box}
 /* cursors */
 .zones{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
 .zn{aspect-ratio:1;border-radius:10px;background:var(--soft);display:grid;place-items:end center;padding-bottom:8px;font:400 11px var(--mono);color:var(--m);position:relative;user-select:none}
@@ -157,6 +162,7 @@ html[data-theme=dark] .k-crate{--bg:#141019;--fg:#ece6f7;--fm:#9a8fb0;--ln:#3a31
   <h2 class="grp">Logo</h2><p>How the project signs itself, top left or in the link preview.</p><div class="sheet" id="W"></div>
   <h2 class="grp">Favicon</h2><p>At real size in a light and a dark tab, then 4×.</p><div class="sheet" id="F"></div>
   <h2 class="grp">Loading</h2><p>Replaces "Gathering records…" while the covers decode. Each one is live and loops.</p><div class="sheet" id="L"></div>
+  <h2 class="grp">No cover art</h2><p>When a record has no cover we can find. Each one is shown with three records, the last with a long title. B0 is what the records page does today.</p><div class="sheet wide" id="B"></div>
   <h2 class="grp">Cursors</h2><p>Hover each square to try the cursor for real; hold the mouse down on Grab. Browsers don’t animate cursors, so the spinning record is drawn on the page and follows the pointer (the real cursor hides while it shows).</p><div class="sheet" id="U"></div>
   <h2 class="grp">The look</h2><p>The whole screen, crate and all. Same navigation in each (C1 from below) so you're only judging the look.</p><div class="sheet wide" id="K"></div>
   <h2 class="grp">Navigation</h2><p>What sits around the crate: a way back to caseycavanagh.com, About, Share, and later Make your own. Shown on the plain look.</p><div class="sheet wide" id="C"></div>
@@ -185,7 +191,8 @@ const R=[
   ['whiskeytown-strangers-almanac','Whiskeytown','Strangers Almanac',1997,'#33424a'],
   ['margo-price-midwest-farmers-daughter','Margo Price','Midwest Farmer’s Daughter',2016,'#b8892f'],
 ];
-const img=(i,side='front')=>`/directions/vinyl/${R[i][0]}-${side}.jpg`;
+// the sheet keeps its own small copies of twelve covers, so the records page can change its covers freely
+const img=i=>`/directions/vinyl-style/${R[i][0]}-front.webp`;
 const ALL={};let uid=0;
 
 /* ---------- the crate, front on (viewBox 120×112). Holes are cut with a mask so the page shows through ---------- */
@@ -283,6 +290,20 @@ add('L','L4','Draws itself','The linework crate draws in, then fills when every 
   const w=$('.dr',s);let t=0;const run=()=>{w.innerHTML=crate({line:true,holes:false});$$('rect,path',w).forEach(p=>{const L=p.getTotalLength?.()||300;p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.style.animation=`draw 1.8s ${Math.random()*.4}s ease forwards`});clearTimeout(t);t=setTimeout(()=>{w.innerHTML=crate({label:'Records'})},2600)};run();setInterval(run,4200)});
 add('L','L5','Fills from the bottom','The lattice fills with cover colors from the bottom up, one diamond row at a time.',`<div class="pad"><div class="ld"><div class="w" style="position:relative"><div class="lq" style="position:absolute;left:2%;right:2%;bottom:3%;height:0;background:linear-gradient(90deg,${R.slice(0,6).map(r=>r[4]).join(',')});transition:height .4s"></div><div style="position:relative">${crate({label:'Records'})}</div></div><span class="n"><b>0</b> of 12</span></div></div>`,s=>loop(s,n=>{$('.lq',s).style.height=n/12*94+'%';$('.n b',s).textContent=n}));
 
+
+
+/* ---------- B: no cover art ---------- */
+const BL=[['Lucius','Wildewoman',2013],['Gillian Welch','Time (The Revelator)',2001],['Townes Van Zandt','Live at the Old Quarter, Houston, Texas',1977]];
+const hash=t=>[...t].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7);
+const hue=t=>hash(t)%360;
+const jackets=f=>`<div class="pad" style="padding:18px"><div class="jk">${BL.map(([a,t,y])=>`<div class="jc" style="${f.bg?f.bg(a,t):''}">${f.in(a,t,y)}</div>`).join('')}</div></div>`;
+add('B','B0','Today','Paper, artist in sans, title in mono, a rule, and the first letter huge in gray. From the records page.',jackets({bg:()=>'background:#d8d3ca;color:#2a2a2a',in:(a,t)=>`<div style="position:absolute;left:8cqw;top:7cqw;right:8cqw"><div style="font:500 7cqw/1.15 'Instrument Sans'">${a}</div><div style="font:400 5cqw/1.3 var(--mono);opacity:.8;margin-top:1.5cqw">${t}</div><div style="width:40cqw;height:2cqw;background:#2a2a2a;margin-top:12cqw"></div></div><div style="position:absolute;left:7cqw;bottom:-8cqw;font:400 62cqw/1 'Instrument Sans';color:#8b8378">${t.replace(/^\\W*/,'')[0]}</div>`}));
+add('B','B1','Die-cut sleeve','A paper sleeve with the hole cut out, so you see the record; the name is printed on its label, the way a white label 45 looks. Label color comes from the name.',jackets({bg:()=>'background:#e9e2d4',in:(a,t)=>`<div style="position:absolute;left:50%;top:50%;width:92cqw;aspect-ratio:1;translate:-50% -50%;border-radius:50%;background:repeating-radial-gradient(circle,#151515 0 .5cqw,#222 .5cqw .9cqw)"></div><div style="position:absolute;left:50%;top:50%;width:64cqw;aspect-ratio:1;translate:-50% -50%;border-radius:50%;box-shadow:0 0 0 40cqw #e9e2d4"></div><div style="position:absolute;left:50%;top:50%;width:36cqw;aspect-ratio:1;translate:-50% -50%;border-radius:50%;background:hsl(${hue(a)} 45% 58%);display:grid;place-items:center;text-align:center;padding:4cqw;color:#1a1a1a"><div><div style="font:600 3.6cqw/1.1 'Instrument Sans'">${a}</div><div style="font:400 2.6cqw/1.2 var(--mono);margin-top:.8cqw">${t}</div></div><i style="position:absolute;left:50%;top:50%;width:2.4cqw;height:2.4cqw;margin:-1.2cqw;border-radius:50%;background:#e9e2d4"></i></div>`}));
+add('B','B2','Stamped crate','A plain kraft jacket with the crate rubber-stamped on it and a price-sticker label with the name. Ties the gaps to the logo.',jackets({bg:()=>'background:#c7a97e',in:(a,t,y)=>`<div style="position:absolute;left:24cqw;top:20cqw;width:52cqw;opacity:.55;mix-blend-mode:multiply;rotate:-4deg">${crate({c:'#5a3a1a',label:'Casey’s',lat:16})}</div><div style="position:absolute;right:6cqw;bottom:7cqw;background:#f6f1e3;color:#2a1c0e;padding:2.4cqw 3cqw;font:400 3.6cqw/1.35 var(--mono);max-width:62cqw;rotate:2deg;box-shadow:0 .6cqw 1.2cqw -.6cqw #0006">${a}<br><span style="opacity:.7">${t}</span></div>`}));
+add('B','B3','Big name, its own color','The artist set huge in the heavy grotesk on a color picked from the name, title small at the bottom. Loud, but every one is different.',jackets({bg:a=>`background:hsl(${hue(a)} 42% 46%);color:hsl(${hue(a)} 60% 92%)`,in:(a,t,y)=>`<div style="position:absolute;inset:6cqw;display:flex;flex-direction:column;justify-content:space-between"><div style="font:900 ${a.length>12?15:20}cqw/.86 var(--grot);font-stretch:70%;letter-spacing:-.02em">${a}</div><div style="font:400 4cqw/1.3 var(--mono)">${t}<br><span style="opacity:.7">${y}</span></div></div>`}));
+add('B','B4','Test pressing','A white jacket with a typed box for the facts, like the sleeve a test pressing comes in. Quietest; says “we don’t have the art” honestly.',jackets({bg:()=>'background:#f3f1ec;color:#222',in:(a,t,y)=>`<div style="position:absolute;left:8cqw;right:8cqw;bottom:8cqw;border:.5cqw solid #222;font:400 3.8cqw/1.4 var(--mono)">${[['Artist',a],['Title',t],['Year',y]].map(([k,v],i)=>`<div style="display:grid;grid-template-columns:16cqw 1fr;${i?'border-top:.35cqw solid #222':''}"><span style="padding:1.4cqw 2cqw;border-right:.35cqw solid #222;opacity:.6">${k}</span><span style="padding:1.4cqw 2cqw">${v}</span></div>`).join('')}</div><div style="position:absolute;left:8cqw;top:8cqw;font:400 3.4cqw var(--mono);opacity:.5">Test pressing</div>`}));
+add('B','B5','Pattern from the name','A simple pattern (rings, stripes or a grid) picked and colored from the name, with the name on a band at the top. Looks designed, never repeats.',jackets({bg:a=>{const h=hue(a),k=hash(a)%3,c1=`hsl(${h} 40% 52%)`,c2=`hsl(${(h+40)%360} 45% 82%)`;return`color:#1a1a1a;background:${[`repeating-radial-gradient(circle at 70% 75%,${c1} 0 6cqw,${c2} 6cqw 12cqw)`,`repeating-linear-gradient(135deg,${c1} 0 7cqw,${c2} 7cqw 14cqw)`,`conic-gradient(${c1} 25%,${c2} 0 50%,${c1} 0 75%,${c2} 0) 0 0/24cqw 24cqw`][k]}`},in:(a,t)=>`<div style="position:absolute;left:0;right:0;top:0;background:#f4efe4;padding:4cqw 6cqw"><div style="font:600 5.4cqw/1.1 'Instrument Sans'">${a}</div><div style="font:400 3.8cqw/1.3 var(--mono);opacity:.75;margin-top:.6cqw">${t}</div></div>`}));
+add('B','B6','Crate lattice','The crate’s diamond lattice as the cover in a color from the name, the name on the band like the crate. Fully on brand.',jackets({bg:a=>`background:hsl(${hue(a)} 38% 40%)`,in:(a,t)=>`<div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#0000 0 6cqw,#ffffff2a 6cqw 7.2cqw),repeating-linear-gradient(-45deg,#0000 0 6cqw,#ffffff2a 6cqw 7.2cqw)"></div><div style="position:absolute;left:0;right:0;top:38cqw;background:hsl(${hue(a)} 38% 34%);color:#fff;padding:3cqw 6cqw;box-shadow:0 .5cqw 0 #0002,0 -.5cqw 0 #fff1"><div style="font:900 7cqw/1 var(--grot);font-stretch:78%">${a}</div><div style="font:400 3.6cqw/1.3 var(--mono);opacity:.8;margin-top:1cqw">${t}</div></div>`}));
 
 /* ---------- U: cursors ---------- */
 // shapes are drawn twice: outlines first (thick stroke), fills on top, so overlaps merge into one silhouette
