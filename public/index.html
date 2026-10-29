@@ -739,6 +739,19 @@ html.phone body.searching .page{opacity:1;scale:none;pointer-events:auto}
 html.phone .page>:not(.find){transition:opacity .35s}
 html.phone body.searching .page>:not(.find){opacity:.12;pointer-events:none}
 html.phone .page{padding-top:calc(env(safe-area-inset-top) + 72px)}
+/* phone search: a quiet field, room before Cancel, no count, covers in place */
+html.phone body.searching .find{gap:12px}
+html.phone .find .q:has(input:focus-visible){outline:none}
+html.phone .find .q:focus-within{border-color:rgba(255,255,255,.2)}
+html.phone .qn{display:none}
+html.phone .find .q.has input{padding-right:48px}
+html.phone .sx{padding:0 2px}
+.sl img{background:#2c2c2e}
+.sl img:not([src]){visibility:visible}
+/* every record has the same barely-there corner: 1px */
+.face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.tbl .c0 img,.tbl .c0 .sw,.hit img,.hit .ph{border-radius:1px}
+/* phones: the flipped records lying toward you fade out softly instead of ending in hard edges */
+html.phone .crate{-webkit-mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8));mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8))}
 </style>
 </head>
 <body>
@@ -1858,6 +1871,11 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
         c.toBlob(b=>res(b?URL.createObjectURL(b):src),'image/jpeg',.86)}catch{res(src)}};i.onerror=()=>res(src);i.src=src}));
     THUMB.set(src,p);return p;
   }
+  window.thumb=thumb;
+  // make the small covers once the page has settled, so the grid, the table and search open with their covers in place
+  const warmThumbs=()=>(window.requestIdleCallback||setTimeout)(()=>RECORDS.forEach(r=>r.front&&thumb(img(r.front))));
+  if(document.body.classList.contains('ready'))setTimeout(warmThumbs,1200);
+  else new MutationObserver((_,o)=>{if(document.body.classList.contains('ready')){o.disconnect();setTimeout(warmThumbs,1200)}}).observe(document.body,{attributes:true,attributeFilter:['class']});
   function tileFor(r,store=keep){
     let n=store.get(r.slug);if(n)return n;
     n=document.createElement('button');n.type='button';n.className='tile';n.dataset.slug=r.slug;
@@ -2248,11 +2266,14 @@ build();at=cur;
   const sl=document.createElement('div');sl.className='sl';sl.id='sl';sl.setAttribute('role','listbox');sl.setAttribute('aria-label','Records');document.body.append(sl);
   const sx=document.createElement('button');sx.type='button';sx.className='sx';sx.textContent='Cancel';qf.parentNode.insertBefore(sx,qf.nextSibling.nextSibling);
   const on=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
-  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<img src="${img(r.front)}" alt="" loading="lazy" decoding="async">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
+  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<img data-src="${img(r.front)}" alt="" decoding="async">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
   function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
     if(!rs.length){sl.innerHTML='<p class="none">Not in the crate</p>';return}
     if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;return}
     let L='',h='';for(const r of rs){const l=letter(r);if(l!==L){if(L)h+='</ul>';L=l;h+=`<h4>${l}</h4><ul>`}h+=row(r)}sl.innerHTML=h+'</ul>'}
+  // covers come from the small copies the grid uses; until one is ready the row shows a plain square
+  const fill=()=>sl.querySelectorAll('img[data-src]').forEach(i=>{const s=i.dataset.src;i.removeAttribute('data-src');(window.thumb?window.thumb(s):Promise.resolve(s)).then(u=>{i.src=u})});
+  new MutationObserver(fill).observe(sl,{childList:true});
   let open1=false;
   function enter(){if(open1||!on())return;open1=true;body.classList.add('searching');list();sl.scrollTop=0}
   function leave(keep){if(!open1)return;open1=false;body.classList.remove('searching');if(!keep){q.value='';qSync();if(filt?.k==='q')arrange(null)}q.blur()}
@@ -2266,7 +2287,14 @@ build();at=cur;
   sx.onclick=()=>leave();
   // a record from the list opens straight from the whole crate
   sl.addEventListener('click',e=>{const b=e.target.closest('[data-slug]');if(!b)return;const r=RECORDS.find(x=>x.slug===b.dataset.slug);
+    const im=b.querySelector('img,.sw');pickFrom=im?im.getBoundingClientRect():null;clearTimeout(pickT);pickT=setTimeout(()=>{pickFrom=null},900);
     leave();if(filt)arrange(null);const j=order.indexOf(r);if(j<0)return;go(j,true);requestAnimationFrame(()=>openRecord(false))});
+  // a record picked from the list lifts out of its row, not out of the crate behind
+  let pickFrom=null,pickT=0;
+  const cp2=cratePose;cratePose=function(...a){const R=pickFrom;if(!R||!R.width)return cp2.apply(this,a);
+    const S=stage.getBoundingClientRect();if(!S.width)return cp2.apply(this,a);
+    const p={x:R.left+R.width/2-(S.left+S.width/2),y:R.top+R.height/2-(S.top+S.height/2),z:0,s:R.width/S.width,ax:0,az:0};
+    return{...p,P:2600,ox:S.width/2,oy:S.height/2,tf:poseTf(p)}};
   // scrolling the list puts the keyboard away, so you can see more of it
   sl.addEventListener('touchmove',()=>{if(document.activeElement===q)q.blur()},{passive:true});
   // the keyboard: keep the bar and the list just above it
