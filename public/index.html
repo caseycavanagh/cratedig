@@ -798,11 +798,12 @@ html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
 /* tabbed dividers: one stands just behind the record before each letter, all the way back, its tab above the tops and
    staggered across like a real crate's; it leaves as you flip past it, and a tab turns to its letter. Styles D1–D8 come from
    vinyl-dividers-sheet.html (?dv=N); each fades darker the further back it stands (--dk, set as it moves) */
-.dv{--dvc:#0e0e0f;--dvt:#ededed;--tw:11%;--th:calc(var(--S)*.062);--tr:3px;--dvf:500 calc(var(--S)*.03)/1 'Instrument Sans',sans-serif;
+.dv{--dvc:#141415;--dvt:#ededed;--rise:calc(var(--S)*.04);--tw:11%;--th:calc(var(--S)*.062);--tr:3px;--dvf:500 calc(var(--S)*.03)/1 'Instrument Sans',sans-serif;
   position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;pointer-events:none;transition:opacity .25s}
 .dv i,.dv span{background:linear-gradient(rgb(0 0 0/var(--dk,0)) 0 0),var(--dvc)}
-.dv i{position:absolute;inset:0 .5%;border-radius:1px}
-.dv span{position:absolute;bottom:calc(100% - 1px);left:var(--tx);width:var(--tw);height:var(--th);display:grid;place-items:center;border-radius:var(--tr) var(--tr) 0 0;
+/* the sheet stands a little taller than the records, so it shows between them, its edge catching the light; the tab is cut from it */
+.dv i{position:absolute;inset:calc(var(--rise)*-1) 0 0;border-radius:2px 2px 1px 1px;box-shadow:inset 0 1px 0 rgb(255 255 255/.16),inset 1px 0 0 rgb(255 255 255/.06),inset -1px 0 0 rgb(0 0 0/.3)}
+.dv span{position:absolute;bottom:calc(100% + var(--rise) - 1px);box-shadow:inset 0 1px 0 rgb(255 255 255/.16);left:var(--tx);width:var(--tw);height:var(--th);display:grid;place-items:center;border-radius:var(--tr) var(--tr) 0 0;
   color:var(--dvt);font:var(--dvf);pointer-events:auto;cursor:pointer}
 .dv.off,.crate.lifted .dv{opacity:0}
 .dv.off span,.crate.lifted .dv span{pointer-events:none}
