@@ -218,7 +218,7 @@ html[data-theme=dark] .play-m{box-shadow:0 12px 32px -12px #000c}
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 200px));-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 html.phone .page{padding:0}
 /* eye level with the bottom of the pile, so a record tipped all the way toward you is edge on and gone, not lying there */
-html.phone .crate{perspective:1500px;perspective-origin:50% calc(50% + 12px + var(--S)/2);cursor:default;-webkit-touch-callout:none}
+html.phone .crate{perspective:1500px;perspective-origin:50% calc(50% + 12px + var(--S)/2);cursor:default;-webkit-touch-callout:none} /* eye level at the pile's bottom edge; eye() sets it again in pixels */
 html.phone .stack{transform:none;bottom:calc(50% - 12px - var(--S)/2)} /* the pile, with the records peeking out above, sits dead center */
 html.phone .rc{transform-origin:50% 50%}
 html.phone .floor{display:none}
@@ -653,10 +653,13 @@ function seat(d){
   if(d>-1){const t=-d;return{z:AHEAD*t,a:10-70*t,m:.5+.5*t}} // falling forward
   const k=-d-1;return{z:AHEAD+k*FGAP,a:-(60+Math.min(k,8)*1.2),m:1}; // flipped records pile up, fanned a little, leaning far enough to show only their backs
 }
+// the crate's eye level again, in pixels: iPhone Safari drops the calc() in the CSS and looks from the middle of the crate,
+// so a phone's flipped records, meant to lie edge on at eye level, show their backs as a slab under the pile
+const eye=()=>{const px=el=>el?parseFloat(getComputedStyle(el).height):0,S=px(nodes[cur]),H=px(crate);if(S&&H)crate.style.perspectiveOrigin=`50% ${(PHONE?H/2+12+S/2:H/2-S*1.13).toFixed(1)}px`};
 function render(){
   frontBox=null;
+  if(!deckS){deckS=nodes[cur]?.offsetWidth||0;eye()}
   if(PHONE){
-    if(!deckS)deckS=nodes[cur]?.offsetWidth||0;
     const h=deckS/2;
     nodes.forEach((n,j)=>{
       if(!shown[j])return;
