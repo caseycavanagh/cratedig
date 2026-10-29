@@ -440,7 +440,6 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:#1e1e20}
 #close .cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
 /* a record's details: big white title, the facts as quiet pills */
 .o-info h2{font-size:34px;letter-spacing:-.02em;line-height:1.08}
-html.phone .o-info h2{font-size:28px}
 .o-info .by{font-size:20px}
 .o-info .by .meta{text-decoration:none}.o-info .by .meta:hover{color:var(--fg)}
 .facts,html.phone .facts{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px;margin-top:22px;font:400 14px/1 'Instrument Sans',sans-serif}
@@ -450,6 +449,29 @@ html.phone .o-info h2{font-size:28px}
 .facts dd:has(.meta){padding:0}
 .facts .meta{height:100%;padding:0 15px;display:inline-flex;align-items:center;border-radius:99px;text-decoration:none}
 .facts .meta:hover{background:var(--soft)}
+/* phones: the record view is laid out for a title of up to three lines. The record's size leaves room for all three,
+   so a long title never pushes Play off the screen and the record stays the same size from one to the next; a shorter
+   title just leaves more air above Play. The artist and the facts each keep to one line. */
+html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:20px}
+@media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--pb:50px;--bot:14px}}
+html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap) - var(--info) - var(--bot) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
+@media(max-height:500px){html.phone .open{--O:calc(100svh - 72px)}}
+html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + var(--top));padding-bottom:calc(env(safe-area-inset-bottom) + var(--bot))}
+html.phone{--info:calc(var(--tl)*3.36 + 26px + var(--fm) + 36px + var(--pp) + var(--pb))}
+html.phone .o-page{align-items:stretch}
+/* the record and a details block of fixed height, centered together: the record and Play sit in the same place for every title */
+html.phone .o-grid{gap:var(--gap);justify-content:center}
+html.phone .o-info{flex:none;min-height:var(--info)}
+html.phone .o-info h2{font-size:var(--tl);line-height:1.12;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;text-wrap:balance}
+html.phone .o-info .by{font-size:17px;line-height:24px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.phone .facts{flex-wrap:nowrap;margin-top:var(--fm);overflow:hidden}
+html.phone .facts dd{flex:0 1 auto;min-width:0;display:block;line-height:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.phone .facts dd:has(.meta){flex-shrink:1}
+html.phone .facts .meta{display:block;overflow:hidden;text-overflow:ellipsis;line-height:34px}
+html.phone .play{padding-top:var(--pp)}
+html.phone .play .btn{height:var(--pb)}
+html.phone .sw{width:var(--pb);height:var(--pb);flex:none}
+@media(max-height:500px){html.phone .o-info h2{-webkit-line-clamp:4;line-clamp:4}html.phone .play{padding-top:0}}
 /* finding: the search floats at the bottom, the filter you're in sits under the views */
 .find,html.phone .find{top:auto;bottom:calc(18px + env(safe-area-inset-bottom));left:0;right:0;justify-content:center;align-items:center;padding:0 16px}
 .find .sp{display:none}
