@@ -512,7 +512,7 @@ body.walling .find .chip{display:none}
 .cv[hidden]{display:none}
 .cv.drag{cursor:grabbing}
 .cv:focus{outline:none}
-.board{position:absolute;left:0;top:0;will-change:transform}
+.board{position:absolute;left:0;top:0;will-change:transform;transform-origin:0 0}
 .board .tile{position:absolute;width:var(--T);height:var(--T)}
 .board .tile img{-webkit-user-drag:none;pointer-events:none}
 .cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--line);color:#d6d6d8;font-size:14px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
@@ -546,7 +546,7 @@ body.walling .find .chip{display:none}
   <nav class="az" id="az" aria-label="Jump to a letter"></nav>
   <div class="vw" role="group" aria-label="View"><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Wall</button><button type="button" data-v="canvas" aria-pressed="false">Canvas</button></div>
 </main>
-<section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around"><div class="board" id="board"></div></section>
+<section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="upF" accept="image/*" hidden>
@@ -1626,7 +1626,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   function thumb(src){
     if(THUMB.has(src))return THUMB.get(src);
     const p=thumbQ=thumbQ.then(()=>new Promise(res=>{const i=new Image();i.decoding='async';i.onload=()=>{
-      try{const n=Math.min(400,i.naturalWidth),c=document.createElement('canvas');c.width=c.height=n;c.getContext('2d').drawImage(i,0,0,n,n);
+      try{const n=Math.min(512,i.naturalWidth),c=document.createElement('canvas');c.width=c.height=n;c.getContext('2d').drawImage(i,0,0,n,n);
         c.toBlob(b=>res(b?URL.createObjectURL(b):src),'image/jpeg',.86)}catch{res(src)}};i.onerror=()=>res(src);i.src=src}));
     THUMB.set(src,p);return p;
   }
@@ -1682,56 +1682,94 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   // closing a record you opened from the wall or the canvas puts you back where you were
   new MutationObserver(()=>{if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
 
-  // ---- the canvas: a board as big as the records need, no bigger. Drag it, flick it, scroll it, or use the arrow keys;
-  // past an edge it gives a little and springs back.
-  const ckeep=new Map();let T=0,bw=0,bh=0,x=0,y=0,vx=0,vy=0,cdrag=null,craf=0,moved=0;
+  // ---- the canvas: a board as big as the records need, no bigger. Drag it, flick it, pinch it, scroll it, or use the
+  // arrow keys (+ and - zoom); past an edge, or past how near or far it goes, it gives a little and springs back.
+  const ckeep=new Map();let T=0,bw=0,bh=0,x=0,y=0,z=1,vx=0,vy=0,cdrag=null,craf=0,moved=0,pinch=null,anchor=null;
+  const pts=new Map();
   const pad=()=>({t:(innerWidth<600?70:84),b:(innerWidth<600?96:110),s:innerWidth<600?16:40});
-  function bounds(){const p=pad(),W=innerWidth,H=innerHeight;
-    const fitX=bw<=W-2*p.s,fitY=bh<=H-p.t-p.b;
-    return{x0:fitX?(W-bw)/2:W-p.s-bw,x1:fitX?(W-bw)/2:p.s,y0:fitY?p.t+(H-p.t-p.b-bh)/2:H-p.b-bh,y1:fitY?p.t+(H-p.t-p.b-bh)/2:p.t}}
+  // as far out as the whole board on screen, as near as two and a half times
+  const zmin=()=>{const p=pad();return Math.min(1,(innerWidth-2*p.s)/bw,(innerHeight-p.t-p.b)/bh)},ZMAX=2.5;
+  function bounds(){const p=pad(),W=innerWidth,H=innerHeight,w=bw*z,h=bh*z;
+    const fitX=w<=W-2*p.s,fitY=h<=H-p.t-p.b;
+    return{x0:fitX?(W-w)/2:W-p.s-w,x1:fitX?(W-w)/2:p.s,y0:fitY?p.t+(H-p.t-p.b-h)/2:H-p.b-h,y1:fitY?p.t+(H-p.t-p.b-h)/2:p.t}}
   function lay(center){
     const n=order.length,W=innerWidth,H=innerHeight;T=W<600?118:W<1100?150:176;const G=Math.round(T*.09),S=T+G;
     // columns so the board is a little wider than the screen is, in proportion
-    const cols=Math.max(2,Math.min(n,Math.round(Math.sqrt(n*(W/H)*1.15)))),rows=Math.ceil(n/cols);
+    const cols=Math.max(2,Math.min(n,Math.round(Math.sqrt(n*(W/H)*1.15))));
     const lag=c=>(((c*.618)%1)*.6)*S; // each column starts a different way down, like pinned cards
     board.style.setProperty('--T',T+'px');
     const f=document.createDocumentFragment();
     order.forEach((r,i)=>{const c=i%cols,rw=Math.floor(i/cols),t=tileFor(r,ckeep);t.style.left=c*S+'px';t.style.top=rw*S+lag(c)+'px';t.tabIndex=-1;f.append(t)});
     board.replaceChildren(f);
     bw=cols*S-G;bh=Math.max(...Array.from({length:cols},(_,c)=>Math.ceil((n-c)/cols)*S+lag(c)))-G;
-    if(center){const b=bounds();x=(b.x0+b.x1)/2;y=(b.y0+b.y1)/2;if(bh>H-pad().t-pad().b)y=b.y1;vx=vy=0}
-    else clamp(true);
+    if(center){z=1;const b=bounds();x=(b.x0+b.x1)/2;y=(b.y0+b.y1)/2;if(bh>H-pad().t-pad().b)y=b.y1;vx=vy=0}
+    else{z=Math.min(ZMAX,Math.max(zmin(),z));clamp(true)}
     paint();
   }
-  const paint=()=>board.style.transform=`translate3d(${x}px,${y}px,0)`;
+  const paint=()=>board.style.transform=`translate3d(${x}px,${y}px,0) scale(${z})`;
+  // close up, the covers on screen swap their small copy for the full one; off screen they go back to small
+  function sharpen(){const W=innerWidth,H=innerHeight;
+    for(const [slug,t] of ckeep){const i=$('img',t);if(!i||!t.isConnected)continue;const r=R(slug);if(!r?.front)continue;
+      const b=t.getBoundingClientRect(),near=z>1.3&&b.right>-50&&b.left<W+50&&b.bottom>-50&&b.top<H+50,full=img(r.front);
+      if(near&&!i.src.endsWith(full)){i.src=full}else if(!near&&!i.src.startsWith('blob:'))THUMB.get(full)?.then(u=>{if(!near)i.src=u})}}
+  const R=slug=>RECORDS.find(r=>r.slug===slug);
   const ease=d=>140*(1-Math.exp(-d/140)); // past an edge it gives less the further you pull, never more than 140px
   const give=(v,lo,hi)=>v>hi?hi+ease(v-hi):v<lo?lo-ease(lo-v):v;
+  const zgive=v=>{const lo=zmin();return v>ZMAX?ZMAX*(1+.25*(1-Math.exp(-(v/ZMAX-1)*3))):v<lo?lo*(1-.2*(1-Math.exp(-(1-v/lo)*3))):v};
+  // zoom to nz keeping the board point under (ax,ay) where it is
+  const zoomAt=(nz,ax,ay)=>{x=ax-(ax-x)*nz/z;y=ay-(ay-y)*nz/z;z=nz};
   function clamp(now){const b=bounds();if(now){x=Math.min(b.x1,Math.max(b.x0,x));y=Math.min(b.y1,Math.max(b.y0,y))}return b}
-  function ctick(){craf=0;if(cdrag)return;const b=bounds();
+  function ctick(){craf=0;if(cdrag||pinch)return;
+    // zoom springs back inside its range first, around where you were pinching
+    const zt=Math.min(ZMAX,Math.max(zmin(),z));let zm=false;
+    if(Math.abs(zt-z)>.0005){const a=anchor||{x:innerWidth/2,y:innerHeight/2};zoomAt(z+(zt-z)*.2,a.x,a.y);zm=true}else if(zt!==z)z=zt;
+    const b=bounds();
     // coast, then spring back inside the edges
     x+=vx;y+=vy;vx*=.92;vy*=.92;
     const sx=x>b.x1?b.x1-x:x<b.x0?b.x0-x:0,sy=y>b.y1?b.y1-y:y<b.y0?b.y0-y:0;
     if(sx){vx=vx*.6+sx*.12}if(sy){vy=vy*.6+sy*.12}
     paint();
-    if(Math.abs(vx)+Math.abs(vy)>.05||Math.abs(sx)+Math.abs(sy)>.5)craf=requestAnimationFrame(ctick);else{clamp(true);paint()}}
-  const ckick=()=>{if(reduce){clamp(true);paint();return}if(!craf)craf=requestAnimationFrame(ctick)};
+    if(zm||Math.abs(vx)+Math.abs(vy)>.05||Math.abs(sx)+Math.abs(sy)>.5)craf=requestAnimationFrame(ctick);else{anchor=null;clamp(true);paint();sharpen()}}
+  const ckick=()=>{if(reduce){z=Math.min(ZMAX,Math.max(zmin(),z));clamp(true);paint();sharpen();return}if(!craf)craf=requestAnimationFrame(ctick)};
   const hint=()=>{const h=$('.hint',cv);if(h)h.style.opacity=0};
-  cv.addEventListener('pointerdown',e=>{if(!e.isPrimary)return;cancelAnimationFrame(craf);craf=0;cdrag={x:e.clientX,y:e.clientY,t:performance.now(),bx:x,by:y,sx:e.clientX,sy:e.clientY};moved=0;vx=vy=0;cv.setPointerCapture(e.pointerId);cv.classList.add('drag');hint()});
-  cv.addEventListener('pointermove',e=>{if(!cdrag)return;const b=bounds(),now=performance.now(),dt=Math.max(1,now-cdrag.t);
+  const startDrag=p=>{cdrag={x:p.x,y:p.y,t:performance.now(),bx:x,by:y,sx:p.x,sy:p.y}};
+  const two=()=>{const [a,b]=[...pts.values()];return{d:Math.hypot(a.x-b.x,a.y-b.y)||1,mx:(a.x+b.x)/2,my:(a.y+b.y)/2}};
+  cv.addEventListener('pointerdown',e=>{cancelAnimationFrame(craf);craf=0;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});cv.setPointerCapture(e.pointerId);hint();
+    if(pts.size===1){startDrag({x:e.clientX,y:e.clientY});moved=0;vx=vy=0;cv.classList.add('drag')}
+    else if(pts.size===2){const t=two();pinch={d0:t.d,mx:t.mx,my:t.my,z0:z,x0:x,y0:y};cdrag=null;moved=99}});
+  cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&pts.size>=2){const t=two(),nz=zgive(pinch.z0*t.d/pinch.d0);
+      // the point under your fingers stays under them, and moving both fingers pans
+      z=nz;x=t.mx-(pinch.mx-pinch.x0)*nz/pinch.z0;y=t.my-(pinch.my-pinch.y0)*nz/pinch.z0;anchor={x:t.mx,y:t.my};paint();return}
+    if(!cdrag)return;const b=bounds(),now=performance.now(),dt=Math.max(1,now-cdrag.t);
     moved=Math.max(moved,Math.hypot(e.clientX-cdrag.sx,e.clientY-cdrag.sy));
     vx=(e.clientX-cdrag.x)/dt*16;vy=(e.clientY-cdrag.y)/dt*16;cdrag.x=e.clientX;cdrag.y=e.clientY;cdrag.t=now;
     x=give(cdrag.bx+e.clientX-cdrag.sx,b.x0,b.x1);y=give(cdrag.by+e.clientY-cdrag.sy,b.y0,b.y1);paint()});
-  const cend=e=>{if(!cdrag)return;const stale=performance.now()-cdrag.t>80;cdrag=null;cv.classList.remove('drag');
-    if(moved<6){const t=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.classList?.contains('tile'));if(t){pull(t.dataset.slug);return}}
+  const cend=e=>{if(!pts.delete(e.pointerId))return;
+    if(pinch){if(pts.size<2){pinch=null;vx=vy=0;
+      // one finger left down carries on as a drag
+      if(pts.size===1){startDrag([...pts.values()][0])}else{cv.classList.remove('drag');ckick()}}return}
+    if(!cdrag)return;const stale=performance.now()-cdrag.t>80;cdrag=null;cv.classList.remove('drag');
+    if(moved<6&&e.type==='pointerup'){const t=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.classList?.contains('tile'));if(t){pull(t.dataset.slug);return}}
     if(stale)vx=vy=0;ckick()};
-  cv.addEventListener('pointerup',cend);cv.addEventListener('pointercancel',e=>{cdrag=null;cv.classList.remove('drag');ckick()});
-  cv.addEventListener('wheel',e=>{e.preventDefault();hint();const b=bounds();x=give(x-e.deltaX,b.x0,b.x1);y=give(y-e.deltaY,b.y0,b.y1);vx=vy=0;paint();clearTimeout(cv._w);cv._w=setTimeout(ckick,90)},{passive:false});
-  // (the arrow keys pan the canvas: see the keydown guard below)
-  window.panCanvas=e=>{const m={ArrowLeft:[1,0],ArrowRight:[-1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!m)return;e.preventDefault();hint();vx=m[0]*16;vy=m[1]*16;ckick()};
-  cv.insertAdjacentHTML('beforeend','<p class="hint" aria-hidden="true">Drag to look around</p>');
+  cv.addEventListener('pointerup',cend);cv.addEventListener('pointercancel',cend);
+  // a trackpad pinch arrives as a wheel with ctrl held (Safari sends gestures instead); a plain wheel pans
+  cv.addEventListener('wheel',e=>{e.preventDefault();hint();cancelAnimationFrame(craf);craf=0;vx=vy=0;
+    if(e.ctrlKey){anchor={x:e.clientX,y:e.clientY};zoomAt(zgive(z*Math.exp(-e.deltaY*.012)),e.clientX,e.clientY)}
+    else{const b=bounds();x=give(x-e.deltaX,b.x0,b.x1);y=give(y-e.deltaY,b.y0,b.y1)}
+    paint();clearTimeout(cv._w);cv._w=setTimeout(ckick,120)},{passive:false});
+  let g=null;
+  cv.addEventListener('gesturestart',e=>{e.preventDefault();g={z0:z};anchor={x:e.clientX,y:e.clientY}});
+  cv.addEventListener('gesturechange',e=>{e.preventDefault();if(!g||pinch)return;zoomAt(zgive(g.z0*e.scale),anchor.x,anchor.y);paint()});
+  cv.addEventListener('gestureend',e=>{e.preventDefault();g=null;ckick()});
+  // (the arrow keys pan the canvas and + and - zoom it: see the keydown guard below)
+  window.panCanvas=e=>{
+    if(e.key==='+'||e.key==='='||e.key==='-'){e.preventDefault();hint();anchor={x:innerWidth/2,y:innerHeight/2};zoomAt(Math.min(ZMAX,Math.max(zmin(),z*(e.key==='-'?1/1.25:1.25))),anchor.x,anchor.y);clamp(true);paint();sharpen();return}
+    const m={ArrowLeft:[1,0],ArrowRight:[-1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!m)return;e.preventDefault();hint();vx=m[0]*16;vy=m[1]*16;ckick()};
+  cv.insertAdjacentHTML('beforeend','<p class="hint" aria-hidden="true">Drag to look around, pinch to zoom</p>');
   // on the wall the arrow keys scroll it, not the crate behind it; slash still searches
   addEventListener('keydown',e=>{if(view==='crate'||!open.hidden||e.target.closest('input'))return;
-    if(view==='canvas')panCanvas(e);
+    if(view==='canvas'){panCanvas(e);if(/^[-+=]$/.test(e.key))e.stopImmediatePropagation()}
     if(/^(Arrow|Home$|End$|j$|k$)/.test(e.key)||((e.key==='Enter'||e.key===' ')&&!e.target.closest('button')))e.stopImmediatePropagation()},true);
   let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{tiles.style.setProperty('--cols',cols());if(view==='canvas')lay()},100)});
   // wait for the crate to fill, then open the view you used last
