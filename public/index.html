@@ -832,7 +832,10 @@ html.phone .dv{display:none}
 @keyframes spin{to{rotate:360deg}}
 /* in the bar it sits between search and layout, and turns a little with the crate */
 .logo{order:2;flex:none;display:grid;place-items:center;width:44px;height:44px;margin:0 auto;border-radius:50%;color:#fff;transition:transform .5s var(--flip),opacity .2s}
-.logo svg{width:24px;height:24px;fill:currentColor}
+.logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+/* hovered, it turns an eighth more, on top of where the crate has turned it */
+@media(hover:hover){.logo:hover svg{transform:rotate(45deg)}}
+.logo:focus-visible svg{transform:rotate(45deg)}
 .logo:active{transform:scale(.96);transition-duration:.08s}
 .logo:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .find:has(.q:focus-within) .logo,.find:has(.q.has) .logo{opacity:0;pointer-events:none}
@@ -1103,14 +1106,14 @@ function nodeFor(r){
   n=t.firstElementChild;n._lazy=[...n.querySelectorAll('img[data-src]')];n._jit=jit(r);n._look=look(r);dress(n,r);made.set(r,n);return n;
 }
 let dvs=[]; // the letter dividers
-const DV=+new URLSearchParams(location.search).get('dv')||1;document.documentElement.dataset.dv=DV;
+const DV=+new URLSearchParams(location.search).get('dv')||0; // stashed for now (2026-10-29): ?dv=1–8 brings them backdocument.documentElement.dataset.dv=DV;
 function build(){
   nodes=order.map(nodeFor);nodes.forEach((n,j)=>n.dataset.j=j);
   jits=nodes.map(n=>n._jit);shown=nodes.map(n=>!n.classList.contains('gone'));frontBox=null; // cached so each frame does no lookups
   tail||=Object.assign(document.createElement('div'),{className:'tail'});
   // a divider before each letter, when the letters run in order (sorted by name)
   const runs=order.map(letter).filter((L,j,a)=>L!==a[j-1]);
-  dvs=new Set(runs).size<runs.length?[]:order.flatMap((r,j)=>{const L=letter(r);if(!j||L===letter(order[j-1]))return[];
+  dvs=!DV||new Set(runs).size<runs.length?[]:order.flatMap((r,j)=>{const L=letter(r);if(!j||L===letter(order[j-1]))return[];
     const d=document.createElement('div');d.className='dv';d.dataset.j=j;d.innerHTML=`<i></i><span>${L}</span>`;
     const k=L==='#'?0:L.charCodeAt(0)-65;d.style.setProperty('--tx',4+(k%6)*15.5+'%');d.style.setProperty('--sp',spineBg(r));d.style.setProperty('--spt',/^#[0-9a-f]{6}$/i.test(spineBg(r))&&(n=>(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6)(parseInt(spineBg(r).slice(1),16))?'#111':'#fff');return[d]});
   stack.replaceChildren(...nodes,...dvs,tail);
