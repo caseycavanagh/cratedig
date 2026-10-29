@@ -749,9 +749,39 @@ html.phone .sx{padding:0 2px}
 .sl img{background:#2c2c2e}
 .sl img:not([src]){visibility:visible}
 /* every record has the same barely-there corner: 1px */
+.face>*,.face::after,.sleeve .sh,.rc .fr{border-radius:1px}
 .face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.tbl .c0 img,.tbl .c0 .sw,.hit img,.hit .ph{border-radius:1px}
 /* phones: the flipped records lying toward you fade out softly instead of ending in hard edges */
 html.phone .crate{-webkit-mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8));mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8))}
+/* phone search: the results card hugs what's in it, and stops above the keyboard */
+html.phone .sl{bottom:auto;max-height:calc(100svh - env(safe-area-inset-top) - 90px - var(--kb,0px) - env(safe-area-inset-bottom))}
+/* phone table: a list. A row of sort pills on top (title, artist, year), then cover, title over artist, year */
+@media (max-width:700px){
+  .tbl{padding:8px 0 calc(env(safe-area-inset-bottom) + 100px)}
+  .tbl table,.tbl thead,.tbl tbody{display:block}
+  .tbl thead tr{display:flex;gap:8px;padding:2px 16px 12px;background:var(--bg)}
+  .tbl thead{position:sticky;top:-8px;z-index:1}
+  .tbl thead th{position:static;display:block;padding:0;border:0}
+  .tbl thead th.c0,.tbl thead th.c-label,.tbl thead th.c-format{display:none}
+  .tbl thead th.c-artist{display:block}
+  .tbl th button{height:34px;padding:0 14px;border-radius:99px;border:1px solid var(--line);font-size:14px;color:#c7c7cc}
+  .tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{background:#fff;color:#111;border-color:#fff}
+  .tbl th button:active{transform:scale(.96)}
+  .tbl tbody tr{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:14px;padding:8px 16px;position:relative;-webkit-tap-highlight-color:transparent}
+  .tbl tbody tr::after{content:'';position:absolute;left:82px;right:16px;bottom:0;height:1px;background:#ffffff0f}
+  .tbl td{display:block;padding:0;border:0;max-width:none}
+  .tbl td.c-artist,.tbl td.c-label,.tbl td.c-format{display:none}
+  .tbl .c0{width:auto;padding:0}
+  .tbl .c0 img,.tbl .c0 .sw{width:52px;height:52px}
+  .tbl td.c-title b,.tbl .m{max-width:none}
+  .tbl td.c-title b{font-size:16px;line-height:1.3}
+  .tbl td.c-year{font-size:14px}
+}
+/* the scrubber stays with you in the record view, above it, and the record makes room for it */
+html:has(.open:not([hidden])) body .kd{opacity:1;visibility:visible;z-index:11;transition:opacity .35s .25s,visibility 0s}
+html:has(.open:not([hidden])) body:not(.ready) .kd{opacity:0}
+html.phone .o-page{padding-bottom:calc(env(safe-area-inset-bottom) + 92px)}
+html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
 </style>
 </head>
 <body>
@@ -992,7 +1022,7 @@ function deckSeat(d,q){
 }
 // One spring drives the crate: pos chases aim, so a flip can be interrupted, retargeted or dragged without restarting
 let pos=0,vel=0,aim=0,raf=0;
-const K=220,C=27;
+const K=220,C=27;let spr=null; // a throw glides on a softer spring, critically damped, then K and C again
 // where a record sits at a (fractional) distance d behind the front one
 function seat(d){
   if(d>=1)return{z:-BEHIND-(d-1)*GAP,a:10+Math.min(d,6)*.5,m:1};
@@ -1026,13 +1056,13 @@ function render(){
 }
 function tick(t){
   const dt=tick.t?Math.min(.032,(t-tick.t)/1000):1/60;tick.t=t;
-  vel+=(-K*(pos-aim)-C*vel)*dt;pos+=vel*dt;
+  vel+=(-(spr?spr[0]:K)*(pos-aim)-(spr?spr[1]:C)*vel)*dt;pos+=vel*dt;
   let rest=Math.abs(pos-aim)<.0005&&Math.abs(vel)<.005;
   if(PHONE&&!dd){
     off.vx+=(-K*off.x-C*off.vx)*dt;off.x+=off.vx*dt;off.vy+=(-K*off.y-C*off.vy)*dt;off.y+=off.vy*dt;
     if(Math.abs(off.x)+Math.abs(off.y)<.1&&Math.abs(off.vx)+Math.abs(off.vy)<1)off.x=off.y=off.vx=off.vy=0;else rest=false;
   }
-  if(rest){pos=aim;vel=0;raf=0;tick.t=0;if(PHONE)place(true);else queueNudge();render();return} // place first: a record it brings into the pile needs its seat drawn
+  if(rest){pos=aim;vel=0;raf=0;tick.t=0;spr=null;if(PHONE)place(true);else queueNudge();render();return} // place first: a record it brings into the pile needs its seat drawn
   render();raf=requestAnimationFrame(tick);
 }
 function kick(){if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);render();return}if(!raf){tick.t=0;raf=requestAnimationFrame(tick)}}
@@ -1556,23 +1586,28 @@ void main(){
   }};
 })():null;
 addEventListener('resize',()=>{frontBox=null;deckS=0;tailS=0;if(nodes.length&&!raf)render();if(PHONE&&!open.hidden)aimPeeks()});
-crate.addEventListener('pointerdown',e=>{if(PHONE)return;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc')};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
+crate.addEventListener('pointerdown',e=>{if(PHONE)return;spr=null;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc'),vy:0,lt:performance.now(),ly:e.clientY};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
-  const dy=e.clientY-drag.y;if(Math.abs(dy)>6&&!moved){moved=true;crate.classList.add('pulling')}
+  const dy=e.clientY-drag.y,now=performance.now(),dt=Math.max(8,now-drag.lt);drag.vy=.2*drag.vy+.8*(e.clientY-drag.ly)/dt;drag.lt=now;drag.ly=e.clientY;
+  if(Math.abs(dy)>6&&!moved){moved=true;crate.classList.add('pulling')}
   if(!moved)return;
   aim=Math.max(0,Math.min(order.length-1,drag.i+dy/PULL));kick(); // pull toward you to flip forward
   const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
 // a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
-const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);openRecord(false)}if(drag&&moved)go(cur,false);drag=null;moved=false;crate.classList.remove('dragging','pulling')};
+const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
+    if(fl){vel=Math.max(-40,Math.min(40,v));glide(fl);go(Math.round(aim)+fl)}else go(cur,false)}drag=null;moved=false;crate.classList.remove('dragging','pulling')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 // a finger on the pile: down flips the top record toward you, up stands the last one back up, a tap opens it; sideways does nothing
+// how many records a flick of v records a second carries past where the finger let go
+const throwOf=v=>{const a=Math.abs(v);return a<2.4?0:Math.sign(v)*Math.min(30,Math.round((a-1.2)*1.1))};
+const glide=n=>{spr=Math.abs(n)>2?[90,19]:null};
 const openTop=()=>{off.x=off.y=off.vx=off.vy=0;openRecord(false);render()};
 const rub=e=>e*.3/(1+Math.abs(e)/300); // past the ends the pile gives, less the further you go
 crate.addEventListener('pointerdown',e=>{
   if(!PHONE||busy||!e.isPrimary)return;
-  cancelAnimationFrame(raf);raf=0;tick.t=0; // catch the pile where it is, mid-flight or not
+  cancelAnimationFrame(raf);raf=0;tick.t=0;spr=null; // catch the pile where it is, mid-flight or not
   const now=performance.now();
   dd={x:e.clientX,y:e.clientY,p:pos,b:aim,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,ax:null};
   crate.setPointerCapture(e.pointerId);crate.classList.add('pressing');
@@ -1580,7 +1615,7 @@ crate.addEventListener('pointerdown',e=>{
 crate.addEventListener('pointermove',e=>{
   if(!dd)return;
   const dx=e.clientX-dd.x,dy=e.clientY-dd.y,now=performance.now(),dt=Math.max(8,now-dd.lt);
-  dd.vx=.5*dd.vx+.5*(e.clientX-dd.lx)/dt;dd.vy=.5*dd.vy+.5*(e.clientY-dd.ly)/dt;dd.lt=now;dd.lx=e.clientX;dd.ly=e.clientY;
+  dd.vx=.5*dd.vx+.5*(e.clientX-dd.lx)/dt;dd.vy=.2*dd.vy+.8*(e.clientY-dd.ly)/dt;dd.lt=now;dd.lx=e.clientX;dd.ly=e.clientY;
   if(!dd.ax){if(Math.hypot(dx,dy)<8)return;dd.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';crate.classList.remove('pressing')}
   if(dd.ax!=='y')return;
   const hi=order.length-1;let p=dd.p+dy/deckS;off.y=0;
@@ -1595,10 +1630,12 @@ const deckEnd=e=>{
   if(!s.ax){if(e.type==='pointerup'&&performance.now()-s.t<500&&Math.abs(s.p-s.b)<.05)openTop();else kick();return}
   if(s.ax!=='y'){kick();return}
   // one pull, one record: far enough or fast enough and it flips, carrying the flick's speed
-  const v=s.vy*1000/deckS,moved=pos-s.p;let to=s.b;
+  // a gentle pull flips one; a flick carries on, further the harder it's thrown, and settles the way a scroll does
+  const v=performance.now()-s.lt>80?0:s.vy*1000/deckS,moved=pos-s.p;let to=s.b;
   if(moved>.2||v>.9&&moved>.02)to=s.b+1;else if(moved<-.2||v<-.9&&moved<-.02)to=s.b-1;
+  const fl=throwOf(v);if(fl&&Math.sign(v)===Math.sign(moved||v)){to=Math.round(pos)+fl;glide(fl)}
   to=Math.max(0,Math.min(order.length-1,to));
-  vel=Math.max(-12,Math.min(12,v));
+  vel=Math.max(-40,Math.min(40,v));
   if(to!==s.b){buzz();crate.classList.add('swiped');try{localStorage.setItem('records-swiped','1')}catch{}}
   go(to);
 };
@@ -2101,8 +2138,11 @@ const mode=()=>S.z.x>=.5?'r':'l',lMax=()=>(AZ.length-1)*W,rMax=()=>X[X.length-1]
 const nearL=px=>{const n=AZ.length,k=clamp(Math.round(px/W),0,n-1);if(has(AZ[k]))return k;for(let s=1;s<n;s++){if(k+s<n&&has(AZ[k+s]))return k+s;if(k-s>=0&&has(AZ[k-s]))return k-s}return k};
 const nearR=px=>{let b=0;for(let i=1;i<X.length;i++)if(Math.abs(X[i]-px)<Math.abs(X[b]-px))b=i;return b};
 const soft=(x,a,b)=>x<a?a-60*(1-Math.exp((x-a)/60)):x>b?b+60*(1-Math.exp((b-x)/60)):x;
-const toLetter=L=>{if(has(L)&&letter(order[cur])!==L)jump(FIRST[L])};
-const toRecord=i=>{if(i!==cur&&open.hidden)go(i)};
+// with a record open, the scrubber picks where to go and the record view swaps once it settles
+let want=null;
+const toLetter=L=>{if(!has(L))return;if(!open.hidden){want=FIRST[L];return}if(letter(order[cur])!==L)jump(FIRST[L])};
+const toRecord=i=>{if(!open.hidden){want=i;return}if(i!==cur)go(i)};
+const apply=t=>{if(open.hidden||t===cur)return;if(busy){setTimeout(()=>apply(t),120);return}swap(t-cur)};
 
 function build(){
   AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];FIRST={};CNT={};
@@ -2140,7 +2180,8 @@ function loop(ts){
 }
 const kick=()=>{if(!raf)raf=requestAnimationFrame(loop)};
 function settled(){if(!user)return;user=false;
-  if(mode()==='l')toLetter(AZ[nearL(S.l.x)]);else toRecord(nearR(S.r.x));rest(mode()==='l'?'r':'l');label()}
+  if(mode()==='l')toLetter(AZ[nearL(S.l.x)]);else toRecord(nearR(S.r.x));rest(mode()==='l'?'r':'l');label();
+  if(want!=null){const t=want;want=null;apply(t)}}
 // the depth you're not in waits on the record in front, so changing depth never jumps
 function rest(m){const o=S[m];o.x=o.t=m==='r'?(X[cur]||0):Math.max(0,slot(cur))*W;o.v=0;if(m==='r')lastR=cur;else lastL=Math.round(o.x/W)}
 // the crate moved on its own (wheel, keys, drag): follow it without ticking through the records in between
