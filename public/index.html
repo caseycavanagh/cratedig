@@ -787,8 +787,8 @@ html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
 .ed,html.phone .ed{position:fixed;top:auto;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;margin:0;z-index:12}
 html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
 /* hover a record in the crate and its name slides out from under its right edge: after a short rest, on a spring; it leaves on a quick fade */
-.hv{position:fixed;z-index:1;left:0;top:0;transform:translateY(-50%);width:var(--hw,280px);display:grid;gap:2px;font-size:14px;line-height:1.3;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
-.hv.on{opacity:1;translate:0;transition:opacity .25s,translate .55s var(--flip),top .45s var(--flip)}
+.hv{position:fixed;z-index:3;left:0;top:0;transform:translateY(-50%);width:var(--hw,280px);display:grid;gap:2px;font-size:14px;line-height:1.3;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
+.hv.on{pointer-events:auto;cursor:pointer;opacity:1;translate:0;transition:opacity .25s,translate .55s var(--flip),top .45s var(--flip)}
 .hv b{display:block;font-weight:500;color:var(--fg);text-wrap:balance}
 .hv span{display:block;color:var(--m)}
 /* the same tokens as the record view's peek hints, with the same small label above */
@@ -1597,13 +1597,14 @@ function aimNudge(){
   nudgeTo(n,Math.round(t*100)/100);
 }
 // the name of the record under a resting pointer, beside the front record
-var hvI=-1,hvT=0;const hv=$('#hv');
-function hvOff(){clearTimeout(hvT);hvT=0;hvI=-1;document.getElementById('hv')?.classList.remove('on')}
+var hvI=-1,hvT=0,hvGo=0,onHv=false;const hv=$('#hv');
+function hvOff(){clearTimeout(hvT);clearTimeout(hvGo);hvT=0;onHv=false;hvI=-1;document.getElementById('hv')?.classList.remove('on')}
 function hoverPeek(){
   const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.elementFromPoint(ptr.x,ptr.y),onTab=el?.closest?.('.dv');
   if(onTab)return hvOff();
   const i=el?nodes.indexOf(el.closest?.('.rc')):-1;
-  if(i<0)return hvOff();
+  if(i<0){if(hv.classList.contains('on')&&!onHv){clearTimeout(hvGo);hvGo=setTimeout(hvOff,500)}else if(!onHv)hvOff();return} // a moment's grace, on the way over to the name
+  clearTimeout(hvGo);
   const f=nodes[cur].firstElementChild.getBoundingClientRect(),room=innerWidth-f.right-72;
   if(room<160)return hvOff();
   hv.style.left=f.right+32+'px';hv.style.top=f.top+f.height/2+'px';hv.style.setProperty('--hw',Math.min(300,room)+'px');
@@ -1614,7 +1615,14 @@ function hoverPeek(){
 }
 const queueNudge=()=>{if(!aimF)aimF=requestAnimationFrame(()=>{aimNudge();hoverPeek()})};
 crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;ptr={x:e.clientX,y:e.clientY};queueNudge()});
-crate.addEventListener('pointerleave',()=>{ptr=null;queueNudge()});
+// leaving the crate for its name keeps the name: a short grace on the way over, and it stays while the pointer is on it
+let hvLeave=0;
+crate.addEventListener('pointerleave',e=>{if(e.pointerType!=='mouse'){ptr=null;queueNudge();return}clearTimeout(hvLeave);hvLeave=setTimeout(()=>{ptr=null;queueNudge()},hv.classList.contains('on')?350:0)});
+crate.addEventListener('pointerenter',()=>clearTimeout(hvLeave));
+hv.addEventListener('pointerenter',()=>{clearTimeout(hvLeave);clearTimeout(hvGo);onHv=true});
+hv.addEventListener('pointerleave',e=>{onHv=false;if(crate.contains(e.relatedTarget))return;ptr=null;queueNudge()});
+// the name opens its record
+hv.addEventListener('click',()=>{const i=hvI;if(i<0||!open.hidden)return;hvOff();if(i!==cur)go(i);openRecord(false)});
 // the mark goes home: back to the crate, at A
 $('.logo').addEventListener('click',e=>{e.preventDefault();const was=!open.hidden;if(was)closeRecord();
   const c=$('.vw button[data-v=crate]');if(c&&c.getAttribute('aria-pressed')!=='true')c.click();setTimeout(()=>jump(0),was?700:0)});
