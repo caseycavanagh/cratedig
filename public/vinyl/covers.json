@@ -1146,9 +1146,6 @@
     "frontSource": "apple",
     "spine": "#c1ae99"
   },
-  "mt-joy-anniversary": {
-    "links": {}
-  },
   "the-national-high-violet": {
     "year": 2010,
     "label": "4AD",
@@ -1676,5 +1673,17 @@
     "frontSource": "apple",
     "spine": "#776965",
     "back": "various-artists-woodstock-music-from-the-original-soundtrack-and-more-back.webp"
+  },
+  "mt-joy-mt-joy": {
+    "year": 2018,
+    "label": "Dualtone",
+    "group": "a75b2811-f640-4b50-917c-9ff678a94a7d",
+    "release": "b8acf713-32c9-40ea-a359-f9e45cf07fa7",
+    "links": {
+      "deezer": "https://www.deezer.com/album/111541292"
+    },
+    "front": "mt-joy-mt-joy-front.webp",
+    "frontSource": "caa",
+    "spine": "#91726a"
   }
 }
