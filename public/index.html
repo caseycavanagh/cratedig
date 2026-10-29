@@ -601,7 +601,23 @@ body.filtering .crate{transition:none}
 .find .q.has input,html.phone .find .q.has input{padding-right:70px}
 html.phone .find .vw button{width:42px;height:48px}
 html.phone .fb{width:58px}
-/* the bar steps aside while you move through the records, and comes back when you stop, scroll back, or reach for it */
+/* the bar: search, filters, layout. Layout is one button like filters; it opens the three views as a row above the bar */
+.find .q,html.phone .find .q{order:1}
+.fb{order:2}
+.fb.lb{order:3}
+.find .vw{order:0;flex:1 0 100%;height:auto;padding:2px 2px 4px;justify-content:flex-start;gap:8px;background:none;border:0;border-radius:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;-webkit-mask:none;mask:none}
+.find .vw[hidden]{display:none}
+.find .vw button,html.phone .find .vw button{width:auto;height:40px;padding:0 18px 0 14px;display:inline-flex;align-items:center;gap:8px;border-radius:99px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);font-size:15px;color:#d6d6d8}
+.find .vw button svg{width:18px;height:18px}
+.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
+.find .vw:not([hidden]){animation:trayIn .35s cubic-bezier(.22,1,.36,1)}
+.find .vw,.fb,.tray button,.find .vw button{transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,width .3s cubic-bezier(.22,1,.36,1),margin .3s cubic-bezier(.22,1,.36,1),background-color .2s,color .2s}
+.tray:not([hidden]){animation-timing-function:cubic-bezier(.22,1,.36,1)}
+.fb:active,.tray button:active,.find .vw button:active{transform:scale(.96)}
+.kd{transition:opacity .4s .25s,visibility 0s .25s,bottom .35s cubic-bezier(.22,1,.36,1)}
+/* while you type, search gets the whole bar */
+.find:has(.q:focus-within) .fb{width:0;opacity:0;margin-left:-8px;padding:0;border-width:0;overflow:hidden}
+/* the bar steps aside while your hand is moving the records, and comes back when you let go */
 .find{transition:opacity .3s,visibility 0s,translate .5s cubic-bezier(.22,1,.36,1)}
 body.quiet .find{translate:0 calc(100% + 40px);opacity:0;pointer-events:none;transition:opacity .2s,translate .35s cubic-bezier(.4,0,.2,1)}
 body.quiet .find *{pointer-events:none}
@@ -2137,32 +2153,49 @@ build();at=cur;
   const ICON={crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
     wall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
     table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>'};
-  $$('button',vwEl).forEach(b=>{const v=b.dataset.v;b.setAttribute('aria-label',b.textContent);b.title=b.getAttribute('aria-label');b.innerHTML=ICON[v]});
-  find.insertBefore(vwEl,qf);
+  $$('button',vwEl).forEach(b=>{const v=b.dataset.v,l=b.textContent;b.innerHTML=ICON[v]+`<span>${l}</span>`});
+  vwEl.id='views';vwEl.hidden=true;vwEl.setAttribute('role','group');vwEl.setAttribute('aria-label','Layout');
   const fb=document.createElement('button');fb.type='button';fb.className='fb';fb.setAttribute('aria-expanded','false');fb.setAttribute('aria-controls','pills');
   fb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sr">Filters</span>';
   qf.after(fb);
+  // layout works like filters: one button showing the current view; it opens the three as a row above the bar
+  const lb=document.createElement('button');lb.type='button';lb.className='fb lb';lb.setAttribute('aria-expanded','false');lb.setAttribute('aria-controls','views');
+  fb.after(lb);
+  const lmark=()=>{const b=$('[aria-pressed=true]',vwEl)||$('button',vwEl);lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
+  new MutationObserver(lmark).observe(vwEl,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});lmark();
   pills.className='tray';pills.hidden=true;find.prepend(pills);
+  vwEl.classList.add('tray');find.prepend(vwEl);
   const mark=()=>{const on=!!(filt&&filt.k!=='q');fb.classList.toggle('on',on);fb.setAttribute('aria-label',on?`Filters: ${filt.v}`:'Filters')};
-  const tray=on=>{pills.hidden=!on;fb.setAttribute('aria-expanded',on);document.body.classList.toggle('filtering',on);
+  const views=on=>{vwEl.hidden=!on;lb.setAttribute('aria-expanded',on);if(on)tray(false);document.body.classList.toggle('filtering',on||!pills.hidden)};
+  const tray=on=>{pills.hidden=!on;fb.setAttribute('aria-expanded',on);if(on&&!vwEl.hidden){vwEl.hidden=true;lb.setAttribute('aria-expanded',false)}document.body.classList.toggle('filtering',on||!vwEl.hidden);
     if(on){const b=$('[aria-pressed=true]',pills);b&&b.scrollIntoView({inline:'center',block:'nearest'})}};
   fb.onclick=()=>tray(pills.hidden);
+  lb.onclick=()=>views(vwEl.hidden);
+  vwEl.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>views(false),120)});
   pills.addEventListener('keydown',e=>{if(e.key==='Escape'){tray(false);fb.focus()}});
-  addEventListener('pointerdown',e=>{if(!pills.hidden&&!e.target.closest('.find'))tray(false)});
+  vwEl.addEventListener('keydown',e=>{if(e.key==='Escape'){views(false);lb.focus()}});
+  addEventListener('pointerdown',e=>{if(e.target.closest('.find'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
   const arrange2=arrange;arrange=function(...a){const n=arrange2.apply(this,a);mark();return n};
   mark();
-  // show and hide: moving through the records tucks the bar away; stopping, scrolling back up, or reaching for it brings it back
-  const cvEl=$('#cv'),wallEl=$('#wall');let qT=0;
-  const held=()=>!pills.hidden||find.contains(document.activeElement)||!open.hidden;
+  // show and hide, tied to your hand: the bar steps aside while a finger (or the mouse button, or the wheel) is moving the
+  // records, and comes back as soon as you let go. No timers while you're holding on, no surprises when you aren't.
+  let qT=0;
+  const held=()=>!pills.hidden||!vwEl.hidden||find.contains(document.activeElement)||!open.hidden;
   const quiet=on=>{if(on&&held())return;document.body.classList.toggle('quiet',on)};
-  const nudge=(ms=1100)=>{if(held())return;quiet(true);clearTimeout(qT);qT=setTimeout(()=>quiet(false),ms)};
-  let at=cur;const place1=place;place=function(...a){const n=place1.apply(this,a);if(cur!==at){at=cur;if(!window.dialBusy?.()&&!document.body.classList.contains('walling'))nudge()}return n};
-  for(const sc of [wallEl,$('#tbl')]){let sy=0;sc.addEventListener('scroll',()=>{const y=sc.scrollTop,d=y-sy;sy=y;clearTimeout(qT);
-    if(y<40||y+sc.clientHeight>sc.scrollHeight-40)quiet(false);else if(d>6)quiet(true);else if(d<-6)quiet(false);
-    qT=setTimeout(()=>quiet(false),1600)},{passive:true})}
-  cvEl.addEventListener('pointerdown',()=>{clearTimeout(qT);quiet(true)});
-  addEventListener('pointerup',()=>{if(document.body.classList.contains('quiet')&&!cvEl.hidden){clearTimeout(qT);qT=setTimeout(()=>quiet(false),700)}});
-  cvEl.addEventListener('wheel',()=>nudge(900),{passive:true});
+  const back=ms=>{clearTimeout(qT);qT=setTimeout(()=>quiet(false),ms)};
+  const CONTENT='.crate,.wall,.tbl,.cv';
+  let hand=null;
+  const down=(x,y,t)=>{if(t.closest?.(CONTENT)&&!t.closest('.find,.kd'))hand={x,y,moved:false}};
+  const move=(x,y)=>{if(hand&&!hand.moved&&Math.hypot(x-hand.x,y-hand.y)>6){hand.moved=true;clearTimeout(qT);quiet(true)}};
+  const up=()=>{if(!hand)return;const m=hand.moved;hand=null;if(m)back(180)};
+  addEventListener('touchstart',e=>{if(e.touches.length===1)down(e.touches[0].clientX,e.touches[0].clientY,e.target)},{passive:true});
+  addEventListener('touchmove',e=>move(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  addEventListener('touchend',e=>{if(!e.touches.length)up()},{passive:true});
+  addEventListener('touchcancel',up,{passive:true});
+  addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')down(e.clientX,e.clientY,e.target)});
+  addEventListener('pointermove',e=>{if(e.pointerType!=='touch')move(e.clientX,e.clientY)},{passive:true});
+  addEventListener('pointerup',e=>{if(e.pointerType!=='touch')up()});
+  addEventListener('wheel',e=>{if(!e.target.closest?.(CONTENT)||e.target.closest('.find,.kd'))return;clearTimeout(qT);quiet(true);back(350)},{passive:true});
   // a mouse heading for the bottom of the window brings it straight back
   addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&e.clientY>innerHeight-150&&document.body.classList.contains('quiet')){clearTimeout(qT);quiet(false)}},{passive:true});
   addEventListener('keydown',e=>{if(e.key==='/'||e.key==='Tab'){clearTimeout(qT);quiet(false)}});
