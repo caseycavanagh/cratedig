@@ -1013,5 +1013,650 @@
     "frontSource": "apple",
     "spine": "#e6b6ad",
     "back": "foxwarren-foxwarren-back.webp"
+  },
+  "mandolin-orange-this-side-of-jordan": {
+    "year": 2013,
+    "label": "Yep Roc Records",
+    "format": "LP",
+    "group": "84ae5c8e-a27e-4464-9a5d-c729269e83c0",
+    "release": "5e0225fb-43db-4a0b-a3d8-612d2e61db1c",
+    "links": {},
+    "front": "mandolin-orange-this-side-of-jordan-front.webp",
+    "frontSource": "caa",
+    "spine": "#d3bb93"
+  },
+  "mandolin-orange-tides-of-a-teardrop": {
+    "year": 2019,
+    "label": "Yep Roc Records",
+    "group": "2bbb28a9-de94-4fd2-a4eb-82a90c475495",
+    "release": "cdb5cd38-c596-4564-b70a-2e0e45bb5378",
+    "links": {},
+    "front": "mandolin-orange-tides-of-a-teardrop-front.webp",
+    "frontSource": "caa",
+    "spine": "#a2afb8",
+    "back": "mandolin-orange-tides-of-a-teardrop-back.webp"
+  },
+  "medium-build-country": {
+    "year": 2024,
+    "label": "slowplay",
+    "group": "45d2833b-dc2f-4d35-9523-93919d8cd247",
+    "release": "051fd100-a646-40b8-a9b4-ed9dd5c2e2fa",
+    "spotify": "6DUyohk95eun9LArJtHyF7",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/country/1731464507",
+      "deezer": "https://www.deezer.com/album/548583262"
+    },
+    "front": "medium-build-country-front.webp",
+    "frontSource": "apple",
+    "spine": "#777260"
+  },
+  "medium-build-king-of-having-fun": {
+    "year": 2026,
+    "label": "Island",
+    "group": "990a7042-28ad-477a-bb38-eb4b96461e7f",
+    "release": "5941d6cc-c3ee-4321-b640-629dba39b01b",
+    "spotify": "6qvLeDfqPRk1w73Vh885S3",
+    "links": {
+      "deezer": "https://www.deezer.com/album/1064842411"
+    },
+    "front": "medium-build-king-of-having-fun-front.webp",
+    "frontSource": "caa",
+    "spine": "#706f63"
+  },
+  "michael-jackson-thriller": {
+    "year": 1982,
+    "label": "Epic",
+    "format": "LP",
+    "group": "f32fab67-77dd-3937-addc-9062e28e4c37",
+    "release": "0881a2b7-2be3-4dfd-94f0-b186069802bd",
+    "spotify": "2ANVost0y2y52ema1E9xAZ",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/thriller-25th-anniversary-deluxe-edition/273048762",
+      "deezer": "https://www.deezer.com/album/96126"
+    },
+    "front": "michael-jackson-thriller-front.webp",
+    "frontSource": "apple",
+    "spine": "#7a7573",
+    "back": "michael-jackson-thriller-back.webp"
+  },
+  "mj-lenderman-manning-fireworks": {
+    "year": 2024,
+    "label": "Anti‐",
+    "format": "2×LP",
+    "group": "0c308741-7b98-4a36-b44e-1ba437b4e2c4",
+    "release": "784c578b-d018-4020-950c-e9a1c6dd6f08",
+    "spotify": "1bKiiYGt1fzm9YMlTnUqpN",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/manning-fireworks/1749088991",
+      "deezer": "https://www.deezer.com/album/593617182"
+    },
+    "front": "mj-lenderman-manning-fireworks-front.webp",
+    "frontSource": "apple",
+    "spine": "#575645",
+    "back": "mj-lenderman-manning-fireworks-back.webp"
+  },
+  "middle-brother-middle-brother-ep": {
+    "links": {}
+  },
+  "milo-greene-milo-greene": {
+    "year": 2012,
+    "label": "Atlantic",
+    "format": "LP",
+    "group": "21de6e40-3561-4e36-85fa-a325932e45c2",
+    "release": "6b7f387e-f11d-4821-bc88-b1981e00bca6",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/milo-greene/541312919",
+      "deezer": "https://www.deezer.com/album/4180091"
+    },
+    "front": "milo-greene-milo-greene-front.webp",
+    "frontSource": "apple",
+    "spine": "#826251",
+    "back": "milo-greene-milo-greene-back.webp"
+  },
+  "monster-rally-castaways-vol-1": {
+    "year": 2020,
+    "group": "41f2586b-a7d5-4359-b959-f1d154d2d0ea",
+    "release": "5227b916-d687-4f5b-bb5d-78afe7acd1eb",
+    "spotify": "1Qw6qXOkX6Po0p54RVovlm",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/castaways-vol-1/1652323981",
+      "deezer": "https://www.deezer.com/album/371449147"
+    },
+    "front": "monster-rally-castaways-vol-1-front.webp",
+    "frontSource": "apple",
+    "spine": "#ca8a7b"
+  },
+  "mount-moriah-mount-moriah": {
+    "year": 2011,
+    "label": "Holidays for Quince",
+    "group": "31bb565c-6996-4e91-98da-88def9c0dc95",
+    "release": "f24a6445-8675-4b60-9f5d-cfaeff26fd85",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/mount-moriah/424726194",
+      "deezer": "https://www.deezer.com/album/2907181"
+    },
+    "front": "mount-moriah-mount-moriah-front.webp",
+    "frontSource": "apple",
+    "spine": "#c1ae99"
+  },
+  "mt-joy-anniversary": {
+    "links": {}
+  },
+  "the-national-high-violet": {
+    "year": 2010,
+    "label": "4AD",
+    "format": "2×LP",
+    "group": "1ce57f6a-62c8-4017-ad38-3339f542faae",
+    "release": "154e29a7-b989-482a-b168-5e35ec675926",
+    "spotify": "3mX8oKajxXEBNNATCKLLPd",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/high-violet-bonus-track-version/368054407",
+      "deezer": "https://www.deezer.com/album/6509003"
+    },
+    "front": "the-national-high-violet-front.webp",
+    "frontSource": "apple",
+    "spine": "#cbc8c2",
+    "back": "the-national-high-violet-back.webp"
+  },
+  "various-artists-a-change-is-gonna-come-live-from-newport-folk": {
+    "links": {}
+  },
+  "various-artists-borrowed-songs-vol-1-live-at-newport": {
+    "links": {}
+  },
+  "nickel-creek-why-should-the-fire-die": {
+    "year": 2005,
+    "label": "Sugar Hill Records",
+    "group": "e2a8e2cf-313b-3409-ac1f-2e65c989b8bb",
+    "release": "234d0329-5122-4e77-9895-302386820d23",
+    "spotify": "6l61p7zbizBUjQWY10LWmb",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/why-should-the-fire-die/1532334675",
+      "deezer": "https://www.deezer.com/album/301680"
+    },
+    "front": "nickel-creek-why-should-the-fire-die-front.webp",
+    "frontSource": "apple",
+    "spine": "#af342a",
+    "back": "nickel-creek-why-should-the-fire-die-back.webp"
+  },
+  "noah-gundersen-ledges": {
+    "year": 2014,
+    "label": "Dualtone",
+    "group": "34503620-467f-44cd-b5c3-c14eceb76d60",
+    "release": "03580034-1b0d-4ee2-8320-f699f797ff41",
+    "spotify": "1JwNRXyWu4PxK13mp51p8y",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/ledges/1654173758",
+      "deezer": "https://www.deezer.com/album/371623597"
+    },
+    "front": "noah-gundersen-ledges-front.webp",
+    "frontSource": "apple",
+    "spine": "#605c52"
+  },
+  "noah-gundersen-carry-the-ghost": {
+    "year": 2015,
+    "label": "Dualtone",
+    "group": "6d493e51-a6e4-4924-b291-fa73d32a55cf",
+    "release": "383da99b-3631-429f-8b41-f35e4c279a87",
+    "spotify": "0UmqeAVMuhYAfGTPfrNsuM",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/carry-the-ghost-deluxe-edition/1654174862",
+      "deezer": "https://www.deezer.com/album/371616037"
+    },
+    "front": "noah-gundersen-carry-the-ghost-front.webp",
+    "frontSource": "apple",
+    "spine": "#444446"
+  },
+  "phoebe-bridgers-lost-weekend": {
+    "year": 2026,
+    "label": "Dead Oceans",
+    "format": "2×LP",
+    "group": "706578f8-fb48-47f2-806d-a047dc408332",
+    "release": "6fff51d5-929c-4c71-afff-4ef65d7a351c",
+    "spotify": "2NSzwyYvQvdOQAoEjrlw9c",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/lost-weekend/6781051268",
+      "deezer": "https://www.deezer.com/album/1050716582"
+    },
+    "front": "phoebe-bridgers-lost-weekend-front.webp",
+    "frontSource": "apple",
+    "spine": "#081718",
+    "back": "phoebe-bridgers-lost-weekend-back.webp"
+  },
+  "the-pogues-featuring-kirsty-maccoll-fairytale-of-new-york": {
+    "year": 2025,
+    "label": "Warner Music UK",
+    "group": "66f3871f-0599-458f-a584-f30e557e3eb4",
+    "release": "13910fef-6a2c-4cc5-909c-b3ba386c537c",
+    "links": {},
+    "front": "the-pogues-featuring-kirsty-maccoll-fairytale-of-new-york-front.webp",
+    "frontSource": "caa",
+    "spine": "#64"
+  },
+  "randy-newman-little-criminals": {
+    "year": 1977,
+    "label": "Warner Bros. Records",
+    "format": "LP",
+    "group": "8211ba5c-b994-3546-b735-a05106b67052",
+    "release": "4f0ce202-f705-3c32-b1dd-13e5cd09eb01",
+    "spotify": "3Dz7wlDnf5GT8l0xg5r91q",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/little-criminals/730582791",
+      "deezer": "https://www.deezer.com/album/7079610"
+    },
+    "front": "randy-newman-little-criminals-front.webp",
+    "frontSource": "apple",
+    "spine": "#aba5a0",
+    "back": "randy-newman-little-criminals-back.webp"
+  },
+  "rett-madison-one-for-jackie": {
+    "year": 2023,
+    "label": "War Buddha Records",
+    "group": "685a932a-c3c8-4f3a-b40a-4aacbc045bf2",
+    "release": "d726207f-e9cd-474f-9afb-31310422b851",
+    "spotify": "1ZauFuTpqdgJ0B5LaziTXu",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/one-for-jackie/1706546350",
+      "deezer": "https://www.deezer.com/album/485665515"
+    },
+    "front": "rett-madison-one-for-jackie-front.webp",
+    "frontSource": "apple",
+    "spine": "#b97656"
+  },
+  "robert-ellis-texas-piano-man": {
+    "year": 2019,
+    "label": "New West Records",
+    "format": "LP",
+    "group": "2f9b029f-0c87-416d-a5a0-84ee912898c1",
+    "release": "5ac88b2d-e205-4a1e-a58b-fec0d8883ae2",
+    "spotify": "7CuBiJKKimeOE5VfDNHmnQ",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/texas-piano-man/1441067392",
+      "deezer": "https://www.deezer.com/album/78323012"
+    },
+    "front": "robert-ellis-texas-piano-man-front.webp",
+    "frontSource": "apple",
+    "spine": "#808a77"
+  },
+  "robert-finley-age-dont-mean-a-thing": {
+    "year": 2016,
+    "label": "Big Legal Mess Records",
+    "group": "f779db76-51ef-49a8-a8f5-71f943da555d",
+    "spotify": "4ibHvyOnidvLXpkky40zec",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/age-dont-mean-a-thing/1152181836",
+      "deezer": "https://www.deezer.com/album/13991946"
+    },
+    "front": "robert-finley-age-dont-mean-a-thing-front.webp",
+    "frontSource": "apple",
+    "spine": "#3b3633"
+  },
+  "the-rolling-stones-sticky-fingers": {
+    "year": 1971,
+    "label": "Rolling Stones Records",
+    "format": "LP",
+    "group": "4a4213d0-f224-3d51-bcca-476f61162681",
+    "release": "39bef642-107b-4330-ba5c-652ea4c02fff",
+    "spotify": "29m6DinzdaD0OPqWKGyMdz",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/sticky-fingers-super-deluxe-edition-2010-remaster/1440830882",
+      "deezer": "https://www.deezer.com/album/10472932"
+    },
+    "front": "the-rolling-stones-sticky-fingers-front.webp",
+    "frontSource": "apple",
+    "spine": "#544f4b",
+    "back": "the-rolling-stones-sticky-fingers-back.webp"
+  },
+  "ruston-kelly-dying-star": {
+    "year": 2018,
+    "label": "Rounder",
+    "format": "2×LP",
+    "group": "828ebc43-e3f1-4ae2-8f01-53a7d2dc1c21",
+    "release": "7523f808-439a-4138-b059-0c65affa30c6",
+    "spotify": "0HglC8wDUKL0VV5KI31bqU",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/dying-star/1399137312",
+      "deezer": "https://www.deezer.com/album/72174592"
+    },
+    "front": "ruston-kelly-dying-star-front.webp",
+    "frontSource": "apple",
+    "spine": "#32263c"
+  },
+  "santana-abraxas": {
+    "year": 1970,
+    "label": "Columbia",
+    "format": "LP",
+    "group": "43424c73-fc58-36b0-b9cf-f8b057ac0603",
+    "release": "6c868cc0-1571-4040-b165-522808abe73c",
+    "spotify": "1CHUXwuge9A7L2KiA3vnR6",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/abraxas/871146591",
+      "deezer": "https://www.deezer.com/album/7740828"
+    },
+    "front": "santana-abraxas-front.webp",
+    "frontSource": "apple",
+    "spine": "#754847",
+    "back": "santana-abraxas-back.webp"
+  },
+  "shakey-graves-movie-of-the-week": {
+    "year": 2023,
+    "label": "Dualtone",
+    "group": "26081fbe-cc4f-4cf7-b871-a17705b9862c",
+    "release": "6c689442-250b-430f-8c83-2132f74a6bba",
+    "spotify": "7wNQC2MXYcehArLMjdFzZ2",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/movie-of-the-week/1752547335",
+      "deezer": "https://www.deezer.com/album/457852675"
+    },
+    "front": "shakey-graves-movie-of-the-week-front.webp",
+    "frontSource": "apple",
+    "spine": "#1a1b1e"
+  },
+  "shovels-rope-busted-jukebox-vol-1": {
+    "links": {}
+  },
+  "shovels-rope-busted-jukebox-vol-3": {
+    "spotify": "7b8GGVISSRAk8g3kER7PTR",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/busted-jukebox-vol-3/1751806140",
+      "deezer": "https://www.deezer.com/album/204437682"
+    },
+    "year": 2021,
+    "front": "shovels-rope-busted-jukebox-vol-3-front.webp",
+    "frontSource": "apple",
+    "spine": "#9f977c"
+  },
+  "shovels-rope-by-blood": {
+    "year": 2019,
+    "label": "Dualtone",
+    "group": "d687765b-6d87-41a5-b2ba-2ee885156892",
+    "release": "03c69324-4374-413d-957b-bb435fb75371",
+    "spotify": "1fK2rnhukNS4kby2cgOMim",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/by-blood-deluxe-edition/1753157634",
+      "deezer": "https://www.deezer.com/album/587370112"
+    },
+    "front": "shovels-rope-by-blood-front.webp",
+    "frontSource": "apple",
+    "spine": "#7c6f6c"
+  },
+  "shovels-rope-something-is-working-up-above-my-head": {
+    "year": 2024,
+    "label": "Dualtone",
+    "group": "bad0f958-7316-48ca-8b0e-2f8eebdb2f01",
+    "release": "2b6b5efe-6bc9-4d70-8c35-f3db081775b5",
+    "spotify": "05eCc4XHbGhZ8jhVbQYnoX",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/something-is-working-up-above-my-head-deluxe-edition/1875402822",
+      "deezer": "https://www.deezer.com/album/587737622"
+    },
+    "front": "shovels-rope-something-is-working-up-above-my-head-front.webp",
+    "frontSource": "apple",
+    "spine": "#36302f"
+  },
+  "sir-woman-bitch": {
+    "year": 2020,
+    "label": "Nine Mile Records",
+    "format": "EP",
+    "group": "f232bc38-c2a2-4d6c-a956-14a3861d0f0e",
+    "release": "74f9b44e-e3d9-4354-99eb-aebdeeffb2de",
+    "spotify": "3TR6Pji1BOV4eSaTP3Kb0e",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/bitch-ep/1752724063",
+      "deezer": "https://www.deezer.com/album/603516382"
+    },
+    "front": "sir-woman-bitch-front.webp",
+    "frontSource": "apple",
+    "spine": "#1e180b",
+    "back": "sir-woman-bitch-back.webp"
+  },
+  "sly-the-family-stone-greatest-hits": {
+    "year": 1970,
+    "label": "Epic",
+    "format": "LP",
+    "group": "320b576b-aa9c-3c5e-8631-178e81841866",
+    "release": "3f5ef113-ed23-33f3-bd6d-14ee75e15b1b",
+    "spotify": "0UM9SydcBtsklCTFgGLvcT",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/greatest-hits/212579326",
+      "deezer": "https://www.deezer.com/album/71157"
+    },
+    "front": "sly-the-family-stone-greatest-hits-front.webp",
+    "frontSource": "apple",
+    "spine": "#a9a39d",
+    "back": "sly-the-family-stone-greatest-hits-back.webp"
+  },
+  "spirit-family-reunion-spirit-family-reunion": {
+    "year": 2010,
+    "group": "e4d1fc13-7120-4439-8f7d-8efacd47a3bf",
+    "release": "9b5b1964-45a2-4f61-aa48-97c17c586dff",
+    "links": {},
+    "front": "spirit-family-reunion-spirit-family-reunion-front.webp",
+    "frontSource": "caa",
+    "spine": "#b79379"
+  },
+  "stephen-stills-stills": {
+    "year": 1975,
+    "label": "Columbia",
+    "format": "LP",
+    "group": "0e57487f-83ad-386c-899a-c3ebef558949",
+    "release": "3293ee14-0d1f-42f7-b8e8-fe5487e23508",
+    "spotify": "5burn04VZNUOBmUFTvoGZa",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/stills/178448357",
+      "deezer": "https://www.deezer.com/album/115690"
+    },
+    "front": "stephen-stills-stills-front.webp",
+    "frontSource": "apple",
+    "spine": "#796555",
+    "back": "stephen-stills-stills-back.webp"
+  },
+  "stevie-wonder-songs-in-the-key-of-life": {
+    "year": 1976,
+    "label": "Tamla",
+    "format": "3×LP",
+    "group": "ea88b09b-fd34-33cf-a3e5-25a3a2fb4c6f",
+    "release": "4f0d5cb0-d9af-438f-b4c1-645cd233975c",
+    "spotify": "6YUCc2RiXcEKS9ibuZxjt0",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/songs-in-the-key-of-life/1440788438",
+      "deezer": "https://www.deezer.com/album/1105892652"
+    },
+    "front": "stevie-wonder-songs-in-the-key-of-life-front.webp",
+    "frontSource": "apple",
+    "spine": "#d06b4d",
+    "back": "stevie-wonder-songs-in-the-key-of-life-back.webp"
+  },
+  "sturgill-simpson-metamodern-sounds-in-country-music": {
+    "year": 2014,
+    "label": "High Top Mountain Records",
+    "format": "LP",
+    "group": "32984f66-0224-4ab3-bd77-9f6bc3dfd33f",
+    "release": "766dcf66-94a7-4843-9872-797a7679c081",
+    "spotify": "5N1kfa3omZENLwlVhEgqHF",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/metamodern-sounds-in-country-music/1887707089",
+      "deezer": "https://www.deezer.com/album/946804331"
+    },
+    "front": "sturgill-simpson-metamodern-sounds-in-country-music-front.webp",
+    "frontSource": "apple",
+    "spine": "#363432"
+  },
+  "johnny-blue-skies-and-the-dark-clouds-mutiny-after-midnight": {
+    "year": 2026,
+    "label": "High Top Mountain Records",
+    "format": "LP",
+    "group": "cddab6fa-4c6a-404e-a78f-2e996fe53d40",
+    "release": "5f63b4d1-4fb3-4738-8ce8-40bc8efc8056",
+    "links": {},
+    "front": "johnny-blue-skies-and-the-dark-clouds-mutiny-after-midnight-front.webp",
+    "frontSource": "caa",
+    "spine": "#3a3227"
+  },
+  "sufjan-stevens-javelin": {
+    "year": 2023,
+    "label": "Asthmatic Kitty Records",
+    "format": "LP",
+    "group": "56dba069-d0a1-4353-b786-db6fc8269139",
+    "release": "b2a2c1a2-97ca-4eb7-b97e-45c4aabebb8f",
+    "spotify": "2KqSL3vLfyVO7rrZJL9tUs",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/javelin/1700723922",
+      "deezer": "https://www.deezer.com/album/471667525"
+    },
+    "front": "sufjan-stevens-javelin-front.webp",
+    "frontSource": "apple",
+    "spine": "#947c74",
+    "back": "sufjan-stevens-javelin-back.webp"
+  },
+  "the-tallest-man-on-earth-dark-bird-is-home": {
+    "year": 2015,
+    "label": "Dead Oceans",
+    "group": "322613ff-430f-4b11-ae69-1634d2f494eb",
+    "release": "e3b4a4e1-309f-4cc7-90b6-ad539ee756f5",
+    "spotify": "1Bz5pzlT3m7uJp1534Ma5V",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/dark-bird-is-home/960850982",
+      "deezer": "https://www.deezer.com/album/10075578"
+    },
+    "front": "the-tallest-man-on-earth-dark-bird-is-home-front.webp",
+    "frontSource": "apple",
+    "spine": "#575653"
+  },
+  "taylor-swift-midnights": {
+    "year": 2022,
+    "label": "Republic Records",
+    "format": "LP",
+    "group": "0dcc84fb-c592-46e9-ba92-a52bb44dd553",
+    "release": "39fb5412-f7c7-4382-9a9a-73a5aebf1d9d",
+    "spotify": "151w1FgRZfnKZA9FEcg9Z3",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/midnights-3am-edition/1650841512"
+    },
+    "front": "taylor-swift-midnights-front.webp",
+    "frontSource": "apple",
+    "spine": "#a48d8e",
+    "back": "taylor-swift-midnights-back.webp"
+  },
+  "tom-petty-and-the-heartbreakers-tom-petty-and-the-heartbreakers": {
+    "year": 1976,
+    "label": "Shelter Records",
+    "format": "LP",
+    "group": "59cb1d59-e0c8-37f0-a2af-9bc8df64f6cd",
+    "release": "d7bdc8b4-7500-4ea0-aa69-65f84828016b",
+    "spotify": "0JBy4lxBlQIxMZ8qPMIJER",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/tom-petty-and-the-heartbreakers/1755217493",
+      "deezer": "https://www.deezer.com/album/218642402"
+    },
+    "front": "tom-petty-and-the-heartbreakers-tom-petty-and-the-heartbreakers-front.webp",
+    "frontSource": "apple",
+    "spine": "#4f4c4c",
+    "back": "tom-petty-and-the-heartbreakers-tom-petty-and-the-heartbreakers-back.webp"
+  },
+  "tom-petty-wildflowers-all-the-rest": {
+    "year": 2020,
+    "label": "Warner Records",
+    "format": "3×LP",
+    "group": "9ff44ce9-380e-4f88-a38c-0cb4b6ee1bbd",
+    "release": "afba7a19-c676-4822-9b3c-d46e17e10f0a",
+    "spotify": "2s7jw1QyMFXe1fsSzla8cv",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/wildflowers-all-the-rest-super-deluxe-edition/1527821823",
+      "deezer": "https://www.deezer.com/album/179257392"
+    },
+    "front": "tom-petty-wildflowers-all-the-rest-front.webp",
+    "frontSource": "apple",
+    "spine": "#9b795a"
+  },
+  "tourturetwinn-blood-love": {
+    "links": {}
+  },
+  "u-s-royalty-blue-sunshine": {
+    "year": 2013,
+    "group": "b6860bc2-ff94-4624-959c-dfc16230069c",
+    "spotify": "4Ltg5FAN9XtmjQo5lQ9LE8",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/blue-sunshine/797012105",
+      "deezer": "https://www.deezer.com/album/7332458"
+    },
+    "front": "u-s-royalty-blue-sunshine-front.webp",
+    "frontSource": "apple",
+    "spine": "#a6a6a6"
+  },
+  "warren-zevon-excitable-boy": {
+    "year": 1978,
+    "label": "Asylum Records",
+    "format": "LP",
+    "group": "e0e0cddc-1af7-33e1-a2d6-bf0ef0d1baa8",
+    "release": "b66973ae-deb4-4bc6-a232-31a5837ec21d",
+    "spotify": "03WJAI8NnJHvCNqnlLw8kg",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/excitable-boy/1048475674",
+      "deezer": "https://www.deezer.com/album/90818"
+    },
+    "front": "warren-zevon-excitable-boy-front.webp",
+    "frontSource": "apple",
+    "spine": "#773d2d",
+    "back": "warren-zevon-excitable-boy-back.webp"
+  },
+  "waxahatchee-tigers-blood": {
+    "year": 2024,
+    "label": "Anti‐",
+    "group": "f9aa9b53-2c89-4901-926e-e992f1e4d8c0",
+    "release": "eddf1481-62ef-47e6-ab22-8074b228429c",
+    "spotify": "2n3HUMLmNl0Cm2atVwWSK6",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/tigers-blood/1772253426",
+      "deezer": "https://www.deezer.com/album/523119932"
+    },
+    "front": "waxahatchee-tigers-blood-front.webp",
+    "frontSource": "apple",
+    "spine": "#8a8e7c",
+    "back": "waxahatchee-tigers-blood-back.webp"
+  },
+  "the-who-tommy": {
+    "year": 1969,
+    "label": "Decca Records",
+    "format": "2×LP",
+    "group": "0e587339-406a-3d21-8678-73e46e250379",
+    "release": "7d7fa4cf-0ce3-4f02-9485-852c568a9f17",
+    "spotify": "5cT7ee1sy2oEbFalP4asS4",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/tommy-deluxe-edition-2013-remaster/1461213097",
+      "deezer": "https://www.deezer.com/album/49469852"
+    },
+    "front": "the-who-tommy-front.webp",
+    "frontSource": "apple",
+    "spine": "#5390a3",
+    "back": "the-who-tommy-back.webp"
+  },
+  "the-wild-reeds-the-world-we-built": {
+    "year": 2017,
+    "label": "Dualtone",
+    "group": "71357225-9293-4baa-a233-29e3f217874c",
+    "release": "46fbabc0-fac9-46d8-9cfe-4df0a694b5e8",
+    "spotify": "4GrF3tys54I2lufDaNs2O4",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/the-world-we-built/1747768134",
+      "deezer": "https://www.deezer.com/album/590746552"
+    },
+    "front": "the-wild-reeds-the-world-we-built-front.webp",
+    "frontSource": "apple",
+    "spine": "#aca55f"
+  },
+  "various-artists-woodstock-music-from-the-original-soundtrack-and-more": {
+    "year": 1970,
+    "label": "Cotillion",
+    "format": "3×LP",
+    "group": "8925ff31-2245-394c-9f97-fcf844bea6a7",
+    "release": "16289f0d-af62-4134-abe0-b5191194e6a7",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/woodstock-music-from-the-original-soundtrack-and-more-vol-1/903584408"
+    },
+    "front": "various-artists-woodstock-music-from-the-original-soundtrack-and-more-front.webp",
+    "frontSource": "apple",
+    "spine": "#776965",
+    "back": "various-artists-woodstock-music-from-the-original-soundtrack-and-more-back.webp"
   }
 }
