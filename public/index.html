@@ -785,13 +785,13 @@ html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
 /* edit (Casey only) sits at the bottom right; on a phone, just above the scrubber */
 .ed,html.phone .ed{position:fixed;top:auto;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;margin:0;z-index:12}
 html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
-/* hover a record in the crate and its name comes up beside the pointer: after a short rest, on a spring; it leaves on a quick fade */
-.hv{position:fixed;z-index:5;left:0;top:0;max-width:240px;padding:9px 13px;border-radius:14px;background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--line);box-shadow:0 10px 30px #0006;font-size:13px;line-height:1.35;pointer-events:none;opacity:0;scale:.96;transform-origin:0 0;transition:opacity .12s,scale 0s .12s}
-.hv.on{opacity:1;scale:1;transition:opacity .2s,scale .45s var(--flip)}
-.hv b{display:block;font-weight:500;color:var(--fg)}
+/* hover a record in the crate and its name slides out from under its right edge: after a short rest, on a spring; it leaves on a quick fade */
+.hv{position:fixed;z-index:1;left:0;top:0;width:var(--hw,280px);font-size:20px;line-height:1.25;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
+.hv.on{opacity:1;translate:0;transition:opacity .25s,translate .55s var(--flip),top .45s var(--flip)}
+.hv b{display:block;font-weight:500;color:var(--fg);text-wrap:balance}
 .hv span{display:block;color:var(--m)}
 @media(hover:none){.hv{display:none}}
-@media(prefers-reduced-motion:reduce){.hv,.hv.on{scale:1}}
+@media(prefers-reduced-motion:reduce){.hv,.hv.on{translate:0;transition:opacity .2s}}
 </style>
 </head>
 <body>
@@ -1533,11 +1533,12 @@ function hoverPeek(){
   const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.elementFromPoint(ptr.x,ptr.y)?.closest('.rc');
   const i=el?nodes.indexOf(el):-1;
   if(i<0)return hvOff();
-  const x=Math.min(ptr.x+16,innerWidth-hv.offsetWidth-12),y=Math.min(ptr.y+20,innerHeight-hv.offsetHeight-12);
-  hv.style.translate=`${x}px ${y}px`;
+  const f=nodes[cur].firstElementChild.getBoundingClientRect(),t=el.firstElementChild.getBoundingClientRect(),room=innerWidth-f.right-72;
+  if(room<160)return hvOff();
+  hv.style.left=f.right+32+'px';hv.style.top=Math.max(t.top,f.top)+'px';hv.style.setProperty('--hw',Math.min(300,room)+'px');
   if(i===hvI)return;
   hvI=i;const r=order[i];
-  const say=()=>{hv.innerHTML=`<b></b><span></span>`;hv.firstChild.textContent=r.title;hv.lastChild.textContent=[r.artist,r.year].filter(Boolean).join(' · ');hv.classList.add('on')};
+  const say=()=>{hv.innerHTML=`<b></b><span></span>`;hv.firstChild.textContent=r.title;hv.lastChild.textContent=r.artist;hv.classList.add('on')};
   clearTimeout(hvT);if(hv.classList.contains('on'))say();else hvT=setTimeout(()=>{hvT=0;if(hvI===i){say();hoverPeek()}},300);
 }
 const queueNudge=()=>{if(!aimF)aimF=requestAnimationFrame(()=>{aimNudge();hoverPeek()})};
