@@ -545,7 +545,7 @@ body.walling .find .chip{display:none}
 .kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
 body:not(.ready) .kd,.crate.lifted~.kd,body.walling .kd,html:has(.open:not([hidden])) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* phones: the pile sits in the space between the views switch and the dial */
-html.phone:not(:has(.open:not([hidden]))) .page{padding:calc(env(safe-area-inset-top) + 70px) 0 calc(env(safe-area-inset-bottom) + 196px)}
+html.phone .page{padding:calc(env(safe-area-inset-top) + 70px) 0 calc(env(safe-area-inset-bottom) + 196px)}
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd::before{content:'';position:absolute;left:calc(50% - 50vw);width:100vw;top:-24px;bottom:calc(-82px - env(safe-area-inset-bottom));background:linear-gradient(#12121200,#121212e0 34%,#121212f2);pointer-events:none}
 .kd-d{position:absolute;left:0;right:0;bottom:0;height:var(--kh,58px);cursor:grab;touch-action:none;outline:0;pointer-events:auto;user-select:none;-webkit-user-select:none}
@@ -561,6 +561,88 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd-b{position:absolute;left:24px;right:24px;bottom:calc(var(--kh,58px) + 12px);height:18px;text-align:center;font:400 13px/18px 'Instrument Sans',sans-serif;color:#8e8e93}
 .kd-b span{position:absolute;inset:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kd-b .a{color:#c7c7cc}
+/* one place for finding: the views, search and filters share a bar at the bottom; filters open in a tray above it */
+.chip{display:none!important}
+.find,html.phone .find{flex-wrap:wrap;gap:8px;max-width:600px;margin:0 auto;padding:0 12px}
+.find .vw{position:static;translate:none;flex:none;order:1;padding:4px;box-shadow:0 14px 40px #0008;height:58px;box-sizing:border-box;align-items:center}
+.find .vw button{height:48px;width:48px;padding:0;display:grid;place-items:center}
+.find .vw svg{width:20px;height:20px;display:block}
+.find .q,html.phone .find .q{order:2;flex:1 1 0;width:auto;min-width:0}
+.fb{all:unset;pointer-events:auto;order:3;flex:none;cursor:pointer;width:58px;height:58px;box-sizing:border-box;border-radius:50%;display:grid;place-items:center;color:#d6d6d8;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 14px 40px #0008;transition:transform .4s var(--spring),background-color .2s,color .2s}
+.fb svg{width:22px;height:22px;display:block}
+.fb:hover{color:#fff}
+.fb:active{transform:scale(.96)}
+.fb:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.fb.on{background:#fff;color:#111;border-color:#fff}
+.find .vw,.fb{transition:transform .4s var(--spring),opacity .2s,width .3s var(--spring),margin .3s var(--spring),background-color .2s,color .2s}
+/* while you type, search gets the whole bar */
+.find:has(.q:focus-within) .vw,.find:has(.q:focus-within) .fb{width:0;opacity:0;margin-right:-8px;padding:0;border-width:0;overflow:hidden}
+.tray{order:0;flex:1 0 100%;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;-webkit-mask:linear-gradient(90deg,#000 85%,transparent);mask:linear-gradient(90deg,#000 85%,transparent);transform-origin:50% 100%}
+.tray[hidden]{display:none}
+.tray::-webkit-scrollbar{display:none}
+.tray button{all:unset;cursor:pointer;flex:none;height:40px;padding:0 18px;border-radius:99px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);font-size:15px;color:#d6d6d8;white-space:nowrap;display:inline-flex;align-items:center;transition:transform .4s var(--spring),background-color .2s}
+.tray button:hover{color:#fff}
+.tray button:active{transform:scale(.97)}
+.tray button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.tray button[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
+.tray:not([hidden]){animation:trayIn .35s var(--spring)}
+@keyframes trayIn{from{opacity:0;transform:translateY(8px)}}
+body.filtering .kd{bottom:calc(env(safe-area-inset-bottom) + 130px)}
+.kd{transition:opacity .4s .25s,visibility 0s .25s,bottom .35s var(--spring)}
+.wall{padding-top:calc(env(safe-area-inset-top) + 16px)}
+body.filtering .wall{padding-bottom:calc(env(safe-area-inset-bottom) + 160px)}
+html.phone .page{padding-top:calc(env(safe-area-inset-top) + 24px)}
+html.phone{--S:min(calc(100vw - 48px),calc(100svh - 300px))}
+body.filtering .crate{transition:none}
+@media(prefers-reduced-motion:reduce){.tray:not([hidden]){animation:none}}
+/* no numbers, no instructions */
+.o-count,html.phone .o-count,.dhint,html.phone .dhint{display:none!important}
+.find .q input,html.phone .find .q input{padding-right:16px}
+.find .q.has input,html.phone .find .q.has input{padding-right:70px}
+html.phone .find .vw button{width:42px;height:48px}
+html.phone .fb{width:58px}
+/* the bar steps aside while you move through the records, and comes back when you stop, scroll back, or reach for it */
+.find{transition:opacity .3s,visibility 0s,translate .5s cubic-bezier(.22,1,.36,1)}
+body.quiet .find{translate:0 calc(100% + 40px);opacity:0;pointer-events:none;transition:opacity .2s,translate .35s cubic-bezier(.4,0,.2,1)}
+body.quiet .find *{pointer-events:none}
+body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px)}
+@media(prefers-reduced-motion:reduce){body.quiet .find{translate:none}}
+/* phones keep the flipped pile: records lie toward you, backs up, under the dial and the bar */
+html.phone .crate{perspective-origin:50% calc(50% + 12px - var(--S)*.6)}
+html.phone .kd::before{display:none}
+/* swapping records: the details change, Play stays put */
+.open.in.swapping .o-info,html.phone .open.in.swapping .o-info{opacity:1;transform:none;transition:none}
+.open.in .o-info>:not(.play){transition:transform .5s var(--flip),opacity .3s}
+.open.in.swapping .o-info>:not(.play){opacity:0;transform:translateY(-12px);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .12s}
+/* arriving: the crate rises first, then the dial and the bar settle in under it */
+body.ready .find,body.ready .kd{animation:barIn .7s cubic-bezier(.22,1,.36,1) .32s backwards}
+@keyframes barIn{from{opacity:0;translate:0 18px}}
+@media(prefers-reduced-motion:reduce){body.ready .find,body.ready .kd{animation:none}}
+/* phone search: the crate steps back and a list of records rises in its place, above the keyboard; tap one to open it,
+   Go to keep the crate narrowed to what matches, Cancel to put everything back */
+.sx{display:none}
+html.phone .sx{all:unset;display:none;order:4;flex:none;height:58px;padding:0 6px 0 4px;font-size:16px;color:#fff;cursor:pointer;pointer-events:auto}
+html.phone .sx:active{opacity:.6}
+html.phone body.searching .sx{display:block}
+html.phone body.searching .find .vw,html.phone body.searching .fb{width:0;opacity:0;margin-right:-8px;padding:0;border-width:0;overflow:hidden}
+html.phone body.searching .find{bottom:calc(var(--kb,0px) + 14px + env(safe-area-inset-bottom));transition:bottom .25s cubic-bezier(.22,1,.36,1)}
+html.phone body.searching .find .q{box-shadow:none}
+html.phone .page,html.phone .kd{transition:opacity .35s,scale .5s cubic-bezier(.22,1,.36,1)}
+html.phone body.searching .page{opacity:.12;scale:.94;pointer-events:none}
+html.phone body.searching .kd{opacity:0;visibility:hidden}
+.sl{display:none}
+html.phone .sl{display:block;position:fixed;z-index:5;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 10px);bottom:calc(var(--kb,0px) + 86px + env(safe-area-inset-bottom));overflow:auto;overscroll-behavior:contain;border-radius:26px;background:#1b1b1dee;-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);border:1px solid var(--line);padding:6px;opacity:0;visibility:hidden;translate:0 14px;scale:.985;transition:opacity .15s,translate .2s,scale .2s,visibility 0s .2s,bottom .25s cubic-bezier(.22,1,.36,1)}
+html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:1;transition:opacity .25s,translate .5s cubic-bezier(.22,1,.36,1),scale .5s cubic-bezier(.22,1,.36,1),bottom .25s cubic-bezier(.22,1,.36,1)}
+.sl ul{list-style:none;margin:0;padding:0}
+.sl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border-radius:16px}
+.sl button:active{background:#ffffff14}
+.sl img,.sl .sw{width:46px;height:46px;border-radius:3px;object-fit:cover;flex:none;background:#2c2c2e}
+.sl b{display:block;font-weight:500;font-size:16px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl span span{display:block;color:var(--m);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl span{min-width:0}
+.sl h4{position:sticky;top:-6px;z-index:1;margin:0 -6px;padding:10px 14px 6px;font-size:13px;font-weight:400;color:var(--m);background:#1b1b1d}
+.sl .none{padding:18px 14px;color:var(--m)}
+@media(prefers-reduced-motion:reduce){html.phone .sl,html.phone body.searching .sl,html.phone .page{transition:none}}
 </style>
 </head>
 <body>
@@ -587,7 +669,7 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
     </form>
   </div>
   <nav class="az" id="az" aria-label="Jump to a letter"></nav>
-  <div class="kd" id="kd"><p class="kd-b" aria-hidden="true"><span class="c"></span><span class="a"></span></p><span class="kd-m" aria-hidden="true"></span><div class="kd-d" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><div class="kd-c"></div></div></div>
+  <div class="kd" id="kd"><p class="kd-b" aria-hidden="true"><span class="c"></span><span class="a"></span></p><div class="kd-d" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><div class="kd-c"></div></div></div>
   <div class="vw" role="group" aria-label="View"><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Wall</button><button type="button" data-v="canvas" aria-pressed="false">Canvas</button></div>
 </main>
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
@@ -609,7 +691,7 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
   <button class="peek next" id="nextP" tabindex="-1" aria-hidden="true"></button>
   <span class="phint prev" aria-hidden="true"></span><span class="phint next" aria-hidden="true"></span>
   <div class="o-page">
-    <button class="btn" id="close"><span>←<span class="cl"> Back to the crate</span></span></button>
+    <button class="btn" id="close"><span><svg width="18" height="18" viewBox="0 0 256 256" aria-hidden="true" style="display:block"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg><span class="cl">Close</span></span></button>
     <span class="o-count" id="ocount" aria-hidden="true"></span>
     <div class="o-grid">
       <div class="stage" id="stage" tabindex="0" role="button" aria-label="Turn the sleeve over"><div class="lift" id="lift"><div class="sleeve" id="sleeve"></div></div></div>
@@ -791,9 +873,12 @@ let PHONE=phoneQ.matches,deckS=0,dd=null;
 // the top record can also leave its track under your finger: a little give before the first one; it springs back
 const off={x:0,y:0,vx:0,vy:0};
 // where a record sits at a (fractional) distance d below the top of the pile; a flipped one tips toward you on its bottom edge until it's edge on, gone
+const FLAT=70; // how far a flipped record leans toward you: past upright, not quite flat, so its back shows
 function deckSeat(d,q){
   if(d>=0){const k=Math.min(d,4),w=Math.min(d,1,Math.max(0,4-d));return{x:q.x*5*w,y:-Math.min(k,3)*14,z:-k*3,s:1-k*.035,r:q.z*2.4*w,a:0}} // past the third, a record squares up and shrinks out of sight behind it
-  return{x:0,y:0,z:1,s:1,r:0,a:-Math.acos(1-Math.min(-d,1))*180/Math.PI}; // its top edge keeps pace with your finger
+  // a flipped record tips toward you past upright and lies down on the ones before it, back up, a hair off true; older ones sink under
+  const t=-d;if(t<=1)return{x:q.x*5*t,y:0,z:1,s:1,r:q.z*2.4*t,a:-Math.acos(1-t)*180/Math.PI*(FLAT/90)}; // its top edge keeps pace with your finger
+  const k=Math.min(t-1,6);return{x:q.x*5,y:k*4,z:1-k*.5,s:1,r:q.z*2.4,a:-(FLAT+k*1.6)};
 }
 // One spring drives the crate: pos chases aim, so a flip can be interrupted, retargeted or dragged without restarting
 let pos=0,vel=0,aim=0,raf=0;
@@ -807,7 +892,7 @@ function seat(d){
 }
 // the crate's eye level again, in pixels: iPhone Safari drops the calc() in the CSS and looks from the middle of the crate,
 // so a phone's flipped records, meant to lie edge on at eye level, show their backs as a slab under the pile
-const eye=()=>{const px=el=>el?parseFloat(getComputedStyle(el).height):0,S=px(nodes[cur]),H=px(crate);if(S&&H)crate.style.perspectiveOrigin=`50% ${(PHONE?H/2+12+S/2:H/2-S*1.13).toFixed(1)}px`};
+const eye=()=>{const px=el=>el?parseFloat(getComputedStyle(el).height):0,S=px(nodes[cur]),H=px(crate);if(S&&H)crate.style.perspectiveOrigin=`50% ${(PHONE?H/2+12-S*.6:H/2-S*1.13).toFixed(1)}px`};
 function render(){
   frontBox=null;
   if(!deckS){deckS=nodes[cur]?.offsetWidth||0;eye()}
@@ -852,7 +937,7 @@ const warmAt=i=>{if(i==null)return;for(let j=Math.max(0,i-3);j<=Math.min(order.l
 function place(rest){
   const [lo,hi]=PHONE?[-4,12]:[-6,16];
   nodes.forEach((n,j)=>{
-    const d=j-cur;let show=PHONE?d>=-2&&d<=7:d>=-3&&d<=10;
+    const d=j-cur;let show=PHONE?d>=-7&&d<=7:d>=-3&&d<=10;
     if(d>=lo&&d<=hi)warm(n,d);
     // on a phone the pile only gains or drops records at rest, out of sight: changing what's drawn mid-flip can make iOS flash the whole pile
     if(PHONE&&!rest&&show!==shown[j]&&(d<-1||d>3))show=shown[j];
@@ -1692,10 +1777,10 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     return out;
   };
   const isOn=f=>f?filt&&filt.k===f.k&&same(filt.v,f.v):!filt||filt.k==='q';
-  function drawPills(){pills.innerHTML=SETS().map((s,i)=>`<button type="button" data-i="${i}" aria-pressed="${isOn(s.f)}">${s.label}${s.n?` <small>${s.n}</small>`:''}</button>`).join('')}
+  function drawPills(){pills.innerHTML=SETS().map((s,i)=>`<button type="button" data-i="${i}" aria-pressed="${isOn(s.f)}">${s.label}</button>`).join('')}
   function draw(animate){
-    if(view==='canvas')return lay();
-    if(view!=='wall')return;
+    if(view==='canvas'){drawPills();return lay()}
+    if(view!=='wall')return drawPills();
     const before=new Map();
     if(animate&&!reduce)for(const [k,n] of keep)if(n.isConnected)before.set(k,n.getBoundingClientRect());
     tiles.style.setProperty('--cols',cols());
@@ -1928,9 +2013,83 @@ dl.addEventListener('keydown',e=>{const k=e.key;
   else if(k==='Home'||k==='End'){e.preventDefault();e.stopPropagation();user=true;const m=mode();S[m].t=k==='Home'?0:(m==='l'?nearL(lMax())*W:rMax());kick()}});
 
 // follow the crate: every change of the record in front goes through place(); a new filter goes through arrange()
+window.dialBusy=()=>!!drag||(!!raf&&user);
 const place0=place;place=function(...a){const r=place0.apply(this,a);sync();return r};
 const arrange1=arrange;arrange=function(...a){const n=arrange1.apply(this,a);if(n){build();at=cur}return n};
 build();at=cur;
+})();
+</script>
+<script>
+// One bar for finding: the views switch and a filters button sit either side of the search; filters open as a tray of pills
+// above the bar (the wall's own pills, moved), and apply to every view.
+(()=>{
+  const find=$('.find'),vwEl=$('.vw'),qf=$('#qf'),pills=$('#pills');
+  const ICON={crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
+    wall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
+    canvas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="15" y="12" width="6" height="6" rx="1"/><rect x="6" y="15" width="6" height="6" rx="1"/></svg>'};
+  $$('button',vwEl).forEach(b=>{const v=b.dataset.v;b.setAttribute('aria-label',v[0].toUpperCase()+v.slice(1));b.title=b.getAttribute('aria-label');b.innerHTML=ICON[v]});
+  find.insertBefore(vwEl,qf);
+  const fb=document.createElement('button');fb.type='button';fb.className='fb';fb.setAttribute('aria-expanded','false');fb.setAttribute('aria-controls','pills');
+  fb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sr">Filters</span>';
+  qf.after(fb);
+  pills.className='tray';pills.hidden=true;find.prepend(pills);
+  const mark=()=>{const on=!!(filt&&filt.k!=='q');fb.classList.toggle('on',on);fb.setAttribute('aria-label',on?`Filters: ${filt.v}`:'Filters')};
+  const tray=on=>{pills.hidden=!on;fb.setAttribute('aria-expanded',on);document.body.classList.toggle('filtering',on);
+    if(on){const b=$('[aria-pressed=true]',pills);b&&b.scrollIntoView({inline:'center',block:'nearest'})}};
+  fb.onclick=()=>tray(pills.hidden);
+  pills.addEventListener('keydown',e=>{if(e.key==='Escape'){tray(false);fb.focus()}});
+  addEventListener('pointerdown',e=>{if(!pills.hidden&&!e.target.closest('.find'))tray(false)});
+  const arrange2=arrange;arrange=function(...a){const n=arrange2.apply(this,a);mark();return n};
+  mark();
+  // show and hide: moving through the records tucks the bar away; stopping, scrolling back up, or reaching for it brings it back
+  const cvEl=$('#cv'),wallEl=$('#wall');let qT=0;
+  const held=()=>!pills.hidden||find.contains(document.activeElement)||!open.hidden;
+  const quiet=on=>{if(on&&held())return;document.body.classList.toggle('quiet',on)};
+  const nudge=(ms=1100)=>{if(held())return;quiet(true);clearTimeout(qT);qT=setTimeout(()=>quiet(false),ms)};
+  let at=cur;const place1=place;place=function(...a){const n=place1.apply(this,a);if(cur!==at){at=cur;if(!window.dialBusy?.()&&!document.body.classList.contains('walling'))nudge()}return n};
+  let sy=0;wallEl.addEventListener('scroll',()=>{const y=wallEl.scrollTop,d=y-sy;sy=y;clearTimeout(qT);
+    if(y<40||y+wallEl.clientHeight>wallEl.scrollHeight-40)quiet(false);else if(d>6)quiet(true);else if(d<-6)quiet(false);
+    qT=setTimeout(()=>quiet(false),1600)},{passive:true});
+  cvEl.addEventListener('pointerdown',()=>{clearTimeout(qT);quiet(true)});
+  addEventListener('pointerup',()=>{if(document.body.classList.contains('quiet')&&!cvEl.hidden){clearTimeout(qT);qT=setTimeout(()=>quiet(false),700)}});
+  cvEl.addEventListener('wheel',()=>nudge(900),{passive:true});
+  // a mouse heading for the bottom of the window brings it straight back
+  addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&e.clientY>innerHeight-150&&document.body.classList.contains('quiet')){clearTimeout(qT);quiet(false)}},{passive:true});
+  addEventListener('keydown',e=>{if(e.key==='/'||e.key==='Tab'){clearTimeout(qT);quiet(false)}});
+  new MutationObserver(()=>{if(!open.hidden){clearTimeout(qT);quiet(false)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
+})();
+</script>
+<script>
+// Phone search: focusing the search opens a list of every record above the keyboard, narrowing as you type.
+(()=>{
+  const q=$('#q'),qf=$('#qf'),body=document.body,root=document.documentElement;
+  const sl=document.createElement('div');sl.className='sl';sl.id='sl';sl.setAttribute('role','listbox');sl.setAttribute('aria-label','Records');document.body.append(sl);
+  const sx=document.createElement('button');sx.type='button';sx.className='sx';sx.textContent='Cancel';qf.parentNode.insertBefore(sx,qf.nextSibling.nextSibling);
+  const on=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
+  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<img src="${img(r.front)}" alt="" loading="lazy" decoding="async">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
+  function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
+    if(!rs.length){sl.innerHTML='<p class="none">Not in the crate</p>';return}
+    if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;return}
+    let L='',h='';for(const r of rs){const l=letter(r);if(l!==L){if(L)h+='</ul>';L=l;h+=`<h4>${l}</h4><ul>`}h+=row(r)}sl.innerHTML=h+'</ul>'}
+  let open1=false;
+  function enter(){if(open1||!on())return;open1=true;body.classList.add('searching');list();sl.scrollTop=0}
+  function leave(keep){if(!open1)return;open1=false;body.classList.remove('searching');if(!keep){q.value='';qSync();if(filt?.k==='q')arrange(null)}q.blur()}
+  q.addEventListener('focus',enter);
+  // while the list is up, typing narrows the list, not the crate
+  addEventListener('input',e=>{if(open1&&e.target===q){e.stopImmediatePropagation();qSync();list()}},true);
+  // Go keeps the crate narrowed to what matches
+  addEventListener('submit',e=>{if(open1&&e.target===qf){e.preventDefault();e.stopImmediatePropagation();const v=q.value.trim();
+    if(v&&all().some(r=>matchQ(r,v))){arrange({k:'q',v});leave(true)}else if(!v)leave()}},true);
+  addEventListener('keydown',e=>{if(open1&&e.key==='Escape'&&e.target===q){e.stopImmediatePropagation();leave()}},true);
+  sx.onclick=()=>leave();
+  // a record from the list opens straight from the whole crate
+  sl.addEventListener('click',e=>{const b=e.target.closest('[data-slug]');if(!b)return;const r=RECORDS.find(x=>x.slug===b.dataset.slug);
+    leave();if(filt)arrange(null);const j=order.indexOf(r);if(j<0)return;go(j,true);requestAnimationFrame(()=>openRecord(false))});
+  // scrolling the list puts the keyboard away, so you can see more of it
+  sl.addEventListener('touchmove',()=>{if(document.activeElement===q)q.blur()},{passive:true});
+  // the keyboard: keep the bar and the list just above it
+  const vv=window.visualViewport;
+  if(vv){const fit=()=>{const kb=Math.max(0,innerHeight-vv.height-vv.offsetTop);root.style.setProperty('--kb',kb.toFixed(0)+'px')};vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit)}
 })();
 </script>
 </body>
