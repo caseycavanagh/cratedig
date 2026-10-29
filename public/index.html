@@ -540,6 +540,24 @@ body.walling .find .chip{display:none}
 .cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--line);color:#d6d6d8;font-size:14px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
 @media (min-width:700px){.wall{padding-left:28px;padding-right:28px}.wall .pills{margin:0 -28px 18px;padding:2px 28px 4px}.tiles{gap:8px}}
 @media(prefers-reduced-motion:reduce){.vw,.tile,.wall .pills button{transition:none}}
+/* the dial, in place of the A–Z rail: letters; slide up on it for every record, down for letters again */
+.az{display:none}
+.kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
+body:not(.ready) .kd,.crate.lifted~.kd,body.walling .kd,html:has(.open:not([hidden])) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+.kd::before{content:'';position:absolute;left:calc(50% - 50vw);width:100vw;top:-24px;bottom:calc(-82px - env(safe-area-inset-bottom));background:linear-gradient(#12121200,#121212e0 34%,#121212f2);pointer-events:none}
+.kd-d{position:absolute;left:0;right:0;bottom:0;height:var(--kh,58px);cursor:grab;touch-action:none;outline:0;pointer-events:auto;user-select:none;-webkit-user-select:none}
+.kd-d:active{cursor:grabbing}
+.kd-d:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:14px}
+.kd-c{position:absolute;inset:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
+.kd-c>*{position:absolute;left:50%;bottom:0;will-change:transform}
+.kd-l{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font:500 18px/24px 'Instrument Sans',sans-serif;color:#6c6c71;transform-origin:50% 70%}
+.kd-l.on{color:#fff}
+.kd-t{width:1px;height:12px;margin-left:-.5px;background:#5f5f64;transform-origin:50% 100%}
+.kd-t.on{background:#fff}
+.kd-m{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:#fff;bottom:calc(var(--kh,58px) - 4px);opacity:calc(1 - var(--kz,0))}
+.kd-b{position:absolute;left:24px;right:24px;bottom:calc(var(--kh,58px) + 12px);height:18px;text-align:center;font:400 13px/18px 'Instrument Sans',sans-serif;color:#8e8e93}
+.kd-b span{position:absolute;inset:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kd-b .a{color:#c7c7cc}
 </style>
 </head>
 <body>
@@ -566,6 +584,7 @@ body.walling .find .chip{display:none}
     </form>
   </div>
   <nav class="az" id="az" aria-label="Jump to a letter"></nav>
+  <div class="kd" id="kd"><p class="kd-b" aria-hidden="true"><span class="c"></span><span class="a"></span></p><span class="kd-m" aria-hidden="true"></span><div class="kd-d" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><div class="kd-c"></div></div></div>
   <div class="vw" role="group" aria-label="View"><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Wall</button><button type="button" data-v="canvas" aria-pressed="false">Canvas</button></div>
 </main>
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
@@ -1797,6 +1816,110 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   // wait for the crate to fill, then open the view you used last
   const ready=new MutationObserver(()=>{if(!document.body.classList.contains('ready'))return;ready.disconnect();let v='crate';try{v=localStorage.getItem('records-view')||'crate'}catch{}if((v==='wall'||v==='canvas')&&open.hidden)setView(v);else drawPills()});
   ready.observe(document.body,{attributes:true,attributeFilter:['class']});
+})();
+</script>
+<script>
+// The dial (from vinyl-dial.html), driving the crate. Letter depth jumps to a letter's first record; record depth steps one record at a time.
+// Two positions in px (letters, records) and a depth z (0 letters, 1 records), each a spring. The crate keeps its own motion.
+(()=>{
+const kd=$('#kd'),dl=$('.kd-d',kd),clip=$('.kd-c',kd),labC=$('.kd-b .c',kd),labA=$('.kd-b .a',kd);
+const W=36,WR=12,H0=58,H1=78,lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const buzz=ms=>{try{navigator.vibrate?.(ms)}catch{}};
+let AZ=[],FIRST={},CNT={},X=[],LT=[],TH=[],at=-1;
+const has=L=>FIRST[L]!=null,slot=i=>AZ.indexOf(letter(order[i]));
+const S={l:{x:0,v:0,t:0},r:{x:0,v:0,t:0},z:{x:0,v:0,t:0}},K={l:[260,33],r:[260,33],z:[320,37]};
+let raf=0,drag=null,user=false,lastL=-1,lastR=-1,acc=0;
+const mode=()=>S.z.x>=.5?'r':'l',lMax=()=>(AZ.length-1)*W,rMax=()=>X[X.length-1]||0;
+const nearL=px=>{const n=AZ.length,k=clamp(Math.round(px/W),0,n-1);if(has(AZ[k]))return k;for(let s=1;s<n;s++){if(k+s<n&&has(AZ[k+s]))return k+s;if(k-s>=0&&has(AZ[k-s]))return k-s}return k};
+const nearR=px=>{let b=0;for(let i=1;i<X.length;i++)if(Math.abs(X[i]-px)<Math.abs(X[b]-px))b=i;return b};
+const soft=(x,a,b)=>x<a?a-60*(1-Math.exp((x-a)/60)):x>b?b+60*(1-Math.exp((b-x)/60)):x;
+const toLetter=L=>{if(has(L)&&letter(order[cur])!==L)jump(FIRST[L])};
+const toRecord=i=>{if(i!==cur&&open.hidden)go(i)};
+
+function build(){
+  AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];FIRST={};CNT={};
+  order.forEach((r,i)=>{const L=letter(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
+    X[i]=i?X[i-1]+WR+(L!==letter(order[i-1])?12:r.artist!==order[i-1].artist?4:0):0});
+  X.length=order.length;if(has('#'))AZ.push('#');
+  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l" data-k="${j}">${L}</span>`).join('');
+  LT=[...clip.querySelectorAll('.kd-l')];TH=[...clip.querySelectorAll('.kd-t')];
+  at=-1;rest('l');rest('r');render();label();
+}
+function render(){
+  const z=clamp(S.z.x,0,1),e=z*z*(3-2*z),cL=S.l.x,cR=S.r.x,lp=cL/W,half=kd.clientWidth/2+30,curL=letter(order[cur]);
+  kd.style.setProperty('--kh',lerp(H0,H1,e)+'px');kd.style.setProperty('--kz',e);
+  LT.forEach((s,j)=>{const L=AZ[j],ok=has(L),x=lerp(j*W-cL,ok?X[FIRST[L]]-cR:j*W-cL,e),d=Math.abs(j-lp);
+    s.style.transform=`translate(${x}px,${-lerp(17,44,e)}px) scale(${lerp(1+.35*Math.max(0,1-d),.72,e)})`;
+    s.style.opacity=ok?1:.35*(1-e);s.style.visibility=Math.abs(x)>half?'hidden':'';s.classList.toggle('on',e<.5?d<.5:L===curL)});
+  TH.forEach((s,i)=>{if(e<.01){s.style.visibility='hidden';return}
+    const x=lerp(slot(i)*W-cL,X[i]-cR,e);if(Math.abs(x)>half){s.style.visibility='hidden';return}
+    const near=Math.max(0,1-Math.abs(X[i]-cR)/WR);
+    s.style.visibility='';s.style.opacity=clamp((e-.3)/.5,0,1);s.style.transform=`translate(${x}px,-14px) scaleY(${lerp(.3,1+.8*near,e)})`;s.classList.toggle('on',i===cur&&e>.5)});
+  if(mode()==='l'){const k=clamp(Math.round(cL/W),0,AZ.length-1);if(k!==lastL){lastL=k;if(user&&has(AZ[k])){toLetter(AZ[k]);buzz(4)}}}
+  else{const k=nearR(cR);if(k!==lastR){lastR=k;if(user){toRecord(k);buzz(2)}}}
+  labC.style.opacity=clamp(1-e*1.8,0,1);labC.style.transform=`translateY(${-8*e}px)`;labA.style.opacity=clamp(e*1.8-.8,0,1);labA.style.transform=`translateY(${8*(1-e)}px)`;
+}
+function label(){const r=order[cur];if(!r)return;const L=letter(r),n=CNT[L],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
+  labC.textContent=`${n} record${n>1?'s':''} in ${L}`;labA.textContent=same.length>1?`${r.artist}  ·  ${k} of ${same.length}`:r.artist;
+  dl.setAttribute('aria-valuetext',mode()==='l'?`${L}, ${n} record${n>1?'s':''}`:`${r.title}, ${r.artist}`)}
+function loop(ts){
+  const dt=Math.min(.032,(ts-(loop.t||ts))/1000||.016);loop.t=ts;let busy=!!drag;
+  for(const k of ['l','r','z']){if(drag&&(k==='z'?drag.v:k===drag.m))continue;const o=S[k],[st,da]=K[k];
+    if(reduce){o.x=o.t;o.v=0;continue}
+    o.v+=(-st*(o.x-o.t)-da*o.v)*dt;o.x+=o.v*dt;
+    if(Math.abs(o.x-o.t)<(k==='z'?.001:.05)&&Math.abs(o.v)<(k==='z'?.01:1)){o.x=o.t;o.v=0}else busy=true}
+  render();if(busy)raf=requestAnimationFrame(loop);else{raf=0;loop.t=0;settled()}
+}
+const kick=()=>{if(!raf)raf=requestAnimationFrame(loop)};
+function settled(){if(!user)return;user=false;
+  if(mode()==='l')toLetter(AZ[nearL(S.l.x)]);else toRecord(nearR(S.r.x));rest(mode()==='l'?'r':'l');label()}
+// the depth you're not in waits on the record in front, so changing depth never jumps
+function rest(m){const o=S[m];o.x=o.t=m==='r'?(X[cur]||0):Math.max(0,slot(cur))*W;o.v=0;if(m==='r')lastR=cur;else lastL=Math.round(o.x/W)}
+// the crate moved on its own (wheel, keys, drag): follow it without ticking through the records in between
+function sync(){if(cur===at||!order.length)return;at=cur;if(drag||(raf&&user)){label();return}
+  S.l.t=Math.max(0,slot(cur))*W;S.r.t=X[cur];lastL=Math.round(S.l.t/W);lastR=cur;if(reduce){S.l.x=S.l.t;S.r.x=S.r.t}kick();label()}
+function setDepth(m){const t=m==='r'?1:0;if(S.z.t===t)return;S.z.t=t;rest(m);buzz(10);kick();setTimeout(label,0)}
+
+dl.addEventListener('pointerdown',e=>{cancelAnimationFrame(raf);raf=0;loop.t=0;user=true;const m=mode();S[m].t=S[m].x;S[m].v=0;
+  drag={x:e.clientX,y:e.clientY,lx:e.clientX,m,z0:S.z.x,v:false,far:0,h:[[e.timeStamp,S[m].x]],vy:[[e.timeStamp,e.clientY]]};
+  try{dl.setPointerCapture(e.pointerId)}catch{}kick()});
+dl.addEventListener('pointermove',e=>{if(!drag)return;const d=drag;
+  d.far=Math.max(d.far,Math.hypot(e.clientX-d.x,e.clientY-d.y));
+  // up and down change depth once the finger clearly means it; the depth follows the finger, with a little give past either end
+  const dy=d.y-e.clientY;
+  if(!d.v&&Math.abs(dy)>12&&Math.abs(dy)>Math.abs(e.clientX-d.x)*.7){d.v=true;d.y=e.clientY;d.z0=S.z.x;rest(d.m==='l'?'r':'l')}
+  if(d.v){const z=d.z0+(d.y-e.clientY)/70;S.z.x=S.z.t=z<0?-.15*(1-Math.exp(z/.15)):z>1?1+.15*(1-Math.exp((1-z)/.15)):z;S.z.v=0;
+    d.vy.push([e.timeStamp,e.clientY]);while(d.vy.length>2&&e.timeStamp-d.vy[0][0]>90)d.vy.shift();
+    const m=mode();if(m!==d.m){d.m=m;rest(m);S.l.v=S.r.v=0;d.h=[[e.timeStamp,S[m].x]];buzz(10);label()}}
+  const dx=e.clientX-d.lx;d.lx=e.clientX;const o=S[d.m];
+  o.x=o.t=soft(o.x-dx,0,d.m==='l'?lMax():rMax());
+  d.h.push([e.timeStamp,o.x]);while(d.h.length>2&&e.timeStamp-d.h[0][0]>90)d.h.shift();
+});
+const up=e=>{if(!drag)return;const d=drag;drag=null;const m=d.m,o=S[m];
+  if(d.far<6){const t=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.dataset?.k!=null&&n.closest?.('.kd'));
+    if(t&&m==='l'&&t.classList.contains('kd-l')&&has(AZ[+t.dataset.k])){o.t=+t.dataset.k*W;kick();return}
+    if(t&&m==='r'&&t.classList.contains('kd-t')){o.t=X[+t.dataset.k];kick();return}}
+  const [t0,x0]=d.h[0],v=(o.x-x0)/Math.max(16,e.timeStamp-t0);
+  o.v=v*1000;const proj=o.x+v*(m==='l'?260:320);
+  o.t=m==='l'?nearL(proj)*W:X[nearR(clamp(proj,0,rMax()))];
+  if(d.v){const [ty,y0]=d.vy[0],vy=(y0-e.clientY)/Math.max(16,e.timeStamp-ty),t=vy>.35?1:vy<-.35?0:S.z.x>=.5?1:0;
+    S.z.t=t;S.z.v=vy*1000/70;if((t===1)!==(m==='r')){setDepth(t?'r':'l');return}}
+  kick()};
+dl.addEventListener('pointerup',up);dl.addEventListener('pointercancel',up);
+dl.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();acc+=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(Math.abs(acc)>30){step(Math.sign(acc));acc=0}},{passive:false});
+function step(dir){user=true;const m=mode(),o=S[m];
+  if(m==='l'){let k=Math.round(o.t/W)+dir;while(k>=0&&k<AZ.length&&!has(AZ[k]))k+=dir;if(k<0||k>=AZ.length)return;o.t=k*W}
+  else o.t=X[clamp(nearR(o.t)+dir,0,order.length-1)];
+  kick()}
+dl.addEventListener('keydown',e=>{const k=e.key;
+  if(k==='ArrowLeft'||k==='ArrowRight'){e.preventDefault();e.stopPropagation();step(k==='ArrowLeft'?-1:1)}
+  else if(k==='ArrowUp'||k==='ArrowDown'){e.preventDefault();e.stopPropagation();setDepth(k==='ArrowUp'?'r':'l')}
+  else if(k==='Home'||k==='End'){e.preventDefault();e.stopPropagation();user=true;const m=mode();S[m].t=k==='Home'?0:(m==='l'?nearL(lMax())*W:rMax());kick()}});
+
+// follow the crate: every change of the record in front goes through place(); a new filter goes through arrange()
+const place0=place;place=function(...a){const r=place0.apply(this,a);sync();return r};
+const arrange1=arrange;arrange=function(...a){const n=arrange1.apply(this,a);if(n){build();at=cur}return n};
+build();at=cur;
 })();
 </script>
 </body>
