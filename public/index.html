@@ -3,247 +3,143 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#141414">
+<meta name="theme-color" content="#121212">
 <title>Records</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-/* A thought experiment: the records, dressed like the Cosmos app. Dark only, white sans type, pills and circles,
-   masonry grids, collection cards, a floating nav. Data comes from vinyl-prototype.html (RECORDS) and vinyl/covers.json. */
+/* A thought experiment after the Cosmos app: not its screens, its feel. One quiet dark wall of covers, white type,
+   pills and circles that float over it, and a record that lifts out on a spring. Data comes from vinyl-prototype.html
+   (RECORDS), vinyl/covers.json and Casey's saved edits. */
 @font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
-:root{--bg:#141414;--fg:#fff;--m:#8e8e93;--m2:#5f5f64;--card:#222224;--card2:#2c2c2e;--line:rgba(255,255,255,.1);--glass:rgba(34,34,36,.72);
-  --spring:cubic-bezier(.2,1.25,.35,1);--ease:cubic-bezier(.25,.8,.3,1);--pad:16px;--gap:12px;--safe:env(safe-area-inset-bottom,0px)}
+:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--m2:#626267;--card:#1f1f21;--line:rgba(255,255,255,.12);--glass:rgba(30,30,32,.7);
+  --spring:cubic-bezier(.2,1.25,.35,1);--ease:cubic-bezier(.25,.8,.3,1);--pad:16px;--gap:6px;--safe:env(safe-area-inset-bottom,0px)}
 *,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
-html{background:var(--bg);color-scheme:dark;overscroll-behavior-y:none}
+html{background:var(--bg);color-scheme:dark}
 body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.35;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;min-height:100svh;overflow-x:hidden}
+body.held{overflow:hidden}
 button,input{font:inherit;color:inherit;background:none;border:0}
-button,a{-webkit-tap-highlight-color:transparent}
+button,a{-webkit-tap-highlight-color:transparent;cursor:pointer}
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid #fff;outline-offset:3px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
 svg{display:block}
+.circ,.pill,.chip,.tile{transition:transform .5s var(--spring),background-color .2s,color .2s,opacity .2s}
+.circ:active{transform:scale(.92)}
+.pill:active,.chip:active,.tile:active{transform:scale(.97)}
 
-/* pressables squish while held */
-.circ,.pill,.tile,.coll,.chip,.nav button,.row,.tag{transition:transform .5s var(--spring),background-color .2s,color .2s}
-.circ:active,.nav button:active{transform:scale(.92)}
-.pill:active,.tile:active,.coll:active,.chip:active,.row:active,.tag:active{transform:scale(.97)}
+/* head: a name, a count, and the ways in as a row of pills */
+header{max-width:1400px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) var(--pad) 18px}
+h1{font-size:clamp(34px,6vw,56px);font-weight:500;letter-spacing:-.025em;line-height:1}
+h1 span{color:var(--m2)}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:22px calc(var(--pad) * -1) 0;padding:2px var(--pad) 4px;scroll-padding:var(--pad)}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;height:40px;padding:0 18px;border-radius:99px;border:1px solid var(--line);font-size:15px;color:#cfcfd2;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.chip:hover{background:var(--card)}
+.chip[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
+.chip small{font-size:13px;opacity:.55}
 
-/* circular icon buttons */
-.circ{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);background:rgba(20,20,20,.55);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);cursor:pointer;flex:none}
-.circ:hover{background:var(--card)}
-.circ svg{width:24px;height:24px}
-.bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:max(12px,env(safe-area-inset-top)) var(--pad) 12px;background:linear-gradient(var(--bg) 60%,rgba(20,20,20,0))}
-.bar .sp{flex:1}
-.bar.float{position:fixed;left:0;right:0;background:none;pointer-events:none}
-.bar.float>*{pointer-events:auto}
-
-/* text tabs, For You / Following style */
-.tabs{flex:1;display:flex;justify-content:center;gap:28px}
-.tabs button{font-size:22px;font-weight:500;color:var(--m2);cursor:pointer;letter-spacing:-.01em}
-.tabs button[aria-selected=true]{color:var(--fg)}
-.tabs button:hover{color:#bbb}.tabs button[aria-selected=true]:hover{color:var(--fg)}
-/* underlined tabs, Elements / Products / Collections style */
-.utabs{display:flex;border-bottom:1px solid var(--line);margin:0 0 var(--pad)}
-.utabs button{flex:1;padding:14px 4px 16px;font-size:18px;font-weight:500;color:var(--m2);cursor:pointer;position:relative;display:flex;gap:8px;justify-content:center;align-items:center}
-.utabs button[aria-selected=true]{color:var(--fg)}
-.utabs button[aria-selected=true]::after{content:'';position:absolute;left:var(--pad);right:var(--pad);bottom:-1px;height:2px;background:#fff;border-radius:2px}
-.utabs .n{font-size:13px;color:var(--m);border:1px solid var(--line);border-radius:99px;padding:1px 8px}
-
-/* pills */
-.pill{height:52px;padding:0 26px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:500;cursor:pointer;border:1px solid var(--line)}
-.pill.white{background:#fff;color:#111;border-color:#fff}
-.pill.white:hover{background:#e9e9ea}
-.pill:not(.white):hover{background:var(--card)}
-.pill svg{width:18px;height:18px}
-
-/* masonry */
-main{max-width:1240px;margin:0 auto;padding:0 var(--pad) calc(120px + var(--safe))}
-.mason{display:flex;gap:var(--gap);align-items:flex-start}
-.mason .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--gap)}
-.mason .lag{aspect-ratio:1/.42;margin-bottom:calc(var(--gap) * -1)}
-.tile{display:block;position:relative;border-radius:4px;overflow:hidden;background:var(--card);cursor:pointer;aspect-ratio:1}
-.tile img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s var(--ease)}
+/* the wall: covers of two sizes, packed tight */
+main{max-width:1400px;margin:0 auto;padding:0 var(--pad) calc(130px + var(--safe))}
+.wall{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));grid-auto-flow:row dense;gap:var(--gap)}
+.tile{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--card);display:block}
+.tile.big{grid-column:span 2;grid-row:span 2}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s var(--ease)}
 .tile img.in{opacity:1}
 .tile .plain{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:15px;line-height:1.15}
-.tile .plain small{display:block;font-weight:400;opacity:.7;margin-top:2px}
-.tile .tw{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.45);display:grid;place-items:center;opacity:.9}
-.tile .tw svg{width:14px;height:14px}
-.cap{padding:8px 2px 4px}
-.cap b{display:block;font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cap span{display:block;color:var(--m);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cap.split{display:flex;justify-content:space-between;gap:8px}
+.tile .plain small{font-weight:400;opacity:.7;margin-top:2px}
+.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));font-size:14px;line-height:1.2;opacity:0;transition:opacity .2s}
+.tile .cap b{display:block;font-weight:500}.tile .cap span{color:#c9c9cc}
+@media (hover:hover){.tile:hover .cap,.tile:focus-visible .cap{opacity:1}}
+.none{color:var(--m);padding:60px 0;text-align:center;font-size:18px}
 
-/* page heads */
-.head{text-align:center;padding:12px 0 32px}
-.head h1{font-size:clamp(32px,8vw,44px);font-weight:500;letter-spacing:-.02em;line-height:1.05}
-.head p{color:var(--m);font-size:18px;margin-top:8px}
+/* floating search and shuffle */
+.float{position:fixed;left:0;right:0;bottom:calc(16px + var(--safe));z-index:20;display:flex;justify-content:center;gap:10px;padding:0 var(--pad);pointer-events:none}
+.float>*{pointer-events:auto}
+.find{flex:0 1 460px;min-width:0;height:60px;border-radius:99px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);display:flex;align-items:center;gap:12px;padding:0 10px 0 22px;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.find svg{width:22px;height:22px;color:#a5a5aa;flex:none}
+.find input{flex:1;min-width:0;height:100%;font-size:18px;outline:none}
+.find input::placeholder{color:#7d7d82}
+.find input::-webkit-search-cancel-button{display:none}
+.find .clr{width:28px;height:28px;border-radius:50%;background:#6c6c71;display:grid;place-items:center;flex:none}
+.find .clr svg{width:14px;height:14px;color:#1b1b1d}
+.find .clr[hidden]{display:none}
+.circ{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:0 14px 40px rgba(0,0,0,.5);flex:none}
+.circ:hover{background:#2a2a2d}
+.circ svg{width:24px;height:24px}
 
-/* collection cards */
-.colls{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:24px var(--pad)}
-.coll{display:block;cursor:pointer}
-.coll .mo{aspect-ratio:1;border-radius:22px;overflow:hidden;background:var(--card);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
-.coll .mo.one{grid-template-columns:1fr;grid-template-rows:1fr}
-.coll .mo img{width:100%;height:100%;object-fit:cover;display:block}
-.coll h3{font-size:20px;font-weight:500;margin-top:12px;letter-spacing:-.01em;line-height:1.15}
-.coll p{color:var(--m);font-size:17px;margin-top:2px}
-
-/* profile */
-.prof{display:flex;align-items:center;gap:22px;padding:8px 0 24px}
-.ava{width:clamp(96px,26vw,160px);aspect-ratio:1;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 30%,#fbb2c9,#f2788a 70%,#ea6a7a);box-shadow:inset 0 -10px 30px rgba(0,0,0,.08)}
-.ava.sm{width:30px;box-shadow:none}
-.prof h1{font-size:clamp(28px,7.6vw,44px);font-weight:500;letter-spacing:-.02em;line-height:1.05}
-.prof .h{color:var(--m);font-size:clamp(17px,4.4vw,22px);margin-top:4px}
-.stats{display:flex;align-items:center;gap:12px;color:var(--m);font-size:clamp(17px,4.6vw,20px);padding-bottom:24px}
-.stats b{color:var(--fg);font-weight:400}
-.faces{display:flex}.faces img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--bg);margin-left:-10px}.faces img:first-child{margin-left:0}
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);padding-bottom:16px}
-.acts .pill{width:100%}
-
-/* record view */
-.rec{max-width:1080px;margin:0 auto;display:grid;gap:28px 48px;padding:0 var(--pad) 40px;grid-template-columns:minmax(0,1fr)}
-@media (min-width:900px){.rec{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:center;padding-top:8px}}
-.flip{perspective:1600px;cursor:pointer;max-width:560px;width:100%;margin:0 auto;display:block}
+/* a record, lifted out over the wall */
+.open{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:max(80px,env(safe-area-inset-top)) var(--pad) calc(24px + var(--safe));overflow-y:auto;visibility:hidden}
+.open.on{visibility:visible}
+.open::before{content:'';position:fixed;inset:0;background:rgba(12,12,12,.78);-webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);opacity:0;transition:opacity .25s}
+.open.on::before{opacity:1}
+.open .x{position:fixed;top:max(16px,env(safe-area-inset-top));right:var(--pad);z-index:2}
+.open .nav{position:fixed;top:50%;z-index:2;margin-top:-30px}
+.open .prev{left:var(--pad)}.open .next{right:var(--pad)}
+@media (max-width:899px){.open .nav{display:none}}
+.rec{position:relative;width:min(100%,1040px);display:grid;gap:24px 56px;align-items:center;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.rec{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);padding:0 64px}}
+.flip{display:block;width:100%;max-width:min(560px,62vh);margin:0 auto;perspective:1600px}
 .flip .card{position:relative;aspect-ratio:1;transform-style:preserve-3d;transition:transform .8s var(--spring)}
 .flip.back .card{transform:rotateY(180deg)}
-.flip .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px;overflow:hidden;background:var(--card);box-shadow:0 30px 60px -20px rgba(0,0,0,.7)}
+.flip .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px;overflow:hidden;background:var(--card);box-shadow:0 40px 80px -24px rgba(0,0,0,.8)}
 .flip .face img{width:100%;height:100%;object-fit:cover;display:block}
 .flip .face.b{transform:rotateY(180deg)}
 .flip .plain{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;font-size:28px;font-weight:500;line-height:1.1}
 .flip .plain small{font-size:18px;font-weight:400;opacity:.7;margin-top:6px}
-.turn{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--m);font-size:14px;margin-top:14px}
-.turn svg{width:16px;height:16px}
-.info h1{font-size:clamp(30px,7vw,42px);font-weight:500;letter-spacing:-.02em;line-height:1.08}
-.info .by{display:inline-block;font-size:20px;color:var(--m);margin-top:8px;cursor:pointer}
+.info h2{font-size:clamp(28px,5vw,40px);font-weight:500;letter-spacing:-.02em;line-height:1.08}
+.info .by{display:inline-block;font-size:19px;color:var(--m);margin-top:8px}
 .info .by:hover{color:var(--fg)}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 28px}
-.tag{height:38px;padding:0 16px;border-radius:99px;border:1px solid var(--line);display:inline-flex;align-items:center;font-size:15px;color:#d6d6d8;cursor:pointer}
-a.tag:hover,button.tag:hover{background:var(--card)}
-span.tag{cursor:default}
-.playrow{display:flex;gap:10px}
-.playrow .pill.white{flex:1;max-width:340px}
-.more{max-width:1240px;margin:0 auto;padding:24px var(--pad) calc(120px + var(--safe))}
-.more h2{font-size:22px;font-weight:500;margin:0 0 16px;letter-spacing:-.01em}
-
-/* floating nav */
-.dock{position:fixed;left:0;right:0;bottom:calc(16px + var(--safe));z-index:30;display:flex;justify-content:center;gap:10px;padding:0 var(--pad);pointer-events:none;transition:transform .5s var(--spring),opacity .2s}
-.dock.off{transform:translateY(140%);opacity:0}
-.nav,.dock .circ{pointer-events:auto}
-.nav{display:flex;align-items:center;gap:6px;height:72px;padding:0 10px;border-radius:99px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 12px 40px rgba(0,0,0,.45);flex:0 1 420px;justify-content:space-around}
-.nav button{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#a5a5aa;cursor:pointer}
-.nav button:hover{color:#fff}
-.nav button[aria-current=page]{color:#fff}
-.nav svg{width:30px;height:30px}
-.nav .me{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbb2c9,#f2788a 70%,#ea6a7a)}
-.nav button[aria-current=page] .me{box-shadow:0 0 0 3px var(--bg),0 0 0 5px #fff}
-.dock>.circ{width:72px;height:72px;background:var(--glass);box-shadow:0 12px 40px rgba(0,0,0,.45)}
-.dock>.circ svg{width:30px;height:30px}
-
-/* search */
-.find{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--pad) calc(16px + var(--safe));max-width:720px;margin:0 auto}
-.find h1{font-size:clamp(34px,9vw,48px);font-weight:500;letter-spacing:-.02em;line-height:1.08;margin-bottom:24px}
-.chip{display:flex;align-items:center;gap:14px;padding:10px 22px 10px 10px;border:1px solid var(--line);border-radius:18px;width:max-content;max-width:100%;margin-bottom:10px;cursor:pointer;text-align:left}
-.chip:hover{background:var(--card)}
-.chip img,.chip .sw{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:none}
-.chip b{display:block;font-weight:500;font-size:18px}
-.chip span{display:block;color:var(--m);font-size:16px}
-.sbar{display:flex;gap:10px;align-items:center;margin-top:14px}
-.sfield{flex:1;height:72px;border-radius:99px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);display:flex;align-items:center;gap:14px;padding:0 20px 0 26px;box-shadow:0 12px 40px rgba(0,0,0,.4)}
-.sfield svg{width:26px;height:26px;color:#a5a5aa;flex:none}
-.sfield input::-webkit-search-cancel-button{display:none}
-.sfield{min-width:0}
-.sfield input{flex:1;min-width:0;height:100%;font-size:20px;outline:none}
-.sfield input::placeholder{color:#7d7d82}
-.sfield .clr{width:28px;height:28px;border-radius:50%;background:#7d7d82;color:#222;display:grid;place-items:center;cursor:pointer}
-.sfield .clr svg{width:14px;height:14px;color:#222}
-.sbar .circ{width:72px;height:72px}
-.sbar .circ svg{width:30px;height:30px}
-.found .sbar{position:fixed;left:0;right:0;bottom:calc(16px + var(--safe));padding:0 var(--pad);max-width:720px;margin:0 auto;z-index:30}
-.empty{text-align:center;padding:80px 20px;color:var(--m)}
-.empty b{display:block;color:var(--fg);font-size:22px;font-weight:500;margin-bottom:6px}
-.arts{display:grid;gap:4px}
-.arts .row{display:flex;align-items:center;gap:14px;padding:10px;border-radius:16px;cursor:pointer;text-align:left;width:100%}
-.arts .row:hover{background:var(--card)}
-.arts img,.arts .sw{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none}
-.arts b{display:block;font-weight:500;font-size:18px}.arts span{color:var(--m)}
-
-/* sheets */
-.scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);opacity:0;transition:opacity .25s}
-.scrim.on{opacity:1}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;margin:0 auto;max-width:560px;background:#1e1e20;border-radius:36px 36px 0 0;padding:12px var(--pad) calc(24px + var(--safe));transform:translateY(105%);transition:transform .55s var(--spring);border:1px solid var(--line);border-bottom:0}
-.sheet.on{transform:none}
-.sheet .grab{width:42px;height:5px;border-radius:9px;background:#48484c;margin:0 auto 18px}
-.sheet h2{font-size:15px;color:var(--m);font-weight:400;margin:0 8px 10px}
-.row{display:flex;align-items:center;gap:14px;width:100%;min-height:68px;padding:0 24px;border-radius:22px;background:var(--card2);font-size:18px;font-weight:500;cursor:pointer;text-align:left;margin-top:8px}
-.row:hover{background:#353538}
-.row .end{margin-left:auto;color:var(--m);display:grid}
-.row svg{width:22px;height:22px}
-.peek{position:fixed;left:0;right:0;bottom:0;z-index:25;max-width:560px;margin:0 auto;padding:10px var(--pad) calc(16px + var(--safe));background:#1e1e20;border-radius:36px 36px 0 0;border:1px solid var(--line);border-bottom:0;transition:transform .55s var(--spring)}
-.peek .grab{width:42px;height:5px;border-radius:9px;background:#48484c;margin:0 auto 12px}
-.peek .row{margin:0}
-
-/* canvas */
-.canvas{position:fixed;inset:0;overflow:hidden;cursor:grab;touch-action:none;background:#0d0d0d}
-.canvas.drag{cursor:grabbing}
-.canvas .t{position:absolute;top:0;left:0;border-radius:4px;overflow:hidden;background:var(--card);will-change:transform}
-.canvas .t img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none;user-select:none;pointer-events:none}
-.canvas .t .plain{position:absolute;inset:0;display:flex;align-items:flex-end;padding:10px;font-size:13px;font-weight:500;line-height:1.15}
-.hint{position:fixed;left:50%;bottom:calc(24px + var(--safe));transform:translateX(-50%);z-index:21;padding:12px 20px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--line);color:#d6d6d8;font-size:15px;white-space:nowrap;transition:opacity .6s}
-
-/* views arrive on a spring, leave on a quick fade */
-#view>*{animation:rise .55s var(--spring) backwards}
-@keyframes rise{from{opacity:0;transform:translateY(18px)}}
-#view.still>*{animation:none}
-.toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));z-index:60;transform:translate(-50%,-150%);visibility:hidden;padding:12px 20px;border-radius:99px;background:#fff;color:#111;font-weight:500;transition:transform .5s var(--spring)}
-.toast.on{transform:translate(-50%,0);visibility:visible}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
-@media (min-width:700px){:root{--pad:28px;--gap:16px}}
+.info .meta{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 26px}
+.info .meta .chip{height:36px;font-size:14px;padding:0 14px}
+.info .meta span.chip{cursor:default}.info .meta span.chip:hover{background:none}
+.play{position:relative;display:flex;gap:10px}
+.pill{height:54px;padding:0 28px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:500;background:#fff;color:#111;flex:1;max-width:320px}
+.pill:hover{background:#e7e7e8}
+.pill svg{width:16px;height:16px}
+.play .circ{width:54px;height:54px;box-shadow:none;background:none}
+.play .circ:hover{background:var(--card)}
+.menu{position:absolute;left:0;bottom:64px;min-width:240px;padding:8px;border-radius:24px;background:#232325;border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.6);transform-origin:bottom left;transform:scale(.92);opacity:0;visibility:hidden;transition:transform .45s var(--spring),opacity .15s,visibility 0s .15s}
+.menu.on{transform:none;opacity:1;visibility:visible;transition:transform .45s var(--spring),opacity .15s}
+.menu a{display:flex;justify-content:space-between;align-items:center;height:48px;padding:0 16px;border-radius:16px;font-size:16px}
+.menu a:hover,.menu a:focus-visible{background:#303033}
+.menu small{color:var(--m);font-size:13px}
+.turn{color:var(--m);font-size:14px;text-align:center;margin-top:14px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation:none!important}}
+@media (min-width:700px){:root{--pad:28px;--gap:8px}}
 </style>
 </head>
 <body>
-<div id="view" aria-live="polite"></div>
-<div class="dock" id="dock">
-  <nav class="nav" aria-label="Records">
-    <button data-go="" aria-label="Home"></button>
-    <button data-go="canvas" aria-label="Canvas"></button>
-    <button data-go="shuffle" aria-label="Shuffle: open a random record"></button>
-    <button data-go="me" aria-label="Casey's records"><span class="me"></span></button>
-  </nav>
-  <button class="circ" data-go="search" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/></svg></button>
+<header>
+  <h1>Records <span id="count"></span></h1>
+  <div class="chips" id="chips" role="group" aria-label="Show"></div>
+</header>
+<main><div class="wall" id="wall"></div><p class="none" id="none" hidden>Nothing in the crate for that yet</p></main>
+<div class="float">
+  <label class="find"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/></svg><span class="sr">Search the records</span><input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="Artist, title, label or year"><button class="clr" id="clr" aria-label="Clear the search" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></label>
+  <button class="circ" id="shuffle" aria-label="Open a record at random"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3.5c2 0 3.2 1 4.3 2.6l2.4 3.8C14.3 15 15.5 17 17.5 17H21M18 14l3 3-3 3M3 17h3.5c1.4 0 2.4-.6 3.2-1.5M21 7h-3.5c-1.4 0-2.4.6-3.2 1.5M18 4l3 3-3 3"/></svg></button>
 </div>
-<div class="toast" id="toast" role="status"></div>
+<div class="open" id="open" role="dialog" aria-modal="true" aria-label="Record">
+  <button class="circ x" id="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <button class="circ nav prev" id="prev" aria-label="Previous record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="circ nav next" id="next" aria-label="Next record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+  <div class="rec" id="rec"></div>
+</div>
 <script>
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const NEW_TAB='<span class="sr"> (opens in a new tab)</span>';
-const P=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-const I={
-  home:P('<path d="M4 10.2 12 4l8 6.2V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19Z"/>'),
-  homeOn:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.4 9.4 11 3.5a1.6 1.6 0 0 1 2 0l7.6 5.9c.4.3.6.7.6 1.2V19a2.2 2.2 0 0 1-2.2 2.2H5A2.2 2.2 0 0 1 2.8 19v-8.4c0-.5.2-.9.6-1.2Z"/></svg>',
-  globe:P('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3Z"/>'),
-  globeOn:P('<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".18"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3Z"/>'),
-  disc:P('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4"/><path d="M12 6.2a5.8 5.8 0 0 0-5.8 5.8"/>'),
-  search:P('<circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/>'),
-  back:P('<path d="M15 5l-7 7 7 7"/>'),
-  more:'<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></g></svg>',
-  close:P('<path d="M6 6l12 12M18 6 6 18"/>'),
-  grid:P('<rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/>'),
-  share:P('<path d="M12 15V3.5M7.5 8 12 3.5 16.5 8"/><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16"/>'),
-  shuffle:P('<path d="M3 7h3.5c2 0 3.2 1 4.3 2.6l2.4 3.8C14.3 15 15.5 17 17.5 17H21M18 14l3 3-3 3M3 17h3.5c1.4 0 2.4-.6 3.2-1.5M21 7h-3.5c-1.4 0-2.4.6-3.2 1.5M18 4l3 3-3 3"/>'),
-  play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.6v14.8c0 .8.9 1.3 1.6.8l11.3-7.4a1 1 0 0 0 0-1.6L8.6 3.8C7.9 3.3 7 3.8 7 4.6Z"/></svg>',
-  turn:P('<path d="M4 12a8 8 0 0 1 13.7-5.6L20 9M20 4v5h-5M20 12a8 8 0 0 1-13.7 5.6L4 15M4 20v-5h5"/>'),
-  chev:P('<path d="m9 5 7 7-7 7"/>'),
-  crate:P('<path d="M3.5 11h17v7.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/><path d="M6.5 11V5.5l3 .6V11M11.5 11V4h3.2v7M16.7 11l.8-5.8 2.6.4-.7 5.4M8 15.5h8"/>'),
-  link:P('<path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/>'),
-};
+const PLAY='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.6v14.8c0 .8.9 1.3 1.6.8l11.3-7.4a1 1 0 0 0 0-1.6L8.6 3.8C7.9 3.3 7 3.8 7 4.6Z"/></svg>';
+const DOTS='<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></g></svg>';
 const SERVICES=[['spotify','Spotify'],['appleMusic','Apple Music'],['youtubeMusic','YouTube Music'],['tidal','Tidal'],['amazonMusic','Amazon Music'],['deezer','Deezer']];
-const PICK='records-play'; // shared with vinyl-prototype.html: the service a visitor picked last
+const PICK='records-play'; // shared with vinyl-prototype.html: the service a visitor played on last
 const picked=()=>{try{return localStorage.getItem(PICK)}catch{return null}};
-const pick=k=>{try{localStorage.setItem(PICK,k)}catch{}};
 const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f;
 const sortKey=r=>(r.sortAs||r.artist).replace(/^the\s+/i,'').toLowerCase();
-const plainInk=hex=>{const n=parseInt((hex||'#333').slice(1),16),l=(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255;return l>.6?'#111':'#fff'};
+const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
+const slugOf=r=>(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)');
 
-let R=[],BY={},COLLS=[];
-const order={az:[],year:[]};
+let R=[],SETS=[],set='all',q='',shown=[],cur=-1;
 
 // ---- data: the crate's own list and covers, plus Casey's saved edits when the server has them ----
 async function load(){
@@ -252,9 +148,7 @@ async function load(){
     fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),
     fetch('/api/crate').then(r=>r.ok?r.json():null).catch(()=>null)]);
   const m=src.match(/const RECORDS=\[([\s\S]*?)\]\.map\(/);
-  const list=m?Function('return ['+m[1]+']')():[];
-  const slug=r=>(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  let recs=list.map(r=>({...meta[slug(r)],...r,slug:slug(r)}));
+  let recs=(m?Function('return ['+m[1]+']')():[]).map(r=>({...meta[slugOf(r)],...r,slug:slugOf(r)}));
   const E=ed&&ed.edits;
   if(E){
     recs=recs.concat((E.added||[]).map(a=>({...a})));
@@ -262,206 +156,123 @@ async function load(){
     for(const r of recs){const p=(E.patch||{})[r.slug];if(!p)continue;if(p.front)r.front=p.front;if(p.back)r.back=p.back;if(p.bg)r.spine=p.bg}
   }
   recs.forEach(r=>{r.links={...r.links};if(r.spotify)r.links.spotify='https://open.spotify.com/album/'+r.spotify;if(r.apple)r.links.appleMusic=r.apple});
-  R=recs;BY=Object.fromEntries(R.map(r=>[r.slug,r]));
-  order.az=[...R].sort((a,b)=>sortKey(a).localeCompare(sortKey(b))||(a.year||0)-(b.year||0));
-  order.year=[...R].sort((a,b)=>(a.year||9999)-(b.year||9999)||sortKey(a).localeCompare(sortKey(b)));
-  COLLS=collections();
+  R=recs.sort((a,b)=>sortKey(a).localeCompare(sortKey(b))||(a.year||0)-(b.year||0));
+  // the ways in: what records share, as pills
+  const add=(id,label,test)=>{const n=R.filter(test).length;if(n>=2)SETS.push({id,label,test,n})};
+  add('all','All',()=>true);
+  for(const d of [...new Set(R.map(r=>r.year&&Math.floor(r.year/10)*10).filter(Boolean))].sort())add('d'+d,d+'s',r=>r.year>=d&&r.year<d+10);
+  add('live','Live',r=>/\blive\b|at newport/i.test(r.title));
+  add('hits','Greatest hits',r=>/greatest|best of/i.test(r.title));
+  const many=[...R.reduce((m,r)=>m.set(r.artist,(m.get(r.artist)||0)+1),new Map())].filter(([a,n])=>n>=3&&!/^various/i.test(a));
+  for(const [a] of many)add('a:'+a,a,r=>r.artist===a);
 }
 
-// ---- collections, made from what the records share ----
-function collections(){
-  const out=[],add=(id,title,recs,kind)=>{if(recs.length>=2)out.push({id,title,recs,kind})};
-  const group=f=>{const g=new Map();for(const r of order.az){const k=f(r);if(k)(g.get(k)||g.set(k,[]).get(k)).push(r)}return g};
-  add('all','All records',order.az,'all');
-  add('live','Live',order.az.filter(r=>/\blive\b|at newport/i.test(r.title)),'theme');
-  add('hits','Greatest hits',order.az.filter(r=>/greatest|best of|their greatest/i.test(r.title)),'theme');
-  add('various','Tributes and compilations',order.az.filter(r=>/^various/i.test(r.artist)),'theme');
-  for(const [d,recs] of [...group(r=>r.year&&Math.floor(r.year/10)*10)].sort((a,b)=>a[0]-b[0]))add('d'+d,d+'s',recs.sort((a,b)=>a.year-b.year),'decade');
-  for(const [a,recs] of group(r=>/^various/i.test(r.artist)?null:r.artist))add('a-'+a.toLowerCase().replace(/[^a-z0-9]+/g,'-'),a,recs,'artist');
-  for(const [l,recs] of group(r=>r.label))add('l-'+l.toLowerCase().replace(/[^a-z0-9]+/g,'-'),l,recs,'label');
-  return out;
-}
-const coll=id=>COLLS.find(c=>c.id===id);
-const artistColl=r=>COLLS.find(c=>c.kind==='artist'&&c.title===r.artist);
-
-// ---- pieces ----
-function face(r,cls='plain'){
+// ---- the wall ----
+const cols=()=>innerWidth>=1200?6:innerWidth>=900?5:innerWidth>=600?4:3;
+// every so often a record takes up four spaces, on a steady rhythm so the wall feels laid out, not random
+const big=i=>i%9===0||i%9===5;
+function face(r){
   if(r.front)return`<img src="${esc(img(r.front))}" alt="" loading="lazy" decoding="async" onload="this.classList.add('in')">`;
-  const bg=r.spine||'#2c2c2e';
-  return`<div class="${cls}" style="background:${bg};color:${plainInk(bg)}">${esc(r.title)}<small>${esc(r.artist)}</small></div>`;
+  const bg=r.spine||'#2c2c2e';return`<div class="plain" style="background:${bg};color:${ink(bg)}">${esc(r.title)}<small>${esc(r.artist)}</small></div>`;
 }
-const tile=(r,caps)=>`<a class="tile" href="#/r/${r.slug}" aria-label="${esc(r.title)} by ${esc(r.artist)}">${face(r)}${r.back?`<span class="tw" aria-hidden="true">${I.turn}</span>`:''}</a>${caps?`<div class="cap"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></div>`:''}`;
-// masonry: the records fill short columns first; every other column starts lower, so the rows never line up
-function mason(recs,{caps=false}={}){
-  const w=Math.min(innerWidth,1240),n=Math.max(2,Math.min(recs.length,w>=1100?5:w>=820?4:w>=560?3:2));
-  const cols=Array.from({length:n},()=>[]),h=Array.from({length:n},(_,i)=>i%2?.42:0);
-  for(const r of recs){const i=h.indexOf(Math.min(...h));cols[i].push(r);h[i]+=1+(caps?.28:0)}
-  return`<div class="mason">${cols.map((c,i)=>`<div class="col">${i%2?'<div class="lag" aria-hidden="true"></div>':''}${c.map(r=>`<div>${tile(r,caps)}</div>`).join('')}</div>`).join('')}</div>`;
+const nodes=new Map();
+function tile(r){
+  let n=nodes.get(r.slug);if(n)return n;
+  n=document.createElement('a');n.className='tile';n.href='#'+r.slug;n.dataset.slug=r.slug;
+  n.innerHTML=`${face(r)}<span class="cap"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span>`;
+  n.setAttribute('aria-label',`${r.title} by ${r.artist}`);
+  nodes.set(r.slug,n);return n;
 }
-const mosaic=c=>{const f=c.recs.filter(r=>r.front);return f.length>=4?`<div class="mo">${f.slice(0,4).map(r=>`<img src="${esc(img(r.front))}" alt="" loading="lazy" decoding="async">`).join('')}</div>`:`<div class="mo one">${f[0]?`<img src="${esc(img(f[0].front))}" alt="" loading="lazy" decoding="async">`:''}</div>`};
-const card=c=>`<a class="coll" href="#/c/${c.id}">${mosaic(c)}<h3>${esc(c.title)}</h3><p>${c.recs.length} records</p></a>`;
-const circ=(icon,label,attrs='')=>`<button class="circ" aria-label="${label}" ${attrs}>${I[icon]}</button>`;
-const circA=(icon,label,href)=>`<a class="circ" aria-label="${label}" href="${href}">${I[icon]}</a>`;
+function render(animate){
+  const s=SETS.find(x=>x.id===set)||SETS[0],t=q.trim().toLowerCase();
+  shown=R.filter(s.test).filter(r=>!t||[r.artist,r.title,r.label,r.year,r.format].some(v=>String(v??'').toLowerCase().includes(t)));
+  const wall=$('#wall'),before=new Map();
+  if(animate&&!reduce.matches)for(const [k,n] of nodes)if(n.isConnected)before.set(k,n.getBoundingClientRect());
+  wall.style.setProperty('--cols',cols());
+  // a short list stays all one size; a long one gets the big covers
+  const frag=document.createDocumentFragment();
+  shown.forEach((r,i)=>{const n=tile(r);n.classList.toggle('big',shown.length>6&&big(i));frag.append(n)});
+  wall.replaceChildren(frag);
+  $('#none').hidden=!!shown.length;
+  $('#count').textContent=shown.length;
+  if(!before.size)return;
+  // records glide from where they were; new ones grow in
+  for(const r of shown){const n=nodes.get(r.slug),a=before.get(r.slug),b=n.getBoundingClientRect();
+    if(a)n.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width})`,transformOrigin:'0 0'},{transform:'none',transformOrigin:'0 0'}],{duration:620,easing:'cubic-bezier(.2,1.15,.35,1)'});
+    else n.animate([{opacity:0,transform:'scale(.9)'},{opacity:1,transform:'none'}],{duration:420,easing:'cubic-bezier(.2,1.2,.35,1)'})}
+}
+function chips(){
+  $('#chips').innerHTML=SETS.map(s=>`<button class="chip" data-set="${esc(s.id)}" aria-pressed="${s.id===set}">${esc(s.label)}${s.id==='all'?'':` <small>${s.n}</small>`}</button>`).join('');
+}
+$('#chips').addEventListener('click',e=>{const b=e.target.closest('[data-set]');if(!b)return;set=set===b.dataset.set&&set!=='all'?'all':b.dataset.set;
+  $$('#chips .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.set===set));render(true)});
+let qt;// a search looks through every record, whatever pill was on
+$('#q').addEventListener('input',e=>{q=e.target.value;if(q&&set!=='all'){set='all';$$('#chips .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.set==='all'))}$('#clr').hidden=!q;clearTimeout(qt);qt=setTimeout(()=>render(true),120)});
+$('#clr').addEventListener('click',e=>{e.preventDefault();q='';$('#q').value='';$('#clr').hidden=true;render(true);$('#q').focus()});
+$('#shuffle').addEventListener('click',()=>{const list=shown.length?shown:R;location.hash=list[Math.random()*list.length|0].slug});
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>$('#wall').style.setProperty('--cols',cols()),100)});
 
-// ---- views ----
-const V={};
-let homeTab='az';
-V.home=()=>`<header class="bar">${circA('crate','The crate','vinyl-prototype.html')}
-  <div class="tabs" role="tablist"><button role="tab" data-tab="az" aria-selected="${homeTab==='az'}">A to Z</button><button role="tab" data-tab="year" aria-selected="${homeTab==='year'}">By year</button></div>
-  ${circ('shuffle','Shuffle: open a random record','data-go="shuffle"')}</header>
-  <main>${mason(order[homeTab])}</main>`;
-
-let meTab='colls';
-V.me=()=>{const artists=new Set(R.filter(r=>!/^various/i.test(r.artist)).map(r=>r.artist)).size;const fr=R.filter(r=>r.front);
-  return`<header class="bar">${circ('share','Share','data-act="share"')}<span class="sp"></span>${circ('search','Search','data-go="search"')}</header>
-  <main>
-    <div class="prof"><div class="ava" aria-hidden="true"></div><div><h1>Casey Cavanagh</h1><p class="h">A through L so far</p></div></div>
-    <p class="stats"><span class="faces" aria-hidden="true">${[0,7,19].map(i=>fr[i]?`<img src="${esc(img(fr[i].front))}" alt="">`:'').join('')}</span><span><b>${R.length}</b> records · <b>${artists}</b> artists</span></p>
-    <div class="acts"><button class="pill white" data-go="shuffle">${I.shuffle}Shuffle</button><a class="pill" href="vinyl-prototype.html">${I.crate}The crate</a></div>
-    <div class="utabs" role="tablist"><button role="tab" data-me="recs" aria-selected="${meTab==='recs'}">Records <span class="n">${R.length}</span></button><button role="tab" data-me="colls" aria-selected="${meTab==='colls'}">Collections <span class="n">${COLLS.length}</span></button></div>
-    ${meTab==='recs'?mason(order.az):`<div class="colls">${COLLS.map(card).join('')}</div>`}
-  </main>`};
-
-V.coll=id=>{const c=coll(id);if(!c)return V.home();
-  return`<header class="bar">${circ('back','Back','data-act="back"')}<span class="sp"></span>${circ('search','Search','data-go="search"')}${circ('more','More','data-act="cmore" data-id="'+c.id+'"')}</header>
-  <main><div class="head"><h1>${esc(c.title)}</h1><p>${c.recs.length} records</p></div>${mason(c.recs)}</main>
-  <div class="peek"><div class="grab"></div><a class="row" href="#/canvas/${c.id}">View canvas<span class="end">${I.grid}</span></a></div>`};
-
-V.rec=slug=>{const r=BY[slug];if(!r)return V.home();
-  const ac=artistColl(r),dec=r.year&&coll('d'+Math.floor(r.year/10)*10),lab=COLLS.find(c=>c.kind==='label'&&c.title===r.label);
+// ---- a record, lifted out ----
+let from=null;
+function show(slug){
+  const i=shown.findIndex(r=>r.slug===slug),r=i>=0?shown[i]:R.find(r=>r.slug===slug);
+  if(!r){hide();return}
+  cur=i;
   const on=SERVICES.filter(([k])=>r.links[k]),mine=on.find(([k])=>k===picked())||on[0];
-  const tag=(t,c)=>c?`<a class="tag" href="#/c/${c.id}">${esc(t)}</a>`:`<span class="tag">${esc(t)}</span>`;
-  const back=r.back?`<img src="${esc(img(r.back))}" alt="">`:`<div class="plain" style="background:${r.spine||'#2c2c2e'};color:${plainInk(r.spine)}"></div>`;
-  const like=[...(ac?ac.recs:[]),...(dec?dec.recs:[])].filter((x,i,a)=>x!==r&&a.indexOf(x)===i).slice(0,14);
-  return`<header class="bar">${circ('back','Back','data-act="back"')}<span class="sp"></span>${circ('more','More','data-act="rmore" data-slug="'+r.slug+'"')}</header>
-  <section class="rec">
-    <div><button class="flip" id="flip" aria-label="Turn the record over" aria-pressed="false"><div class="card"><div class="face">${face(r)}</div><div class="face b">${back}</div></div></button>
-    <p class="turn">${I.turn}Turn it over</p></div>
-    <div class="info">
-      <h1>${esc(r.title)}</h1>
-      ${ac?`<a class="by" href="#/c/${ac.id}">${esc(r.artist)}</a>`:`<span class="by">${esc(r.artist)}</span>`}
-      <div class="tags">${r.year?tag(r.year,dec):''}${r.label?tag(r.label,lab):''}${r.format?`<span class="tag">${esc(r.format)}</span>`:''}</div>
-      ${mine?`<div class="playrow"><a class="pill white" href="${esc(r.links[mine[0]])}" target="_blank" rel="noopener" data-svc="${mine[0]}">${I.play}Play on ${mine[1]}${NEW_TAB}</a>${on.length>1?circ('more','Play somewhere else','data-act="play" data-slug="'+r.slug+'"').replace('class="circ"','class="circ" style="width:52px;height:52px"'):''}</div>`:''}
-    </div>
-  </section>
-  ${like.length?`<section class="more"><h2>More like this</h2>${mason(like,{caps:true})}</section>`:''}`};
-
-let q='',qTab='recs';
-const SUGG=()=>{const pool=COLLS.filter(c=>c.kind!=='all'),out=[];while(out.length<3&&pool.length)out.push(pool.splice(Math.random()*pool.length|0,1)[0]);return out};
-V.search=()=>{
-  if(!q){const s=SUGG();
-    return`<header class="bar float">${circ('back','Back','data-act="back"')}</header>
-    <section class="find"><h1>Find your<br>next record</h1>
-      ${s.map(c=>{const f=c.recs.find(r=>r.front);return`<a class="chip" href="#/c/${c.id}">${f?`<img src="${esc(img(f.front))}" alt="">`:'<span class="sw"></span>'}<span><b>${esc(c.title)}</b><span>${kindName(c)}</span></span></a>`}).join('')}
-      ${sbar()}</section>`}
-  const t=q.toLowerCase(),hit=r=>[r.artist,r.title,r.label,r.year,r.format].some(v=>String(v??'').toLowerCase().includes(t));
-  const recs=order.az.filter(hit),cs=COLLS.filter(c=>c.kind!=='all'&&c.title.toLowerCase().includes(t)),arts=COLLS.filter(c=>c.kind==='artist'&&c.title.toLowerCase().includes(t));
-  const solo=[...new Set(recs.map(r=>r.artist))].filter(a=>!/^various/i.test(a)&&!COLLS.some(c=>c.kind==='artist'&&c.title===a));
-  const body=qTab==='recs'?(recs.length?mason(recs,{caps:true}):none()):qTab==='arts'?(arts.length+solo.length?`<div class="arts">${arts.map(c=>{const f=c.recs.find(r=>r.front);return`<a class="row" href="#/c/${c.id}">${f?`<img src="${esc(img(f.front))}" alt="">`:'<span class="sw"></span>'}<span><b>${esc(c.title)}</b><span>${c.recs.length} records</span></span></a>`}).join('')}${solo.map(a=>{const r=recs.find(x=>x.artist===a);return`<a class="row" href="#/r/${r.slug}">${r.front?`<img src="${esc(img(r.front))}" alt="">`:'<span class="sw"></span>'}<span><b>${esc(a)}</b><span>1 record</span></span></a>`}).join('')}</div>`:none()):(cs.length?`<div class="colls">${cs.map(card).join('')}</div>`:none());
-  return`<div class="found"><header class="bar"><div class="utabs" role="tablist" style="flex:1;margin:0">${[['recs','Records'],['arts','Artists'],['colls','Collections']].map(([k,n])=>`<button role="tab" data-q="${k}" aria-selected="${qTab===k}">${n}</button>`).join('')}</div></header>
-  <main style="padding-top:12px;padding-bottom:calc(140px + var(--safe))">${body}</main>${sbar()}</div>`};
-const none=()=>`<div class="empty"><b>Nothing in the crate yet</b>Try an artist, a label or a year</div>`;
-const kindName=c=>({artist:'Artist',label:'Label',decade:'Decade',theme:'Collection'})[c.kind]||'Collection';
-const sbar=()=>`<div class="sbar"><label class="sfield">${I.search}<span class="sr">Search the records</span><input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="Search for anything" value="${esc(q)}">${q?`<button class="clr" data-act="clr" aria-label="Clear">${I.close}</button>`:''}</label>${circ('close','Close search','data-act="back"')}</div>`;
-
-V.canvas=id=>`<div class="canvas" id="cv" tabindex="0" aria-label="Canvas of covers. Drag or use the arrow keys to move around"></div>
-  <header class="bar float">${circ('back','Back','data-act="back"')}</header>
-  <p class="hint" id="hint">Drag to look around</p>`;
-
-// ---- router ----
-let last='';const scrolls={};
-function route(still){
-  const h=location.hash.replace(/^#\/?/,''),[k,...a]=h.split('/');const arg=decodeURIComponent(a.join('/'));
-  if(k==='shuffle'){const r=R[Math.random()*R.length|0];location.replace('#/r/'+r.slug);return}
-  if(!still){scrolls[last]=scrollY;last=h}
-  const v=$('#view');v.classList.toggle('still',!!still);
-  const html=k==='me'?V.me():k==='c'?V.coll(arg):k==='r'?V.rec(arg):k==='search'?V.search():k==='canvas'?V.canvas(arg):V.home();
-  v.innerHTML=html;
-  $$('.nav button').forEach(b=>{if(b.dataset.go===k)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
-  $('.nav [data-go=""]').innerHTML=k===''?I.homeOn:I.home;
-  $('#dock').classList.toggle('off',k==='search'||k==='canvas'||k==='r'||k==='c');
-  if(!still)scrollTo(0,scrolls[h]||0);
-  if(k==='canvas')canvas(arg?coll(arg)?.recs:null);
-  if(k==='search'){const i=$('#q');if(i){i.focus({preventScroll:true});const n=i.value.length;i.setSelectionRange(n,n)}}
-  document.title=k==='r'&&BY[arg]?`${BY[arg].title} · Records`:k==='c'&&coll(arg)?`${coll(arg).title} · Records`:'Records';
-}
-let hist=0;addEventListener('hashchange',()=>{hist++;route()});
-
-// ---- events ----
-document.addEventListener('click',e=>{
-  const go=e.target.closest('[data-go]');if(go){location.hash='#/'+go.dataset.go;return}
-  const tb=e.target.closest('[data-tab]');if(tb){homeTab=tb.dataset.tab;route(true);scrollTo(0,0);return}
-  const mt=e.target.closest('[data-me]');if(mt){meTab=mt.dataset.me;route(true);return}
-  const qt=e.target.closest('[data-q]');if(qt){qTab=qt.dataset.q;route(true);return}
-  const f=e.target.closest('#flip');if(f){f.classList.toggle('back');f.setAttribute('aria-pressed',f.classList.contains('back'));return}
-  const svc=e.target.closest('[data-svc]');if(svc)pick(svc.dataset.svc);
-  const a=e.target.closest('[data-act]');if(!a)return;
-  const act=a.dataset.act;
-  if(act==='back'){if(hist>0)history.back();else location.hash='#/';}
-  if(act==='clr'){q='';route(true)}
-  if(act==='share')share(location.href.split('#')[0],'Casey’s records');
-  if(act==='play'){const r=BY[a.dataset.slug];sheet('Play on',SERVICES.filter(([k])=>r.links[k]).map(([k,n])=>`<a class="row" href="${esc(r.links[k])}" target="_blank" rel="noopener" data-svc="${k}">${n}${NEW_TAB}<span class="end">${k===picked()?'Last used':I.chev}</span></a>`).join(''),a)}
-  if(act==='rmore'){const r=BY[a.dataset.slug];sheet(r.title,`<button class="row" data-act="copy">Copy link<span class="end">${I.link}</span></button><a class="row" href="vinyl-prototype.html">See it in the crate<span class="end">${I.crate}</span></a>`,a)}
-  if(act==='cmore'){const c=coll(a.dataset.id);sheet(c.title,`<a class="row" href="#/canvas/${c.id}">View canvas<span class="end">${I.grid}</span></a><button class="row" data-act="copy">Copy link<span class="end">${I.link}</span></button>`,a)}
-  if(act==='copy'){navigator.clipboard?.writeText(location.href).then(()=>toast('Link copied'),()=>{});closeSheet()}
-});
-document.addEventListener('input',e=>{if(e.target.id!=='q')return;const was=!!q,s=e.target.selectionStart;q=e.target.value;route(was===!!q);const i=$('#q');i.setSelectionRange(s,s)});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.querySelector('.sheet.on'))closeSheet();else if(location.hash&&location.hash!=='#/')$('[data-act=back]')?.click()}});
-let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(!/canvas|search/.test(location.hash))route(true)},150)});
-
-function share(url,title){if(navigator.share)navigator.share({title,url}).catch(()=>{});else navigator.clipboard?.writeText(url).then(()=>toast('Link copied'))}
-function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800)}
-let opener=null;
-function sheet(title,rows,from){
-  closeSheet(true);opener=from;
-  const s=document.createElement('div');s.className='scrim';const d=document.createElement('div');d.className='sheet';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label',title);
-  d.innerHTML=`<div class="grab"></div><h2>${esc(title)}</h2>${rows}`;
-  s.onclick=()=>closeSheet();d.addEventListener('click',e=>{if(e.target.closest('a.row'))setTimeout(closeSheet,50)});
-  document.body.append(s,d);requestAnimationFrame(()=>{s.classList.add('on');d.classList.add('on');$('.row',d)?.focus()});
-  // pull the sheet down to close it
-  let y0=null;d.addEventListener('pointerdown',e=>{y0=e.clientY});d.addEventListener('pointerup',e=>{if(y0!=null&&e.clientY-y0>60)closeSheet();y0=null});
-}
-function closeSheet(now){$$('.scrim,.sheet').forEach(n=>{n.classList.remove('on');setTimeout(()=>n.remove(),now?0:300)});if(!now&&opener){opener.focus();opener=null}}
-
-// ---- canvas: an endless wall of covers, columns staggered, drag or arrow keys to move ----
-let stopCanvas=()=>{};
-function canvas(list){
-  stopCanvas();
-  const cv=$('#cv'),recs=(list&&list.length?list:R),T=innerWidth<600?150:210,G=12,S=T+G;
-  let x=0,y=0,vx=0,vy=0,drag=null,raf=0,moved=0;
-  const pool=new Map();
-  const at=(c,r)=>{const n=recs.length;const i=((c*7+r*3+(c*c%5))%n+n)%n;return recs[i]};
-  const off=c=>(((c*0.37)%1+1)%1)*S;
-  function draw(){
-    const c0=Math.floor(-x/S)-1,c1=Math.ceil((innerWidth-x)/S)+1,seen=new Set();
-    for(let c=c0;c<=c1;c++){const o=off(c),r0=Math.floor((-y-o)/S)-1,r1=Math.ceil((innerHeight-y-o)/S)+1;
-      for(let r=r0;r<=r1;r++){const k=c+','+r;seen.add(k);let n=pool.get(k);
-        if(!n){const rec=at(c,r);n=document.createElement('a');n.className='t';n.href='#/r/'+rec.slug;n.tabIndex=-1;n.draggable=false;n.style.width=n.style.height=T+'px';
-          n.innerHTML=rec.front?`<img src="${esc(img(rec.front))}" alt="" decoding="async">`:`<div class="plain" style="background:${rec.spine||'#2c2c2e'};color:${plainInk(rec.spine)}">${esc(rec.title)}</div>`;
-          n.setAttribute('aria-label',rec.title+' by '+rec.artist);cv.append(n);pool.set(k,n)}
-        n.style.transform=`translate3d(${x+c*S}px,${y+r*S+o}px,0)`}}
-    for(const [k,n] of pool)if(!seen.has(k)){n.remove();pool.delete(k)}
+  const back=r.back?`<img src="${esc(img(r.back))}" alt="">`:`<div class="plain" style="background:${r.spine||'#2c2c2e'}"></div>`;
+  const pill=(label,s)=>`<button class="chip" data-find="${esc(s)}">${esc(label)}</button>`;
+  $('#rec').innerHTML=`<div><button class="flip" id="flip" aria-label="Turn the record over" aria-pressed="false"><div class="card"><div class="face">${face(r).replace(' loading="lazy"','')}</div><div class="face b">${back}</div></div></button><p class="turn">Tap to turn it over</p></div>
+    <div class="info"><h2>${esc(r.title)}</h2><a class="by" href="#" data-find="${esc(r.artist)}">${esc(r.artist)}</a>
+      <div class="meta">${r.year?pill(r.year,String(r.year)):''}${r.label?pill(r.label,r.label):''}${r.format?`<span class="chip">${esc(r.format)}</span>`:''}</div>
+      ${mine?`<div class="play"><a class="pill" href="${esc(r.links[mine[0]])}" target="_blank" rel="noopener" data-k="${mine[0]}">${PLAY}Play on ${mine[1]}${NEW_TAB}</a>${on.length>1?`<button class="circ" id="more" aria-label="Play somewhere else" aria-expanded="false" aria-controls="menu">${DOTS}</button><div class="menu" id="menu">${on.map(([k,n])=>`<a href="${esc(r.links[k])}" target="_blank" rel="noopener" data-k="${k}">${n}${NEW_TAB}${k===mine[0]?'<small>Last used</small>':''}</a>`).join('')}</div>`:''}</div>`:''}
+    </div>`;
+  $('#prev').hidden=$('#next').hidden=cur<0||shown.length<2;
+  document.title=`${r.title} · Records`;
+  const o=$('#open'),was=o.classList.contains('on');
+  if(!was){from=document.activeElement;o.classList.add('on');document.body.classList.add('held')}
+  // the record rises from its tile on the wall, or slides in from the side when you step through
+  const card=$('#flip'),t=nodes.get(r.slug);
+  if(!reduce.matches){
+    if(!was&&t&&t.isConnected){const a=t.getBoundingClientRect(),b=card.getBoundingClientRect();
+      card.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width})`,transformOrigin:'0 0'},{transform:'none',transformOrigin:'0 0'}],{duration:700,easing:'cubic-bezier(.2,1.12,.35,1)'})}
+    else card.animate([{opacity:0,transform:`translateX(${(step||1)*40}px)`},{opacity:1,transform:'none'}],{duration:500,easing:'cubic-bezier(.2,1.2,.35,1)'});
+    $('.info').animate([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:500,delay:80,fill:'backwards',easing:'cubic-bezier(.2,1.2,.35,1)'});
   }
-  function step(){raf=0;if(!drag){x+=vx;y+=vy;vx*=.94;vy*=.94;if(Math.abs(vx)+Math.abs(vy)>.1)raf=requestAnimationFrame(step)}draw()}
-  const kick=()=>{if(!raf)raf=requestAnimationFrame(step)};
-  cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,t:performance.now()};moved=0;vx=vy=0;cv.setPointerCapture(e.pointerId);cv.classList.add('drag');$('#hint').style.opacity=0});
-  cv.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y,dt=Math.max(1,performance.now()-drag.t);moved+=Math.abs(dx)+Math.abs(dy);x+=dx;y+=dy;vx=dx/dt*16;vy=dy/dt*16;drag={x:e.clientX,y:e.clientY,t:performance.now()};kick()});
-  const up=e=>{if(!drag)return;drag=null;cv.classList.remove('drag');
-    if(moved<6){const t=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.classList?.contains('t'));if(t)location.hash=t.getAttribute('href')}else kick()};
-  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',()=>{drag=null});
-  cv.addEventListener('click',e=>e.preventDefault());
-  cv.addEventListener('wheel',e=>{e.preventDefault();x-=e.deltaX;y-=e.deltaY;$('#hint').style.opacity=0;kick()},{passive:false});
-  cv.addEventListener('keydown',e=>{const m={ArrowLeft:[1,0],ArrowRight:[-1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!m)return;e.preventDefault();vx=m[0]*14;vy=m[1]*14;kick()});
-  // start centered on the middle of a column so the stagger reads at once
-  x=-S*.3;y=-S*.2;draw();cv.focus({preventScroll:true});
-  setTimeout(()=>{const h=$('#hint');if(h)h.style.opacity=0},3500);
-  const rs=()=>draw();addEventListener('resize',rs);
-  stopCanvas=()=>{cancelAnimationFrame(raf);removeEventListener('resize',rs)};
+  step=0;
+  if(!was)$('#close').focus({preventScroll:true});
 }
-addEventListener('hashchange',()=>{if(!/^#\/?canvas/.test(location.hash)){stopCanvas();stopCanvas=()=>{}}});
+let step=0;
+function hide(){
+  const o=$('#open');if(!o.classList.contains('on'))return;
+  o.classList.remove('on');document.body.classList.remove('held');document.title='Records';
+  if(location.hash)history.replaceState(null,'',location.pathname+location.search);
+  const t=nodes.get((shown[cur]||{}).slug);(t&&t.isConnected?t:from)?.focus({preventScroll:true});cur=-1;
+}
+const go=d=>{if(cur<0||!shown.length)return;step=d;location.replace('#'+shown[(cur+d+shown.length)%shown.length].slug)};
+addEventListener('hashchange',()=>{const s=decodeURIComponent(location.hash.slice(1));s?show(s):hide()});
+$('#close').onclick=hide;$('#prev').onclick=()=>go(-1);$('#next').onclick=()=>go(1);
+$('#open').addEventListener('click',e=>{
+  if(e.target===e.currentTarget||e.target.classList.contains('rec')){hide();return}
+  const f=e.target.closest('#flip');if(f){f.classList.toggle('back');f.setAttribute('aria-pressed',f.classList.contains('back'));return}
+  const m=e.target.closest('#more');if(m){const on=!$('#menu').classList.contains('on');$('#menu').classList.toggle('on',on);m.setAttribute('aria-expanded',on);if(on&&e.detail===0)$('#menu a').focus();return}
+  const k=e.target.closest('[data-k]');if(k){try{localStorage.setItem(PICK,k.dataset.k)}catch{}}
+  // an artist, year or label searches the wall for it
+  const s=e.target.closest('[data-find]');if(s){e.preventDefault();q=s.dataset.find;$('#q').value=q;$('#clr').hidden=false;set='all';$$('#chips .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.set==='all'));hide();render(true);scrollTo({top:0,behavior:reduce.matches?'auto':'smooth'})}
+  if(!e.target.closest('.play'))$('#menu')?.classList.remove('on');
+});
+addEventListener('keydown',e=>{
+  if(!$('#open').classList.contains('on')){if(e.key==='/'&&document.activeElement!==$('#q')){e.preventDefault();$('#q').focus()}return}
+  if(e.key==='Escape'){if($('#menu.on')){$('#menu').classList.remove('on');$('#more').focus()}else hide()}
+  if(e.key==='ArrowLeft')go(-1);if(e.key==='ArrowRight')go(1);
+});
+// on a phone, swipe sideways between records and pull down to put one back
+let sx=null,sy=0;
+$('#open').addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+$('#open').addEventListener('touchend',e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.4)go(dx<0?1:-1);else if(dy>90&&dy>Math.abs(dx)*1.4&&$('#open').scrollTop<=0)hide()});
 
-$('.nav [data-go=canvas]').innerHTML=I.globe;$('.nav [data-go=shuffle]').innerHTML=I.disc;
-load().then(()=>route()).catch(err=>{$('#view').innerHTML=`<div class="empty"><b>The records didn’t load</b>${esc(err.message)}</div>`});
+load().then(()=>{chips();render(false);const s=decodeURIComponent(location.hash.slice(1));if(s)show(s)})
+  .catch(err=>{$('#none').hidden=false;$('#none').textContent='The records didn’t load: '+err.message});
 </script>
 </body>
 </html>
