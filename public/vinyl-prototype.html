@@ -405,7 +405,7 @@ html.phone .az{right:calc(env(safe-area-inset-right) + 1px);top:calc(env(safe-ar
 html.phone .az button{flex-basis:22px;font-size:11px}
 html.phone .az button[aria-current=true]::before{display:none}
 @media(prefers-reduced-motion:reduce){.q input,.az.scrub::after{transition:none}}
-/* loading: a quiet count, then the whole crate rises in at once */
+/* loading: a quiet bar, then the whole crate rises in at once */
 .loading{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;font:400 13px/1 var(--mono);color:var(--m);transition:opacity .3s;pointer-events:none}
 .loading .bar{width:120px;height:1px;background:var(--line);overflow:hidden}
 .loading .bar i{display:block;height:100%;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;transition:transform .3s}
@@ -416,7 +416,7 @@ html.phone .az button[aria-current=true]::before{display:none}
 </style>
 </head>
 <body>
-<div class="loading" id="loading" aria-live="polite"><span>Gathering records…</span><span class="bar"><i id="loadBar"></i></span><span id="loadN"></span></div>
+<div class="loading" id="loading" aria-live="polite"><span>Gathering records…</span><span class="bar"><i id="loadBar"></i></span></div>
 <main class="page">
   <h1 class="sr">Records</h1>
   <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record, slash searches.">
@@ -1105,28 +1105,40 @@ const TILES={};
 {const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d'),d=x.createImageData(96,96);
  for(let i=0;i<d.data.length;i+=4){const v=Math.random()<.5?40:235;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*14|0}x.putImageData(d,0,0);
  root.style.setProperty('--tooth',blobURL(TILES.tooth=c))}
-// Bake a record's paper and wear into its cover as the image arrives: drawn once, sized to the record on screen. The crate then
-// draws exactly what it did before, one image per face, and the record you pull out uses the same baked image.
+// Bake a record's paper and wear into its cover as the image arrives: drawn once (on a phone at the size the record is drawn,
+// for the screen's sharpness), so the crate still draws one image per face, and the record you pull out uses the same baked image. One bake at a time, so a phone's pile stays smooth while its covers come in. bake() answers
+// when the baked cover is decoded and showing, which is what the loader waits for.
+// the paper tiles, softened once (over a 3×3 of themselves, so their edges still meet) so they don't shimmer as the record nudges
+const soft=t=>t._soft||(t._soft=(()=>{const n=t.width,big=document.createElement('canvas');big.width=big.height=3*n;const bx=big.getContext('2d');
+  for(let a=0;a<3;a++)for(let b=0;b<3;b++)bx.drawImage(t,a*n,b*n);
+  const c=document.createElement('canvas');c.width=c.height=n;const x=c.getContext('2d');x.filter='blur(.3px)';x.drawImage(big,-n,-n);return c})());
+let bakeQ=Promise.resolve();
 function bake(i,el){
-  if(i._baked||!i.naturalWidth||i.src.startsWith('blob:')||new URL(i.src).origin!==location.origin)return;i._baked=1; // a cover from another site can't be read back: it stays plain
-  const src=i.src;if(BAKED.has(src)){i.src=BAKED.get(src);return}
-  const w=i.naturalWidth,h=i.naturalHeight,k=w/(nodes[0]?.offsetWidth||480),c=document.createElement('canvas');c.width=w;c.height=h;
+  if(i._baked)return i._baked;
+  if(!el||!i.naturalWidth||i.src.startsWith('blob:')||new URL(i.src).origin!==location.origin)return Promise.resolve(); // a cover from another site can't be read back: it stays plain
+  const src=i.src,p=bakeQ.then(()=>BAKED.get(src)||draw(i,el)).catch(()=>null);bakeQ=p;
+  return i._baked=p.then(u=>{if(u&&i.src===src){BAKED.set(src,u);i.src=u;return i.decode().catch(()=>{})}});
+}
+function draw(i,el){
+  // a phone draws the record at the crate's size; a wider screen pulls it out bigger, so it keeps the file's own size
+  const S=nodes.find(n=>n.offsetWidth)?.offsetWidth||480,nw=i.naturalWidth,nh=i.naturalHeight,f=PHONE?Math.min(1,S*Math.min(devicePixelRatio||1,3)/Math.max(nw,nh)):1;
+  const w=Math.round(nw*f),h=Math.round(nh*f),k=w/S,c=document.createElement('canvas');c.width=w;c.height=h;
   const x=c.getContext('2d'),P=el.dataset.paper,wear=+el.dataset.wear||0;
   const fill=f=>{x.fillStyle=f;x.fillRect(0,0,w,h)};
   const lin=(deg,stops)=>{const a=deg*Math.PI/180,dx=Math.sin(a),dy=-Math.cos(a),L=Math.abs(w*dx)+Math.abs(h*dy),g=x.createLinearGradient(w/2-dx*L/2,h/2-dy*L/2,w/2+dx*L/2,h/2+dy*L/2);stops.forEach(([o,col])=>g.addColorStop(o,col));return g};
-  const pat=(t,n)=>{const p=x.createPattern(t,'repeat');p.setTransform(new DOMMatrix().scale(k*n/t.width));return p};
+  const pat=(t,n)=>{const p=x.createPattern(soft(t),'repeat');p.setTransform(new DOMMatrix().scale(k*n/t.width));return p};
   const corner=(cx,cy,r,col)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r*Math.hypot(w,h));g.addColorStop(0,col);g.addColorStop(1,'#ffffff00');fill(g)};
-  x.drawImage(i,0,0);
-  x.filter='blur(.6px)'; // soft enough not to shimmer as the record nudges under the pointer
+  x.imageSmoothingQuality='high';x.drawImage(i,0,0,w,h);
   if(P==='matte'&&TILES.grain){x.globalAlpha=.5;fill(pat(TILES.grain,128));x.globalAlpha=1}
   if(P==='uncoated')fill(pat(TILES.tooth,96));
-  x.filter='none';
   if(P==='matte')fill('#ffffff06');
   if(P==='uncoated')fill('#f7efdc10');
   if(P==='gloss'){fill(lin(118,[[.3,'#ffffff00'],[.41,'#ffffff1e'],[.48,'#ffffff08'],[.56,'#ffffff00']]));fill(lin(180,[[0,'#ffffff0e'],[.35,'#ffffff00']]))}
   if(wear===1){corner(0,0,.035,'#ffffff24');corner(w,h,.03,'#ffffff1a')}
   if(wear===2){corner(0,0,.05,'#ffffff38');corner(w,h,.04,'#ffffff26');corner(w,0,.03,'#ffffff1c');fill('#f3e4c40f');x.strokeStyle='#ffffff26';x.lineWidth=2*k;x.strokeRect(0,0,w,h)}
-  c.toBlob(b=>{if(b)BAKED.set(src,i.src=URL.createObjectURL(b))},'image/webp',.92);
+  // JPEG: a cover has no transparency, and it writes and reads back twice as fast as WebP (Safari can't write WebP at all).
+  // The canvas is let go at once: Safari counts canvas memory
+  return new Promise(res=>c.toBlob(b=>{c.width=c.height=0;res(b&&URL.createObjectURL(b))},'image/jpeg',.9));
 }
 // a pulled-out record whose cover the crate hasn't baked yet bakes its own
 const bakeIn=el=>el.querySelectorAll('img.art').forEach(i=>i.complete&&i.naturalWidth?bake(i,el):i.addEventListener('load',()=>bake(i,el),{once:true}));
@@ -1475,10 +1487,12 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   // a visitor's crate reads its spine colors from the covers; Casey's come with covers.json
   await Promise.race([Promise.all(RECORDS.filter(r=>r.front&&!r.spine).map(async r=>r.spine=await edgeColor(img(r.front)))),new Promise(r=>setTimeout(r,8000))]);
   start();if(!visiting)ownerInit();
-  // hold the crate back until the covers on screen are decoded, so it arrives whole; the rest load as you flip toward them
+  // hold the crate back until the covers on screen are in, baked and decoded, so it arrives whole and nothing on it changes
+  // after; the rest load as you flip toward them. Only a stalled network lets it in sooner.
   const imgs=[...nodes.filter((_,j)=>shown[j]).flatMap(n=>[...n.querySelectorAll('img[src]')]),...$$('img',open.hidden?document.createElement('i'):open)];let n=0;
-  const tick=()=>{n++;$('#loadN').textContent=`${n} of ${imgs.length}`;$('#loadBar').style.transform=`scaleX(${n/imgs.length})`};
-  await Promise.race([Promise.all(imgs.map(i=>i.decode().catch(()=>{}).then(tick))),new Promise(r=>setTimeout(r,12000))]);
+  const tick=()=>{n++;$('#loadBar').style.transform=`scaleX(${n/imgs.length})`};
+  const loaded=i=>i.complete?Promise.resolve():new Promise(r=>{i.addEventListener('load',r,{once:true});i.addEventListener('error',r,{once:true})});
+  await Promise.race([Promise.all(imgs.map(i=>loaded(i).then(()=>bake(i,i.closest('.rc,.sleeve'))).then(()=>i.decode().catch(()=>{})).then(tick))),new Promise(r=>setTimeout(r,30000))]);
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
 });
 </script>
