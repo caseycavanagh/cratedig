@@ -717,6 +717,14 @@ body.reading .tbl{opacity:0;transition:opacity .3s}
 .kd-b{display:none}
 .kd::before{top:-60px}
 body:has(.find .q:focus-within) .kd,body:has(.find .q.has) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+/* at rest, search and layout are bare icons; search becomes a pill only while it's open */
+.find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{background:none;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.find .q{transition:max-width .45s cubic-bezier(.22,1,.36,1),background-color .25s,border-color .25s,box-shadow .25s}
+.find .q:not(:focus-within):not(.has) .qi{color:#d6d6d8}
+.find .q:not(:focus-within):not(.has):hover .qi,.fb.lb:hover{color:#fff}
+.fb.lb{color:#d6d6d8}
+.fb.lb svg{width:20px;height:20px}
+.fb.lb[aria-expanded=true]{color:#fff}
 </style>
 </head>
 <body>
