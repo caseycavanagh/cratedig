@@ -132,7 +132,8 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 /* the neighbors peek in from the page edges; hover pulls one out a little further */
 .peek{all:unset;position:fixed;top:50%;z-index:2;width:var(--O);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
   transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s;box-shadow:0 20px 40px -20px #0006}
-.peek img,.peek>div{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.peek img,.peek>div:not(.cover-type){position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.peek{container-type:inline-size;overflow:hidden} /* a record without art sets its name to the peek's width, not the page's */
 .peek.prev{left:0;--x:calc(-100% + 28px);--h:calc(-100% + 96px)}
 .peek.next{right:0;--x:calc(100% - 28px);--h:calc(100% - 96px)}
 .peek{transform:translate(var(--x),-50%)}
@@ -183,7 +184,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .sw[aria-expanded=true] svg{transform:rotate(180deg)}
 /* where there's hover, the caret waits tucked behind Play and slides out when you come near it (or tab to it); it leaves on a quick fade */
 @media(hover:hover){
-  html:not(.phone) .pair .btn{position:relative;z-index:1;background:var(--bg)}
+  html:not(.phone) .pair .btn{position:relative;z-index:1}
   html:not(.phone) .pair .sw{opacity:0;translate:-26px 0;transition:opacity .12s,translate 0s .12s,transform .5s var(--flip),background-color .2s,color .2s}
   html:not(.phone) .pair:hover .sw,html:not(.phone) .pair:focus-within .sw,html:not(.phone) .pair .sw[aria-expanded=true]{opacity:1;translate:0;transition:opacity .2s,translate .55s var(--flip),transform .5s var(--flip),background-color .2s,color .2s}
 }
@@ -786,12 +787,21 @@ html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
 .ed,html.phone .ed{position:fixed;top:auto;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;margin:0;z-index:12}
 html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
 /* hover a record in the crate and its name slides out from under its right edge: after a short rest, on a spring; it leaves on a quick fade */
-.hv{position:fixed;z-index:1;left:0;top:0;width:var(--hw,280px);font-size:20px;line-height:1.25;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
+.hv{position:fixed;z-index:1;left:0;top:0;transform:translateY(-50%);width:var(--hw,280px);font-size:20px;line-height:1.25;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
 .hv.on{opacity:1;translate:0;transition:opacity .25s,translate .55s var(--flip),top .45s var(--flip)}
 .hv b{display:block;font-weight:500;color:var(--fg);text-wrap:balance}
 .hv span{display:block;color:var(--m)}
 @media(hover:none){.hv{display:none}}
 @media(prefers-reduced-motion:reduce){.hv,.hv.on{translate:0;transition:opacity .2s}}
+/* tabbed dividers: one stands just before each letter's first record, all the way back, its tab above the tops and staggered across
+   like a real crate's; it leaves when you flip past it, and a tab turns to its letter */
+.dv{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;pointer-events:none;transition:opacity .25s}
+.dv i{position:absolute;inset:0 1%;background:#1c1c1e;border-radius:2px}
+.dv span{position:absolute;bottom:calc(100% - 1px);left:var(--tx);width:12%;height:calc(var(--S)*.07);display:grid;place-items:center;padding-bottom:calc(var(--S)*.008);box-sizing:border-box;
+  background:#2a2a2d;border-radius:5px 5px 0 0;box-shadow:inset 0 1px 0 #ffffff14;color:#f2f2f2;font:500 calc(var(--S)*.036)/1 'Instrument Sans',sans-serif;pointer-events:auto;cursor:pointer}
+.dv.off,.crate.lifted .dv{opacity:0}
+.dv.off span,.crate.lifted .dv span{pointer-events:none}
+html.phone .dv{display:none}
 </style>
 </head>
 <body>
@@ -1043,11 +1053,17 @@ function nodeFor(r){
   t.innerHTML=`<div class="rc"><div class="face fr" style="background:${spineBg(r)}">${coverHTML(r,true)}</div><div class="face bk" style="background:${spineBg(r)}">${backHTML(r,true)}</div></div>`;
   n=t.firstElementChild;n._lazy=[...n.querySelectorAll('img[data-src]')];n._jit=jit(r);n._look=look(r);dress(n,r);made.set(r,n);return n;
 }
+let dvs=[]; // the letter dividers
 function build(){
   nodes=order.map(nodeFor);nodes.forEach((n,j)=>n.dataset.j=j);
   jits=nodes.map(n=>n._jit);shown=nodes.map(n=>!n.classList.contains('gone'));frontBox=null; // cached so each frame does no lookups
   tail||=Object.assign(document.createElement('div'),{className:'tail'});
-  stack.replaceChildren(...nodes,tail);
+  // a divider before each letter, when the letters run in order (sorted by name)
+  const runs=order.map(letter).filter((L,j,a)=>L!==a[j-1]);
+  dvs=new Set(runs).size<runs.length?[]:order.flatMap((r,j)=>{const L=letter(r);if(!j||L===letter(order[j-1]))return[];
+    const d=document.createElement('div');d.className='dv';d.dataset.j=j;d.innerHTML=`<i></i><span>${L}</span>`;
+    const k=L==='#'?0:L.charCodeAt(0)-65;d.style.setProperty('--tx',4+(k%6)*15.5+'%');return[d]});
+  stack.replaceChildren(...nodes,...dvs,tail);
   // the tail: every record's top as a band in its spine color, shaded like the records behind, over the dark gaps between them.
   // Each band sits a hair off true like the records in front, with its own shift, tilt and lean, so the back reads as a stack
   // of jackets rather than stripes. Drawn back to front, so a nearer record covers the one behind where they cross.
@@ -1112,6 +1128,10 @@ function render(){
     const p=seat(j-pos),q=jits[j];
     n.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg)`;
   });
+  // each divider stands just behind the record before its letter, parallel to it, so the two never cross; it leaves as that record flips
+  for(const v of dvs){const j=+v.dataset.j-1,d=j-pos,off=d<0;if(v._off!==off){v._off=off;v.classList.toggle('off',off)}
+    if(!off){const p=seat(d),q=jits[j],g=Math.max(1.5,(p.z-seat(d+1).z)*.45);
+      v.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg) translateZ(${(-g).toFixed(1)}px)`}}
   // the tail starts where the next record past the drawn ones would stand; everything back there leans the same 13°
   if(tailN){tailS||=nodes[0].offsetWidth;const d=cur+11-pos;tail.style.transform=`translate3d(0,${(-tailS*.9744).toFixed(1)}px,${(-BEHIND-(d-1)*GAP-tailS*.225).toFixed(1)}px) rotateX(-90deg)`}
 }
@@ -1526,16 +1546,17 @@ function aimNudge(){
   if(ptr&&!reduce&&!raf&&!moved&&open.hidden){const b=frontBox||=n.firstElementChild.getBoundingClientRect();if(ptr.x>=b.left&&ptr.x<=b.right&&ptr.y>=b.top&&ptr.y<=b.bottom)t=Math.max(-1,Math.min(1,((ptr.x-b.left)/b.width-.5)*2))}
   nudgeTo(n,Math.round(t*100)/100);
 }
-// the name of the record under a resting pointer, in a small card beside it
+// the name of the record under a resting pointer, beside the front record
 var hvI=-1,hvT=0;const hv=$('#hv');
 function hvOff(){clearTimeout(hvT);hvT=0;hvI=-1;document.getElementById('hv')?.classList.remove('on')}
 function hoverPeek(){
-  const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.elementFromPoint(ptr.x,ptr.y)?.closest('.rc');
-  const i=el?nodes.indexOf(el):-1;
+  const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.elementFromPoint(ptr.x,ptr.y),onTab=el?.closest?.('.dv');
+  if(onTab)return hvOff();
+  const i=el?nodes.indexOf(el.closest?.('.rc')):-1;
   if(i<0)return hvOff();
-  const f=nodes[cur].firstElementChild.getBoundingClientRect(),t=el.firstElementChild.getBoundingClientRect(),room=innerWidth-f.right-72;
+  const f=nodes[cur].firstElementChild.getBoundingClientRect(),room=innerWidth-f.right-72;
   if(room<160)return hvOff();
-  hv.style.left=f.right+32+'px';hv.style.top=Math.max(t.top,f.top)+'px';hv.style.setProperty('--hw',Math.min(300,room)+'px');
+  hv.style.left=f.right+32+'px';hv.style.top=f.top+f.height/2+'px';hv.style.setProperty('--hw',Math.min(300,room)+'px');
   if(i===hvI)return;
   hvI=i;const r=order[i];
   const say=()=>{hv.innerHTML=`<b></b><span></span>`;hv.firstChild.textContent=r.title;hv.lastChild.textContent=r.artist;hv.classList.add('on')};
@@ -1665,7 +1686,7 @@ void main(){
   }};
 })():null;
 addEventListener('resize',()=>{frontBox=null;deckS=0;tailS=0;if(nodes.length&&!raf)render();if(PHONE&&!open.hidden)aimPeeks()});
-crate.addEventListener('pointerdown',e=>{if(PHONE)return;spr=null;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc'),vy:0,lt:performance.now(),ly:e.clientY};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
+crate.addEventListener('pointerdown',e=>{if(PHONE)return;spr=null;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc'),dv:e.target.closest('.dv'),vy:0,lt:performance.now(),ly:e.clientY};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
   const dy=e.clientY-drag.y,now=performance.now(),dt=Math.max(8,now-drag.lt);drag.vy=.2*drag.vy+.8*(e.clientY-drag.ly)/dt;drag.lt=now;drag.ly=e.clientY;
@@ -1675,7 +1696,7 @@ crate.addEventListener('pointermove',e=>{
   const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
 // a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
-const end=()=>{if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
+const end=()=>{if(drag&&!moved&&drag.dv)jump(+drag.dv.dataset.j);else if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
     if(fl){vel=Math.max(-40,Math.min(40,v));glide(fl);go(Math.round(aim)+fl)}else go(cur,false)}drag=null;moved=false;crate.classList.remove('dragging','pulling')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 // a finger on the pile: down flips the top record toward you, up stands the last one back up, a tap opens it; sideways does nothing
