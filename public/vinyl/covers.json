@@ -1096,7 +1096,14 @@
     "back": "mj-lenderman-manning-fireworks-back.webp"
   },
   "middle-brother-middle-brother-ep": {
-    "links": {}
+    "links": {},
+    "year": 2011,
+    "label": "Partisan Records",
+    "group": "9d76a576-d442-4c15-9b37-8de569680292",
+    "release": "d018eb48-2097-463c-9d1b-433836f3ec47",
+    "front": "middle-brother-middle-brother-ep-front.webp",
+    "frontSource": "caa",
+    "spine": "#141414"
   },
   "milo-greene-milo-greene": {
     "year": 2012,
@@ -1353,7 +1360,15 @@
     "spine": "#1a1b1e"
   },
   "shovels-rope-busted-jukebox-vol-1": {
-    "links": {}
+    "links": {},
+    "year": 2015,
+    "label": "Dualtone",
+    "group": "11a9b562-80b9-4ec9-915d-c0798cd08c24",
+    "release": "5b612010-7f04-40e5-aced-01b909b202ba",
+    "front": "shovels-rope-busted-jukebox-vol-1-front.webp",
+    "frontSource": "caa",
+    "spine": "#877d56",
+    "back": "shovels-rope-busted-jukebox-vol-1-back.webp"
   },
   "shovels-rope-busted-jukebox-vol-3": {
     "spotify": "7b8GGVISSRAk8g3kER7PTR",
@@ -1364,7 +1379,10 @@
     "year": 2021,
     "front": "shovels-rope-busted-jukebox-vol-3-front.webp",
     "frontSource": "apple",
-    "spine": "#9f977c"
+    "spine": "#9f977c",
+    "label": "Dualtone",
+    "group": "bce9854a-ca1f-4e8e-9fa2-70e3594e3da9",
+    "release": "e715dee8-57c5-4c47-850b-29b1a0fd00c3"
   },
   "shovels-rope-by-blood": {
     "year": 2019,
