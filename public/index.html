@@ -643,6 +643,13 @@ html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:
 .sl h4{position:sticky;top:-6px;z-index:1;margin:0 -6px;padding:10px 14px 6px;font-size:13px;font-weight:400;color:var(--m);background:#1b1b1d}
 .sl .none{padding:18px 14px;color:var(--m)}
 @media(prefers-reduced-motion:reduce){html.phone .sl,html.phone body.searching .sl,html.phone .page{transition:none}}
+/* the canvas settles on one cover; the rest dim a little until you move again */
+.board .tile{transition:opacity .45s cubic-bezier(.22,1,.36,1)}
+.board.focus .tile:not(.on){opacity:.42}
+.tile.held{opacity:0!important;transition:none!important}
+/* reading a record opened from the wall or the canvas: they fade back behind it, and come back as it goes home */
+.wall,.cv{transition:opacity .4s cubic-bezier(.22,1,.36,1)}
+body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 </style>
 </head>
 <body>
@@ -1806,14 +1813,24 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   const arrange0=arrange;arrange=function(...a){const n=arrange0.apply(this,a);draw(true);return n};
   pills.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const s=SETS()[+b.dataset.i];
     if(!s.f||isOn(s.f))arrange(null);else arrange(s.f);wall.scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
-  const pull=slug=>{const j=order.findIndex(r=>r.slug===slug);if(j<0)return;back=view;setView('crate');go(j,true);openRecord(false)};
+  const pull=slug=>{const j=order.findIndex(r=>r.slug===slug);if(j<0)return;document.body.classList.add('reading');go(j,true);openRecord(false)};
+  // the open record's tile, as a pose the lift can fly from and back to (brought on screen first if it isn't)
+  window.tilePose=()=>{if(view==='crate')return null;const r=order[cur],t=(view==='wall'?keep:ckeep).get(r?.slug);if(!t||!t.isConnected)return null;
+    let R=t.getBoundingClientRect();
+    if(R.top<40||R.bottom>innerHeight-100||R.left<0||R.right>innerWidth){if(view==='wall')t.scrollIntoView({block:'center'});else cvCenter(t);R=t.getBoundingClientRect()}
+    const S=stage.getBoundingClientRect();if(!S.width)return null;
+    for(const n of document.querySelectorAll('.tile.held'))if(n!==t)n.classList.remove('held');t.classList.add('held');
+    const p={x:R.left+R.width/2-(S.left+S.width/2),y:R.top+R.height/2-(S.top+S.height/2),z:0,s:R.width/S.width,ax:0,az:0};
+    return{...p,P:2600,ox:S.width/2,oy:S.height/2,tf:poseTf(p)}};
+  const cp0=cratePose;cratePose=function(...a){return window.tilePose?.()||cp0.apply(this,a)};
+  const cr0=closeRecord;closeRecord=function(...a){document.body.classList.remove('reading');return cr0.apply(this,a)};
   tiles.addEventListener('click',e=>{const t=e.target.closest('.tile');if(t)pull(t.dataset.slug)});
   // closing a record you opened from the wall or the canvas puts you back where you were
-  new MutationObserver(()=>{if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
+  new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
 
   // ---- the canvas: a board as big as the records need, no bigger. Drag it, flick it, pinch it, scroll it, or use the
   // arrow keys (+ and - zoom); past an edge, or past how near or far it goes, it gives a little and springs back.
-  const ckeep=new Map();let T=0,bw=0,bh=0,x=0,y=0,z=1,vx=0,vy=0,cdrag=null,craf=0,moved=0,pinch=null,anchor=null;
+  const ckeep=new Map();let T=0,bw=0,bh=0,x=0,y=0,z=1,vx=0,vy=0,cdrag=null,craf=0,moved=0,pinch=null,anchor=null,tx=0,ty=0,pend=false,lt=0;
   const pts=new Map();
   const pad=()=>({t:(innerWidth<600?70:84),b:(innerWidth<600?96:110),s:innerWidth<600?16:40});
   // as far out as the whole board on screen, as near as two and a half times
@@ -1831,9 +1848,9 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     order.forEach((r,i)=>{const c=i%cols,rw=Math.floor(i/cols),t=tileFor(r,ckeep);t.style.left=c*S+'px';t.style.top=rw*S+lag(c)+'px';t.tabIndex=-1;f.append(t)});
     board.replaceChildren(f);
     bw=cols*S-G;bh=Math.max(...Array.from({length:cols},(_,c)=>Math.ceil((n-c)/cols)*S+lag(c)))-G;
-    if(center){z=1;const b=bounds();x=(b.x0+b.x1)/2;y=(b.y0+b.y1)/2;if(bh>H-pad().t-pad().b)y=b.y1;vx=vy=0}
+    if(center){z=1;const b=bounds();x=(b.x0+b.x1)/2;y=(b.y0+b.y1)/2;vx=vy=0}
     else{z=Math.min(ZMAX,Math.max(zmin(),z));clamp(true)}
-    paint();
+    aimAt(x,y);x=tx;y=ty;paint();
   }
   const paint=()=>board.style.transform=`translate3d(${x}px,${y}px,0) scale(${z})`;
   // close up, the covers on screen swap their small copy for the full one; off screen they go back to small
@@ -1848,23 +1865,30 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   // zoom to nz keeping the board point under (ax,ay) where it is
   const zoomAt=(nz,ax,ay)=>{x=ax-(ax-x)*nz/z;y=ay-(ay-y)*nz/z;z=nz};
   function clamp(now){const b=bounds();if(now){x=Math.min(b.x1,Math.max(b.x0,x));y=Math.min(b.y1,Math.max(b.y0,y))}return b}
-  function ctick(){craf=0;if(cdrag||pinch)return;
-    // zoom springs back inside its range first, around where you were pinching
-    const zt=Math.min(ZMAX,Math.max(zmin(),z));let zm=false;
-    if(Math.abs(zt-z)>.0005){const a=anchor||{x:innerWidth/2,y:innerHeight/2};zoomAt(z+(zt-z)*.2,a.x,a.y);zm=true}else if(zt!==z)z=zt;
-    const b=bounds();
-    // coast, then spring back inside the edges
-    x+=vx;y+=vy;vx*=.92;vy*=.92;
-    const sx=x>b.x1?b.x1-x:x<b.x0?b.x0-x:0,sy=y>b.y1?b.y1-y:y<b.y0?b.y0-y:0;
-    if(sx){vx=vx*.6+sx*.12}if(sy){vy=vy*.6+sy*.12}
-    paint();
-    if(zm||Math.abs(vx)+Math.abs(vy)>.05||Math.abs(sx)+Math.abs(sy)>.5)craf=requestAnimationFrame(ctick);else{anchor=null;clamp(true);paint();sharpen()}}
-  const ckick=()=>{if(reduce){z=Math.min(ZMAX,Math.max(zmin(),z));clamp(true);paint();sharpen();return}if(!craf)craf=requestAnimationFrame(ctick)};
+  // where the view settles: the cover nearest the middle of the screen comes to the middle, the rest dim a little.
+  // Zoomed far out (covers small), it just stays inside the edges.
+  const mid=()=>{const p=pad();return{x:innerWidth/2,y:p.t+(innerHeight-p.t-p.b)/2}};
+  function aimAt(px,py){const b=bounds(),m=mid();let best=null,bd=1e9;
+    if(T*z>=90)for(const t of board.children){const sx=px+(t.offsetLeft+T/2)*z,sy=py+(t.offsetTop+T/2)*z,d=Math.hypot(sx-m.x,sy-m.y);if(d<bd){bd=d;best=t}}
+    let nx=px,ny=py;if(best){nx=m.x-(best.offsetLeft+T/2)*z;ny=m.y-(best.offsetTop+T/2)*z}
+    tx=Math.min(b.x1,Math.max(b.x0,nx));ty=Math.min(b.y1,Math.max(b.y0,ny));focus(best)}
+  function focus(t){for(const n of board.querySelectorAll('.tile.on'))if(n!==t)n.classList.remove('on');t?.classList.add('on');board.classList.toggle('focus',!!t)}
+  window.cvCenter=t=>{const m=mid();x=tx=m.x-(t.offsetLeft+T/2)*z;y=ty=m.y-(t.offsetTop+T/2)*z;const b=bounds();x=tx=Math.min(b.x1,Math.max(b.x0,x));y=ty=Math.min(b.y1,Math.max(b.y0,y));vx=vy=0;paint();focus(t)};
+  // one spring, critically damped: no bounce, no drift
+  function ctick(now){craf=0;if(cdrag||pinch)return;const dt=Math.min(.032,lt?(now-lt)/1000:.016);lt=now;
+    // zoom eases back inside its range first, around where you were pinching
+    const zt=Math.min(ZMAX,Math.max(zmin(),z));
+    if(Math.abs(zt-z)>.0005){const a=anchor||mid();zoomAt(z+(zt-z)*.2,a.x,a.y);paint();pend=true;craf=requestAnimationFrame(ctick);return}
+    z=zt;anchor=null;
+    if(pend){pend=false;aimAt(x+vx*.3,y+vy*.3)}
+    vx+=(170*(tx-x)-26*vx)*dt;vy+=(170*(ty-y)-26*vy)*dt;x+=vx*dt;y+=vy*dt;paint();
+    if(Math.abs(tx-x)+Math.abs(ty-y)>.4||Math.abs(vx)+Math.abs(vy)>6)craf=requestAnimationFrame(ctick);else{x=tx;y=ty;vx=vy=0;paint();sharpen()}}
+  const ckick=()=>{pend=true;lt=0;if(reduce){z=Math.min(ZMAX,Math.max(zmin(),z));aimAt(x,y);x=tx;y=ty;vx=vy=0;paint();sharpen();return}if(!craf)craf=requestAnimationFrame(ctick)};
   const hint=()=>{const h=$('.hint',cv);if(h)h.style.opacity=0};
   const startDrag=p=>{cdrag={x:p.x,y:p.y,t:performance.now(),bx:x,by:y,sx:p.x,sy:p.y}};
   const two=()=>{const [a,b]=[...pts.values()];return{d:Math.hypot(a.x-b.x,a.y-b.y)||1,mx:(a.x+b.x)/2,my:(a.y+b.y)/2}};
   cv.addEventListener('pointerdown',e=>{cancelAnimationFrame(craf);craf=0;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});cv.setPointerCapture(e.pointerId);hint();
-    if(pts.size===1){startDrag({x:e.clientX,y:e.clientY});moved=0;vx=vy=0;cv.classList.add('drag')}
+    if(pts.size===1){startDrag({x:e.clientX,y:e.clientY});moved=0;vx=vy=0;cv.classList.add('drag');board.classList.remove('focus')}
     else if(pts.size===2){const t=two();pinch={d0:t.d,mx:t.mx,my:t.my,z0:z,x0:x,y0:y};cdrag=null;moved=99}});
   cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(pinch&&pts.size>=2){const t=two(),nz=zgive(pinch.z0*t.d/pinch.d0);
@@ -1872,7 +1896,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
       z=nz;x=t.mx-(pinch.mx-pinch.x0)*nz/pinch.z0;y=t.my-(pinch.my-pinch.y0)*nz/pinch.z0;anchor={x:t.mx,y:t.my};paint();return}
     if(!cdrag)return;const b=bounds(),now=performance.now(),dt=Math.max(1,now-cdrag.t);
     moved=Math.max(moved,Math.hypot(e.clientX-cdrag.sx,e.clientY-cdrag.sy));
-    vx=(e.clientX-cdrag.x)/dt*16;vy=(e.clientY-cdrag.y)/dt*16;cdrag.x=e.clientX;cdrag.y=e.clientY;cdrag.t=now;
+    vx=(e.clientX-cdrag.x)/dt*1000;vy=(e.clientY-cdrag.y)/dt*1000;cdrag.x=e.clientX;cdrag.y=e.clientY;cdrag.t=now;
     x=give(cdrag.bx+e.clientX-cdrag.sx,b.x0,b.x1);y=give(cdrag.by+e.clientY-cdrag.sy,b.y0,b.y1);paint()});
   const cend=e=>{if(!pts.delete(e.pointerId))return;
     if(pinch){if(pts.size<2){pinch=null;vx=vy=0;
@@ -1883,7 +1907,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     if(stale)vx=vy=0;ckick()};
   cv.addEventListener('pointerup',cend);cv.addEventListener('pointercancel',cend);
   // a trackpad pinch arrives as a wheel with ctrl held (Safari sends gestures instead); a plain wheel pans
-  cv.addEventListener('wheel',e=>{e.preventDefault();hint();cancelAnimationFrame(craf);craf=0;vx=vy=0;
+  cv.addEventListener('wheel',e=>{e.preventDefault();hint();cancelAnimationFrame(craf);craf=0;vx=vy=0;board.classList.remove('focus');
     if(e.ctrlKey){anchor={x:e.clientX,y:e.clientY};zoomAt(zgive(z*Math.exp(-e.deltaY*.012)),e.clientX,e.clientY)}
     else{const b=bounds();x=give(x-e.deltaX,b.x0,b.x1);y=give(y-e.deltaY,b.y0,b.y1)}
     paint();clearTimeout(cv._w);cv._w=setTimeout(ckick,120)},{passive:false});
@@ -1894,8 +1918,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   // (the arrow keys pan the canvas and + and - zoom it: see the keydown guard below)
   window.panCanvas=e=>{
     if(e.key==='+'||e.key==='='||e.key==='-'){e.preventDefault();hint();anchor={x:innerWidth/2,y:innerHeight/2};zoomAt(Math.min(ZMAX,Math.max(zmin(),z*(e.key==='-'?1/1.25:1.25))),anchor.x,anchor.y);clamp(true);paint();sharpen();return}
-    const m={ArrowLeft:[1,0],ArrowRight:[-1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!m)return;e.preventDefault();hint();vx=m[0]*16;vy=m[1]*16;ckick()};
-  cv.insertAdjacentHTML('beforeend','<p class="hint" aria-hidden="true">Drag to look around, pinch to zoom</p>');
+    const m={ArrowLeft:[1,0],ArrowRight:[-1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!m)return;e.preventDefault();hint();vx=m[0]*T*z*3.4;vy=m[1]*T*z*3.4;ckick()};
   // on the wall the arrow keys scroll it, not the crate behind it; slash still searches
   addEventListener('keydown',e=>{if(view==='crate'||!open.hidden||e.target.closest('input'))return;
     if(view==='canvas'){panCanvas(e);if(/^[-+=]$/.test(e.key))e.stopImmediatePropagation()}
