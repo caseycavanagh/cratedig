@@ -782,6 +782,16 @@ html:has(.open:not([hidden])) body .kd{opacity:1;visibility:visible;z-index:11;t
 html:has(.open:not([hidden])) body:not(.ready) .kd{opacity:0}
 html.phone .o-page{padding-bottom:calc(env(safe-area-inset-bottom) + 92px)}
 html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
+/* edit (Casey only) sits at the bottom right; on a phone, just above the scrubber */
+.ed,html.phone .ed{position:fixed;top:auto;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;margin:0;z-index:12}
+html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
+/* hover a record in the crate and its name comes up beside the pointer: after a short rest, on a spring; it leaves on a quick fade */
+.hv{position:fixed;z-index:5;left:0;top:0;max-width:240px;padding:9px 13px;border-radius:14px;background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--line);box-shadow:0 10px 30px #0006;font-size:13px;line-height:1.35;pointer-events:none;opacity:0;scale:.96;transform-origin:0 0;transition:opacity .12s,scale 0s .12s}
+.hv.on{opacity:1;scale:1;transition:opacity .2s,scale .45s var(--flip)}
+.hv b{display:block;font-weight:500;color:var(--fg)}
+.hv span{display:block;color:var(--m)}
+@media(hover:none){.hv{display:none}}
+@media(prefers-reduced-motion:reduce){.hv,.hv.on{scale:1}}
 </style>
 </head>
 <body>
@@ -814,6 +824,7 @@ html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
 <section class="tbl" id="tbl" hidden tabindex="-1" aria-label="Every record, as a table"><table><thead></thead><tbody></tbody></table></section>
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
+<div class="hv" id="hv" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="upF" accept="image/*" hidden>
 <dialog class="unlock" id="unlock" aria-labelledby="unlockH">
@@ -1115,7 +1126,7 @@ function tick(t){
   if(rest){pos=aim;vel=0;raf=0;tick.t=0;spr=null;if(PHONE)place(true);else queueNudge();render();return} // place first: a record it brings into the pile needs its seat drawn
   render();raf=requestAnimationFrame(tick);
 }
-function kick(){if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);render();return}if(!raf){tick.t=0;raf=requestAnimationFrame(tick)}}
+function kick(){hvOff();if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);render();return}if(!raf){tick.t=0;raf=requestAnimationFrame(tick)}}
 // shading and classes follow the whole-number position, and snap (animating them repaints every cover)
 // Only records you could see are drawn: the pile hides all but its top few, and past 10 deep nothing shows.
 // Shading is two flat steps (behind, flipped), so a flip repaints only the records that change sides.
@@ -1337,7 +1348,7 @@ function openRecord(deep){
   const r=order[cur];fill(r);
   timers.forEach(clearTimeout);timers=[];
   open.hidden=false;open.scrollTop=0;lampOn();
-  ptr=null;if(!PHONE)aimNudge(); // the pointer is in the open view now; the crate waits for it to come back
+  ptr=null;hvOff();if(!PHONE)aimNudge(); // the pointer is in the open view now; the crate waits for it to come back
   document.documentElement.style.overflow='hidden';
   if(PHONE)aimPeeks();
   // 1 click, 2 the rest of the crate dissolves, 3 the record lifts out, 4 the details slide out from under it
@@ -1515,9 +1526,24 @@ function aimNudge(){
   if(ptr&&!reduce&&!raf&&!moved&&open.hidden){const b=frontBox||=n.firstElementChild.getBoundingClientRect();if(ptr.x>=b.left&&ptr.x<=b.right&&ptr.y>=b.top&&ptr.y<=b.bottom)t=Math.max(-1,Math.min(1,((ptr.x-b.left)/b.width-.5)*2))}
   nudgeTo(n,Math.round(t*100)/100);
 }
-const queueNudge=()=>{if(!aimF)aimF=requestAnimationFrame(aimNudge)};
+// the name of the record under a resting pointer, in a small card beside it
+var hvI=-1,hvT=0;const hv=$('#hv');
+function hvOff(){clearTimeout(hvT);hvT=0;hvI=-1;document.getElementById('hv')?.classList.remove('on')}
+function hoverPeek(){
+  const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.elementFromPoint(ptr.x,ptr.y)?.closest('.rc');
+  const i=el?nodes.indexOf(el):-1;
+  if(i<0)return hvOff();
+  const x=Math.min(ptr.x+16,innerWidth-hv.offsetWidth-12),y=Math.min(ptr.y+20,innerHeight-hv.offsetHeight-12);
+  hv.style.translate=`${x}px ${y}px`;
+  if(i===hvI)return;
+  hvI=i;const r=order[i];
+  const say=()=>{hv.innerHTML=`<b></b><span></span>`;hv.firstChild.textContent=r.title;hv.lastChild.textContent=[r.artist,r.year].filter(Boolean).join(' · ');hv.classList.add('on')};
+  clearTimeout(hvT);if(hv.classList.contains('on'))say();else hvT=setTimeout(()=>{hvT=0;if(hvI===i){say();hoverPeek()}},300);
+}
+const queueNudge=()=>{if(!aimF)aimF=requestAnimationFrame(()=>{aimNudge();hoverPeek()})};
 crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;ptr={x:e.clientX,y:e.clientY};queueNudge()});
 crate.addEventListener('pointerleave',()=>{ptr=null;queueNudge()});
+crate.addEventListener('pointerdown',hvOff);crate.addEventListener('wheel',hvOff,{passive:true});
 
 // Paper and wear by year (see "Each jacket's paper" in the styles). A record without a year is plain matte and unworn.
 function dress(el,r){
