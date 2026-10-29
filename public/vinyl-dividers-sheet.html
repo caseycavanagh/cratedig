@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<title>Records: letter dividers</title>
+<link rel="icon" href="vinyl/records-icon.svg" type="image/svg+xml">
+<style>
+/* Sticker sheet for the letter dividers in the crate of vinyl-cosmos.html. Each card is the real crate in that style
+   (vinyl-cosmos.html?dv=N); "Try it" opens it live. Picks stay in this browser. */
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--ease:cubic-bezier(.22,1,.36,1)}
+*,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
+html{background:var(--bg);color-scheme:dark}
+body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.wrap{max-width:1400px;margin:0 auto;padding:40px 20px 80px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+h1{font-size:28px;font-weight:500;letter-spacing:-.01em}
+.top p{color:var(--m);margin-top:4px;max-width:560px}
+.tools{display:flex;align-items:center;gap:8px}
+.picks{color:var(--m);font-size:14px;margin-right:6px}
+.tool{height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--line);font-size:14px;transition:transform .3s var(--ease)}
+.tool:hover{background:var(--soft)}
+.tool:active{transform:scale(.99)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:16px}
+.st{position:relative;border-radius:20px;border:1px solid var(--line);overflow:hidden;background:#161616}
+.st img{display:block;width:100%;height:auto;aspect-ratio:8/5;object-fit:cover;background:#121212}
+.st .meta{padding:14px 16px 16px;display:grid;gap:4px}
+.st .id{font-weight:500}.st .id b{font-weight:500;color:var(--m);margin-right:8px}
+.st .use{color:var(--m);font-size:14px}
+.st .try{justify-self:start;margin-top:8px;font-size:14px;text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:3px}
+.st .try:hover{text-decoration-color:currentColor}
+.star{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#d6d6d8;background:rgba(18,18,18,.7);font-size:17px;transition:transform .3s var(--ease)}
+.star:hover{color:#fff}
+.star:active{transform:scale(.96)}
+.st.picked{box-shadow:inset 0 0 0 2px #fff}.st.picked .star{color:#111;background:#fff}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <div><h1>Letter dividers</h1><p>The tabbed dividers in the crate, eight ways. Star the ones you like, then copy your picks</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="tool" id="copy" type="button">Copy picks</button><button class="tool" id="clear" type="button">Clear</button></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const ALL=[
+  ['D1','Matte black','One black card, the tab cut from it, a small white letter. Darker the further back it stands'],
+  ['D2','Kraft','Record-store cardboard with the letter stamped in mono'],
+  ['D3','White index cards','Off-white cards, black letters: the easiest to read from across the room'],
+  ['D4','Smoked acrylic','Clear plastic with a faint edge, white letters'],
+  ['D5','Just the letters','No cards: each letter stands above the tops on its own'],
+  ['D6','Big tabs','Matte black, tabs and letters about half again as big'],
+  ['D7','In the records’ colors','Each tab takes the color of its letter’s first record'],
+  ['D8','Only what’s next','Matte black, but only the next few letters show; the rest stay hidden'],
+];
+const KEY='records-dividers-picks';let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem(KEY))||[])}catch{}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...picks]))}catch{}};
+$('#grid').innerHTML=ALL.map(([id,n,use])=>`<article class="st" data-id="${id}"><img src="vinyl/dv/${id.toLowerCase()}.webp" alt="The crate with ${n.toLowerCase()} dividers" loading="lazy" width="1280" height="800"><button class="star" type="button" aria-pressed="false" aria-label="Pick ${id} ${n}">★</button><div class="meta"><span class="id"><b>${id}</b>${n}</span><p class="use">${use}</p><a class="try" href="vinyl-cosmos.html?dv=${id.slice(1)}" target="_blank" rel="noopener">Try it<span class="sr"> (opens in a new tab)</span></a></div></article>`).join('');
+function show(){$$('.st').forEach(s=>{const on=picks.has(s.dataset.id);s.classList.toggle('picked',on);$('.star',s).setAttribute('aria-pressed',on)});$('#picks').textContent=[...picks].sort().join(', ')}
+$$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{navigator.clipboard?.writeText([...picks].sort().join(', ')).catch(()=>{});$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1200)};
+$('#clear').onclick=()=>{picks.clear();save();show()};
+show();
+</script>
+</body>
+</html>

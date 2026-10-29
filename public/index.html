@@ -787,21 +787,43 @@ html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
 .ed,html.phone .ed{position:fixed;top:auto;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;margin:0;z-index:12}
 html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
 /* hover a record in the crate and its name slides out from under its right edge: after a short rest, on a spring; it leaves on a quick fade */
-.hv{position:fixed;z-index:1;left:0;top:0;transform:translateY(-50%);width:var(--hw,280px);font-size:20px;line-height:1.25;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
+.hv{position:fixed;z-index:1;left:0;top:0;transform:translateY(-50%);width:var(--hw,280px);display:grid;gap:2px;font-size:14px;line-height:1.3;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
 .hv.on{opacity:1;translate:0;transition:opacity .25s,translate .55s var(--flip),top .45s var(--flip)}
 .hv b{display:block;font-weight:500;color:var(--fg);text-wrap:balance}
 .hv span{display:block;color:var(--m)}
+/* the same tokens as the record view's peek hints, with the same small label above */
+.hv::before{content:'Open →';font:400 12px/1 var(--mono);color:var(--m);margin-bottom:6px}
 @media(hover:none){.hv{display:none}}
 @media(prefers-reduced-motion:reduce){.hv,.hv.on{translate:0;transition:opacity .2s}}
-/* tabbed dividers: one stands just before each letter's first record, all the way back, its tab above the tops and staggered across
-   like a real crate's; it leaves when you flip past it, and a tab turns to its letter */
-.dv{position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;pointer-events:none;transition:opacity .25s}
-.dv i{position:absolute;inset:0 1%;background:#1c1c1e;border-radius:2px}
-.dv span{position:absolute;bottom:calc(100% - 1px);left:var(--tx);width:12%;height:calc(var(--S)*.07);display:grid;place-items:center;padding-bottom:calc(var(--S)*.008);box-sizing:border-box;
-  background:#2a2a2d;border-radius:5px 5px 0 0;box-shadow:inset 0 1px 0 #ffffff14;color:#f2f2f2;font:500 calc(var(--S)*.036)/1 'Instrument Sans',sans-serif;pointer-events:auto;cursor:pointer}
+/* tabbed dividers: one stands just behind the record before each letter, all the way back, its tab above the tops and
+   staggered across like a real crate's; it leaves as you flip past it, and a tab turns to its letter. Styles D1–D8 come from
+   vinyl-dividers-sheet.html (?dv=N); each fades darker the further back it stands (--dk, set as it moves) */
+.dv{--dvc:#0e0e0f;--dvt:#ededed;--tw:11%;--th:calc(var(--S)*.062);--tr:3px;--dvf:500 calc(var(--S)*.03)/1 'Instrument Sans',sans-serif;
+  position:absolute;left:calc(var(--S)/-2);bottom:0;width:var(--S);height:var(--S);transform-origin:50% 100%;pointer-events:none;transition:opacity .25s}
+.dv i,.dv span{background:linear-gradient(rgb(0 0 0/var(--dk,0)) 0 0),var(--dvc)}
+.dv i{position:absolute;inset:0 .5%;border-radius:1px}
+.dv span{position:absolute;bottom:calc(100% - 1px);left:var(--tx);width:var(--tw);height:var(--th);display:grid;place-items:center;border-radius:var(--tr) var(--tr) 0 0;
+  color:var(--dvt);font:var(--dvf);pointer-events:auto;cursor:pointer}
 .dv.off,.crate.lifted .dv{opacity:0}
 .dv.off span,.crate.lifted .dv span{pointer-events:none}
 html.phone .dv{display:none}
+/* D2 kraft: record-store cardboard, the letter stamped in mono */
+[data-dv="2"] .dv{--dvc:#9a7650;--dvt:#1d140b;--dvf:600 calc(var(--S)*.034)/1 'Paper Mono',monospace;--tr:2px}
+/* D3 white index cards */
+[data-dv="3"] .dv{--dvc:#e8e6e0;--dvt:#141414;--tr:2px}
+/* D4 smoked acrylic */
+[data-dv="4"] .dv{--dvc:rgb(255 255 255/.08);--dvt:#fff}
+[data-dv="4"] .dv i,[data-dv="4"] .dv span{box-shadow:inset 0 0 0 1px rgb(255 255 255/.16)}
+[data-dv="4"] .dv span{clip-path:inset(0 0 1px 0)}
+/* D5 just the letters, standing above the tops */
+[data-dv="5"] .dv i{display:none}
+[data-dv="5"] .dv span{background:none;--dvf:500 calc(var(--S)*.05)/1 'Instrument Sans',sans-serif;color:rgb(255 255 255/calc(1 - var(--dk,0)*1.4));text-shadow:0 2px 12px #000c}
+/* D6 big tabs, big letters */
+[data-dv="6"] .dv{--tw:14%;--th:calc(var(--S)*.1);--dvf:500 calc(var(--S)*.055)/1 'Instrument Sans',sans-serif}
+/* D7 each tab in the color of its letter's first record */
+[data-dv="7"] .dv{--dvc:var(--sp);--dvt:var(--spt)}
+/* D8 like D1, but only the next few letters show */
+
 /* the mark: a record. Loading, it spins at 33⅓ and its grooves light from the label out as the covers come in */
 .loading{--p:0}
 .loading .mk{width:48px;height:48px;fill:#fff;animation:spin 1.8s linear infinite}
@@ -814,6 +836,18 @@ html.phone .dv{display:none}
 .logo:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .find:has(.q:focus-within) .logo,.find:has(.q.has) .logo{opacity:0;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.loading .mk{animation:none}}
+/* the details and links, in a sheet of their own over the record */
+.own-d{width:min(520px,calc(100vw - 32px));max-height:calc(100svh - 48px);overflow:auto;overscroll-behavior:contain}
+.own-f{display:grid;gap:18px}
+.own-f h2{margin:0}
+.own-f fieldset{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+.own-f legend{padding:0;margin-bottom:10px;font-size:13px;color:var(--m)}
+.own-d.unlock label{display:grid;gap:6px;margin:0;font:400 12px/1.4 'Instrument Sans',sans-serif;color:var(--m);min-width:0}
+.own-d.unlock input{height:38px;min-width:0;font-size:15px;background:var(--soft)}
+.own-d input::placeholder{color:#5c5c61}
+.own-f .row{display:flex;justify-content:flex-end;gap:8px}
+.own-f #ownFs{background:#fff;color:#111;border-color:#fff}
+@media(max-width:600px){.own-f fieldset{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1068,6 +1102,7 @@ function nodeFor(r){
   n=t.firstElementChild;n._lazy=[...n.querySelectorAll('img[data-src]')];n._jit=jit(r);n._look=look(r);dress(n,r);made.set(r,n);return n;
 }
 let dvs=[]; // the letter dividers
+const DV=+new URLSearchParams(location.search).get('dv')||1;document.documentElement.dataset.dv=DV;
 function build(){
   nodes=order.map(nodeFor);nodes.forEach((n,j)=>n.dataset.j=j);
   jits=nodes.map(n=>n._jit);shown=nodes.map(n=>!n.classList.contains('gone'));frontBox=null; // cached so each frame does no lookups
@@ -1076,7 +1111,7 @@ function build(){
   const runs=order.map(letter).filter((L,j,a)=>L!==a[j-1]);
   dvs=new Set(runs).size<runs.length?[]:order.flatMap((r,j)=>{const L=letter(r);if(!j||L===letter(order[j-1]))return[];
     const d=document.createElement('div');d.className='dv';d.dataset.j=j;d.innerHTML=`<i></i><span>${L}</span>`;
-    const k=L==='#'?0:L.charCodeAt(0)-65;d.style.setProperty('--tx',4+(k%6)*15.5+'%');return[d]});
+    const k=L==='#'?0:L.charCodeAt(0)-65;d.style.setProperty('--tx',4+(k%6)*15.5+'%');d.style.setProperty('--sp',spineBg(r));d.style.setProperty('--spt',/^#[0-9a-f]{6}$/i.test(spineBg(r))&&(n=>(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6)(parseInt(spineBg(r).slice(1),16))?'#111':'#fff');return[d]});
   stack.replaceChildren(...nodes,...dvs,tail);
   // the tail: every record's top as a band in its spine color, shaded like the records behind, over the dark gaps between them.
   // Each band sits a hair off true like the records in front, with its own shift, tilt and lean, so the back reads as a stack
@@ -1144,9 +1179,9 @@ function render(){
     n.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg)`;
   });
   // each divider stands just behind the record before its letter, parallel to it, so the two never cross; it leaves as that record flips
-  for(const v of dvs){const j=+v.dataset.j-1,d=j-pos,off=d<0;if(v._off!==off){v._off=off;v.classList.toggle('off',off)}
+  for(const v of dvs){const j=+v.dataset.j-1,d=j-pos,off=d<0||DV===8&&d>6;if(v._off!==off){v._off=off;v.classList.toggle('off',off)}
     if(!off){const p=seat(d),q=jits[j],g=Math.max(1.5,(p.z-seat(d+1).z)*.45);
-      v.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg) translateZ(${(-g).toFixed(1)}px)`}}
+      v.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg) translateZ(${(-g).toFixed(1)}px)`;v.style.setProperty('--dk',Math.min(.3,Math.max(0,d-1)*.015).toFixed(3))}}
   // the tail starts where the next record past the drawn ones would stand; everything back there leans the same 13°
   if(tailN){tailS||=nodes[0].offsetWidth;const d=cur+11-pos;tail.style.transform=`translate3d(0,${(-tailS*.9744).toFixed(1)}px,${(-BEHIND-(d-1)*GAP-tailS*.225).toFixed(1)}px) rotateX(-90deg)`}
 }
@@ -1796,13 +1831,18 @@ const slugOf=(a,t)=>(a+' '+t).toLowerCase().replace(/[’']/g,'').replace(/[^a-z
 const rgbOf=c=>c?.[0]==='#'?[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)):(String(c).match(/\d+/g)||[216,211,202]).slice(0,3).map(Number);
 const hexOf=c=>'#'+rgbOf(c).map(v=>(+v).toString(16).padStart(2,'0')).join('');
 const inkOn=c=>{const [r,g,b]=rgbOf(c);return r*.299+g*.587+b*.114>150?'#1a1a1a':'#f4f2ee'}; // type on a jacket of that color
+const TEXT=['title','artist','sortAs','year','label','format']; // the details Casey can correct
 const added=new Map(); // slug → record, the same object each time, so the crate keeps its node
 function applyEdits(){
   if(!BASE)return;
   const mine=EDITS.added.map(a=>{const r=added.get(a.slug)||{};added.set(a.slug,r);for(const k of Object.keys(r))delete r[k];r._o={pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...a,mine:true};return r});
   for(const r of [...BASE,...mine]){
-    r._o||={front:r.front,back:r.back,spine:r.spine,pal:r.pal};Object.assign(r,r._o);
+    r._o||={front:r.front,back:r.back,spine:r.spine,pal:r.pal,...Object.fromEntries(TEXT.map(k=>[k,r[k]])),links:r.links,spotify:r.spotify,apple:r.apple};Object.assign(r,r._o);
     const p=EDITS.patch[r.slug];if(!p)continue;
+    for(const k of TEXT)if(p[k]!=null)r[k]=p[k]||undefined;
+    // a corrected link wins over the one the script found; an empty one takes it away
+    if(p.links){const l={...r.links};if(r.spotify)l.spotify='https://open.spotify.com/album/'+r.spotify;if(r.apple)l.appleMusic=r.apple;
+      for(const [k,v] of Object.entries(p.links))if(v)l[k]=v;else delete l[k];r.links=l;r.spotify=r.apple=undefined}
     if(p.front)r.front=p.front;if(p.back)r.back=p.back;if(p.spine)r.spine=p.spine;
     if(p.bg){const t=inkOn(p.bg);r.spine=p.bg;r.pal=[p.bg,t,t]}
   }
@@ -1883,7 +1923,15 @@ $('#unlockF').addEventListener('submit',async e=>{
 $('#unlockX').onclick=()=>unlockD.close();
 unlockD.addEventListener('close',()=>{$('#key').value='';$('#keyErr').textContent='';dropAsk()});
 // Casey's tools on an open record: jacket color, new covers, take it out
+const LINKS=[['spotify','Spotify'],['appleMusic','Apple Music'],['youtubeMusic','YouTube Music'],['tidal','Tidal'],['amazonMusic','Amazon Music'],['deezer','Deezer']];
+const linksOf=r=>{const l={...r.links};if(r.spotify)l.spotify='https://open.spotify.com/album/'+r.spotify;if(r.apple)l.appleMusic=r.apple;return l};
+// the details and links, as a form: a field left as it was, or emptied where the script had nothing, saves nothing
+const detailsHTML=r=>{const l=linksOf(r),f=(k,t,v,ph='')=>`<label><span>${t}</span><input name="${k}" value="${esc(v??'')}" placeholder="${esc(ph)}" autocomplete="off" spellcheck="false"${k==='year'?' inputmode="numeric" maxlength="4"':''}></label>`;
+  return`<form class="own-f" id="ownF" method="dialog"><h2>${esc(r.title)}</h2><fieldset><legend>Details</legend>${f('title','Title',r.title)}${f('artist','Artist',r.artist)}${f('sortAs','Sort as',r.sortAs,'Same as the artist')}${f('year','Year',r.year)}${f('label','Label',r.label)}${f('format','Format',r.format)}</fieldset>
+    <fieldset><legend>Links</legend>${LINKS.map(([k,t])=>f('l-'+k,t,l[k],'https://')).join('')}</fieldset>
+    <div class="row"><button type="button" class="btn sm" id="ownFx">Cancel</button><button class="btn sm" id="ownFs">Save</button></div></form>`};
 const ownHTML=r=>editing?`<div class="own">
+      <button type="button" class="btn sm" id="ownD" aria-haspopup="dialog">Details and links</button>
       <label class="own-c"><input type="color" id="ownC" value="${hexOf(spineBg(r))}"><span>Jacket color</span></label>
       <button type="button" class="btn sm" data-up="front">${r.front?'New front':'Add a front'}</button><button type="button" class="btn sm" data-up="back">${r.back?'New back':'Add a back'}</button>
       ${EDITS.patch[r.slug]?'<button type="button" class="btn sm" id="ownReset">Back to the original</button>':''}<button type="button" class="btn sm" id="ownX">Take it out of the crate</button>
@@ -1892,7 +1940,8 @@ const upF=$('#upF'),ownBusy=on=>$('#oinfo .own')?.classList.toggle('busy',on);
 $('#oinfo').addEventListener('click',e=>{
   if(!editing||busy)return;const r=order[cur];
   const u=e.target.closest('[data-up]');if(u){upF.dataset.side=u.dataset.up;upF.click()}
-  if(e.target.closest('#ownReset'))patch(r,{bg:null,spine:null,front:null,back:null},'Back to the original');
+  if(e.target.closest('#ownReset'))patch(r,{bg:null,spine:null,front:null,back:null,...Object.fromEntries(TEXT.map(k=>[k,null])),links:null},'Back to the original');
+  if(e.target.closest('#ownD')){ownDlg.innerHTML=detailsHTML(r);ownDlg.showModal();$('#ownF').elements.title.focus()}
   if(e.target.closest('#ownX'))takeOut(r);
 });
 // the color shows on the record as you pick it, and saves when you're done
@@ -1901,6 +1950,18 @@ $('#oinfo').addEventListener('input',e=>{
   $$('#sleeve .edge').forEach(n=>n.style.background=c);if(!r.front)$('#sleeve .fr').innerHTML=coverHTML(x);if(!r.back)$('#sleeve .bk').innerHTML=backHTML(x);
 });
 $('#oinfo').addEventListener('change',e=>{if(e.target.id==='ownC')patch(order[cur],{bg:e.target.value},'Jacket color saved')});
+// saving the details: only what changed goes; a field put back to how the script had it goes back to the original
+const ownDlg=document.createElement('dialog');ownDlg.className='unlock own-d';ownDlg.setAttribute('aria-label','Details and links');document.body.append(ownDlg);
+ownDlg.addEventListener('click',e=>{if(e.target.closest('#ownFx'))ownDlg.close()});
+ownDlg.addEventListener('submit',e=>{
+  e.preventDefault();const r=order[cur],F=e.target.elements,o=r._o||{},ol=linksOf(o),now=linksOf(r),set={},links={};
+  for(const k of TEXT){const v=F[k].value.trim();if(v===String(r[k]??''))continue;set[k]=v===String(o[k]??'')?null:v}
+  for(const [k] of LINKS){const v=F['l-'+k].value.trim();if(v===(now[k]??''))continue;if(v&&!/^https:\/\/\S+$/.test(v)){toast('A link starts with https://');F['l-'+k].focus();return}links[k]=v===(ol[k]??'')?null:v}
+  if(Object.keys(links).length)set.links=links;
+  if(!Object.keys(set).length){ownDlg.close();return}
+  if('title' in set&&!F.title.value.trim()||'artist' in set&&!F.artist.value.trim()){toast('A record needs a title and an artist');return}
+  ownDlg.close();patch(r,set,'Details saved');
+});
 async function patch(r,set,msg){
   ownBusy(true);
   try{await api({op:'patch',slug:r.slug,set});toast(msg)}catch(e){toast(e.message)}
@@ -2281,16 +2342,19 @@ function build(){
   LT=[...clip.querySelectorAll('.kd-l')];TH=[...clip.querySelectorAll('.kd-t')];
   at=-1;rest('l');rest('r');render();label();
 }
+const BOW=12; // how far the dial's ends drop, in pixels
 function render(){
   const z=clamp(S.z.x,0,1),e=z*z*(3-2*z),cL=S.l.x,cR=S.r.x,lp=cL/W,half=kd.clientWidth/2+30,curL=letter(order[cur]);
+  // the dial curves away a little at its ends, like the edge of a wheel: each mark drops and leans with its distance from the middle
+  const R=half*half/BOW,bend=x=>+(x*x/R).toFixed(2),tilt=x=>(Math.atan(2*x/R)*180/Math.PI).toFixed(2);
   kd.style.setProperty('--kh',lerp(H0,H1,e)+'px');kd.style.setProperty('--kz',e);
   LT.forEach((s,j)=>{const L=AZ[j],ok=has(L),x=lerp(j*W-cL,ok?X[FIRST[L]]-cR:j*W-cL,e),d=Math.abs(j-lp);
-    s.style.transform=`translate(${x}px,${-lerp(17,44,e)}px) scale(${lerp(1+.35*Math.max(0,1-d),.72,e)})`;
+    s.style.transform=`translate(${x}px,${-lerp(17,44,e)+bend(x)}px) rotate(${tilt(x)}deg) scale(${lerp(1+.35*Math.max(0,1-d),.72,e)})`;
     s.style.opacity=ok?1:.35*(1-e);s.style.visibility=Math.abs(x)>half?'hidden':'';s.classList.toggle('on',e<.5?d<.5:L===curL)});
   TH.forEach((s,i)=>{if(e<.01){s.style.visibility='hidden';return}
     const x=lerp(slot(i)*W-cL,X[i]-cR,e);if(Math.abs(x)>half){s.style.visibility='hidden';return}
     const near=Math.max(0,1-Math.abs(X[i]-cR)/WR);
-    s.style.visibility='';s.style.opacity=clamp((e-.3)/.5,0,1);s.style.transform=`translate(${x}px,-14px) scaleY(${lerp(.3,1+.8*near,e)})`;s.classList.toggle('on',i===cur&&e>.5)});
+    s.style.visibility='';s.style.opacity=clamp((e-.3)/.5,0,1);s.style.transform=`translate(${x}px,${-14+bend(x)}px) rotate(${tilt(x)}deg) scaleY(${lerp(.3,1+.8*near,e)})`;s.classList.toggle('on',i===cur&&e>.5)});
   if(mode()==='l'){const k=clamp(Math.round(cL/W),0,AZ.length-1);if(k!==lastL){lastL=k;if(user&&has(AZ[k])){toLetter(AZ[k]);buzz(4)}}}
   else{const k=nearR(cR);if(k!==lastR){lastR=k;if(user){toRecord(k);buzz(2)}}}
   labC.style.opacity=clamp(1-e*1.8,0,1);labC.style.transform=`translateY(${-8*e}px)`;labA.style.opacity=clamp(e*1.8-.8,0,1);labA.style.transform=`translateY(${8*(1-e)}px)`;

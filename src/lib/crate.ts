@@ -19,7 +19,21 @@ export type Rec = {
   links?: Record<string, string>;
   added?: string;
 };
-export type Patch = { bg?: string; front?: string; back?: string; spine?: string };
+export type Patch = {
+  bg?: string;
+  front?: string;
+  back?: string;
+  spine?: string;
+  // the details Casey corrects; an empty string blanks one (a label or year that's wrong rather than missing)
+  title?: string;
+  artist?: string;
+  sortAs?: string;
+  year?: string;
+  label?: string;
+  format?: string;
+  // where Play goes, by service; an empty string takes a wrong link away
+  links?: Record<string, string>;
+};
 export type Edits = { added: Rec[]; removed: string[]; patch: Record<string, Patch> };
 
 export const EDITS = "crate:edits";

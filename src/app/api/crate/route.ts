@@ -5,7 +5,8 @@
 //     op "add"     record                a record: artist, title, year, label, format, front, back, spine, spotify, links
 //     op "remove"  slug                  off the crate (kept, covers and all, so it can be put back)
 //     op "restore" slug                  back in the crate
-//     op "patch"   slug, set             { bg, front, back, spine } for a record; null clears one
+//     op "patch"   slug, set             { bg, front, back, spine, title, artist, sortAs, year, label, format, links } for a
+//                                         record; null clears one, back to the original. links: { service: url }, "" takes one away
 // Covers Casey uploads go to /api/crate/img first and come back as /api/crate/img/<id>.
 import { connection } from "next/server";
 import { kv } from "@/lib/kv";
@@ -23,6 +24,7 @@ export async function GET() {
   );
 }
 
+const SERVICES = ["spotify", "appleMusic", "youtubeMusic", "tidal", "amazonMusic", "deezer"];
 const text = (v: unknown, max = 200) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : undefined);
 const color = (v: unknown) => (typeof v === "string" && /^(#[0-9a-f]{6}|rgb\(\d{1,3},\s?\d{1,3},\s?\d{1,3}\))$/i.test(v) ? v : undefined);
 // a cover is one of Casey's uploads or an image on the web
@@ -80,6 +82,24 @@ export async function POST(req: Request) {
       if (v) p[k] = v;
       else delete p[k];
     }
+    for (const k of ["title", "artist", "sortAs", "year", "label", "format"] as const) {
+      if (!(k in b.set)) continue;
+      const v = b.set[k];
+      if (v === null || typeof v !== "string") delete p[k];
+      else if ((k === "title" || k === "artist") && !v.trim()) continue; // a record always has both
+      else if (k === "year" && !/^(\d{4})?$/.test(v.trim())) continue;
+      else p[k] = v.trim().slice(0, k === "format" ? 40 : 200);
+    }
+    if (b.set.links && typeof b.set.links === "object") {
+      const l: Record<string, string> = { ...p.links };
+      for (const [k, v] of Object.entries(b.set.links)) {
+        if (!SERVICES.includes(k)) continue;
+        if (v === null) delete l[k];
+        else if (v === "" || (typeof v === "string" && /^https:\/\/[^\s"'<>]+$/.test(v))) l[k] = (v as string).slice(0, 500);
+      }
+      if (Object.keys(l).length) p.links = l;
+      else delete p.links;
+    } else if (b.set.links === null) delete p.links;
     if (Object.keys(p).length) e.patch[slug] = p;
     else delete e.patch[slug];
   } else return Response.json({ error: "unknown edit" }, { status: 400 });
