@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<title>Records: control bar</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+/* Sticker sheet for the bottom bar of vinyl-cosmos.html (views, search, filters). Two rows: when it shows (W) and
+   how it looks (B). Every phone is live. Data from vinyl-prototype.html and vinyl/covers.json. */
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--glass:rgba(30,30,32,.74);--ease:cubic-bezier(.22,1,.36,1);--out:cubic-bezier(.4,0,.2,1)}
+*,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
+html{background:var(--bg);color-scheme:dark}
+body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button,input{font:inherit;color:inherit;background:none;border:0}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
+.wrap{max-width:1500px;margin:0 auto;padding:40px 20px 80px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.top h1{font-size:32px;font-weight:500;letter-spacing:-.02em}
+.top p{color:var(--m);max-width:660px;margin-top:6px}
+.tools{display:flex;align-items:center;gap:10px;font-size:14px}
+.picks{color:var(--m)}
+.tool{height:40px;padding:0 18px;border-radius:99px;border:1px solid var(--line);font-size:14px;font-weight:500;transition:transform .3s var(--ease)}
+.tool:hover{background:var(--soft)}
+.tool:active{transform:scale(.99)}
+h2{font-size:20px;font-weight:500;margin:44px 0 4px}
+h2+p{color:var(--m);margin-bottom:22px;max-width:660px}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:28px 20px}
+.st{position:relative;padding:44px 14px 16px;border-radius:26px;background:#19191b}
+.st .id{position:absolute;top:15px;left:18px;right:52px;font-size:14px;color:var(--m)}.st .id b{color:var(--fg);font-weight:500;margin-right:6px}
+.st .use{margin:14px 4px 0;font-size:14px;color:var(--m);line-height:1.45}
+.star{position:absolute;top:8px;right:10px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--m);font-size:17px;transition:transform .3s var(--ease)}
+.star:hover{background:var(--soft);color:var(--fg)}
+.star:active{transform:scale(.96)}
+.st.picked{box-shadow:inset 0 0 0 2px #fff}.st.picked .star{color:#fff}
+
+/* a phone */
+.ph{position:relative;width:330px;height:660px;margin:0 auto;border-radius:44px;background:var(--bg);overflow:hidden;box-shadow:0 0 0 7px #2a2a2c,0 0 0 8px #3a3a3d;isolation:isolate;user-select:none;-webkit-user-select:none}
+svg{display:block}
+/* W phones: a column of records you move through, one at a time */
+.ph .sc{position:absolute;inset:0;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain}
+.ph .sc::-webkit-scrollbar{display:none}
+.ph .sc figure{height:440px;scroll-snap-align:center;display:grid;place-content:center;justify-items:start;gap:14px}
+.ph .sc figure:first-child{margin-top:60px}.ph .sc figure:last-child{margin-bottom:160px}
+.ph .cov{width:228px;height:228px;border-radius:3px;object-fit:cover;background:#2a2a2d;box-shadow:0 18px 30px -12px #000c;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:15px;line-height:1.15}
+.ph figcaption b{display:block;font-weight:500;width:228px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph figcaption span{color:var(--m);font-size:14px}
+/* B phones: the front of the crate, still */
+.ph .pile{position:absolute;left:51px;top:110px;width:228px;height:228px}
+.ph .pile i{position:absolute;inset:0;border-radius:3px;background:#2a2a2d}
+.ph .pile i:nth-child(1){transform:translateY(-12px) scale(.94);background:#222224}
+.ph .pile i:nth-child(2){transform:translateY(-6px) scale(.97);background:#2c2c2f}
+.ph .pile .cov{position:absolute;inset:0;width:100%;height:100%}
+.ph .letters{position:absolute;left:0;right:0;bottom:96px;display:flex;justify-content:center;gap:16px;font-size:15px;color:#5f5f64;pointer-events:none;transition:bottom .4s var(--ease),opacity .2s}
+.ph .letters b{color:#fff;font-weight:500;font-size:19px;line-height:1}
+.ph .fade{position:absolute;left:0;right:0;bottom:0;height:150px;background:linear-gradient(#12121200,#121212d9 60%,#121212);pointer-events:none;z-index:1}
+
+/* the bar, shared parts */
+.bar{position:absolute;z-index:3;left:10px;right:10px;bottom:18px;display:flex;align-items:center;gap:8px;transition:transform .4s var(--ease),opacity .25s var(--ease)}
+.bar.away{transform:translateY(24px);opacity:0;pointer-events:none;transition:transform .3s var(--out),opacity .16s}
+.glass{background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
+.seg{display:flex;padding:3px;border-radius:99px;flex:none}
+.seg button{width:36px;height:36px;border-radius:99px;display:grid;place-items:center;color:#a5a5aa;transition:background-color .25s,color .2s,transform .3s var(--ease)}
+.seg button[aria-pressed=true]{background:#fff;color:#111}
+.ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#d6d6d8;flex:none;transition:transform .3s var(--ease),background-color .2s}
+.ib:active,.seg button:active,.ic:active,.q:active{transform:scale(.96)}
+.q{flex:1;min-width:0;height:44px;border-radius:99px;display:flex;align-items:center;gap:8px;padding:0 14px;color:#7d7d82;font-size:15px;transition:transform .3s var(--ease)}
+.q input{flex:1;min-width:0;outline:none;color:#fff}
+.q input::placeholder{color:#7d7d82}
+.q svg,.ic svg,.seg svg{width:19px;height:19px;flex:none}
+.tray{position:absolute;z-index:3;left:12px;right:12px;bottom:76px;display:flex;flex-wrap:wrap;gap:6px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .35s var(--ease)}
+.tray.on{opacity:1;transform:none;pointer-events:auto}
+.ph:has(.tray.on) .letters,.ph:has(.pop.on) .letters{opacity:0}
+.chip{height:34px;padding:0 14px;border-radius:99px;font-size:14px;color:#d6d6d8;transition:transform .3s var(--ease),background-color .2s}
+.chip[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
+
+/* W4: shrinks to one circle */
+.w4 .bar{justify-content:center}
+.w4 .bar>*{transition:max-width .4s var(--ease),opacity .2s,padding .4s var(--ease),margin .4s var(--ease)}
+.w4 .bar .seg,.w4 .bar .fbt{max-width:200px;overflow:hidden}
+.w4 .bar .q{max-width:400px}
+.w4 .bar.small .seg,.w4 .bar.small .fbt{max-width:0;opacity:0;padding:0;border-width:0;margin:0 -4px}
+.w4 .bar.small .q{max-width:44px;flex:0 0 44px;padding:0 12px}
+.w4 .bar.small .q input{opacity:0}
+/* W5: only when asked; a short line marks where it lives */
+.w5 .grab{position:absolute;z-index:2;left:50%;bottom:10px;width:120px;height:28px;translate:-50% 0;display:grid;place-items:end center;padding-bottom:6px;transition:opacity .2s}
+.w5 .grab::after{content:'';width:44px;height:5px;border-radius:3px;background:#5f5f64}
+.w5 .grab.off{opacity:0;pointer-events:none}
+
+/* B1: today */
+/* B2: one capsule, hairlines between */
+.b2 .one{flex:1;min-width:0;display:flex;align-items:center;height:52px;border-radius:99px;padding:0 4px 0 0}
+.b2 .one .q{background:none;border:0;height:52px}
+.b2 .one .vr{width:1px;height:22px;background:var(--line);flex:none}
+.b2 .one .ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#d6d6d8;flex:none;transition:transform .3s var(--ease)}
+.b2 .one .ib svg{width:19px;height:19px}
+.b2 .pop{position:absolute;z-index:4;right:12px;bottom:80px;padding:4px;border-radius:20px;display:grid;min-width:150px;opacity:0;transform:translateY(8px) scale(.98);transform-origin:100% 100%;pointer-events:none;transition:opacity .18s,transform .35s var(--ease)}
+.b2 .pop.on{opacity:1;transform:none;pointer-events:auto}
+.b2 .pop button{height:42px;padding:0 14px;border-radius:16px;display:flex;align-items:center;gap:10px;font-size:15px;color:#d6d6d8;text-align:left}
+.b2 .pop button svg{width:18px;height:18px}
+.b2 .pop button[aria-pressed=true]{background:#ffffff14;color:#fff}
+/* B3: search pill only; one sheet holds views and filters */
+.b3 .q{height:52px}
+.b3 .q .in{margin-left:auto;margin-right:-10px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#d6d6d8}
+.b3 .scrim{position:absolute;inset:0;z-index:4;background:#0007;opacity:0;pointer-events:none;transition:opacity .25s}
+.b3 .scrim.on{opacity:1;pointer-events:auto}
+.b3 .sh{position:absolute;z-index:5;left:8px;right:8px;bottom:8px;border-radius:32px;background:#1e1e20;border:1px solid var(--line);padding:18px 16px 16px;transform:translateY(110%);transition:transform .45s var(--ease)}
+.b3 .sh.on{transform:none}
+.b3 .sh h4{font-size:13px;font-weight:400;color:var(--m);margin:0 4px 8px}
+.b3 .sh h4+*{margin-bottom:18px}
+.b3 .sh .vs{display:flex;padding:3px;border-radius:99px;background:#2a2a2d}
+.b3 .sh .vs button{flex:1;height:38px;border-radius:99px;font-size:14px;color:#a5a5aa;transition:background-color .25s,color .2s}
+.b3 .sh .vs button[aria-pressed=true]{background:#fff;color:#111}
+.b3 .sh .chips{display:flex;flex-wrap:wrap;gap:6px}
+.b3 .sh .chip{border:1px solid var(--line)}
+/* B4: words, no glass */
+.b4 .fade{height:130px}
+.b4 .bar{left:20px;right:20px;bottom:26px;justify-content:space-between;gap:0}
+.b4 .words{display:flex;gap:18px;font-size:15px}
+.b4 .words button{color:#7d7d82;padding:6px 0;position:relative;transition:color .2s,transform .3s var(--ease)}
+.b4 .words button[aria-pressed=true]{color:#fff}
+.b4 .words button:active{transform:scale(.99)}
+.b4 .sx{position:absolute;z-index:3;left:20px;right:20px;bottom:22px;display:flex;align-items:center;gap:10px;height:40px;border-bottom:1px solid #ffffff40;opacity:0;pointer-events:none;transition:opacity .2s}
+.b4 .sx input{flex:1;outline:none;font-size:16px}
+.b4 .sx button{color:#a5a5aa;font-size:15px}
+.b4.searching .sx{opacity:1;pointer-events:auto}
+.b4.searching .bar{opacity:0;pointer-events:none}
+.b4 .tray{bottom:70px;left:20px;right:20px}
+.b4 .tray .chip{padding:0 2px;height:28px;color:#7d7d82;background:none;border:0;margin-right:10px}
+.b4 .tray .chip[aria-pressed=true]{color:#fff;background:none}
+/* B5: a toolbar, edge to edge */
+.b5 .bar{left:0;right:0;bottom:0;height:84px;padding:6px 18px 30px;justify-content:space-between;gap:0;border-radius:0;border-width:1px 0 0;background:#161618e6}
+.b5 .bar button{width:48px;height:44px;display:grid;place-items:center;color:#7d7d82;transition:color .2s,transform .3s var(--ease)}
+.b5 .bar button svg{width:22px;height:22px}
+.b5 .bar button[aria-pressed=true]{color:#fff}
+.b5 .bar button:active{transform:scale(.96)}
+.b5 .bar .gap{width:1px;height:20px;background:var(--line)}
+.b5 .letters{bottom:104px}
+.b5 .tray{bottom:96px}
+.b5 .sx{position:absolute;z-index:4;left:0;right:0;bottom:0;height:84px;padding:12px 14px 30px;display:flex;gap:10px;align-items:center;background:#161618;border-top:1px solid var(--line);transform:translateY(100%);transition:transform .35s var(--ease)}
+.b5 .sx .q{height:40px;background:#2a2a2d}
+.b5 .sx>button{color:#d6d6d8;font-size:15px}
+.b5.searching .sx{transform:none}
+/* B6: a small solid dock; search widens it into a field */
+.b6 .bar{justify-content:center}
+.b6 .dock{display:flex;align-items:center;gap:2px;height:52px;padding:4px;border-radius:99px;background:#232325;box-shadow:0 12px 30px -10px #000c;transition:width .4s var(--ease)}
+.b6 .dock button{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#8e8e93;transition:color .2s,background-color .2s,transform .3s var(--ease)}
+.b6 .dock button svg{width:20px;height:20px}
+.b6 .dock button[aria-pressed=true]{color:#fff;background:#ffffff14}
+.b6 .dock button:active{transform:scale(.96)}
+.b6 .dock .vr{width:1px;height:20px;background:#ffffff1a;margin:0 4px}
+.b6 .dock .field{width:0;overflow:hidden;transition:width .4s var(--ease)}
+.b6 .dock .field input{width:170px;height:44px;outline:none;padding:0 8px;font-size:15px}
+.b6 .dock .field input::placeholder{color:#7d7d82}
+.b6.searching .dock .field{width:178px}
+.b6.searching .dock .vw{width:0;padding:0;opacity:0;overflow:hidden}
+.b6 .dock .vw{transition:width .4s var(--ease),opacity .2s}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>Records: control bar</h1><p>The bottom bar on the records page, two ways: when it shows, and how it looks. Pick one from each row. Every phone is live: scroll the W phones to move through records, tap around the B phones.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="tool" id="copy" type="button">Copy picks</button><button class="tool" id="clear" type="button">Clear</button></div></div>
+  <h2>When it shows</h2><p>Same bar in each; only the timing changes.</p>
+  <div class="sheet" id="when"></div>
+  <h2>How it looks</h2><p>Views, search and filters, six ways. The letters above stand in for the dial.</p>
+  <div class="sheet" id="look"></div>
+</div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f;
+const slugOf=r=>(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const name=r=>(r.sortAs||r.artist).replace(/^the /i,'');
+const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
+const sv=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I={
+  crate:sv('<rect x="4" y="9" width="16" height="11" rx="2"/><path d="M6 6h12M8 3h8"/>'),
+  grid:sv('<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>'),
+  table:sv('<path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/>'),
+  search:sv('<circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/>'),
+  filter:sv('<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'),
+};
+const VIEWS=[['crate','Crate'],['grid','Grid'],['table','Table']];
+const FILTERS=['60s','70s','2000s','2010s','2020s','Live','Greatest hits'];
+let R=[];
+const cover=r=>r.front?`<img class="cov" src="${img(r.front)}" alt="" loading="lazy">`:`<span class="cov" style="background:${r.spine||'#2c2c2e'};color:${ink(r.spine)}">${esc(r.title)}</span>`;
+
+// pressing one of a set
+const radio=(btns,on)=>btns.forEach(b=>b.addEventListener('click',()=>{btns.forEach(x=>x.setAttribute('aria-pressed',x===b));on?.(b)}));
+const toggles=root=>$$('.chip',root).forEach(c=>c.addEventListener('click',()=>c.setAttribute('aria-pressed',c.getAttribute('aria-pressed')!=='true')));
+
+// today's bar, for the W row
+const barToday=()=>`<div class="bar"><div class="seg glass" role="group" aria-label="View">${VIEWS.map(([k,l],i)=>`<button type="button" aria-label="${l}" aria-pressed="${!i}">${I[k]}</button>`).join('')}</div>
+  <label class="q glass">${I.search}<span class="sr">Search</span><input type="search" placeholder="Search"></label>
+  <button class="ic glass fbt" type="button" aria-label="Filters">${I.filter}</button></div>
+  <div class="tray">${FILTERS.map(f=>`<button class="chip glass" type="button" aria-pressed="false">${f}</button>`).join('')}</div>`;
+function wireToday(ph){radio($$('.seg button',ph));toggles(ph);$('.fbt',ph).addEventListener('click',()=>$('.tray',ph).classList.toggle('on'))}
+
+function scroller(ph){
+  const sc=document.createElement('div');sc.className='sc';
+  sc.innerHTML=R.slice(0,24).map(r=>`<figure>${cover(r)}<figcaption><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></figcaption></figure>`).join('');
+  ph.append(sc);const f=document.createElement('div');f.className='fade';ph.append(f);
+  ph.insertAdjacentHTML('beforeend',barToday());wireToday(ph);return sc;
+}
+const ends=sc=>sc.scrollTop<20||sc.scrollTop+sc.clientHeight>sc.scrollHeight-20;
+const away=(ph,on)=>{$('.bar',ph).classList.toggle('away',on);if(on)$('.tray',ph).classList.remove('on')};
+
+const WHEN=[
+ ['Always there',ph=>{scroller(ph)},
+  'Never moves. Records pass under a soft fade at the bottom, and every control is always one tap away.'],
+ ['Steps aside while you move',ph=>{const sc=scroller(ph);let t;sc.addEventListener('scroll',()=>{if(!ends(sc))away(ph,true);clearTimeout(t);t=setTimeout(()=>away(ph,false),700)},{passive:true})},
+  'Goes the moment the records move, back 0.7 seconds after they stop. What it does today, minus the bounce and the mouse rules.'],
+ ['Follows your direction',ph=>{const sc=scroller(ph);let y=0;sc.addEventListener('scroll',()=>{const d=sc.scrollTop-y;y=sc.scrollTop;if(ends(sc))away(ph,false);else if(d>4)away(ph,true);else if(d<-4)away(ph,false)},{passive:true})},
+  'Moving forward hides it; going back, even a little, brings it back. Like Safari. No timers, so it never pops up on its own.'],
+ ['Shrinks, never leaves',ph=>{const sc=scroller(ph),bar=$('.bar',ph);let y=0;sc.addEventListener('scroll',()=>{const d=sc.scrollTop-y;y=sc.scrollTop;if(ends(sc)||d<-4)bar.classList.remove('small');else if(d>4){bar.classList.add('small');$('.tray',ph).classList.remove('on')}},{passive:true});
+   $('.q',ph).addEventListener('pointerdown',()=>bar.classList.remove('small'))},
+  'While you move forward it folds into one search circle; go back or tap it and it opens out again. Search is never more than a tap away.'],
+ ['Only when asked',ph=>{const sc=scroller(ph),bar=$('.bar',ph);bar.classList.add('away');const g=document.createElement('button');g.type='button';g.className='grab';g.setAttribute('aria-label','Show controls');ph.append(g);
+   const show=on=>{away(ph,!on);g.classList.toggle('off',on)};g.addEventListener('click',()=>show(true));
+   let sy=null;ph.addEventListener('pointerdown',e=>{if(e.clientY>ph.getBoundingClientRect().bottom-70)sy=e.clientY});ph.addEventListener('pointerup',e=>{if(sy!=null&&sy-e.clientY>20)show(true);sy=null});
+   sc.addEventListener('scroll',()=>{if(!bar.classList.contains('away'))show(false)},{passive:true})},
+  'Hidden until you tap the line at the bottom or swipe up from it. Touch the records again and it tucks away. The records get the whole screen.'],
+ ['Back when your finger lifts',ph=>{const sc=scroller(ph);let held=false;
+   sc.addEventListener('pointerdown',()=>{held=true;away(ph,true)});addEventListener('pointerup',()=>{if(held){held=false;setTimeout(()=>away(ph,false),180)}});
+   sc.addEventListener('wheel',()=>{away(ph,true);clearTimeout(sc.t);sc.t=setTimeout(()=>away(ph,false),350)},{passive:true});
+   sc.addEventListener('scrollend',()=>{if(!held)away(ph,false)})},
+  'Tied to your hand, not a timer: it leaves while your finger is on the records and returns as soon as you let go.'],
+];
+
+// B phones: the crate front, letters, and the bar
+function still(ph){
+  const r=R.find(x=>x.front)||R[0];
+  ph.insertAdjacentHTML('beforeend',`<div class="pile"><i></i><i></i>${cover(r)}</div><div class="fade"></div><div class="letters"><span>A</span><b>B</b><span>C</span><span>D</span><span>E</span><span>F</span></div>`);
+}
+const LOOK=[
+ ['Today',ph=>{still(ph);ph.insertAdjacentHTML('beforeend',barToday());wireToday(ph)},
+  'Three view icons in a capsule, the search pill, a filters circle that opens a row of pills above. The baseline.'],
+ ['One capsule',ph=>{still(ph);
+   ph.insertAdjacentHTML('beforeend',`<div class="bar"><div class="one glass"><label class="q">${I.search}<span class="sr">Search</span><input type="search" placeholder="Search"></label><span class="vr"></span>
+     <button class="ib vb" type="button" aria-label="View" aria-expanded="false">${I.crate}</button><button class="ib fbt" type="button" aria-label="Filters">${I.filter}</button></div></div>
+     <div class="pop glass" role="group" aria-label="View">${VIEWS.map(([k,l],i)=>`<button type="button" data-k="${k}" aria-pressed="${!i}">${I[k]}${l}</button>`).join('')}</div>
+     <div class="tray">${FILTERS.map(f=>`<button class="chip glass" type="button" aria-pressed="false">${f}</button>`).join('')}</div>`);
+   const pop=$('.pop',ph),vb=$('.vb',ph),tray=$('.tray',ph);toggles(ph);
+   vb.addEventListener('click',()=>{tray.classList.remove('on');vb.setAttribute('aria-expanded',pop.classList.toggle('on'))});
+   radio($$('.pop button',ph),b=>{vb.innerHTML=I[b.dataset.k];pop.classList.remove('on');vb.setAttribute('aria-expanded',false)});
+   $('.fbt',ph).addEventListener('click',()=>{pop.classList.remove('on');tray.classList.toggle('on')})},
+  'One glass capsule: search fills it, and two quiet icons at the end. The view icon shows where you are and opens a small menu of the three.'],
+ ['Search, and one sheet',ph=>{still(ph);
+   ph.insertAdjacentHTML('beforeend',`<div class="bar"><label class="q glass">${I.search}<span class="sr">Search</span><input type="search" placeholder="Search"><button class="in" type="button" aria-label="View and filters">${I.filter}</button></label></div>
+     <div class="scrim"></div><div class="sh" role="dialog" aria-label="View and filters"><h4>View</h4><div class="vs">${VIEWS.map(([k,l],i)=>`<button type="button" aria-pressed="${!i}">${l}</button>`).join('')}</div>
+     <h4>Show</h4><div class="chips">${FILTERS.map(f=>`<button class="chip" type="button" aria-pressed="false">${f}</button>`).join('')}</div></div>`);
+   const sh=$('.sh',ph),scrim=$('.scrim',ph),set=on=>{sh.classList.toggle('on',on);scrim.classList.toggle('on',on)};
+   $('.in',ph).addEventListener('click',e=>{e.preventDefault();set(true)});scrim.addEventListener('click',()=>set(false));
+   radio($$('.vs button',ph));toggles(ph)},
+  'Just the search pill. The button inside it opens one sheet with the view and the filters together: one place, nothing else on screen.'],
+ ['Words',ph=>{still(ph);
+   ph.insertAdjacentHTML('beforeend',`<div class="bar"><div class="words" role="group" aria-label="View">${VIEWS.map(([k,l],i)=>`<button type="button" aria-pressed="${!i}">${l}</button>`).join('')}</div>
+     <div class="words"><button type="button" class="sb" aria-pressed="false">Search</button><button type="button" class="fbt" aria-pressed="false">Filter</button></div></div>
+     <div class="sx"><input type="search" placeholder="Artist, title, label" aria-label="Search"><button type="button">Cancel</button></div>
+     <div class="tray">${FILTERS.map(f=>`<button class="chip" type="button" aria-pressed="false">${f}</button>`).join('')}</div>`);
+   radio($$('.words:first-child button',ph));toggles($('.tray',ph));
+   $('.sb',ph).addEventListener('click',()=>{ph.classList.add('searching');$('.tray',ph).classList.remove('on');$('.sx input',ph).focus()});
+   $('.sx button',ph).addEventListener('click',()=>ph.classList.remove('searching'));
+   $('.fbt',ph).addEventListener('click',e=>{const on=$('.tray',ph).classList.toggle('on');e.currentTarget.setAttribute('aria-pressed',on)})},
+  'No glass, no pills. Plain words on a fade, the current view in white. Search turns the row into a single underlined field.'],
+ ['Toolbar',ph=>{still(ph);
+   ph.insertAdjacentHTML('beforeend',`<div class="bar glass">${VIEWS.map(([k,l],i)=>`<button type="button" class="v" aria-label="${l}" aria-pressed="${!i}">${I[k]}</button>`).join('')}<span class="gap"></span>
+     <button type="button" class="sb" aria-label="Search">${I.search}</button><button type="button" class="fbt" aria-label="Filters" aria-pressed="false">${I.filter}</button></div>
+     <div class="sx"><label class="q">${I.search}<input type="search" placeholder="Search" aria-label="Search"></label><button type="button">Cancel</button></div>
+     <div class="tray">${FILTERS.map(f=>`<button class="chip glass" type="button" aria-pressed="false">${f}</button>`).join('')}</div>`);
+   radio($$('.v',ph));toggles($('.tray',ph));
+   $('.sb',ph).addEventListener('click',()=>{ph.classList.add('searching');$('.tray',ph).classList.remove('on');$('.sx input',ph).focus()});
+   $('.sx>button',ph).addEventListener('click',()=>ph.classList.remove('searching'));
+   $('.fbt',ph).addEventListener('click',e=>{const on=$('.tray',ph).classList.toggle('on');e.currentTarget.setAttribute('aria-pressed',on)})},
+  'Edge to edge along the bottom like an iOS toolbar: five even icons, a hairline on top. Steady and familiar; search slides up in its place.'],
+ ['Small dock',ph=>{still(ph);
+   ph.insertAdjacentHTML('beforeend',`<div class="bar"><div class="dock">${VIEWS.map(([k,l],i)=>`<button type="button" class="vw" aria-label="${l}" aria-pressed="${!i}">${I[k]}</button>`).join('')}<span class="vr"></span>
+     <button type="button" class="sb" aria-label="Search">${I.search}</button><span class="field"><input type="search" placeholder="Search" aria-label="Search"></span><button type="button" class="fbt" aria-label="Filters" aria-pressed="false">${I.filter}</button></div></div>
+     <div class="tray">${FILTERS.map(f=>`<button class="chip glass" type="button" aria-pressed="false">${f}</button>`).join('')}</div>`);
+   radio($$('.dock .vw',ph));toggles($('.tray',ph));
+   $('.sb',ph).addEventListener('click',()=>{const on=ph.classList.toggle('searching');if(on)$('.field input',ph).focus()});
+   $('.fbt',ph).addEventListener('click',e=>{const on=$('.tray',ph).classList.toggle('on');e.currentTarget.setAttribute('aria-pressed',on)})},
+  'A small, solid dock centered at the bottom, icons only. Search widens the dock into a field in place, and the view icons step out.'],
+];
+
+function card(sheet,id,n,make,use){
+  const st=document.createElement('div');st.className='st';st.dataset.id=id;
+  st.innerHTML=`<span class="id"><b>${id}</b>${esc(n)}</span><button class="star" type="button" aria-label="Pick ${id} ${esc(n)}">★</button><div class="ph ${id.toLowerCase()}"></div><p class="use">${use}</p>`;
+  sheet.append(st);make($('.ph',st));
+}
+async function load(){
+  const [src,meta]=await Promise.all([fetch('vinyl-prototype.html').then(r=>r.text()),fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}))]);
+  const m=src.match(/const RECORDS=\[([\s\S]*?)\]\.map\(/);
+  R=(m?Function('return ['+m[1]+']')():[]).map(r=>({...meta[slugOf(r)],...r}));
+  R.sort((a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||(+a.year||9999)-(+b.year||9999));
+  WHEN.forEach(([n,make,use],i)=>card($('#when'),'W'+(i+1),n,make,use));
+  LOOK.forEach(([n,make,use],i)=>card($('#look'),'B'+(i+1),n,make,use));
+  wire();
+}
+function wire(){
+  let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('records-bar-picks')||'[]'))}catch{}
+  const save=()=>{try{localStorage.setItem('records-bar-picks',JSON.stringify([...picks]))}catch{}};
+  const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
+  $$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+  $('#copy').onclick=()=>{navigator.clipboard?.writeText([...picks].sort().join(', ')).catch(()=>{});$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1200)};
+  $('#clear').onclick=()=>{picks.clear();save();show()};
+  show();
+}
+load();
+</script>
+</body>
+</html>
