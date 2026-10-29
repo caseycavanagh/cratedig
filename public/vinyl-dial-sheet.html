@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<title>Records: the dial</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+/* Sticker sheet: riffs on L4 (the dial) from vinyl-index-sheet.html. Same phones, same Cosmos-feel dress.
+   Every dial runs on one engine: drag, flick with momentum, spring to a letter, tap a letter, arrow keys, wheel. */
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--glass:rgba(30,30,32,.74);--spring:cubic-bezier(.2,1.25,.35,1)}
+*,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
+html{background:var(--bg);color-scheme:dark}
+body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button,input{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.wrap{max-width:1500px;margin:0 auto;padding:40px 20px 80px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.top h1{font-size:32px;font-weight:500;letter-spacing:-.02em}
+.top p{color:var(--m);max-width:640px;margin-top:6px}
+.tools{display:flex;align-items:center;gap:10px;font-size:14px}
+.picks{color:var(--m)}
+.tool{height:40px;padding:0 18px;border-radius:99px;border:1px solid var(--line);font-size:14px;font-weight:500}
+.tool:hover{background:var(--soft)}
+.tool:active{transform:scale(.97)}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:28px 20px}
+.st{position:relative;padding:44px 14px 16px;border-radius:26px;background:#19191b}
+.st .id{position:absolute;top:15px;left:18px;right:52px;font-size:14px;color:var(--m)}.st .id b{color:var(--fg);font-weight:500;margin-right:6px}
+.st .use{margin:14px 4px 0;font-size:14px;color:var(--m);line-height:1.45}
+.star{position:absolute;top:8px;right:10px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--m);font-size:17px}
+.star:hover{background:var(--soft);color:var(--fg)}
+.star:active{transform:scale(.96)}
+.st.picked{box-shadow:inset 0 0 0 2px #fff}.st.picked .star{color:#fff}
+
+/* a phone */
+.ph{position:relative;width:300px;height:620px;margin:0 auto;border-radius:44px;background:var(--bg);overflow:hidden;box-shadow:0 0 0 7px #2a2a2c,0 0 0 8px #3a3a3d;isolation:isolate;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.ph img{-webkit-user-drag:none;pointer-events:none}
+.ph .stage{position:absolute;left:0;right:0;top:88px;display:grid;justify-items:center}
+.ph .pile{position:relative;width:216px;height:216px}
+.ph .pile i{position:absolute;inset:0;border-radius:4px;background:#2a2a2d;box-shadow:0 1px 0 #0006}
+.ph .pile i:nth-child(1){transform:translate(0,-12px) scale(.94);background:#232325}
+.ph .pile i:nth-child(2){transform:translate(0,-6px) scale(.97);background:#2c2c2f}
+.ph .pile img,.ph .pile .pl{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px;box-shadow:0 18px 30px -12px #000c}
+.ph .pile .pl{display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:15px;line-height:1.15}
+.ph .pile .pl small{font-weight:400;opacity:.7}
+.ph .t{margin-top:18px;width:216px;text-align:left}
+.ph .t b{display:block;font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph .t span{color:var(--m);font-size:14px}
+.ph .pos{position:absolute;top:22px;left:0;right:0;text-align:center;font-size:13px;color:var(--m)}
+.ph .q{position:absolute;left:14px;right:14px;bottom:18px;height:50px;border-radius:99px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);display:flex;align-items:center;gap:10px;padding:0 18px;color:#7d7d82;font-size:15px}
+.ph .q svg{width:18px;height:18px;flex:none;color:#a5a5aa}
+.ph .flip{animation:in .45s var(--spring)}
+@keyframes in{from{transform:translateY(10px) scale(.97);opacity:.4}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
+
+/* shared dial parts: a strip of letters that slides under a fixed mark */
+.dl{position:absolute;z-index:4;overflow:hidden;cursor:grab;touch-action:none}
+.dl:active{cursor:grabbing}
+.dl:focus-visible{outline-offset:-2px;border-radius:14px}
+.fade{-webkit-mask:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);mask:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent)}
+.tape{position:absolute;left:50%;top:0;height:100%;display:flex;align-items:center;will-change:transform}
+.tape span{width:36px;flex:none;text-align:center;font-size:18px;font-weight:500;color:#6c6c71;transform-origin:50% 60%}
+.tape span.no{opacity:.35}
+.mark{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:#fff;z-index:4;pointer-events:none}
+
+/* D1 the dial, with a flick and a count */
+.d1 .dl{left:0;right:0;bottom:80px;height:58px}
+.d1 .mark{bottom:136px}
+.d1 .count{position:absolute;left:0;right:0;bottom:150px;text-align:center;font-size:12px;color:var(--m);z-index:4;pointer-events:none}
+
+/* D2 an arc, like a camera's mode dial */
+.d2 .dl{left:0;right:0;bottom:72px;height:96px}
+.d2 .arc span{position:absolute;left:50%;top:16px;width:36px;margin-left:-18px;text-align:center;font-size:18px;font-weight:500;color:#6c6c71}
+.d2 .arc span.on{color:#fff}
+.d2 .mark{bottom:158px;width:0;height:0;margin-left:-5px;border:5px solid transparent;border-top:6px solid #fff;border-bottom:0;background:none;border-radius:0}
+.d2 .rim{position:absolute;left:50%;top:44px;width:560px;height:560px;margin-left:-280px;border-radius:50%;border:1px solid var(--line);pointer-events:none}
+
+/* D3 every record is a tick, letters label the groups */
+.d3 .dl{left:0;right:0;bottom:78px;height:68px}
+.d3 .tape{align-items:flex-end;padding-bottom:12px}
+.d3 .tape i{position:relative;width:9px;flex:none;height:12px;display:flex;justify-content:center}
+.d3 .tape i::before{content:'';width:1px;height:100%;background:#55555a}
+.d3 .tape i.L{height:22px}.d3 .tape i.L::before{background:#9a9aa0}
+.d3 .tape i b{position:absolute;bottom:28px;left:0;font-size:14px;font-weight:500;color:#6c6c71;transition:color .15s}
+.d3 .tape i b.on{color:#fff}
+.d3 .mark{bottom:88px;height:34px}
+
+/* D4 the dial lives in the search pill; tap to type instead */
+.d4 .q{padding:0 6px 0 18px;cursor:grab}
+.d4 .q .dl{position:relative;flex:1;height:100%;z-index:1}
+.d4 .q .tape span{width:30px;font-size:16px}
+.d4 .q .mark{top:5px;height:6px}
+.d4 .q input{display:none;flex:1;height:100%;outline:0;cursor:text;font-size:15px;color:#fff}
+.d4 .q input::placeholder{color:#7d7d82}
+.d4 .q.typing .dl{display:none}.d4 .q.typing input{display:block}
+.d4 .hintx{position:absolute;left:0;right:0;bottom:80px;text-align:center;font-size:13px;color:var(--m)}
+
+/* D5 a thumb wheel on the right edge */
+.d5 .dl{right:2px;top:120px;width:36px;height:300px;perspective:420px;border-radius:23px}
+.d5 .drum{position:absolute;inset:0;transform-style:preserve-3d}
+.d5 .drum span{position:absolute;left:0;right:0;top:50%;height:30px;margin-top:-15px;line-height:30px;text-align:center;font-size:17px;font-weight:500;color:#6c6c71;backface-visibility:hidden}
+.d5 .drum span.on{color:#fff}
+.d5 .mark{right:2px;left:auto;top:270px;width:36px;height:30px;margin:0;border-radius:15px;background:#ffffff14}
+
+/* D6 letters, then the artists inside the letter */
+.d6 .dl.lt{left:0;right:0;bottom:122px;height:44px}
+.d6 .dl.ar{left:0;right:0;bottom:76px;height:40px}
+.d6 .ar .tape span{width:132px;padding:0 8px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d6 .mark{bottom:166px}
+
+/* D7 hold the record, then slide */
+.d7 .over{position:absolute;left:0;right:0;bottom:80px;height:58px;z-index:4;opacity:0;transform:translateY(8px);transition:opacity .15s,transform .15s;pointer-events:none}
+.d7 .over.on{opacity:1;transform:none;transition:opacity .2s,transform .45s var(--spring)}
+.d7 .over .dl{inset:0}
+.d7 .bub{position:absolute;z-index:6;width:68px;height:68px;margin:-100px 0 0 -34px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-size:32px;font-weight:500;opacity:0;scale:.6;transition:opacity .12s,scale .4s var(--spring);pointer-events:none}
+.d7 .bub.on{opacity:1;scale:1}
+.d7 .hintx{position:absolute;left:0;right:0;bottom:84px;text-align:center;font-size:13px;color:var(--m);transition:opacity .15s}
+.d7 .over.on~.hintx{opacity:0}
+
+/* D8 a knob you turn */
+.d8 .knob{position:absolute;left:50%;bottom:78px;width:124px;height:124px;margin-left:-62px;border-radius:50%;z-index:4;background:radial-gradient(circle at 50% 35%,#2e2e31,#1c1c1e 70%);box-shadow:inset 0 1px 0 #ffffff1f,0 10px 24px -8px #000;cursor:grab;touch-action:none}
+.d8 .knob:focus-visible{outline-offset:3px;border-radius:50%}
+.d8 .face{position:absolute;inset:0;will-change:transform}
+.d8 .face span{position:absolute;left:50%;top:50%;width:14px;margin:-8px 0 0 -7px;text-align:center;font-size:10px;line-height:16px;font-weight:500;color:#6c6c71}
+.d8 .face span.on{color:#fff}
+.d8 .kl{position:absolute;inset:34px;border-radius:50%;background:#121212;display:grid;place-items:center;font-size:26px;font-weight:500;pointer-events:none}
+.d8 .mark{bottom:206px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>Records: the dial</h1><p>Eight riffs on L4 from the letter index. Every dial flicks with momentum, springs to a letter, takes a tap on a letter, and answers the arrow keys and a scroll wheel. Phones that can buzz give a tiny tick per letter. Star the ones worth taking further.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="tool" id="copy" type="button">Copy picks</button><button class="tool" id="clear" type="button">Clear</button></div></div>
+  <div class="sheet" id="sheet"></div>
+</div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f;
+const slugOf=r=>(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const name=r=>(r.sortAs||r.artist).replace(/^the /i,'');
+const letter=r=>{const c=name(r).normalize('NFD').toUpperCase().replace(/[^A-Z0-9]/g,'')[0]||'#';return /[A-Z]/.test(c)?c:'#'};
+const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
+const SEARCH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/></svg>';
+let R=[],FIRST={},PL=[];
+const has=L=>FIRST[L]!=null;
+const count=L=>R.filter(r=>letter(r)===L).length;
+
+// one phone: a pile with the front record, its title and the search pill
+function phone(cls){
+  const ph=document.createElement('div');ph.className='ph '+cls;
+  ph.innerHTML=`<p class="pos"></p><div class="stage"><div class="pile"><i></i><i></i><span class="front"></span></div><div class="t"></div></div><div class="q">${SEARCH}Search</div>`;
+  ph.cur=0;
+  ph.show=i=>{i=Math.max(0,Math.min(R.length-1,i));const ch=i!==ph.cur;ph.cur=i;const r=R[i],f=$('.front',ph);
+    f.innerHTML=r.front?`<img src="${img(r.front)}" alt="">`:`<span class="pl" style="background:${r.spine||'#2c2c2e'};color:${ink(r.spine)}">${esc(r.title)}<small>${esc(r.artist)}</small></span>`;
+    if(ch){f.classList.remove('flip');void f.offsetWidth;f.classList.add('flip')}
+    $('.t',ph).innerHTML=`<b>${esc(r.title)}</b><span>${esc(r.artist)}</span>`;$('.pos',ph).textContent=`${i+1} of ${R.length}`;ph.onshow?.(letter(r))};
+  ph.go=L=>{if(has(L)&&letter(R[ph.cur])!==L)ph.show(FIRST[L])};
+  // a swipe up or down on the pile flips one record, like the crate
+  let y0=null;const stage=$('.stage',ph);
+  stage.addEventListener('pointerdown',e=>{y0=e.clientY});
+  stage.addEventListener('pointerup',e=>{if(ph.lock||y0==null){y0=null;return}const d=e.clientY-y0;y0=null;if(Math.abs(d)>24)ph.show(ph.cur+(d>0?1:-1))});
+  stage.addEventListener('wheel',e=>{e.preventDefault();if(Math.abs(e.deltaY)>8)ph.show(ph.cur+Math.sign(e.deltaY))},{passive:false});
+  return ph;
+}
+
+// the dial engine: a position in items that you drag, flick, tap or key, which springs to a whole item
+function dial(o){
+  let pos=0,tgt=0,v=0,raf=0,drag=null,user=false,last=-1,acc=0;
+  const n=()=>o.n(),ok=k=>!o.ok||o.ok(k);
+  const near=k=>{k=Math.max(0,Math.min(n()-1,Math.round(k)));if(ok(k))return k;for(let s=1;s<n();s++){if(k+s<n()&&ok(k+s))return k+s;if(k-s>=0&&ok(k-s))return k-s}return k};
+  const soft=p=>{const m=n()-1;return p<0?-(1-Math.exp(p)):p>m?m+(1-Math.exp(m-p)):p};
+  const draw=()=>{o.render(pos);const k=Math.max(0,Math.min(n()-1,Math.round(pos)));if(k!==last){last=k;if(user){o.onTick?.(k);navigator.vibrate?.(3)}}};
+  const step=()=>{v=(v+(tgt-pos)*.13)*.76;pos+=v;
+    if(Math.abs(tgt-pos)<.002&&Math.abs(v)<.002){pos=tgt;v=0;raf=0;draw();if(user)o.onSettle?.(tgt);user=false;return}
+    draw();raf=requestAnimationFrame(step)};
+  const to=k=>{tgt=near(k);if(REDUCED){cancelAnimationFrame(raf);raf=0;pos=tgt;v=0;draw();if(user)o.onSettle?.(tgt);user=false;return}if(!raf)raf=requestAnimationFrame(step)};
+  const by=dir=>{let k=tgt+dir;while(k>=0&&k<n()&&!ok(k))k+=dir;if(k>=0&&k<n()){user=true;to(k)}};
+  const api={
+    down(e){cancelAnimationFrame(raf);raf=0;v=0;user=true;drag={s:o.start?o.start(e):{x:e.clientX,y:e.clientY},x:e.clientX,y:e.clientY,p0:pos,far:0,h:[[e.timeStamp,pos]]};
+      if(!o.manual)try{o.el.setPointerCapture(e.pointerId)}catch{}o.onGrab?.(true)},
+    move(e){if(!drag)return;drag.far=Math.max(drag.far,Math.hypot(e.clientX-drag.x,e.clientY-drag.y));pos=soft(drag.p0+o.delta(e,drag.s));
+      drag.h.push([e.timeStamp,pos]);while(drag.h.length>2&&e.timeStamp-drag.h[0][0]>90)drag.h.shift();draw()},
+    up(e){if(!drag)return;const d=drag;drag=null;o.onGrab?.(false);
+      if(d.far<6){if(o.onTap)return void(user=false,o.onTap(e));const t=o.tapAt?o.tapAt(e):e.target.closest?.('[data-k]');if(t!=null&&(typeof t==='number'||t.dataset)){to(typeof t==='number'?t:+t.dataset.k);return}to(pos);return}
+      const [t0,p0]=d.h[0],dt=Math.max(16,e.timeStamp-t0),vel=(pos-p0)/dt;v=vel*16;to(pos+vel*(o.fling??220))},
+    sync(k){if(drag||(raf&&user))return;user=false;if(REDUCED||last<0){tgt=near(k);pos=tgt;v=0;draw();return}to(k)},
+    jump(k){cancelAnimationFrame(raf);raf=0;user=false;tgt=pos=near(k);v=0;last=-1;draw()},
+    get busy(){return !!drag||(!!raf&&user)},by
+  };
+  if(!o.manual){const el=o.el;
+    el.addEventListener('pointerdown',api.down);el.addEventListener('pointermove',api.move);
+    el.addEventListener('pointerup',api.up);el.addEventListener('pointercancel',api.up);
+    el.addEventListener('wheel',e=>{e.preventDefault();acc+=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(Math.abs(acc)>30){by(Math.sign(acc));acc=0}},{passive:false});
+    el.tabIndex=0;el.setAttribute('role','slider');el.setAttribute('aria-label',o.label||'Turn to a letter');
+    el.addEventListener('keydown',e=>{const d={ArrowLeft:-1,ArrowUp:-1,ArrowRight:1,ArrowDown:1}[e.key];if(d){e.preventDefault();by(d)}
+      else if(e.key==='Home'){e.preventDefault();user=true;to(0)}else if(e.key==='End'){e.preventDefault();user=true;to(n()-1)}});
+  }
+  return api;
+}
+const sideways=W=>(e,s)=>(s.x-e.clientX)/W;
+// a straight strip: slide the tape, swell the item under the mark
+const strip=(tape,W,grow=.35)=>p=>{tape.style.transform=`translateX(${-p*W-W/2}px)`;
+  [...tape.children].forEach((s,i)=>{const d=Math.abs(i-p);s.style.scale=1+grow*Math.max(0,1-d);s.style.color=d<.5?'#fff':''})};
+const spans=(list,cls)=>list.map((x,k)=>`<span data-k="${k}"${cls?.(x)?` class="${cls(x)}"`:''}>${esc(x)}</span>`).join('');
+const say=(el,t)=>el.setAttribute('aria-valuetext',t);
+
+const V=[
+ ['The dial, with a flick','d1',ph=>{
+   ph.insertAdjacentHTML('beforeend',`<div class="dl fade"><div class="tape">${spans(AZ,L=>has(L)?'':'no')}</div></div><span class="mark"></span><span class="count"></span>`);
+   const el=$('.dl',ph),cnt=$('.count',ph);
+   const d=dial({el,n:()=>26,ok:k=>has(AZ[k]),render:strip($('.tape',el),36),delta:sideways(36),
+     onTick:k=>{const L=AZ[k];cnt.textContent=has(L)?`${count(L)} record${count(L)>1?'s':''}`:'None';ph.go(L)},onSettle:k=>ph.go(AZ[k])});
+   ph.onshow=L=>{d.sync(AZ.indexOf(L));if(!d.busy)cnt.textContent=`${count(L)} record${count(L)>1?'s':''}`;say(el,L)};
+ },'L4, kept straight, with the missing physics: flick it and it coasts, then springs onto a letter. Letters with no records get skipped. A small count above the mark says how deep the letter is. Tap any letter to go there.'],
+ ['An arc','d2',ph=>{
+   ph.insertAdjacentHTML('beforeend',`<div class="dl"><span class="rim"></span><div class="arc">${spans(PL)}</div></div><span class="mark"></span>`);
+   const el=$('.dl',ph),items=$$('.arc span',el),A=12,RAD=280;
+   const render=p=>items.forEach((s,i)=>{const a=(i-p)*A,r=a*Math.PI/180;
+     s.style.transform=`translate(${RAD*Math.sin(r)}px,${RAD*(1-Math.cos(r))}px) rotate(${a}deg) scale(${1+.35*Math.max(0,1-Math.abs(i-p))})`;
+     s.style.opacity=Math.max(0,1-Math.abs(a)/75);s.classList.toggle('on',Math.abs(i-p)<.5)});
+   const d=dial({el,n:()=>PL.length,render,delta:sideways(52),onTick:k=>ph.go(PL[k])});
+   ph.onshow=L=>{d.sync(PL.indexOf(L));say(el,L)};
+ },'The strip bends into the edge of a big wheel, like the mode dial on a camera. Letters lean as they roll away and fade over the horizon. Only letters with records are on it.'],
+ ['Every record','d3',ph=>{
+   const ticks=R.map((r,i)=>{const L=letter(r),f=FIRST[L]===i;return`<i data-k="${i}"${f?' class="L"':''}>${f?`<b data-l="${L}">${L}</b>`:''}</i>`}).join('');
+   ph.insertAdjacentHTML('beforeend',`<div class="dl fade"><div class="tape">${ticks}</div></div><span class="mark"></span>`);
+   const el=$('.dl',ph),tape=$('.tape',el);
+   const d=dial({el,n:()=>R.length,render:p=>tape.style.transform=`translateX(${-p*9-4.5}px)`,delta:sideways(9),fling:500,label:'Scrub through every record',
+     tapAt:e=>{const t=e.target.closest('[data-k]');return t?+t.dataset.k:null},onTick:k=>ph.show(k)});
+   ph.onshow=L=>{d.sync(ph.cur);$$('b',tape).forEach(b=>b.classList.toggle('on',b.dataset.l===L));say(el,`${L}, record ${ph.cur+1} of ${R.length}`)};
+ },'The dial counts records, not letters: one tick for each, a taller tick and the letter where each letter starts. A slow drag steps one record at a time; a flick crosses the alphabet. Tap a letter to land on its first record.'],
+ ['Inside the search','d4',ph=>{
+   const q=$('.q',ph);q.innerHTML=`${SEARCH}<div class="dl fade"><div class="tape">${spans(PL)}</div><span class="mark"></span></div><input type="search" placeholder="Artist, title, label or year" aria-label="Search records">`;
+   ph.insertAdjacentHTML('beforeend',`<p class="hintx">Drag the search sideways, or tap it to type</p>`);
+   const el=$('.dl',q),inp=$('input',q);
+   const d=dial({el,n:()=>PL.length,render:strip($('.tape',el),30,.3),delta:sideways(30),label:'Search, or turn to a letter',
+     onTap:()=>{q.classList.add('typing');inp.focus()},onTick:k=>ph.go(PL[k])});
+   inp.addEventListener('blur',()=>{if(!inp.value)q.classList.remove('typing')});
+   inp.addEventListener('keydown',e=>{if(e.key==='Escape'){inp.value='';inp.blur()}});
+   el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();q.classList.add('typing');inp.focus()}});
+   ph.onshow=L=>{d.sync(PL.indexOf(L));say(el,L)};
+ },'One control instead of two. The search pill is the dial: drag it sideways and the letters slide through it. Tap it and the letters step aside for a cursor.'],
+ ['A thumb wheel','d5',ph=>{
+   ph.insertAdjacentHTML('beforeend',`<span class="mark"></span><div class="dl"><div class="drum">${spans(PL)}</div></div>`);
+   const el=$('.dl',ph),items=$$('.drum span',el),A=20;
+   const render=p=>items.forEach((s,i)=>{const a=(i-p)*A;s.style.transform=`rotateX(${-a}deg) translateZ(84px)`;s.style.fontSize='';
+     s.style.opacity=Math.abs(a)>84?0:1-Math.abs(a)/110;s.classList.toggle('on',Math.abs(i-p)<.5)});
+   const d=dial({el,n:()=>PL.length,render,delta:(e,s)=>(s.y-e.clientY)/30,onTick:k=>ph.go(PL[k])});
+   ph.onshow=L=>{d.sync(PL.indexOf(L));say(el,L)};
+ },'The dial stands up on the right edge as a drum, where a right thumb already rests. Roll it up and down; the letters turn over the top like a picker wheel.'],
+ ['Letters, then artists','d6',ph=>{
+   ph.insertAdjacentHTML('beforeend',`<div class="dl lt fade"><div class="tape">${spans(PL)}</div></div><span class="mark"></span><div class="dl ar fade"><div class="tape"></div></div>`);
+   const lt=$('.lt',ph),ar=$('.ar',ph),at=$('.tape',ar);let A=[],built='';
+   const firstOf=a=>R.findIndex(r=>r.artist===a);
+   const build=L=>{built=L;A=[...new Set(R.filter(r=>letter(r)===L).map(r=>r.artist))];at.innerHTML=spans(A)};
+   const dl=dial({el:lt,n:()=>PL.length,render:strip($('.tape',lt),34),delta:sideways(34),onTick:k=>ph.go(PL[k])});
+   const da=dial({el:ar,n:()=>A.length,render:strip(at,132,.08),delta:sideways(132),fling:120,label:'Turn to an artist',
+     onTick:k=>{if(R[ph.cur].artist!==A[k])ph.show(firstOf(A[k]))}});
+   ph.onshow=L=>{if(L!==built){build(L);da.jump(A.indexOf(R[ph.cur].artist))}else da.sync(A.indexOf(R[ph.cur].artist));
+     dl.sync(PL.indexOf(L));say(lt,L);say(ar,R[ph.cur].artist)};
+ },'Two strips. The top one turns letters; the one under it fills with that letter’s artists, so you go from “H” to Hiss Golden Messenger without flipping. Each strip moves on its own.'],
+ ['Hold, then slide','d7',ph=>{
+   ph.insertAdjacentHTML('beforeend',`<div class="over"><div class="dl fade" aria-hidden="true"><div class="tape">${spans(PL)}</div></div></div><p class="hintx">Hold the record, then slide sideways</p><span class="bub"></span>`);
+   const ov=$('.over',ph),el=$('.dl',ov),bub=$('.bub',ph),stage=$('.stage',ph);let timer=0,held=false,p0=null;
+   const d=dial({el,manual:true,n:()=>PL.length,render:strip($('.tape',el),36),delta:sideways(30),onTick:k=>{bub.textContent=PL[k];ph.go(PL[k])}});
+   const put=e=>{const b=ph.getBoundingClientRect();bub.style.left=(e.clientX-b.left)+'px';bub.style.top=(e.clientY-b.top)+'px'};
+   stage.addEventListener('pointerdown',e=>{p0=e;try{stage.setPointerCapture(e.pointerId)}catch{}
+     timer=setTimeout(()=>{held=true;ph.lock=true;ov.classList.add('on');bub.textContent=letter(R[ph.cur]);put(p0);bub.classList.add('on');navigator.vibrate?.(8);d.down(p0)},300)});
+   stage.addEventListener('pointermove',e=>{if(held){put(e);d.move(e)}else if(p0&&Math.hypot(e.clientX-p0.clientX,e.clientY-p0.clientY)>8)clearTimeout(timer)});
+   const end=e=>{clearTimeout(timer);p0=null;if(!held)return;held=false;d.up(e);bub.classList.remove('on');setTimeout(()=>{ov.classList.remove('on');ph.lock=false},450)};
+   stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);stage.addEventListener('contextmenu',e=>e.preventDefault());
+   ph.onshow=L=>d.sync(PL.indexOf(L));
+ },'Nothing on screen until you want it. Press and hold the record: the dial rises from the search and the letter floats over your thumb. Slide to turn, let go and it tucks away. A quick swipe still flips one record.'],
+ ['A knob','d8',ph=>{
+   const S=360/PL.length;
+   ph.insertAdjacentHTML('beforeend',`<span class="mark"></span><div class="knob"><div class="face">${PL.map((L,k)=>`<span data-k="${k}" style="transform:rotate(${-k*S}deg) translateY(-50px)">${L}</span>`).join('')}</div><b class="kl"></b></div>`);
+   const el=$('.knob',ph),face=$('.face',el),kl=$('.kl',el),items=$$('span',face);
+   const ang=e=>{const b=el.getBoundingClientRect();return Math.atan2(e.clientY-b.top-b.height/2,e.clientX-b.left-b.width/2)*180/Math.PI};
+   const d=dial({el,n:()=>PL.length,fling:120,label:'Turn the knob to a letter',
+     render:p=>{face.style.transform=`rotate(${p*S}deg)`;const k=Math.max(0,Math.min(PL.length-1,Math.round(p)));kl.textContent=PL[k];items.forEach((s,i)=>s.classList.toggle('on',i===k))},
+     start:e=>({x:e.clientX,y:e.clientY,a:ang(e),acc:0}),delta:(e,s)=>{const a=ang(e);let da=a-s.a;da-=360*Math.round(da/360);s.a=a;s.acc+=da;return s.acc/S},
+     onTick:k=>ph.go(PL[k])});
+   ph.onshow=L=>{d.sync(PL.indexOf(L));say(el,L)};
+ },'A real knob above the search. Turn it clockwise to go forward; the letter you’re on sits in the middle, the rest ride the rim. Small, but it feels like hardware.'],
+];
+
+async function load(){
+  const [src,meta]=await Promise.all([fetch('vinyl-prototype.html').then(r=>r.text()),fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}))]);
+  const m=src.match(/const RECORDS=\[([\s\S]*?)\]\.map\(/);
+  R=(m?Function('return ['+m[1]+']')():[]).map(r=>({...meta[slugOf(r)],...r}));
+  R.sort((a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||(+a.year||9999)-(+b.year||9999));
+  R.forEach((r,i)=>{const L=letter(r);if(FIRST[L]==null)FIRST[L]=i});
+  PL=AZ.filter(has);
+  V.forEach(([n,c,make,use],i)=>{const id='D'+(i+1),st=document.createElement('div');st.className='st';st.dataset.id=id;
+    st.innerHTML=`<span class="id"><b>${id}</b>${esc(n)}</span><button class="star" type="button" aria-label="Pick ${id} ${esc(n)}">★</button><p class="use">${use}</p>`;
+    const ph=phone(c);st.insertBefore(ph,$('.use',st));$('#sheet').append(st);make(ph);ph.cur=-1;ph.show(0)});
+  wire();
+}
+function wire(){
+  let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('records-dial-picks')||'[]'))}catch{}
+  const save=()=>{try{localStorage.setItem('records-dial-picks',JSON.stringify([...picks]))}catch{}};
+  const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
+  $$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+  $('#copy').onclick=()=>{navigator.clipboard?.writeText([...picks].sort().join(', ')).catch(()=>{});$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1200)};
+  $('#clear').onclick=()=>{picks.clear();save();show()};
+  show();
+}
+load();
+</script>
+</body>
+</html>
