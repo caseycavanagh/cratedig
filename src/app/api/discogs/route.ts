@@ -1,4 +1,4 @@
-// Discogs for visitor crates (public/directions/vinyl-make.html). The token stays on
+// Discogs for visitor crates (public/vinyl-make.html). The token stays on
 // the server; set DISCOGS_TOKEN in .env.local (and in Vercel for production), made at
 // discogs.com/settings/developers. Discogs allows 60 requests a minute per token.
 //   ?q=harvest        vinyl releases matching a search, one per album

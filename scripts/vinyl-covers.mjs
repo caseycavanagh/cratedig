@@ -1,6 +1,6 @@
 // Fetches everything the records experiment shows for each record in RECORDS
-// (public/directions/vinyl-prototype.html, the one list of Casey's records)
-// and writes it to public/directions/vinyl/covers.json for the prototype:
+// (public/vinyl-prototype.html, the one list of Casey's records)
+// and writes it to public/vinyl/covers.json for the prototype:
 // - year (first release), label and format (first vinyl pressing) from MusicBrainz
 // - the front cover from Apple Music's artwork (clean, label-supplied), or the
 //   Cover Art Archive when Apple doesn't have the album; the back from the
@@ -20,8 +20,8 @@ import {mkdir, writeFile, readFile, access, unlink, readdir} from 'node:fs/promi
 import path from 'node:path';
 import sharp from 'sharp';
 
-const OUT = path.resolve('public/directions/vinyl');
-const PAGE = path.resolve('public/directions/vinyl-prototype.html');
+const OUT = path.resolve('public/vinyl');
+const PAGE = path.resolve('public/vinyl-prototype.html');
 const UA = 'caseycavanagh.com-records/1.0 (https://caseycavanagh.com)';
 const args = process.argv.slice(2);
 const force = args.includes('--force'), prune = args.includes('--prune');

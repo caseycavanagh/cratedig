@@ -1,8 +1,5 @@
-// Upstash Redis over its REST API, shared by the likes and views routes.
+// Upstash Redis over its REST API, for the crate's edits (src/lib/crate.ts).
 // Add Upstash from Vercel's marketplace; it sets KV_REST_API_URL and KV_REST_API_TOKEN.
-import { createHash } from "node:crypto";
-import { site } from "@/lib/site";
-
 type Cmd = (string | number)[];
 
 export const kv = () => {
@@ -20,11 +17,3 @@ export const kv = () => {
     return ((await res.json()) as { result: unknown }[]).map((r) => r.result);
   };
 };
-
-// a reader, without accounts or cookies: a salted hash of their IP, different for every note
-export const reader = (req: Request, slug: string) => {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
-  return createHash("sha256").update(`${slug}:${ip}:${process.env.LIKES_SALT ?? "cc"}`).digest("hex").slice(0, 32);
-};
-
-export const isNote = (slug: unknown): slug is string => typeof slug === "string" && site().notes.some((n) => n.slug === slug);

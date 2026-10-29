@@ -7,8 +7,8 @@
 <title>Records: letter dividers</title>
 <link rel="icon" href="vinyl/records-icon.svg" type="image/svg+xml">
 <style>
-/* Sticker sheet for the letter dividers in the crate of vinyl-cosmos.html. Each card is the real crate in that style
-   (vinyl-cosmos.html?dv=N); "Try it" opens it live. Picks stay in this browser. */
+/* Sticker sheet for the letter dividers in the crate of index.html. Each card is the real crate in that style
+   (index.html?dv=N); "Try it" opens it live. Picks stay in this browser. */
 @font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
 :root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--ease:cubic-bezier(.22,1,.36,1)}
 *,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
@@ -63,7 +63,7 @@ const ALL=[
 ];
 const KEY='records-dividers-picks';let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem(KEY))||[])}catch{}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...picks]))}catch{}};
-$('#grid').innerHTML=ALL.map(([id,n,use])=>`<article class="st" data-id="${id}"><img src="vinyl/dv/${id.toLowerCase()}.webp" alt="The crate with ${n.toLowerCase()} dividers" loading="lazy" width="1280" height="800"><button class="star" type="button" aria-pressed="false" aria-label="Pick ${id} ${n}">★</button><div class="meta"><span class="id"><b>${id}</b>${n}</span><p class="use">${use}</p><a class="try" href="vinyl-cosmos.html?dv=${id.slice(1)}" target="_blank" rel="noopener">Try it<span class="sr"> (opens in a new tab)</span></a></div></article>`).join('');
+$('#grid').innerHTML=ALL.map(([id,n,use])=>`<article class="st" data-id="${id}"><img src="vinyl/dv/${id.toLowerCase()}.webp" alt="The crate with ${n.toLowerCase()} dividers" loading="lazy" width="1280" height="800"><button class="star" type="button" aria-pressed="false" aria-label="Pick ${id} ${n}">★</button><div class="meta"><span class="id"><b>${id}</b>${n}</span><p class="use">${use}</p><a class="try" href="index.html?dv=${id.slice(1)}" target="_blank" rel="noopener">Try it<span class="sr"> (opens in a new tab)</span></a></div></article>`).join('');
 function show(){$$('.st').forEach(s=>{const on=picks.has(s.dataset.id);s.classList.toggle('picked',on);$('.star',s).setAttribute('aria-pressed',on)});$('#picks').textContent=[...picks].sort().join(', ')}
 $$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
 $('#copy').onclick=()=>{navigator.clipboard?.writeText([...picks].sort().join(', ')).catch(()=>{});$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1200)};

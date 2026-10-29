@@ -1,4 +1,4 @@
-// MusicBrainz and the Cover Art Archive for visitor crates (public/directions/vinyl-make.html):
+// MusicBrainz and the Cover Art Archive for visitor crates (public/vinyl-make.html):
 // no key needed, so it's the source until DISCOGS_TOKEN is set. MusicBrainz asks for at most
 // one request a second, so the crate page loads every record in one search by ID.
 //   ?q=harvest        albums (release groups) matching a search

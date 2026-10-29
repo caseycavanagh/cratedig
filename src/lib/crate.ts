@@ -1,4 +1,4 @@
-// Casey's edits to the records crate (public/directions/vinyl-prototype.html), kept in Upstash Redis (src/lib/kv.ts)
+// Casey's edits to the records crate (public/index.html, and the original in public/vinyl-prototype.html), kept in Upstash Redis (src/lib/kv.ts)
 // next to the likes: records added and taken out, jacket colors, and covers Casey uploads. Anyone can read them,
 // because the crate shows them; only Casey can change them, with the key in CRATE_KEY sent in an X-Crate-Key header.
 import { createHash, timingSafeEqual } from "node:crypto";
