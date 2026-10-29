@@ -18,11 +18,6 @@ html{background:var(--bg);color-scheme:dark}
 body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;min-height:100svh;display:grid;place-items:center;padding:32px 20px}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:2px solid #fff;outline-offset:2px}
-.top{position:fixed;top:28px;left:32px;max-width:300px}
-.top h1{font-size:20px;font-weight:500;letter-spacing:-.01em}
-.top p{color:var(--m);font-size:14px;margin-top:6px;line-height:1.5}
-.top a{color:var(--m)}
-@media (max-width:1100px){.top{display:none}}
 
 /* the phone */
 .ph{--pile:280px;position:relative;width:390px;height:800px;max-height:calc(100svh - 64px);border-radius:52px;background:var(--bg);overflow:hidden;box-shadow:0 0 0 8px #2a2a2c,0 0 0 9px #3a3a3d;isolation:isolate;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -48,39 +43,30 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webki
 /* the dial */
 .dl{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 82px);height:var(--h,58px);z-index:4;cursor:grab;touch-action:none;outline:0}
 .dl:active{cursor:grabbing}
-.dl:focus-visible .track{box-shadow:inset 0 0 0 2px #fff}
-.track{position:absolute;left:12px;right:12px;top:0;bottom:0;border-radius:22px;background:#1b1b1d;border:1px solid var(--line);opacity:var(--z,0)}
+.dl:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:14px}
 .clip{position:absolute;inset:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
 .clip>*{position:absolute;left:50%;bottom:0;will-change:transform}
 .lt{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font-size:18px;font-weight:500;color:#6c6c71;transform-origin:50% 70%}
 .lt.on{color:#fff}
-.th{width:22px;height:22px;margin-left:-11px;border-radius:2px;overflow:hidden;background:#2c2c2e;transform-origin:50% 100%;box-shadow:0 2px 4px #0008}
-.th img{width:100%;height:100%;object-fit:cover;display:block}
-.mark{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:#fff;z-index:5;pointer-events:none;bottom:calc(env(safe-area-inset-bottom) + 82px + var(--h,58px) - 4px)}
+.th{width:1px;height:12px;margin-left:-.5px;background:#5f5f64;transform-origin:50% 100%}
+.th.on{background:#fff}
+.mark{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:#fff;z-index:5;pointer-events:none;opacity:calc(1 - var(--z,0));bottom:calc(env(safe-area-inset-bottom) + 82px + var(--h,58px) - 4px)}
 .lab{position:absolute;left:24px;right:24px;z-index:5;text-align:center;font-size:13px;color:var(--m);pointer-events:none;bottom:calc(env(safe-area-inset-bottom) + 82px + var(--h,58px) + 12px);height:18px}
 .lab span{position:absolute;inset:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lab .a{color:#fff;font-weight:500}
+.lab .a{color:#c7c7cc}
 .bub{position:absolute;z-index:6;width:64px;height:64px;margin:-104px 0 0 -32px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-size:30px;font-weight:500;overflow:hidden;opacity:0;scale:.6;transition:opacity .12s,scale .35s var(--spring),border-radius .25s var(--spring);pointer-events:none}
 .bub.on{opacity:1;scale:1}
-.bub.rec{border-radius:6px;box-shadow:0 10px 24px -6px #000}
-.bub img,.bub span{width:100%;height:100%;object-fit:cover;display:block}
-.hint{position:absolute;left:0;right:0;z-index:5;text-align:center;font-size:13px;color:var(--m);pointer-events:none;bottom:calc(env(safe-area-inset-bottom) + 82px + var(--h,58px) + 40px);opacity:calc(1 - var(--z,0));transition:opacity .3s}
-.hint.gone{opacity:0}
-.hint i{display:inline-block;font-style:normal;animation:nudge 1.8s ease-in-out infinite}
-@keyframes nudge{0%,60%,100%{transform:none}30%{transform:translateY(-4px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
-<div class="top"><h1>Records: one dial</h1><p>Drag the letters, flick them, or tap one. Or hold the record and slide. Slide up on the dial to go record by record; pull down to go back to letters. Arrow keys work too: up and down change depth.</p><p><a href="vinyl-dial-sheet.html">← The dial sheet</a></p></div>
 <div class="ph" id="ph">
   <p class="pos" id="pos"></p>
   <div class="stage" id="stage"><div class="pile"><i></i><i></i><span class="front" id="front"></span></div><div class="t" id="t"></div></div>
   <span class="bub" id="bub" aria-hidden="true"></span>
-  <p class="hint" id="hint"><i aria-hidden="true">↑</i> Slide up for every record</p>
   <p class="lab" aria-hidden="true"><span class="c" id="labC"></span><span class="a" id="labA"></span></p>
   <span class="mark" aria-hidden="true"></span>
-  <div class="dl" id="dl" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><span class="track"></span><div class="clip" id="clip"></div></div>
+  <div class="dl" id="dl" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><div class="clip" id="clip"></div></div>
   <div class="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/></svg>Search</div>
 </div>
 <script>
@@ -98,7 +84,7 @@ const buzz=ms=>{try{navigator.vibrate?.(ms)}catch{}};
 
 let R=[],FIRST={},CNT={},X=[],cur=0;
 const has=L=>FIRST[L]!=null;
-const W=36,WR=26,GAP_ARTIST=6,GAP_LETTER=14,H0=58,H1=104;
+const W=36,WR=12,GAP_ARTIST=4,GAP_LETTER=12,H0=58,H1=78;
 
 // ---- the pile
 const ph=$('#ph'),front=$('#front');
@@ -124,7 +110,7 @@ function render(){
   ph.style.setProperty('--h',lerp(H0,H1,e)+'px');ph.style.setProperty('--z',e);
   const curL=letter(R[cur]),half=ph.clientWidth/2+30;
   LT.forEach((s,j)=>{const L=AZ[j],ok=has(L);
-    const x=lerp(j*W-cL,ok?X[FIRST[L]]-cR:j*W-cL,e),y=lerp(17,70,e);
+    const x=lerp(j*W-cL,ok?X[FIRST[L]]-cR:j*W-cL,e),y=lerp(17,44,e);
     const d=Math.abs(j-lp),sc=lerp(1+.35*Math.max(0,1-d),.72,e);
     s.style.transform=`translate(${x}px,${-y}px) scale(${sc})`;
     s.style.opacity=ok?1:.35*(1-e);s.style.visibility=Math.abs(x)>half?'hidden':'';
@@ -133,12 +119,12 @@ function render(){
   TH.forEach((s,i)=>{if(!vis){s.style.visibility='hidden';return}
     const x=lerp(AZ.indexOf(letter(R[i]))*W-cL,X[i]-cR,e);
     if(Math.abs(x)>half){s.style.visibility='hidden';return}
-    const sc=lerp(.3,1+.75*Math.max(0,1-Math.abs(X[i]-cR)/WR),e);
-    s.style.visibility='';s.style.opacity=clamp((e-.2)/.55,0,1);s.style.transform=`translate(${x}px,${-lerp(20,14,e)}px) scale(${sc})`});
+    const near=Math.max(0,1-Math.abs(X[i]-cR)/WR);
+    s.style.visibility='';s.style.opacity=clamp((e-.3)/.5,0,1);s.style.transform=`translate(${x}px,${-14}px) scaleY(${lerp(.3,1+.8*near,e)})`;s.classList.toggle('on',i===cur&&e>.5)});
   // ticks: letters in letter depth, records in record depth (only when the person is driving)
   if(mode()==='l'){const k=clamp(Math.round(cL/W),0,25);if(k!==lastL){lastL=k;if(user&&has(AZ[k])){goLetter(AZ[k]);buzz(4)}}}
   else{const k=nearR(cR);if(k!==lastR){lastR=k;if(user&&k!==cur){show(k);buzz(2)}}}
-  $('#labC').style.opacity=clamp(1-e*1.8,0,1);$('#labC').style.transform=`translateY(${-8*e}px)`;$('#labA').style.transform=`translateY(${8*(1-e)}px)`;if(drag)bubFill();$('#labA').style.opacity=clamp(e*1.8-.8,0,1);
+  $('#labC').style.opacity=clamp(1-e*1.8,0,1);$('#labC').style.transform=`translateY(${-8*e}px)`;$('#labA').style.transform=`translateY(${8*(1-e)}px)`;$('#labA').style.opacity=clamp(e*1.8-.8,0,1);
 }
 function label(){const r=R[cur],L=letter(r),n=CNT[L],same=R.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
   $('#labC').textContent=`${n} record${n>1?'s':''} in ${L}`;
@@ -167,13 +153,13 @@ function sync(anim=true){if(drag||(raf&&user))return;
 function setDepth(m,haptic=true){const t=m==='r'?1:0;if(S.z.t===t)return;S.z.t=t;
   // the depth we're going to starts right on the record in front
   if(m==='r'){S.r.x=S.r.t=X[cur];S.r.v=0;lastR=cur}else{S.l.x=S.l.t=AZ.indexOf(letter(R[cur]))*W;S.l.v=0;lastL=Math.round(S.l.x/W)}
-  if(haptic)buzz(10);hint(true);kick();setTimeout(label,0)}
+  if(haptic)buzz(10);kick();setTimeout(label,0)}
 
 function down(e,held){cancelAnimationFrame(raf);raf=0;loop.t=0;user=true;
   const m=mode();S[m].t=S[m].x;S[m].v=0;
-  drag={x:e.clientX,y:e.clientY,lx:e.clientX,m,z0:S.z.x,v:false,far:0,h:[[e.timeStamp,S[m].x]],vy:[[e.timeStamp,e.clientY]]};
-  if(!held)try{dl.setPointerCapture(e.pointerId)}catch{}kick();bubble(e,held)}
-function move(e){if(!drag)return;const d=drag;bubble(e)
+  drag={held,x:e.clientX,y:e.clientY,lx:e.clientX,m,z0:S.z.x,v:false,far:0,h:[[e.timeStamp,S[m].x]],vy:[[e.timeStamp,e.clientY]]};
+  if(!held)try{dl.setPointerCapture(e.pointerId)}catch{}kick();if(held)bubble(e,true)}
+function move(e){if(!drag)return;const d=drag;if(d.held)bubble(e)
   d.far=Math.max(d.far,Math.hypot(e.clientX-d.x,e.clientY-d.y));
   // up and down change depth, once the finger clearly means it; the dial follows the finger, with a little give past either end
   const dy=d.y-e.clientY;
@@ -182,7 +168,7 @@ function move(e){if(!drag)return;const d=drag;bubble(e)
     d.vy.push([e.timeStamp,e.clientY]);while(d.vy.length>2&&e.timeStamp-d.vy[0][0]>90)d.vy.shift();
     const m=mode();if(m!==d.m){d.m=m;
       if(m==='r'){S.r.x=S.r.t=X[cur];lastR=cur}else{S.l.x=S.l.t=AZ.indexOf(letter(R[cur]))*W;lastL=Math.round(S.l.x/W)}
-      S.l.v=S.r.v=0;d.h=[[e.timeStamp,S[m].x]];buzz(10);hint(true);label()}}
+      S.l.v=S.r.v=0;d.h=[[e.timeStamp,S[m].x]];buzz(10);label()}}
   const dx=e.clientX-d.lx;d.lx=e.clientX;const o=S[d.m];
   o.x=o.t=soft(o.x-dx,0,d.m==='l'?lMax():rMax());
   d.h.push([e.timeStamp,o.x]);while(d.h.length>2&&e.timeStamp-d.h[0][0]>90)d.h.shift();
@@ -209,14 +195,11 @@ dl.addEventListener('keydown',e=>{const k=e.key;
   else if(k==='ArrowUp'){e.preventDefault();setDepth('r')}else if(k==='ArrowDown'){e.preventDefault();setDepth('l')}
   else if(k==='Home'||k==='End'){e.preventDefault();user=true;const m=mode();S[m].t=k==='Home'?0:(m==='l'?nearL(lMax())*W:rMax());kick()}});
 
-// the bubble over your thumb: the letter, or in record depth the cover
+// holding the record: the letter floats over your thumb
 const bub=$('#bub');
-function bubble(e,force){if(!e){bub.classList.remove('on');return}
+function bubble(e){if(!e){bub.classList.remove('on');return}
   const b=ph.getBoundingClientRect();bub.style.left=(e.clientX-b.left)+'px';bub.style.top=(e.clientY-b.top)+'px';
-  if(force||drag&&drag.far>6)bub.classList.add('on');bubFill()}
-function bubFill(){const r=R[cur],k=mode()+cur;if(bub.dataset.k===k)return;bub.dataset.k=k;
-  bub.classList.toggle('rec',mode()==='r');
-  bub.innerHTML=mode()==='r'?(TH[cur].querySelector('img')?`<img src="${TH[cur].querySelector('img').src}" alt="">`:`<span style="background:${r.spine||'#2c2c2e'}"></span>`):esc(letter(r))}
+  bub.classList.add('on');bub.textContent=letter(R[cur])}
 // a swipe up or down on the pile flips one record, like the crate
 let y0=null,p0=null,timer=0,held=false;const stage=$('#stage');
 stage.addEventListener('pointerdown',e=>{y0=e.clientY;p0=e;try{stage.setPointerCapture(e.pointerId)}catch{}
@@ -227,16 +210,6 @@ stage.addEventListener('contextmenu',e=>e.preventDefault());
 stage.addEventListener('pointerup',e=>{clearTimeout(timer);p0=null;if(held){held=false;up(e);return}if(y0==null)return;const d=e.clientY-y0;y0=null;if(Math.abs(d)>24){show(cur+(d>0?1:-1));sync()}});
 stage.addEventListener('wheel',e=>{e.preventDefault();if(Math.abs(e.deltaY)>8){show(cur+Math.sign(e.deltaY));sync()}},{passive:false});
 
-// the hint goes once you've changed depth
-function hint(done){const h=$('#hint');if(done){h.classList.add('gone');try{localStorage.setItem('records-dial-hint','1')}catch{}}
-  else{try{if(localStorage.getItem('records-dial-hint'))h.classList.add('gone')}catch{}}}
-
-// small covers for the dial, made one at a time so a phone never decodes 68 full covers at once
-async function thumbs(){const c=document.createElement('canvas');c.width=c.height=72;const g=c.getContext('2d');
-  for(const [i,r] of R.entries()){const s=TH[i];
-    if(!r.front){s.style.background=r.spine||'#2c2c2e';continue}
-    try{const im=new Image();im.src=img(r.front);await im.decode();g.drawImage(im,0,0,72,72);
-      const b=await new Promise(res=>c.toBlob(res,'image/jpeg',.82));s.innerHTML=`<img src="${URL.createObjectURL(b)}" alt="">`}catch{}}}
 
 async function load(){
   const [src,meta]=await Promise.all([fetch('vinyl-prototype.html').then(r=>r.text()),fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}))]);
@@ -248,7 +221,7 @@ async function load(){
     X[i]=i?X[i-1]+WR+(L!==letter(R[i-1])?GAP_LETTER:r.artist!==R[i-1].artist?GAP_ARTIST:0):0});
   clip.innerHTML=R.map((r,i)=>`<span class="th" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="lt" data-k="${j}">${L}</span>`).join('');
   LT=[...clip.querySelectorAll('.lt')];TH=[...clip.querySelectorAll('.th')];
-  cur=-1;show(0);sync(false);hint();render();thumbs();
+  cur=-1;show(0);sync(false);render();
 }
 load();
 </script>
