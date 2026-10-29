@@ -10,7 +10,7 @@
 /* Sticker sheet: riffs on L4 (the dial) from vinyl-index-sheet.html. Same phones, same Cosmos-feel dress.
    Every dial runs on one engine: drag, flick with momentum, spring to a letter, tap a letter, arrow keys, wheel. */
 @font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
-:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--glass:rgba(30,30,32,.74);--spring:cubic-bezier(.2,1.25,.35,1)}
+:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--glass:rgba(30,30,32,.74);--spring:cubic-bezier(.22,1,.36,1)}
 *,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
 html{background:var(--bg);color-scheme:dark}
 body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
@@ -175,7 +175,7 @@ function dial(o){
   const near=k=>{k=Math.max(0,Math.min(n()-1,Math.round(k)));if(ok(k))return k;for(let s=1;s<n();s++){if(k+s<n()&&ok(k+s))return k+s;if(k-s>=0&&ok(k-s))return k-s}return k};
   const soft=p=>{const m=n()-1;return p<0?-(1-Math.exp(p)):p>m?m+(1-Math.exp(m-p)):p};
   const draw=()=>{o.render(pos);const k=Math.max(0,Math.min(n()-1,Math.round(pos)));if(k!==last){last=k;if(user){o.onTick?.(k);navigator.vibrate?.(3)}}};
-  const step=()=>{v=(v+(tgt-pos)*.13)*.76;pos+=v;
+  const step=()=>{v=(v+(tgt-pos)*.1)*.62;pos+=v;
     if(Math.abs(tgt-pos)<.002&&Math.abs(v)<.002){pos=tgt;v=0;raf=0;draw();if(user)o.onSettle?.(tgt);user=false;return}
     draw();raf=requestAnimationFrame(step)};
   const to=k=>{tgt=near(k);if(REDUCED){cancelAnimationFrame(raf);raf=0;pos=tgt;v=0;draw();if(user)o.onSettle?.(tgt);user=false;return}if(!raf)raf=requestAnimationFrame(step)};

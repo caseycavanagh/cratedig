@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<title>Records: one dial</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+/* One dial, two depths. D1 + D3 + a little of D6 from vinyl-dial-sheet.html.
+   Letters: drag, flick, tap. Slide up on the dial and the letters open into every record, as small covers grouped by
+   artist and letter; the artist rides above the mark. Pull down and it folds back into letters. One spring system:
+   letter position and record position are both in pixels, z is the depth (0 letters, 1 records). */
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--glass:rgba(30,30,32,.74);--spring:cubic-bezier(.22,1,.36,1)}
+*,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
+html{background:var(--bg);color-scheme:dark}
+body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;min-height:100svh;display:grid;place-items:center;padding:32px 20px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.top{position:fixed;top:28px;left:32px;max-width:300px}
+.top h1{font-size:20px;font-weight:500;letter-spacing:-.01em}
+.top p{color:var(--m);font-size:14px;margin-top:6px;line-height:1.5}
+.top a{color:var(--m)}
+@media (max-width:1100px){.top{display:none}}
+
+/* the phone */
+.ph{--pile:280px;position:relative;width:390px;height:800px;max-height:calc(100svh - 64px);border-radius:52px;background:var(--bg);overflow:hidden;box-shadow:0 0 0 8px #2a2a2c,0 0 0 9px #3a3a3d;isolation:isolate;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+@media (max-width:500px){body{padding:0}.ph{width:100vw;height:100svh;max-height:none;border-radius:0;box-shadow:none;--pile:min(300px,calc(100vw - 80px),calc(100svh - 400px))}}
+.ph img{-webkit-user-drag:none;pointer-events:none}
+.pos{position:absolute;top:calc(env(safe-area-inset-top) + 26px);left:0;right:0;text-align:center;font-size:13px;color:var(--m)}
+.stage{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 88px);display:grid;justify-items:center}
+.pile{position:relative;width:var(--pile);height:var(--pile)}
+.pile i{position:absolute;inset:0;border-radius:4px;box-shadow:0 1px 0 #0006}
+.pile i:nth-child(1){transform:translate(0,-14px) scale(.94);background:#232325}
+.pile i:nth-child(2){transform:translate(0,-7px) scale(.97);background:#2c2c2f}
+.pile img,.pile .pl{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px;box-shadow:0 22px 36px -14px #000c}
+.pile .pl{display:flex;flex-direction:column;justify-content:flex-end;padding:14px;font-weight:500;font-size:17px;line-height:1.15}
+.pile .pl small{font-weight:400;opacity:.7}
+.flip{animation:in .4s var(--spring)}
+@keyframes in{from{transform:translateY(8px) scale(.975);opacity:.5}}
+.t{margin-top:20px;width:var(--pile)}
+.t b{display:block;font-weight:500;font-size:18px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t span{display:block;color:var(--m);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);height:52px;border-radius:99px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);display:flex;align-items:center;gap:10px;padding:0 20px;color:#7d7d82;font-size:16px}
+.q svg{width:18px;height:18px;flex:none;color:#a5a5aa}
+
+/* the dial */
+.dl{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 82px);height:var(--h,58px);z-index:4;cursor:grab;touch-action:none;outline:0}
+.dl:active{cursor:grabbing}
+.dl:focus-visible .track{box-shadow:inset 0 0 0 2px #fff}
+.track{position:absolute;left:12px;right:12px;top:0;bottom:0;border-radius:22px;background:#1b1b1d;border:1px solid var(--line);opacity:var(--z,0)}
+.clip{position:absolute;inset:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
+.clip>*{position:absolute;left:50%;bottom:0;will-change:transform}
+.lt{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font-size:18px;font-weight:500;color:#6c6c71;transform-origin:50% 70%}
+.lt.on{color:#fff}
+.th{width:22px;height:22px;margin-left:-11px;border-radius:2px;overflow:hidden;background:#2c2c2e;transform-origin:50% 100%;box-shadow:0 2px 4px #0008}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.mark{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:#fff;z-index:5;pointer-events:none;bottom:calc(env(safe-area-inset-bottom) + 82px + var(--h,58px) - 4px)}
+.lab{position:absolute;left:24px;right:24px;z-index:5;text-align:center;font-size:13px;color:var(--m);pointer-events:none;bottom:calc(env(safe-area-inset-bottom) + 82px + var(--h,58px) + 12px);height:18px}
+.lab span{position:absolute;inset:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab .a{color:#fff;font-weight:500}
+.bub{position:absolute;z-index:6;width:64px;height:64px;margin:-104px 0 0 -32px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;font-size:30px;font-weight:500;overflow:hidden;opacity:0;scale:.6;transition:opacity .12s,scale .35s var(--spring),border-radius .25s var(--spring);pointer-events:none}
+.bub.on{opacity:1;scale:1}
+.bub.rec{border-radius:6px;box-shadow:0 10px 24px -6px #000}
+.bub img,.bub span{width:100%;height:100%;object-fit:cover;display:block}
+.hint{position:absolute;left:0;right:0;z-index:5;text-align:center;font-size:13px;color:var(--m);pointer-events:none;bottom:calc(env(safe-area-inset-bottom) + 82px + var(--h,58px) + 40px);opacity:calc(1 - var(--z,0));transition:opacity .3s}
+.hint.gone{opacity:0}
+.hint i{display:inline-block;font-style:normal;animation:nudge 1.8s ease-in-out infinite}
+@keyframes nudge{0%,60%,100%{transform:none}30%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="top"><h1>Records: one dial</h1><p>Drag the letters, flick them, or tap one. Or hold the record and slide. Slide up on the dial to go record by record; pull down to go back to letters. Arrow keys work too: up and down change depth.</p><p><a href="vinyl-dial-sheet.html">← The dial sheet</a></p></div>
+<div class="ph" id="ph">
+  <p class="pos" id="pos"></p>
+  <div class="stage" id="stage"><div class="pile"><i></i><i></i><span class="front" id="front"></span></div><div class="t" id="t"></div></div>
+  <span class="bub" id="bub" aria-hidden="true"></span>
+  <p class="hint" id="hint"><i aria-hidden="true">↑</i> Slide up for every record</p>
+  <p class="lab" aria-hidden="true"><span class="c" id="labC"></span><span class="a" id="labA"></span></p>
+  <span class="mark" aria-hidden="true"></span>
+  <div class="dl" id="dl" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><span class="track"></span><div class="clip" id="clip"></div></div>
+  <div class="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/></svg>Search</div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f;
+const slugOf=r=>(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const name=r=>(r.sortAs||r.artist).replace(/^the /i,'');
+const letter=r=>{const c=name(r).normalize('NFD').toUpperCase().replace(/[^A-Z0-9]/g,'')[0]||'#';return /[A-Z]/.test(c)?c:'#'};
+const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const buzz=ms=>{try{navigator.vibrate?.(ms)}catch{}};
+
+let R=[],FIRST={},CNT={},X=[],cur=0;
+const has=L=>FIRST[L]!=null;
+const W=36,WR=26,GAP_ARTIST=6,GAP_LETTER=14,H0=58,H1=104;
+
+// ---- the pile
+const ph=$('#ph'),front=$('#front');
+function show(i){i=clamp(i,0,R.length-1);const ch=i!==cur;cur=i;const r=R[i];
+  front.innerHTML=r.front?`<img src="${img(r.front)}" alt="">`:`<span class="pl" style="background:${r.spine||'#2c2c2e'};color:${ink(r.spine)}">${esc(r.title)}<small>${esc(r.artist)}</small></span>`;
+  if(ch){front.classList.remove('flip');void front.offsetWidth;front.classList.add('flip')}
+  $('#t').innerHTML=`<b>${esc(r.title)}</b><span>${esc(r.artist)}</span>`;$('#pos').textContent=`${i+1} of ${R.length}`;label()}
+const goLetter=L=>{if(has(L)&&letter(R[cur])!==L)show(FIRST[L])};
+
+// ---- the dial: two positions in pixels (letters, records) and a depth, each a spring
+const dl=$('#dl'),clip=$('#clip');let LT=[],TH=[];
+const S={l:{x:0,v:0,t:0},r:{x:0,v:0,t:0},z:{x:0,v:0,t:0}};
+const K={l:[260,33],r:[260,33],z:[320,37]}; // stiffness, damping
+let raf=0,drag=null,user=false,lastL=-1,lastR=-1,acc=0;
+const mode=()=>S.z.x>=.5?'r':'l';
+const lMax=()=>25*W,rMax=()=>X[X.length-1];
+const nearL=px=>{const k=clamp(Math.round(px/W),0,25);if(has(AZ[k]))return k;for(let s=1;s<26;s++){if(k+s<26&&has(AZ[k+s]))return k+s;if(k-s>=0&&has(AZ[k-s]))return k-s}return k};
+const nearR=px=>{let b=0;for(let i=1;i<X.length;i++)if(Math.abs(X[i]-px)<Math.abs(X[b]-px))b=i;return b};
+const soft=(x,a,b)=>x<a?a-60*(1-Math.exp((x-a)/60)):x>b?b+60*(1-Math.exp((b-x)/60)):x;
+
+function render(){
+  const z=clamp(S.z.x,0,1),e=z*z*(3-2*z),cL=S.l.x,cR=S.r.x,lp=cL/W;
+  ph.style.setProperty('--h',lerp(H0,H1,e)+'px');ph.style.setProperty('--z',e);
+  const curL=letter(R[cur]),half=ph.clientWidth/2+30;
+  LT.forEach((s,j)=>{const L=AZ[j],ok=has(L);
+    const x=lerp(j*W-cL,ok?X[FIRST[L]]-cR:j*W-cL,e),y=lerp(17,70,e);
+    const d=Math.abs(j-lp),sc=lerp(1+.35*Math.max(0,1-d),.72,e);
+    s.style.transform=`translate(${x}px,${-y}px) scale(${sc})`;
+    s.style.opacity=ok?1:.35*(1-e);s.style.visibility=Math.abs(x)>half?'hidden':'';
+    s.classList.toggle('on',e<.5?d<.5:L===curL)});
+  const vis=e>.01;
+  TH.forEach((s,i)=>{if(!vis){s.style.visibility='hidden';return}
+    const x=lerp(AZ.indexOf(letter(R[i]))*W-cL,X[i]-cR,e);
+    if(Math.abs(x)>half){s.style.visibility='hidden';return}
+    const sc=lerp(.3,1+.75*Math.max(0,1-Math.abs(X[i]-cR)/WR),e);
+    s.style.visibility='';s.style.opacity=clamp((e-.2)/.55,0,1);s.style.transform=`translate(${x}px,${-lerp(20,14,e)}px) scale(${sc})`});
+  // ticks: letters in letter depth, records in record depth (only when the person is driving)
+  if(mode()==='l'){const k=clamp(Math.round(cL/W),0,25);if(k!==lastL){lastL=k;if(user&&has(AZ[k])){goLetter(AZ[k]);buzz(4)}}}
+  else{const k=nearR(cR);if(k!==lastR){lastR=k;if(user&&k!==cur){show(k);buzz(2)}}}
+  $('#labC').style.opacity=clamp(1-e*1.8,0,1);$('#labC').style.transform=`translateY(${-8*e}px)`;$('#labA').style.transform=`translateY(${8*(1-e)}px)`;if(drag)bubFill();$('#labA').style.opacity=clamp(e*1.8-.8,0,1);
+}
+function label(){const r=R[cur],L=letter(r),n=CNT[L],same=R.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
+  $('#labC').textContent=`${n} record${n>1?'s':''} in ${L}`;
+  $('#labA').textContent=same.length>1?`${r.artist}  ·  ${k} of ${same.length}`:r.artist;
+  dl.setAttribute('aria-valuetext',mode()==='l'?`${L}, ${n} record${n>1?'s':''}`:`${r.title}, ${r.artist}`)}
+
+function loop(ts){
+  const dt=Math.min(.032,(ts-(loop.t||ts))/1000||.016);loop.t=ts;let busy=!!drag;
+  for(const k of ['l','r','z']){if(drag&&k!=='z'&&k===drag.m)continue;if(drag&&k==='z'&&drag.v)continue;const o=S[k],[st,da]=K[k];
+    if(REDUCED){o.x=o.t;o.v=0;continue}
+    o.v+=(-st*(o.x-o.t)-da*o.v)*dt;o.x+=o.v*dt;
+    if(Math.abs(o.x-o.t)<(k==='z'?.001:.05)&&Math.abs(o.v)<(k==='z'?.01:1)){o.x=o.t;o.v=0}else busy=true}
+  render();
+  if(busy)raf=requestAnimationFrame(loop);else{raf=0;loop.t=0;settled()}
+}
+const kick=()=>{if(!raf)raf=requestAnimationFrame(loop)};
+function settled(){if(!user)return;user=false;
+  if(mode()==='l')goLetter(AZ[nearL(S.l.x)]);else if(nearR(S.r.x)!==cur)show(nearR(S.r.x));rest(mode()==='l'?'r':'l');label()}
+// park the depth you're not in on the record in front, so changing depth never jumps
+function rest(m){const o=S[m];o.x=o.t=m==='r'?X[cur]:AZ.indexOf(letter(R[cur]))*W;o.v=0;if(m==='r')lastR=cur;else lastL=Math.round(o.x/W)}
+// keep both positions on the record in front, without ticking through the ones in between
+function sync(anim=true){if(drag||(raf&&user))return;
+  S.l.t=AZ.indexOf(letter(R[cur]))*W;S.r.t=X[cur];
+  if(!anim||REDUCED){S.l.x=S.l.t;S.r.x=S.r.t;S.l.v=S.r.v=0}
+  lastL=Math.round(S.l.t/W);lastR=cur;kick();label()}
+function setDepth(m,haptic=true){const t=m==='r'?1:0;if(S.z.t===t)return;S.z.t=t;
+  // the depth we're going to starts right on the record in front
+  if(m==='r'){S.r.x=S.r.t=X[cur];S.r.v=0;lastR=cur}else{S.l.x=S.l.t=AZ.indexOf(letter(R[cur]))*W;S.l.v=0;lastL=Math.round(S.l.x/W)}
+  if(haptic)buzz(10);hint(true);kick();setTimeout(label,0)}
+
+function down(e,held){cancelAnimationFrame(raf);raf=0;loop.t=0;user=true;
+  const m=mode();S[m].t=S[m].x;S[m].v=0;
+  drag={x:e.clientX,y:e.clientY,lx:e.clientX,m,z0:S.z.x,v:false,far:0,h:[[e.timeStamp,S[m].x]],vy:[[e.timeStamp,e.clientY]]};
+  if(!held)try{dl.setPointerCapture(e.pointerId)}catch{}kick();bubble(e,held)}
+function move(e){if(!drag)return;const d=drag;bubble(e)
+  d.far=Math.max(d.far,Math.hypot(e.clientX-d.x,e.clientY-d.y));
+  // up and down change depth, once the finger clearly means it; the dial follows the finger, with a little give past either end
+  const dy=d.y-e.clientY;
+  if(!d.v&&Math.abs(dy)>12&&Math.abs(dy)>Math.abs(e.clientX-d.x)*.7){d.v=true;d.y=e.clientY;d.z0=S.z.x;rest(d.m==='l'?'r':'l')}
+  if(d.v){const z=d.z0+(d.y-e.clientY)/70;S.z.x=S.z.t=z<0?-.15*(1-Math.exp(z/.15)):z>1?1+.15*(1-Math.exp((1-z)/.15)):z;S.z.v=0;
+    d.vy.push([e.timeStamp,e.clientY]);while(d.vy.length>2&&e.timeStamp-d.vy[0][0]>90)d.vy.shift();
+    const m=mode();if(m!==d.m){d.m=m;
+      if(m==='r'){S.r.x=S.r.t=X[cur];lastR=cur}else{S.l.x=S.l.t=AZ.indexOf(letter(R[cur]))*W;lastL=Math.round(S.l.x/W)}
+      S.l.v=S.r.v=0;d.h=[[e.timeStamp,S[m].x]];buzz(10);hint(true);label()}}
+  const dx=e.clientX-d.lx;d.lx=e.clientX;const o=S[d.m];
+  o.x=o.t=soft(o.x-dx,0,d.m==='l'?lMax():rMax());
+  d.h.push([e.timeStamp,o.x]);while(d.h.length>2&&e.timeStamp-d.h[0][0]>90)d.h.shift();
+}
+function up(e){if(!drag)return;const d=drag;drag=null;bubble(null);const m=d.m,o=S[m];
+  if(d.far<6){const t=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.dataset&&(n.dataset.k!=null));
+    if(t&&mode()==='l'&&t.classList.contains('lt')&&has(AZ[+t.dataset.k])){o.t=+t.dataset.k*W;kick();return}
+    if(t&&mode()==='r'&&t.classList.contains('th')){o.t=X[+t.dataset.k];kick();return}}
+  const [t0,x0]=d.h[0],v=(o.x-x0)/Math.max(16,e.timeStamp-t0); // px per ms
+  o.v=v*1000;const proj=o.x+v*(m==='l'?260:320);
+  o.t=m==='l'?nearL(proj)*W:X[nearR(clamp(proj,0,rMax()))];
+  if(d.v){const [ty,y0]=d.vy[0],vy=(y0-e.clientY)/Math.max(16,e.timeStamp-ty);
+    const t=vy>.35?1:vy<-.35?0:S.z.x>=.5?1:0;S.z.t=t;S.z.v=vy*1000/70;
+    if((t===1)!==(m==='r')){setDepth(t?'r':'l');return}}
+  kick()}
+dl.addEventListener('pointerdown',e=>down(e));dl.addEventListener('pointermove',move);dl.addEventListener('pointerup',up);dl.addEventListener('pointercancel',up);
+dl.addEventListener('wheel',e=>{e.preventDefault();acc+=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(Math.abs(acc)>30){step(Math.sign(acc));acc=0}},{passive:false});
+function step(dir){user=true;const m=mode(),o=S[m];
+  if(m==='l'){let k=Math.round(o.t/W)+dir;while(k>=0&&k<26&&!has(AZ[k]))k+=dir;if(k<0||k>25)return;o.t=k*W}
+  else{const k=clamp(nearR(o.t)+dir,0,R.length-1);o.t=X[k]}
+  kick()}
+dl.addEventListener('keydown',e=>{const k=e.key;
+  if(k==='ArrowLeft'||k==='ArrowRight'){e.preventDefault();step(k==='ArrowLeft'?-1:1)}
+  else if(k==='ArrowUp'){e.preventDefault();setDepth('r')}else if(k==='ArrowDown'){e.preventDefault();setDepth('l')}
+  else if(k==='Home'||k==='End'){e.preventDefault();user=true;const m=mode();S[m].t=k==='Home'?0:(m==='l'?nearL(lMax())*W:rMax());kick()}});
+
+// the bubble over your thumb: the letter, or in record depth the cover
+const bub=$('#bub');
+function bubble(e,force){if(!e){bub.classList.remove('on');return}
+  const b=ph.getBoundingClientRect();bub.style.left=(e.clientX-b.left)+'px';bub.style.top=(e.clientY-b.top)+'px';
+  if(force||drag&&drag.far>6)bub.classList.add('on');bubFill()}
+function bubFill(){const r=R[cur],k=mode()+cur;if(bub.dataset.k===k)return;bub.dataset.k=k;
+  bub.classList.toggle('rec',mode()==='r');
+  bub.innerHTML=mode()==='r'?(TH[cur].querySelector('img')?`<img src="${TH[cur].querySelector('img').src}" alt="">`:`<span style="background:${r.spine||'#2c2c2e'}"></span>`):esc(letter(r))}
+// a swipe up or down on the pile flips one record, like the crate
+let y0=null,p0=null,timer=0,held=false;const stage=$('#stage');
+stage.addEventListener('pointerdown',e=>{y0=e.clientY;p0=e;try{stage.setPointerCapture(e.pointerId)}catch{}
+  timer=setTimeout(()=>{held=true;y0=null;buzz(8);down(p0,true)},320)});
+stage.addEventListener('pointermove',e=>{if(held)return move(e);if(p0&&Math.hypot(e.clientX-p0.clientX,e.clientY-p0.clientY)>8)clearTimeout(timer)});
+stage.addEventListener('pointercancel',e=>{clearTimeout(timer);p0=null;if(held){held=false;up(e)}});
+stage.addEventListener('contextmenu',e=>e.preventDefault());
+stage.addEventListener('pointerup',e=>{clearTimeout(timer);p0=null;if(held){held=false;up(e);return}if(y0==null)return;const d=e.clientY-y0;y0=null;if(Math.abs(d)>24){show(cur+(d>0?1:-1));sync()}});
+stage.addEventListener('wheel',e=>{e.preventDefault();if(Math.abs(e.deltaY)>8){show(cur+Math.sign(e.deltaY));sync()}},{passive:false});
+
+// the hint goes once you've changed depth
+function hint(done){const h=$('#hint');if(done){h.classList.add('gone');try{localStorage.setItem('records-dial-hint','1')}catch{}}
+  else{try{if(localStorage.getItem('records-dial-hint'))h.classList.add('gone')}catch{}}}
+
+// small covers for the dial, made one at a time so a phone never decodes 68 full covers at once
+async function thumbs(){const c=document.createElement('canvas');c.width=c.height=72;const g=c.getContext('2d');
+  for(const [i,r] of R.entries()){const s=TH[i];
+    if(!r.front){s.style.background=r.spine||'#2c2c2e';continue}
+    try{const im=new Image();im.src=img(r.front);await im.decode();g.drawImage(im,0,0,72,72);
+      const b=await new Promise(res=>c.toBlob(res,'image/jpeg',.82));s.innerHTML=`<img src="${URL.createObjectURL(b)}" alt="">`}catch{}}}
+
+async function load(){
+  const [src,meta]=await Promise.all([fetch('vinyl-prototype.html').then(r=>r.text()),fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}))]);
+  const m=src.match(/const RECORDS=\[([\s\S]*?)\]\.map\(/);
+  R=(m?Function('return ['+m[1]+']')():[]).map(r=>({...meta[slugOf(r)],...r}));
+  R.sort((a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||(+a.year||9999)-(+b.year||9999));
+  R.forEach((r,i)=>{const L=letter(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
+    // records sit in a row; a small gap between artists, a bigger one between letters
+    X[i]=i?X[i-1]+WR+(L!==letter(R[i-1])?GAP_LETTER:r.artist!==R[i-1].artist?GAP_ARTIST:0):0});
+  clip.innerHTML=R.map((r,i)=>`<span class="th" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="lt" data-k="${j}">${L}</span>`).join('');
+  LT=[...clip.querySelectorAll('.lt')];TH=[...clip.querySelectorAll('.th')];
+  cur=-1;show(0);sync(false);hint();render();thumbs();
+}
+load();
+</script>
+</body>
+</html>
