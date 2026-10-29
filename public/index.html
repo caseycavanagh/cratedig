@@ -725,6 +725,20 @@ body:has(.find .q:focus-within) .kd,body:has(.find .q.has) .kd{opacity:0;visibil
 .fb.lb{color:#d6d6d8}
 .fb.lb svg{width:20px;height:20px}
 .fb.lb[aria-expanded=true]{color:#fff}
+/* search and layout sit at the top corners; the scrubber has the bottom to itself */
+.find,html.phone .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto;max-width:none;padding:0 14px}
+html.phone body.searching .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto}
+.find .vw{order:5}
+body.quiet .find{translate:0 calc(-100% - 40px)}
+.qnone,html.phone .qnone{top:calc(100% + 10px);bottom:auto}
+html.phone .sl{top:calc(env(safe-area-inset-top) + 80px);bottom:calc(var(--kb,0px) + 10px + env(safe-area-inset-bottom))}
+.kd{--kw:min(520px,100vw)}
+.wall,.tbl{top:calc(env(safe-area-inset-top) + 68px);padding-top:8px}
+/* searching on a phone: the records dim behind the list; the search itself stays bright */
+html.phone body.searching .page{opacity:1;scale:none;pointer-events:auto}
+html.phone .page>:not(.find){transition:opacity .35s}
+html.phone body.searching .page>:not(.find){opacity:.12;pointer-events:none}
+html.phone .page{padding-top:calc(env(safe-area-inset-top) + 72px)}
 </style>
 </head>
 <body>
