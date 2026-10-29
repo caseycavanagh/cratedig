@@ -608,12 +608,17 @@ body.quiet .find *{pointer-events:none}
 body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px)}
 @media(prefers-reduced-motion:reduce){body.quiet .find{translate:none}}
 /* phones keep the flipped pile: records lie toward you, backs up, under the dial and the bar */
-html.phone .crate{perspective-origin:50% calc(50% + 12px - var(--S)*.6)}
+html.phone .crate{perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% + 12px - var(--S)*1.13)} /* the same eye as the desktop crate: above, looking down onto the backs */
 html.phone .kd::before{display:none}
 /* swapping records: the details change, Play stays put */
 .open.in.swapping .o-info,html.phone .open.in.swapping .o-info{opacity:1;transform:none;transition:none}
 .open.in .o-info>:not(.play){transition:transform .5s var(--flip),opacity .3s}
 .open.in.swapping .o-info>:not(.play){opacity:0;transform:translateY(-12px);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .12s}
+/* phones: the words just cross-fade between records, and arrive with a short rise, no overshoot */
+html.phone .o-info{transform:translateY(10px)}
+html.phone .open.in .o-info{transform:none;transition:transform .45s cubic-bezier(.22,1,.36,1) .08s,opacity .3s .08s}
+html.phone .open.in .o-info>:not(.play){transition:opacity .22s}
+html.phone .open.in.swapping .o-info>:not(.play){transform:none;transition:opacity .1s}
 /* arriving: the crate rises first, then the dial and the bar settle in under it */
 body.ready .find,body.ready .kd{animation:barIn .7s cubic-bezier(.22,1,.36,1) .32s backwards}
 @keyframes barIn{from{opacity:0;translate:0 18px}}
@@ -650,6 +655,38 @@ html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:
 /* reading a record opened from the wall or the canvas: they fade back behind it, and come back as it goes home */
 .wall,.cv{transition:opacity .4s cubic-bezier(.22,1,.36,1)}
 body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
+/* the grid: pinch changes the columns, so the page itself doesn't zoom */
+.wall{touch-action:pan-y}
+/* the table: quiet rows, a cover, the facts; the headers sort */
+.tbl{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s cubic-bezier(.22,1,.36,1)}
+.tbl[hidden]{display:none}
+.tbl:focus{outline:none}
+.tbl table{width:100%;max-width:1100px;margin:0 auto;border-collapse:collapse;font-size:15px;table-layout:auto}
+.tbl thead th{position:sticky;top:-8px;z-index:1;background:var(--bg);text-align:left;font-weight:400;padding:10px 12px 8px;border-bottom:1px solid var(--line)}
+.tbl th button{all:unset;cursor:pointer;color:var(--m);font-size:13px;display:inline-flex;gap:4px;align-items:center}
+.tbl th button:hover,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{color:#fff}
+.tbl th button:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:4px}
+.tbl th i{font-style:normal;font-size:12px;width:10px}
+.tbl tbody tr{cursor:pointer;transition:background-color .15s}
+.tbl tbody tr:hover{background:#ffffff0a}
+.tbl tbody tr:active{background:#ffffff14}
+.tbl tbody tr:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.tbl td{padding:8px 12px;border-bottom:1px solid #ffffff0d;color:#c7c7cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;vertical-align:middle}
+.tbl td.c-title{color:#fff;max-width:340px}
+.tbl td.c-title b{font-weight:500}
+.tbl .c0{width:48px;padding-right:4px}
+.tbl .c0 img,.tbl .c0 .sw{display:block;width:44px;height:44px;border-radius:3px;object-fit:cover;background:#2c2c2e}
+.tbl .held{opacity:0}
+.tbl .m{display:none}
+@media (max-width:700px){
+  .tbl{padding-left:8px;padding-right:8px}
+  .tbl .c-artist,.tbl .c-label,.tbl .c-format{display:none}
+  .tbl td.c-title{white-space:normal;max-width:none}
+  .tbl td.c-title b,.tbl .m{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 150px)}
+  .tbl .m{color:var(--m);font-size:14px}
+  .tbl .c-year{text-align:right;color:var(--m)}
+}
+body.reading .tbl{opacity:0;transition:opacity .3s}
 </style>
 </head>
 <body>
@@ -677,9 +714,10 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
   </div>
   <nav class="az" id="az" aria-label="Jump to a letter"></nav>
   <div class="kd" id="kd"><p class="kd-b" aria-hidden="true"><span class="c"></span><span class="a"></span></p><div class="kd-d" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><div class="kd-c"></div></div></div>
-  <div class="vw" role="group" aria-label="View"><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Wall</button><button type="button" data-v="canvas" aria-pressed="false">Canvas</button></div>
+  <div class="vw" role="group" aria-label="View"><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
 </main>
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
+<section class="tbl" id="tbl" hidden tabindex="-1" aria-label="Every record, as a table"><table><thead></thead><tbody></tbody></table></section>
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="upF" accept="image/*" hidden>
@@ -885,7 +923,7 @@ function deckSeat(d,q){
   if(d>=0){const k=Math.min(d,4),w=Math.min(d,1,Math.max(0,4-d));return{x:q.x*5*w,y:-Math.min(k,3)*14,z:-k*3,s:1-k*.035,r:q.z*2.4*w,a:0}} // past the third, a record squares up and shrinks out of sight behind it
   // a flipped record tips toward you past upright and lies down on the ones before it, back up, a hair off true; older ones sink under
   const t=-d;if(t<=1)return{x:q.x*5*t,y:0,z:1,s:1,r:q.z*2.4*t,a:-Math.acos(1-t)*180/Math.PI*(FLAT/90)}; // its top edge keeps pace with your finger
-  const k=Math.min(t-1,6);return{x:q.x*5,y:k*4,z:1-k*.5,s:1,r:q.z*2.4,a:-(FLAT+k*1.6)};
+  const k=Math.min(t-1,6);return{x:q.x*5,y:k*1.5,z:1-k*1.5,s:1,r:q.z*2.4,a:-(FLAT+k*.6)}; // older ones settle just under it, the way they do on a desktop
 }
 // One spring drives the crate: pos chases aim, so a flip can be interrupted, retargeted or dragged without restarting
 let pos=0,vel=0,aim=0,raf=0;
@@ -899,7 +937,7 @@ function seat(d){
 }
 // the crate's eye level again, in pixels: iPhone Safari drops the calc() in the CSS and looks from the middle of the crate,
 // so a phone's flipped records, meant to lie edge on at eye level, show their backs as a slab under the pile
-const eye=()=>{const px=el=>el?parseFloat(getComputedStyle(el).height):0,S=px(nodes[cur]),H=px(crate);if(S&&H)crate.style.perspectiveOrigin=`50% ${(PHONE?H/2+12-S*.6:H/2-S*1.13).toFixed(1)}px`};
+const eye=()=>{const px=el=>el?parseFloat(getComputedStyle(el).height):0,S=px(nodes[cur]),H=px(crate);if(S&&H){crate.style.perspectiveOrigin=`50% ${(PHONE?H/2+12-S*1.13:H/2-S*1.13).toFixed(1)}px`;crate.style.perspective=PHONE?(S*2.9).toFixed(0)+'px':''}};
 function render(){
   frontBox=null;
   if(!deckS){deckS=nodes[cur]?.offsetWidth||0;eye()}
@@ -938,7 +976,7 @@ function kick(){if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);render();retu
 // Shading is two flat steps (behind, flipped), so a flip repaints only the records that change sides.
 // Covers load a few records beyond what's drawn, so one is always decoded before it shows. Only records near the front
 // can fall forward and show their back, so backs load over a shorter reach; a phone's pile never shows one.
-const warm=(n,d)=>{if(n._lazy.length)n._lazy=n._lazy.filter(i=>{if(d>(PHONE?-99:4)&&i.parentNode.classList.contains('bk'))return true;i.addEventListener('load',()=>bake(i,n),{once:true});i.src=i.dataset.src;i.removeAttribute('data-src');return false})};
+const warm=(n,d)=>{if(n._lazy.length)n._lazy=n._lazy.filter(i=>{if(d>4&&i.parentNode.classList.contains('bk'))return true;i.addEventListener('load',()=>bake(i,n),{once:true});i.src=i.dataset.src;i.removeAttribute('data-src');return false})};
 // about to jump somewhere (a letter under the pointer): load what will show there
 const warmAt=i=>{if(i==null)return;for(let j=Math.max(0,i-3);j<=Math.min(order.length-1,i+10);j++)warm(nodes[j],j-i)};
 function place(rest){
@@ -948,9 +986,9 @@ function place(rest){
     if(d>=lo&&d<=hi)warm(n,d);
     // on a phone the pile only gains or drops records at rest, out of sight: changing what's drawn mid-flip can make iOS flash the whole pile
     if(PHONE&&!rest&&show!==shown[j]&&(d<-1||d>3))show=shown[j];
-    const shade=PHONE?'#0000':d<0?'rgb(0 0 0/.06)':d===0?'#0000':'rgb(0 0 0/.16)'; // the pile goes unshaded: no record brightens as it reaches the top
+    const shade=PHONE?(d<0?'rgb(0 0 0/.22)':'#0000'):d<0?'rgb(0 0 0/.06)':d===0?'#0000':'rgb(0 0 0/.16)'; // the pile goes unshaded: no record brightens as it reaches the top
     if(n.dataset.shade!==shade){n.dataset.shade=shade;n.style.setProperty('--shade',shade)}
-    n.classList.toggle('cur',d===0);n.classList.toggle('fell',!PHONE&&d<0);
+    n.classList.toggle('cur',d===0);n.classList.toggle('fell',d<0);
     if(shown[j]!==show){shown[j]=show;n.classList.toggle('gone',!show)}
   });
   tailN=PHONE?0:Math.max(0,order.length-cur-11);
@@ -1753,7 +1791,9 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   FIELD.decade=r=>r.year?Math.floor(r.year/10)*10+'s':'';KIND.decade='Decade';
   FIELD.kind=r=>/\blive\b|at newport/i.test(r.title)?'Live':/greatest|best of/i.test(r.title)?'Greatest hits':'';KIND.kind='Records';
   let view='crate',back=false;
-  const cols=()=>innerWidth>=1200?6:innerWidth>=900?5:innerWidth>=600?4:3;
+  const auto=()=>innerWidth>=1200?6:innerWidth>=900?5:innerWidth>=600?4:3,CMIN=()=>innerWidth<600?1:2,CMAX=()=>innerWidth<600?6:10;
+  let gc=null;try{gc=+localStorage.getItem('records-grid-cols')||null}catch{}
+  const cols=()=>Math.max(CMIN(),Math.min(CMAX(),gc||auto()));
   const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
   const keep=new Map();
   // covers on the wall and the canvas are small copies, made one at a time as the page settles: 68 full-size covers
@@ -1787,6 +1827,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   function drawPills(){pills.innerHTML=SETS().map((s,i)=>`<button type="button" data-i="${i}" aria-pressed="${isOn(s.f)}">${s.label}</button>`).join('')}
   function draw(animate){
     if(view==='canvas'){drawPills();return lay()}
+    if(view==='table'){drawPills();return drawTable()}
     if(view!=='wall')return drawPills();
     const before=new Map();
     if(animate&&!reduce)for(const [k,n] of keep)if(n.isConnected)before.set(k,n.getBoundingClientRect());
@@ -1797,14 +1838,16 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     if(!before.size)return;
     // covers glide from where they were; new ones grow in
     for(const r of order){const n=keep.get(r.slug),a=before.get(r.slug),b=n.getBoundingClientRect();
-      if(a)n.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width})`,transformOrigin:'0 0'},{transform:'none',transformOrigin:'0 0'}],{duration:620,easing:'cubic-bezier(.2,1.15,.35,1)'});
-      else n.animate([{opacity:0,transform:'scale(.9)'},{opacity:1,transform:'none'}],{duration:420,easing:'cubic-bezier(.2,1.2,.35,1)'})}
+      if(a)n.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width})`,transformOrigin:'0 0'},{transform:'none',transformOrigin:'0 0'}],{duration:480,easing:'cubic-bezier(.22,1,.36,1)'});
+      else n.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'})}
   }
   function setView(v,focus,stay){
-    view=v;wall.hidden=v!=='wall';cv.hidden=v!=='canvas';document.body.classList.toggle('walling',v!=='crate');
+    if(v==='canvas')v='wall';
+    view=v;wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
     vw.forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
     try{localStorage.setItem('records-view',v)}catch{}
     if(v==='wall'){draw(false);if(focus)wall.focus({preventScroll:true})}
+    else if(v==='table'){drawTable();if(focus)tbl.focus({preventScroll:true})}
     else if(v==='canvas'){lay(!stay);if(focus)cv.focus({preventScroll:true})}
     else{go(cur,true);if(focus)crate.focus({preventScroll:true})}
   }
@@ -1815,18 +1858,62 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     if(!s.f||isOn(s.f))arrange(null);else arrange(s.f);wall.scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
   const pull=slug=>{const j=order.findIndex(r=>r.slug===slug);if(j<0)return;document.body.classList.add('reading');go(j,true);openRecord(false)};
   // the open record's tile, as a pose the lift can fly from and back to (brought on screen first if it isn't)
-  window.tilePose=()=>{if(view==='crate')return null;const r=order[cur],t=(view==='wall'?keep:ckeep).get(r?.slug);if(!t||!t.isConnected)return null;
+  window.tilePose=()=>{if(view==='crate')return null;const r=order[cur];const t=(view==='wall'?keep:view==='table'?tkeep:ckeep).get(r?.slug);if(!t||!t.isConnected)return null;
     let R=t.getBoundingClientRect();
-    if(R.top<40||R.bottom>innerHeight-100||R.left<0||R.right>innerWidth){if(view==='wall')t.scrollIntoView({block:'center'});else cvCenter(t);R=t.getBoundingClientRect()}
+    if(R.top<40||R.bottom>innerHeight-100||R.left<0||R.right>innerWidth){if(view!=='canvas')t.scrollIntoView({block:'center'});else cvCenter(t);R=t.getBoundingClientRect()}
     const S=stage.getBoundingClientRect();if(!S.width)return null;
-    for(const n of document.querySelectorAll('.tile.held'))if(n!==t)n.classList.remove('held');t.classList.add('held');
+    for(const n of document.querySelectorAll('.tile.held,.tbl .held'))if(n!==t)n.classList.remove('held');t.classList.add('held');
     const p={x:R.left+R.width/2-(S.left+S.width/2),y:R.top+R.height/2-(S.top+S.height/2),z:0,s:R.width/S.width,ax:0,az:0};
     return{...p,P:2600,ox:S.width/2,oy:S.height/2,tf:poseTf(p)}};
   const cp0=cratePose;cratePose=function(...a){return window.tilePose?.()||cp0.apply(this,a)};
   const cr0=closeRecord;closeRecord=function(...a){document.body.classList.remove('reading');return cr0.apply(this,a)};
   tiles.addEventListener('click',e=>{const t=e.target.closest('.tile');if(t)pull(t.dataset.slug)});
   // closing a record you opened from the wall or the canvas puts you back where you were
-  new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
+  new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held,.tbl .held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
+
+
+  // ---- the grid: pinch it (or ctrl-scroll, or + and −) and the columns change; the covers glide to their new places and
+  // the cover under your fingers stays put
+  function regrid(n,ax,ay){
+    n=Math.max(CMIN(),Math.min(CMAX(),n));if(n===cols())return;
+    const before=new Map();for(const [k,t] of keep)if(t.isConnected)before.set(k,t.getBoundingClientRect());
+    const a=document.elementsFromPoint(ax,ay).find(e=>e.classList?.contains('tile'))||null,a0=a&&before.get(a.dataset.slug);
+    for(const t of keep.values())t.getAnimations().forEach(x=>x.cancel());
+    gc=n;try{localStorage.setItem('records-grid-cols',n)}catch{}tiles.style.setProperty('--cols',n);
+    if(a){const a1=a.getBoundingClientRect();wall.scrollTop+=a1.top+a1.height*((ay-a0.top)/a0.height)-ay}
+    if(reduce)return;navigator.vibrate?.(4);
+    for(const [k,t] of keep){const p=before.get(k);if(!p||!t.isConnected)continue;const b=t.getBoundingClientRect();if(b.bottom<-200||b.top>innerHeight+200)continue;
+      t.animate([{transform:`translate(${p.left-b.left}px,${p.top-b.top}px) scale(${p.width/b.width})`,transformOrigin:'0 0'},{transform:'none',transformOrigin:'0 0'}],{duration:420,easing:'cubic-bezier(.22,1,.36,1)'})}
+  }
+  let gp=null;
+  wall.addEventListener('touchstart',e=>{if(e.touches.length===2){const [a,b]=e.touches;gp={d0:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)||1,c0:cols()};e.preventDefault()}},{passive:false});
+  wall.addEventListener('touchmove',e=>{if(!gp||e.touches.length<2)return;e.preventDefault();const [a,b]=e.touches,d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+    regrid(Math.round(gp.c0*gp.d0/d),(a.clientX+b.clientX)/2,(a.clientY+b.clientY)/2)},{passive:false});
+  wall.addEventListener('touchend',e=>{if(e.touches.length<2)gp=null});
+  let gacc=0;wall.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();gacc+=e.deltaY;if(Math.abs(gacc)>40){regrid(cols()+Math.sign(gacc),e.clientX,e.clientY);gacc=0}},{passive:false});
+  let gg=null;
+  wall.addEventListener('gesturestart',e=>{e.preventDefault();gg={c0:cols()}});
+  wall.addEventListener('gesturechange',e=>{e.preventDefault();if(gg&&!gp)regrid(Math.round(gg.c0/e.scale),e.clientX,e.clientY)});
+  wall.addEventListener('gestureend',e=>{e.preventDefault();gg=null});
+  addEventListener('keydown',e=>{if(view!=='wall'||!open.hidden||e.target.closest('input'))return;if(/^[-+=]$/.test(e.key)){e.preventDefault();regrid(cols()+(e.key==='-'?1:-1),innerWidth/2,innerHeight/2)}});
+
+  // ---- the table: every record in the crate (as narrowed) as a row; the headers sort it
+  const tbl=$('#tbl'),tkeep=new Map();
+  const COLS=[['title','Title',r=>r.title],['artist','Artist',r=>name(r)],['year','Year',r=>+r.year||9999],['label','Label',r=>r.label||'~'],['format','Format',r=>r.format||'~']];
+  let ts={k:'artist',d:1};try{ts=JSON.parse(localStorage.getItem('records-table-sort'))||ts}catch{}
+  function drawTable(){
+    const c=COLS.find(x=>x[0]===ts.k)||COLS[1],key=c[2];
+    const rows=[...order].sort((a,b)=>{const x=key(a),y=key(b);return(typeof x==='number'?x-y:String(x).localeCompare(String(y),'en',{sensitivity:'base'}))*ts.d||byName(a,b)});
+    $('thead',tbl).innerHTML=`<tr><th class="c0"><span class="sr">Cover</span></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button></th>`).join('')}</tr>`;
+    tkeep.clear();
+    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<img alt="" decoding="async" data-src="${img(r.front)}">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
+    for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
+  }
+  tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable();return}
+    const tr=e.target.closest('tbody tr');if(tr)pull(tr.dataset.slug)});
+  tbl.addEventListener('keydown',e=>{const tr=e.target.closest?.('tbody tr');if(!tr)return;
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();pull(tr.dataset.slug)}
+    else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();(e.key==='ArrowDown'?tr.nextElementSibling:tr.previousElementSibling)?.focus()}});
 
   // ---- the canvas: a board as big as the records need, no bigger. Drag it, flick it, pinch it, scroll it, or use the
   // arrow keys (+ and - zoom); past an edge, or past how near or far it goes, it gives a little and springs back.
@@ -1925,7 +2012,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     if(/^(Arrow|Home$|End$|j$|k$)/.test(e.key)||((e.key==='Enter'||e.key===' ')&&!e.target.closest('button')))e.stopImmediatePropagation()},true);
   let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{tiles.style.setProperty('--cols',cols());if(view==='canvas')lay()},100)});
   // wait for the crate to fill, then open the view you used last
-  const ready=new MutationObserver(()=>{if(!document.body.classList.contains('ready'))return;ready.disconnect();let v='crate';try{v=localStorage.getItem('records-view')||'crate'}catch{}if((v==='wall'||v==='canvas')&&open.hidden)setView(v);else drawPills()});
+  const ready=new MutationObserver(()=>{if(!document.body.classList.contains('ready'))return;ready.disconnect();let v='crate';try{v=localStorage.getItem('records-view')||'crate'}catch{}if((v==='wall'||v==='canvas'||v==='table')&&open.hidden)setView(v);else drawPills()});
   ready.observe(document.body,{attributes:true,attributeFilter:['class']});
 })();
 </script>
@@ -2049,8 +2136,8 @@ build();at=cur;
   const find=$('.find'),vwEl=$('.vw'),qf=$('#qf'),pills=$('#pills');
   const ICON={crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
     wall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
-    canvas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="15" y="12" width="6" height="6" rx="1"/><rect x="6" y="15" width="6" height="6" rx="1"/></svg>'};
-  $$('button',vwEl).forEach(b=>{const v=b.dataset.v;b.setAttribute('aria-label',v[0].toUpperCase()+v.slice(1));b.title=b.getAttribute('aria-label');b.innerHTML=ICON[v]});
+    table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>'};
+  $$('button',vwEl).forEach(b=>{const v=b.dataset.v;b.setAttribute('aria-label',b.textContent);b.title=b.getAttribute('aria-label');b.innerHTML=ICON[v]});
   find.insertBefore(vwEl,qf);
   const fb=document.createElement('button');fb.type='button';fb.className='fb';fb.setAttribute('aria-expanded','false');fb.setAttribute('aria-controls','pills');
   fb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sr">Filters</span>';
@@ -2070,9 +2157,9 @@ build();at=cur;
   const quiet=on=>{if(on&&held())return;document.body.classList.toggle('quiet',on)};
   const nudge=(ms=1100)=>{if(held())return;quiet(true);clearTimeout(qT);qT=setTimeout(()=>quiet(false),ms)};
   let at=cur;const place1=place;place=function(...a){const n=place1.apply(this,a);if(cur!==at){at=cur;if(!window.dialBusy?.()&&!document.body.classList.contains('walling'))nudge()}return n};
-  let sy=0;wallEl.addEventListener('scroll',()=>{const y=wallEl.scrollTop,d=y-sy;sy=y;clearTimeout(qT);
-    if(y<40||y+wallEl.clientHeight>wallEl.scrollHeight-40)quiet(false);else if(d>6)quiet(true);else if(d<-6)quiet(false);
-    qT=setTimeout(()=>quiet(false),1600)},{passive:true});
+  for(const sc of [wallEl,$('#tbl')]){let sy=0;sc.addEventListener('scroll',()=>{const y=sc.scrollTop,d=y-sy;sy=y;clearTimeout(qT);
+    if(y<40||y+sc.clientHeight>sc.scrollHeight-40)quiet(false);else if(d>6)quiet(true);else if(d<-6)quiet(false);
+    qT=setTimeout(()=>quiet(false),1600)},{passive:true})}
   cvEl.addEventListener('pointerdown',()=>{clearTimeout(qT);quiet(true)});
   addEventListener('pointerup',()=>{if(document.body.classList.contains('quiet')&&!cvEl.hidden){clearTimeout(qT);qT=setTimeout(()=>quiet(false),700)}});
   cvEl.addEventListener('wheel',()=>nudge(900),{passive:true});
