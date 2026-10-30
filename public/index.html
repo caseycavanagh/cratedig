@@ -101,6 +101,10 @@ html.phone.deck .tail{display:none}
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
 .art.plain{background-image:var(--ring);background-size:100% 100%}
 img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none}
+/* a cover still on its way shows the jacket's color, then fades in over it */
+.rc .face:has(>img.art){background:var(--sp,#2c2c2e)}
+.rc img.art{transition:opacity .5s ease-out}
+.rc img.art:not(.on){opacity:0}
 .cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
 .cover-type b{display:block;font:500 6cqw 'Instrument Sans',sans-serif}
 .cover-type i{display:block;font:400 4.4cqw var(--mono);font-style:normal;opacity:.85;margin-top:1.2cqw}
@@ -541,18 +545,18 @@ body.walling .find .chip{display:none}
 .tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#1f1f21;display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
 .tile img.on{opacity:1}
 .tile .pl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:15px;line-height:1.15}
 .tile .pl small{font-weight:400;opacity:.7;margin-top:2px}
 .tile .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,#000b);font-size:14px;line-height:1.2;opacity:0;transition:opacity .2s}
 .tile .cap b{display:block;font-weight:500}.tile .cap span{color:#c9c9cc}
-/* the grid names a record only when you tab to it; under a pointer, its cover lifts a little instead */
+/* the grid names a record only when you tab to it; under a pointer, its cover comes a little off the page toward you instead */
 .tile:focus-visible .cap{opacity:1}
 @media (hover:hover){
   .tiles .tile{transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1)}
-  .tiles .tile:hover{transform:translateY(-4px);box-shadow:0 14px 28px -12px #000d}
-  .tiles .tile:hover:active{transform:translateY(-4px) scale(.97)}
+  .tiles .tile:hover{z-index:1;transform:scale(1.03);box-shadow:0 18px 36px -14px #000e,0 4px 10px -4px #0009}
+  .tiles .tile:hover:active{transform:scale(1)}
 }
 /* the canvas: every cover once, in staggered columns, on a board you drag around; its edges give a little and spring back */
 .cv{position:fixed;inset:0;z-index:3;overflow:hidden;background:var(--bg);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
@@ -564,7 +568,7 @@ body.walling .find .chip{display:none}
 .board .tile img{-webkit-user-drag:none;pointer-events:none}
 .cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--line);color:#d6d6d8;font-size:14px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
 @media (min-width:700px){.wall{padding-left:28px;padding-right:28px}.wall .pills{margin:0 -28px 18px;padding:2px 28px 4px}.tiles{gap:8px}}
-@media(prefers-reduced-motion:reduce){.vw,.tile,.tiles .tile,.wall .pills button{transition:none}.tiles .tile:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.vw,.tile,.tiles .tile,.wall .pills button,.tile img,.rc img.art,.pic img{transition:none}.tiles .tile:hover{transform:none}}
 /* the dial, in place of the A–Z rail: letters; slide up on it for every record, down for letters again */
 .az{display:none}
 .kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
@@ -575,7 +579,8 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd::before{content:'';position:absolute;left:calc(50% - 50vw);width:100vw;top:-24px;bottom:calc(-82px - env(safe-area-inset-bottom));background:linear-gradient(#12121200,#121212e0 34%,#121212f2);pointer-events:none}
 .kd-d{position:absolute;left:0;right:0;bottom:0;height:var(--kh,58px);cursor:grab;touch-action:none;outline:0;pointer-events:auto;user-select:none;-webkit-user-select:none}
 .kd-d:active{cursor:grabbing}
-.kd-d:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:14px}
+.kd-d:focus-visible{outline:none}
+.kd-d.kf:focus-visible{outline:1px solid #ffffff3d;outline-offset:-1px;border-radius:14px} /* a quiet ring, only when Tab brought you here */
 .kd-c{position:absolute;inset:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
 .kd-c>*{position:absolute;left:50%;bottom:0;will-change:transform}
 .kd-l{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font:500 18px/24px 'Instrument Sans',sans-serif;color:#6c6c71;transform-origin:50% 70%}
@@ -678,7 +683,7 @@ html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:
 .sl ul{list-style:none;margin:0;padding:0}
 .sl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border-radius:16px}
 .sl button:active{background:#ffffff14}
-.sl img,.sl .sw{width:46px;height:46px;border-radius:3px;object-fit:cover;flex:none;background:#2c2c2e}
+.sl .sw,.sl .pic{width:46px;height:46px;border-radius:3px;flex:none;background:#2c2c2e}
 .sl b{display:block;font-weight:500;font-size:16px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span span{display:block;color:var(--m);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span{min-width:0}
@@ -712,7 +717,11 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .tbl td.c-title{color:#fff;max-width:340px}
 .tbl td.c-title b{font-weight:500}
 .tbl .c0{width:48px;padding-right:4px}
-.tbl .c0 img,.tbl .c0 .sw{display:block;width:44px;height:44px;border-radius:3px;object-fit:cover;background:#2c2c2e}
+.tbl .c0 .sw,.tbl .c0 .pic{display:block;width:44px;height:44px;border-radius:3px;background:#2c2c2e}
+.pic{position:relative;overflow:hidden}
+/* table and search covers: the record's color first, then the cover fades in over it */
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
+.pic img.on{opacity:1}
 .tbl .held{opacity:0}
 .tbl .m{display:none}
 @media (max-width:700px){
@@ -766,11 +775,10 @@ html.phone .find .q:focus-within{border-color:rgba(255,255,255,.2)}
 html.phone .qn{display:none}
 html.phone .find .q.has input{padding-right:48px}
 html.phone .sx{padding:0 2px}
-.sl img{background:#2c2c2e}
 .sl img:not([src]){visibility:visible}
 /* every record has the same barely-there corner: 1px */
 .face>*,.face::after,.sleeve .sh,.rc .fr{border-radius:1px}
-.face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.tbl .c0 img,.tbl .c0 .sw,.hit img,.hit .ph{border-radius:1px}
+.face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.sl .pic,.tbl .c0 .sw,.tbl .c0 .pic,.hit img,.hit .ph{border-radius:1px}
 /* phones: the flipped records lying toward you fade out softly instead of ending in hard edges */
 html.phone.deck .crate{-webkit-mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8));mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8))}
 /* phone search: the results card hugs what's in it, and stops above the keyboard */
@@ -792,7 +800,7 @@ html.phone .sl{bottom:auto;max-height:calc(100svh - env(safe-area-inset-top) - 9
   .tbl td{display:block;padding:0;border:0;max-width:none}
   .tbl td.c-artist,.tbl td.c-label,.tbl td.c-format{display:none}
   .tbl .c0{width:auto;padding:0}
-  .tbl .c0 img,.tbl .c0 .sw{width:52px;height:52px}
+  .tbl .c0 .sw,.tbl .c0 .pic{width:52px;height:52px}
   .tbl td.c-title b,.tbl .m{max-width:none}
   .tbl td.c-title b{font-size:16px;line-height:1.3}
   .tbl td.c-year{font-size:14px}
@@ -924,6 +932,31 @@ html.phone .sx{height:44px}
 .qnone:has(ul) .qh{padding:6px 8px 8px}
 /* phones show the laptop's crate, set lower so the pile behind clears the bar; the dial's fade takes the records that fall forward */
 html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
+/* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
+.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
+.kd::before,.kd::before{top:-80px;background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%)}
+html.phone body.searching .find::before{display:none}
+.find::before{transition:opacity .3s}
+body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
+/* the grid and the table run up under the bar instead of stopping at a hard line */
+.wall,.tbl{top:0;padding-top:calc(env(safe-area-inset-top) + 72px)}
+.tbl thead th,.tbl thead{position:static}
+@media (max-width:700px){
+  .tbl thead tr{padding:4px 18px 10px;background:none}
+  .tbl thead th[aria-sort=none]{display:none}
+  .tbl th button,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{height:auto;padding:6px 0;border:0;border-radius:0;background:none;font-size:14px;color:#fff;gap:6px}
+  .tbl th button::before{content:'Sorted by';color:#8e8e93}
+  .tbl th button::after{content:'';width:7px;height:7px;margin:-4px 0 0 2px;border:solid #8e8e93;border-width:0 1.5px 1.5px 0;rotate:45deg}
+  .tbl th button[aria-expanded=true]::after{rotate:225deg;margin-top:4px}
+  .tbl th button:active{transform:none;opacity:.7}
+}
+.tsm{position:fixed;z-index:6;width:188px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 14px 40px #0008;transform-origin:0 0;animation:tsmIn .35s cubic-bezier(.22,1,.36,1)}
+.tsm button{all:unset;box-sizing:border-box;height:42px;padding:0 12px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;font-size:15px;color:#c7c7cc;cursor:pointer}
+.tsm button[aria-checked=true]{background:#ffffff1f;color:#fff}
+.tsm button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.tsm i{font-style:normal;color:#fff}
+@keyframes tsmIn{from{opacity:0;scale:.96}}
+@media(prefers-reduced-motion:reduce){.tsm{animation:none}}
 </style>
 </head>
 <body>
@@ -1128,7 +1161,14 @@ const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f; // covers Casey uploads come 
 // a lazy image waits in data-src until its record comes near the front (see place)
 const BAKED=new Map(); // cover → the same cover with its paper and wear baked in (see "bake")
 const baked=u=>BAKED.get(new URL(u,location.href).href)||u;
-const imgHTML=(f,lazy)=>`<img class="art" ${lazy?'data-src':'src'}="${lazy?img(f):baked(img(f))}" alt="" decoding="sync" draggable="false">`;
+const imgHTML=(f,lazy)=>`<img class="art" ${lazy?'data-src':'src'}="${lazy?img(f):baked(img(f))}" alt="" decoding="sync" draggable="false" onload="fadeIn(this)">`;
+// a cover fades in once it's decoded and a frame has passed, so the fade always plays, even for one already in the cache.
+// Before the crate first shows, covers are simply there: it waits for them behind the loading screen
+function fadeIn(i){
+  if(i.classList.contains('on'))return;
+  if(!document.body.classList.contains('ready')){i.classList.add('on');return}
+  i.decode().catch(()=>{}).then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.add('on'))));
+}
 const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
 const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
@@ -1708,7 +1748,7 @@ crate.addEventListener('pointerdown',hvOff);crate.addEventListener('wheel',hvOff
 
 // Paper and wear by year (see "Each jacket's paper" in the styles). A record without a year is plain matte and unworn.
 function dress(el,r){
-  const y=+r.year||0;
+  const y=+r.year||0;el.style.setProperty('--sp',spineBg(r));
   el.dataset.paper=!y||y>=1970&&y<2010?'matte':y<1970?'gloss':'uncoated';
   if(y&&y<1980)el.dataset.wear='2';else if(y&&y<2000)el.dataset.wear='1';else delete el.dataset.wear;
 }
@@ -2161,12 +2201,28 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   const auto=()=>innerWidth>=1200?6:innerWidth>=900?5:innerWidth>=600?4:3,CMIN=()=>innerWidth<600?1:2,CMAX=()=>innerWidth<600?6:10;
   let gc=null;try{gc=+localStorage.getItem('records-grid-cols')||null}catch{}
   const cols=()=>Math.max(CMIN(),Math.min(CMAX(),gc||auto()));
+  // how wide a tile is, so each cover can pick its size; told again whenever the columns change
+  let tileSize='33vw';
+  function sizeTiles(){const n=cols(),w=Math.ceil(((tiles.clientWidth||Math.min(innerWidth,1400))-(n-1)*8)/n);tileSize=w+'px';
+    for(const t of keep.values()){const i=t.firstElementChild;if(i?.srcset)i.sizes=tileSize}}
   const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
   const keep=new Map();
   // covers on the wall and the canvas are small copies, made one at a time as the page settles: 68 full-size covers
   // decoded at once is more memory than a phone keeps, and it starts dropping them
   const THUMB=new Map();let thumbQ=Promise.resolve();
+  // most covers already come in smaller sizes: Casey's as copies in vinyl/t/ made at build time, a visitor's from Apple or
+  // the Cover Art Archive, which serve the same cover at any of a few widths. A tile asks for the size nearest its own
+  function sized(src){
+    let m;
+    if((m=src.match(/^vinyl\/([^/]+-front)\.webp$/))){const t=w=>`vinyl/t/${m[1]}-${w}.webp`;return{src:t(360),srcset:`${t(360)} 360w,${t(720)} 720w,${src} 1200w`}}
+    if((m=src.match(/^(https:\/\/[^?]+\/)\d+x\d+bb\.(jpg|png)$/))){const t=w=>`${m[1]}${w}x${w}bb.jpg`;return{src:t(360),srcset:`${t(360)} 360w,${t(720)} 720w,${t(1200)} 1200w`}}
+    try{const u=new URL(src,location.href),p=u.searchParams.get('img');
+      if(u.pathname==='/api/musicbrainz'&&p&&/-1200(\.jpg)?$/.test(p)){u.searchParams.set('img',p.replace(/-1200(\.jpg)?$/,'-500$1'));return{src:u.href,srcset:`${u.href} 500w,${src} 1200w`}}}catch{}
+    return null;
+  }
+  // and when one doesn't, the browser makes its own small copy, one at a time
   function thumb(src){
+    const z=sized(src);if(z)return Promise.resolve(z.src);
     if(THUMB.has(src))return THUMB.get(src);
     const p=thumbQ=thumbQ.then(()=>new Promise(res=>{const i=new Image();i.decoding='async';i.onload=()=>{
       try{const n=Math.min(512,i.naturalWidth),c=document.createElement('canvas');c.width=c.height=n;c.getContext('2d').drawImage(i,0,0,n,n);
@@ -2178,9 +2234,15 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     let n=store.get(r.slug);if(n)return n;
     n=document.createElement('button');n.type='button';n.className='tile';n.dataset.slug=r.slug;
     const bg=r.spine||'#2c2c2e';
-    n.innerHTML=(r.front?`<img alt="" decoding="async" onload="this.classList.add('on')">`:`<span class="pl" style="background:${bg};color:${ink(bg)}">${r.title}<small>${r.artist}</small></span>`)+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
+    n.innerHTML=(r.front?`<img alt="" loading="lazy" decoding="async" width="360" height="360" onload="fadeIn(this)">`:`<span class="pl" style="background:${bg};color:${ink(bg)}">${r.title}<small>${r.artist}</small></span>`)+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
     n.setAttribute('aria-label',`${r.title} by ${r.artist}`);store.set(r.slug,n);
-    if(r.front)thumb(img(r.front)).then(u=>{$('img',n).src=u});
+    if(r.front){
+      // the tile wears the record's spine color until its cover is in; covers off screen wait until you scroll near them
+      if(r.spine)n.style.background=r.spine;
+      const i=$('img',n),full=img(r.front),z=sized(full);
+      if(z){i.sizes=tileSize;i.srcset=z.srcset;i.src=z.src;i.onerror=()=>{i.onerror=null;i.removeAttribute('srcset');i.src=full}}
+      else thumb(full).then(u=>{i.src=u});
+    }
     return n;
   }
   const SETS=()=>{
@@ -2199,7 +2261,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     if(view!=='wall')return drawPills();
     const before=new Map();
     if(animate&&!reduce)for(const [k,n] of keep)if(n.isConnected)before.set(k,n.getBoundingClientRect());
-    tiles.style.setProperty('--cols',cols());
+    tiles.style.setProperty('--cols',cols());sizeTiles();
     const f=document.createDocumentFragment();
     order.forEach(r=>f.append(tileFor(r)));
     tiles.replaceChildren(f);drawPills();
@@ -2211,7 +2273,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   }
   function setView(v,focus,stay){
     if(v==='canvas')v='wall';
-    view=v;wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
+    view=v;document.body.classList.toggle('under',(v==='wall'?wall:v==='table'?tbl:null)?.scrollTop>2);wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
     vw.forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
     try{localStorage.setItem('records-view',v)}catch{}
     if(v==='wall'){draw(false);if(focus)wall.focus({preventScroll:true})}
@@ -2240,14 +2302,14 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held,.tbl .held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
 
 
-  // ---- the grid: pinch it (or ctrl-scroll, or + and −) and the columns change; the covers glide to their new places and
+  // ---- the grid: pinch it (or ⌘- or ctrl-scroll, or + and −) and the columns change; the covers glide to their new places and
   // the cover under your fingers stays put
   function regrid(n,ax,ay){
     n=Math.max(CMIN(),Math.min(CMAX(),n));if(n===cols())return;
     const before=new Map();for(const [k,t] of keep)if(t.isConnected)before.set(k,t.getBoundingClientRect());
     const a=document.elementsFromPoint(ax,ay).find(e=>e.classList?.contains('tile'))||null,a0=a&&before.get(a.dataset.slug);
     for(const t of keep.values())t.getAnimations().forEach(x=>x.cancel());
-    gc=n;try{localStorage.setItem('records-grid-cols',n)}catch{}tiles.style.setProperty('--cols',n);
+    gc=n;try{localStorage.setItem('records-grid-cols',n)}catch{}tiles.style.setProperty('--cols',n);sizeTiles();
     if(a){const a1=a.getBoundingClientRect();wall.scrollTop+=a1.top+a1.height*((ay-a0.top)/a0.height)-ay}
     if(reduce)return;navigator.vibrate?.(4);
     for(const [k,t] of keep){const p=before.get(k);if(!p||!t.isConnected)continue;const b=t.getBoundingClientRect();if(b.bottom<-200||b.top>innerHeight+200)continue;
@@ -2258,7 +2320,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   wall.addEventListener('touchmove',e=>{if(!gp||e.touches.length<2)return;e.preventDefault();const [a,b]=e.touches,d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
     regrid(Math.round(gp.c0*gp.d0/d),(a.clientX+b.clientX)/2,(a.clientY+b.clientY)/2)},{passive:false});
   wall.addEventListener('touchend',e=>{if(e.touches.length<2)gp=null});
-  let gacc=0;wall.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();gacc+=e.deltaY;if(Math.abs(gacc)>40){regrid(cols()+Math.sign(gacc),e.clientX,e.clientY);gacc=0}},{passive:false});
+  let gacc=0;wall.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();gacc+=e.deltaY;if(Math.abs(gacc)>40){regrid(cols()+Math.sign(gacc),e.clientX,e.clientY);gacc=0}},{passive:false});
   let gg=null;
   wall.addEventListener('gesturestart',e=>{e.preventDefault();gg={c0:cols()}});
   wall.addEventListener('gesturechange',e=>{e.preventDefault();if(gg&&!gp)regrid(Math.round(gg.c0/e.scale),e.clientX,e.clientY)});
@@ -2274,10 +2336,23 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     const rows=[...order].sort((a,b)=>{const x=key(a),y=key(b);return(typeof x==='number'?x-y:String(x).localeCompare(String(y),'en',{sensitivity:'base'}))*ts.d||byName(a,b)});
     $('thead',tbl).innerHTML=`<tr><th class="c0"><span class="sr">Cover</span></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button></th>`).join('')}</tr>`;
     tkeep.clear();
-    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<img alt="" decoding="async" data-src="${img(r.front)}">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
+    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
     for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
-  tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable();return}
+  // on a phone the sort is one quiet line, "Sorted by Artist ↑"; it opens a small menu like the view menu
+  const narrow=matchMedia('(max-width:700px)'),tsm=document.createElement('div');tsm.className='tsm';tsm.setAttribute('role','menu');tsm.hidden=true;document.body.append(tsm);
+  const sortBy=k=>{ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable()};
+  const tsmOff=()=>{if(tsm.hidden)return;tsm.hidden=true;$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.setAttribute('aria-expanded','false')};
+  function tsmOn(h){
+    tsm.innerHTML=COLS.slice(0,3).map(([k,l])=>`<button type="button" role="menuitemradio" aria-checked="${ts.k===k}" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`).join('');
+    const r=h.getBoundingClientRect();tsm.style.left=r.left+'px';tsm.style.top=r.bottom+8+'px';tsm.hidden=false;h.setAttribute('aria-expanded','true');$('button[aria-checked=true]',tsm).focus({preventScroll:true});
+  }
+  tsm.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tsmOff();sortBy(b.dataset.k)});
+  addEventListener('pointerdown',e=>{if(!tsm.hidden&&!tsm.contains(e.target)&&!e.target.closest('.tbl th button'))tsmOff()},true);
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&!tsm.hidden){tsmOff();$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.focus()}});
+  tbl.addEventListener('scroll',tsmOff,{passive:true});
+  for(const s of [wall,tbl])s.addEventListener('scroll',()=>document.body.classList.toggle('under',s.scrollTop>2),{passive:true});
+  tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){if(narrow.matches){tsm.hidden?tsmOn(h):tsmOff();return}sortBy(h.dataset.k);return}
     const tr=e.target.closest('tbody tr');if(tr)pull(tr.dataset.slug)});
   tbl.addEventListener('keydown',e=>{const tr=e.target.closest?.('tbody tr');if(!tr)return;
     if(e.key==='Enter'||e.key===' '){e.preventDefault();pull(tr.dataset.slug)}
@@ -2510,6 +2585,9 @@ dl.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();acc+=Math
 // then follows the mouse from mark to mark until it leaves the dial
 const tip=document.createElement('div');tip.className='kd-tip';tip.setAttribute('aria-hidden','true');tip.append(document.createElement('b'),document.createElement('span'));document.body.append(tip);
 let tipT=0,tipI=-1;
+// the dial shows it has focus only when Tab brought you there, never after a click, a drag or the arrow keys
+let viaTab=false;addEventListener('keydown',e=>{if(e.key==='Tab')viaTab=true},true);addEventListener('pointerdown',()=>{viaTab=false},true);
+dl.addEventListener('focus',()=>dl.classList.toggle('kf',viaTab));dl.addEventListener('blur',()=>dl.classList.remove('kf'));
 let tipG=0;const tipOff=()=>{clearTimeout(tipT);clearTimeout(tipG);tipG=0;TH[tipI]?.classList.remove('kd-hv');tipI=-1;tip.classList.remove('on','glide')};
 dl.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||mode()!=='r'||!open.hidden){tipOff();return}
   let b=-1,bd=7;TH.forEach((s,i)=>{if(s.style.visibility==='hidden')return;const r=s.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-e.clientX);if(d<bd){bd=d;b=i}});
@@ -2577,7 +2655,7 @@ build();at=cur;
   const sl=document.createElement('div');sl.className='sl';sl.id='sl';sl.setAttribute('role','listbox');sl.setAttribute('aria-label','Records');document.body.append(sl);
   const sx=document.createElement('button');sx.type='button';sx.className='sx';sx.textContent='Cancel';qf.parentNode.insertBefore(sx,qf.nextSibling.nextSibling);
   const on=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
-  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<img data-src="${img(r.front)}" alt="" decoding="async">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
+  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
   function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
     if(!rs.length){sl.innerHTML='<p class="none">Not in the crate</p>';return}
     if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;return}
