@@ -956,6 +956,33 @@ html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 html.phone .play .btn{height:var(--pb);font-size:16px}
 html.phone{--pb:46px}
 @media(max-height:700px){html.phone{--pb:44px}}
+/* the filter pill: its name opens a menu of the others of that kind; the × clears it */
+.chip,html.phone .chip{padding:0;gap:0;cursor:default}
+.chip .cn,.chip .cx{all:unset;cursor:pointer;height:100%;display:inline-flex;align-items:center;min-width:0}
+.chip .cn{gap:7px;padding:0 4px 0 16px;flex:0 1 auto}
+.chip>b{padding-left:16px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .cn b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .cx{flex:none;padding:0 14px 0 8px}
+.chip .chv{width:12px;height:12px;flex:none;color:#a5a5aa;transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.chip .cn[aria-expanded=true] .chv{transform:rotate(180deg)}
+.chip .cn:hover .chv,.chip .cx:hover svg{color:#fff}
+.chip .cn:focus-visible,.chip .cx:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:99px}
+.chip:hover svg{color:#a5a5aa}
+.cmenu{position:absolute;z-index:5;top:54px;left:50%;translate:-50% 0;width:280px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:6px;border-radius:18px;background:#1e1e20;border:1px solid var(--line);box-shadow:0 30px 60px -20px #000,0 8px 20px -8px #000a;pointer-events:auto;animation:trayIn .3s cubic-bezier(.22,1,.36,1)}
+.cmenu[hidden]{display:none}
+.cmenu .ch{margin:0;padding:10px 12px 8px;font-size:11px;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
+.cmenu ul{list-style:none;margin:0;padding:4px 0 0;-webkit-mask:linear-gradient(transparent,#000 14px);mask:linear-gradient(transparent,#000 14px);max-height:min(52vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.cmenu ul::-webkit-scrollbar{display:none}
+.cmenu li button{all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:40px;padding:0 12px;border-radius:10px;display:flex;align-items:center;gap:10px;font-size:15px;color:#d6d6d8}
+.cmenu li button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmenu li button:hover{background:#ffffff0f;color:#fff}
+.cmenu li button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.cmenu li button[aria-current]{background:#fff;color:#111;font-weight:500}
+.cmenu li button[aria-current]::after{content:"";flex:none;width:10px;height:5px;border:solid #111;border-width:0 0 1.75px 1.75px;rotate:-45deg;translate:0 -2px}
+html.phone .cmenu{width:auto;left:12px;right:12px;translate:none;max-width:none}
+html.phone .cmenu ul{max-height:min(60svh,480px)}
+.find:has(.q:focus-within) .cmenu{display:none}
+@media(prefers-reduced-motion:reduce){.cmenu{animation:none}.chip .chv{transition:none}}
 </style>
 </head>
 <body>
@@ -971,7 +998,8 @@ html.phone{--pb:46px}
   </section>
   <p class="sr" id="pos" aria-live="polite"></p>
   <div class="find">
-    <button type="button" class="chip" id="chip" hidden></button>
+    <div class="chip" id="chip" hidden></div>
+    <div class="cmenu" id="cmenu" hidden></div>
     <span class="sp"></span>
     <a class="logo" href="#" aria-label="Records, back to A"><svg aria-hidden="true"><use href="#mark"/></svg></a>
     <button type="button" class="btn ed" id="editB" aria-pressed="false" hidden>Edit</button>
@@ -1391,13 +1419,44 @@ qf.addEventListener('submit',e=>{e.preventDefault();clearTimeout(qT);if(search()
 $('#qx').onclick=()=>{q.value='';search();q.focus()};
 // the filter you're in, from a record's details: click it to see the whole crate again
 const X_ICON='<svg width="14" height="14" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
-function showChip(){
-  const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;if(!f)return;
-  const v=f.k==='label'?labelName(f.v):f.v;
-  chip.innerHTML=`<b>${v}</b>${X_ICON}`;
-  chip.setAttribute('aria-label',`${KIND[f.k]||''} ${v}. Show the whole crate`);
+// tap its name for a menu of the others of that kind (years, labels, artists); the × shows the whole crate again
+const CHEV='<svg class="chv" width="12" height="12" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
+const escC=s=>String(s).replace(/[&<>"]/g,c=>`&#${c.charCodeAt(0)};`);
+const KINDS={year:'Year',label:'Label',artist:'Artist'};
+const asRead=(k,v)=>k==='label'?labelName(v):v;
+// every year, label or artist in the crate, once each as it reads: years oldest first, names A to Z without "The"
+function choices(k){
+  const m=new Map();
+  for(const r of RECORDS){const v=FIELD[k](r);if(!v||(k==='artist'&&/^various/i.test(v)))continue;const s=String(asRead(k,v)),key=fold(s);if(!m.has(key))m.set(key,{v,s})}
+  const az=x=>x.s.replace(/^the\s+/i,'');
+  return[...m.values()].sort((a,b)=>k==='year'?a.v-b.v:az(a).localeCompare(az(b)));
 }
-chip.onclick=()=>{arrange(null);say('The whole crate.');crate.focus({preventScroll:true})};
+function showChip(){
+  const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;menuOff();if(!f)return;
+  const v=asRead(f.k,f.v),pick=KINDS[f.k];
+  chip.innerHTML=(pick?`<button type="button" class="cn" aria-expanded="false" aria-controls="cmenu" aria-label="${pick}: ${escC(v)}. Choose another"><b>${escC(v)}</b>${CHEV}</button>`:`<b>${escC(v)}</b>`)
+    +`<button type="button" class="cx" aria-label="Show the whole crate">${X_ICON}</button>`;
+}
+function menuOff(){const cmenu=$('#cmenu');if(cmenu.hidden)return;cmenu.hidden=true;$('.cn',chip)?.setAttribute('aria-expanded','false')}
+function menuOn(){
+  const cmenu=$('#cmenu'),f=filt;if(!f||!KINDS[f.k])return;
+  const list=choices(f.k);
+  cmenu.innerHTML=`<p class="ch">${KINDS[f.k]}</p><ul>${list.map((c,i)=>`<li><button type="button" data-i="${i}"${same(String(c.v),String(f.v))?' aria-current="true"':''}><span>${escC(c.s)}</span></button></li>`).join('')}</ul>`;
+  cmenu.list=list;cmenu.k=f.k;cmenu.hidden=false;$('.cn',chip).setAttribute('aria-expanded','true');
+  const on=$('[aria-current]',cmenu);if(on){const ul=$('ul',cmenu);ul.scrollTop=on.offsetTop-ul.clientHeight/2+on.offsetHeight/2;on.focus({preventScroll:true})}
+}
+chip.addEventListener('click',e=>{
+  if(e.target.closest('.cx')){menuOff();arrange(null);say('The whole crate.');crate.focus({preventScroll:true});return}
+  if(e.target.closest('.cn'))$('#cmenu').hidden?menuOn():menuOff();
+});
+$('#cmenu').addEventListener('click',e=>{const cmenu=$('#cmenu'),b=e.target.closest('[data-i]');if(!b)return;const c=cmenu.list[+b.dataset.i];
+  menuOff();if(!same(String(c.v),String(filt?.v)))arrange({k:cmenu.k,v:c.v});$('.cn',chip)?.focus({preventScroll:true})});
+$('#cmenu').addEventListener('keydown',e=>{const cmenu=$('#cmenu');
+  if(e.key==='Escape'){e.preventDefault();menuOff();$('.cn',chip)?.focus();return}
+  if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;e.preventDefault();
+  const bs=$$('button',cmenu),i=bs.indexOf(document.activeElement);bs[Math.max(0,Math.min(bs.length-1,i+(e.key==='ArrowDown'?1:-1)))]?.focus();
+});
+addEventListener('pointerdown',e=>{if(!$('#cmenu').hidden&&!e.target.closest('#cmenu,#chip'))menuOff()});
 
 // Pull a record out: big sleeve to turn over (drag, click, arrow keys), details and a Spotify link beside it
 // resting angle of a pulled-out sleeve: barely turned, unless you turn it
