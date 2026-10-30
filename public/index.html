@@ -1107,6 +1107,21 @@ html:not(.phone) .sl button.on{background:var(--sel)}
 body.searching .qnone{display:none}
 html.phone body.searching .page>:not(.find){opacity:.3}
 @media(prefers-reduced-motion:reduce){html:not(.phone) body.searching .sl:not(.idle){animation:none}}
+/* the bar hands over to an open record's buttons in place: search never moves or blinks (the two buttons swap in the same
+   frame, on the same signal), the layout button turns into × and back, and the rest ease out and in around them */
+.crate.lifted~.find{opacity:1;visibility:visible;transition:none}
+.find>*{transition:opacity .35s .12s,scale .5s var(--spring) .12s,rotate .5s var(--spring) .12s,visibility 0s .12s}
+.crate.lifted~.find>*{opacity:0;visibility:hidden;scale:.92;pointer-events:none;transition:opacity .15s,scale .3s var(--spring),rotate .3s var(--spring),visibility 0s .15s}
+.crate.lifted~.find>.fb.lb{rotate:90deg;scale:.6}
+html:has(.crate.lifted) .find>.q,html:not(:has(.crate.lifted)) #oq{transition:none}
+html:has(.crate.lifted) .find>.q{scale:1}
+#oq,.open.in #oq{opacity:0;transition:none}
+html:has(.crate.lifted) #oq{opacity:1}
+#close{scale:.6;rotate:-90deg;transition:opacity .15s,scale .3s var(--spring),rotate .3s var(--spring)}
+html:has(.crate.lifted) .open:not([hidden]) #close{opacity:1;scale:1;rotate:0deg;transition:opacity .3s .08s,scale .5s var(--spring) .08s,rotate .5s var(--spring) .08s}
+.find>.fb.lb{transition-delay:0s}
+html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3)}
+@media(prefers-reduced-motion:reduce){.find>*,.crate.lifted~.find>*,#close,html:has(.crate.lifted) .open:not([hidden]) #close{transition:opacity .15s;scale:none;rotate:none}.crate.lifted~.find>.fb.lb{scale:none;rotate:none}}
 </style>
 </head>
 <body>
