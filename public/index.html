@@ -1315,7 +1315,7 @@ const backHTML=(r,lazy)=>r.back?imgHTML(r.back,lazy):`<div class="art plain" sty
 
 // crate geometry, in px
 const GAP=7,AHEAD=8,BEHIND=16,FGAP=3.5;
-let order=[...RECORDS],cur=0,filt=null;
+let TITLE=document.title,order=[...RECORDS],cur=0,filt=null;
 const stack=$('#stack'),crate=$('#crate');
 
 // by artist (a leading "The" doesn't count), then each artist's records oldest first; a record without a year goes after that artist's dated ones
@@ -1478,7 +1478,11 @@ function place(rest){
   lampOn();
   if(!PHONE)queueNudge();
 }
-const setHash=()=>{clearTimeout(setHash.t);setHash.t=setTimeout(()=>{if(open.hidden)history.replaceState(null,'','#'+order[cur].slug)},250)};
+// the crate remembers its place for this tab without touching the address, so flipping leaves nothing in the browser's history
+const AT='crate-at'+location.search,plain=()=>location.pathname+location.search;
+const setHash=()=>{clearTimeout(setHash.t);setHash.t=setTimeout(()=>{try{sessionStorage.setItem(AT,order[cur].slug)}catch{}},250)};
+// an open record's address follows it once it settles, so arrows and the scrubber don't write one per record they pass
+const addr=()=>{clearTimeout(addr.t);addr.t=setTimeout(()=>{if(!open.hidden)history.replaceState(history.state,'','#record/'+order[cur].slug)},800)};
 function go(i,now){
   i=Math.max(0,Math.min(order.length-1,i));
   if(now){cur=i;aim=pos=i;vel=0;place(true);render()}
@@ -1788,7 +1792,7 @@ $('#oinfo').addEventListener('click',e=>{
   // a cover from More from isn't next to this one in the crate, so it doesn't slide in from the side: it grows out of its thumbnail,
   // the arrows then step to its own neighbors, and Back returns to the record it came from
   const nb=e.target.closest('.nb');if(nb){const i=order.findIndex(x=>x.slug===nb.dataset.slug);if(i>=0&&!busy){
-    const st=history.state||{};history.pushState({open:st.open||0,d:(st.d||0)+1},'','#record/'+order[i].slug);
+    clearTimeout(addr.t);const st=history.state||{};history.pushState({open:st.open||0,d:(st.d||0)+1},'','#record/'+order[i].slug);
     hop(i,nb.getBoundingClientRect());open.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}return}
   const b=e.target.closest('.meta');if(!b||busy)return;
   const f={k:b.dataset.f,v:FIELD[b.dataset.f](order[cur])};
@@ -1830,7 +1834,7 @@ function swap(dir,o=0){
   $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));
   crate.classList.add('still');go(j,true);$('.rc.cur',stack).classList.add('held');
   const r=order[cur];
-  history.replaceState(history.state,'','#record/'+r.slug);
+  addr();
   if(reduce){fill(r);setS();return}
   // the record travels out to the edge it came from and becomes the peek; the neighbor travels in from its edge
   busy=true;
@@ -1885,8 +1889,9 @@ function closeRecord(fromPop){
   if(open.hidden)return;
   // back past the record and any covers opened from it, to the crate
   const st=history.state,n=(st?.open?1:0)+(st?.d||0);
+  clearTimeout(addr.t);
   if(!fromPop&&n){closing=true;history.go(-n);return}
-  history.replaceState(null,'','#'+order[cur].slug); // the record on top now, even after cycling
+  history.replaceState(null,'',plain());setHash(); // the crate's address is plain again; the record on top now is remembered, even after cycling
   timers.forEach(clearTimeout);timers=[];
   const done=()=>{open.hidden=true;lampOn();lamp.copy?.remove();lamp.copy=null;lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
     $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');veil.style.transition='';root.classList.remove('pulldown','sliding');busy=false;document.activeElement?.blur()};
@@ -1912,10 +1917,10 @@ function closeRecord(fromPop){
   };
   if(quick){quick=false;crate.classList.remove('lifted');veil.style.transition='opacity .3s';veil.style.opacity='0';fly()} // the veil lifts off the pile as the record lands
   else{later(()=>crate.classList.remove('lifted'),90);later(fly,60)} // the rest of the crate fades back in as the details finish tucking away, and the record flies home through it
-  document.title='Crate Dig';
+  document.title=TITLE;
 }
 let closing=false;
-addEventListener('popstate',()=>{const m=location.hash.match(/^#record\/(.+)$/),j=m?order.findIndex(r=>r.slug===m[1]):-1;
+addEventListener('popstate',()=>{clearTimeout(addr.t);const m=location.hash.match(/^#record\/(.+)$/),j=m?order.findIndex(r=>r.slug===m[1]):-1;
   if(closing){closing=false;closeRecord(true);return}
   if(j>=0&&!open.hidden){const h=()=>busy?setTimeout(h,100):hop(j);h();return} // Back and Forward among the covers opened from More from
   if(j>=0){go(j,true);openRecord(true)}else closeRecord(true)});
@@ -2488,7 +2493,10 @@ async function addFrom(x,btn){
 }
 
 function start(){
-  const m=location.hash.match(/^#(record\/)?(.+)$/); // read the address before sorting rewrites it
+  // a shared link names a record; otherwise the tab's last place in the crate. An old #<slug> link still works, then the address goes plain
+  let m=location.hash.match(/^#(record\/)?(.+)$/),at=null;try{at=sessionStorage.getItem(AT)}catch{}
+  if(m&&!m[1])history.replaceState(null,'',plain());
+  if(!m&&at)m=[,'',at];
   arrange(null,null);
   const j=m?order.findIndex(r=>r.slug===m[2]):-1;
   if(j>0)go(j,true);
@@ -2506,7 +2514,7 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 // Casey's edits come too (fresh for Casey, a few seconds old for everyone else), unless they're slow: the crate doesn't wait long for them
 const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(OWNER?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,2500))])]).then(async([m,v,ed])=>{
-  if(v&&v.records.length){RECORDS.splice(0,RECORDS.length,...v.records);document.title=VisitorCrate.crateName(v.name)}
+  if(v&&v.records.length){RECORDS.splice(0,RECORDS.length,...v.records);document.title=TITLE=VisitorCrate.crateName(v.name)}
   else{
     RECORDS.forEach(r=>Object.assign(r,{...m[r.slug],...r})); // a value written in RECORDS wins
     BASE=[...RECORDS];
@@ -2815,7 +2823,7 @@ let want=null,lt=0,lT=0;
 const live=i=>{if(open.hidden||i===cur)return;if(busy){clearTimeout(lT);lT=setTimeout(()=>live(i),80);return}
   timers.forEach(clearTimeout);timers=[];$$('.rc.held',stack).forEach(n=>n.classList.remove('held'));
   crate.classList.add('still');go(i,true);$('.rc.cur',stack)?.classList.add('held');
-  history.replaceState(history.state,'','#record/'+order[cur].slug);if(!lite(order[cur]))fill(order[cur]);setS()};
+  addr();if(!lite(order[cur]))fill(order[cur]);setS()};
 // the light way to change the open record: the crate's own covers, already decoded and baked, go straight into the sleeve,
 // so scrubbing never waits on a full-size image. The peeks catch up when the scrubber settles.
 function lite(r){const n=nodes[cur],a=n?.querySelector('.fr img.art'),sa=sleeve.querySelector('.fr img.art');
