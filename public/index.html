@@ -1050,6 +1050,7 @@ html.phone .ab-body{font-size:18px}
 html.phone .ab-cr{margin-top:12px}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
 .find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
+.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-82px - env(safe-area-inset-bottom));background:#121212;opacity:calc(var(--kz,0)*.94);-webkit-mask:linear-gradient(#0000,#000 50%);mask:linear-gradient(#0000,#000 50%);pointer-events:none} /* opened up to records, the dial darkens what's behind it */
 .kd::before,.kd::before{top:-80px;background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%)}
 html.phone body.searching .find::before{display:none}
 .find::before{transition:opacity .3s}
@@ -2895,9 +2896,14 @@ function render(){
   // the dial curves away a little at its ends, like the edge of a wheel: each mark drops and leans with its distance from the middle
   const R=half*half/BOW,bend=x=>+(x*x/R).toFixed(2),tilt=x=>(Math.atan(2*x/R)*180/Math.PI).toFixed(2);
   kd.style.setProperty('--kh',lerp(H0,H1,e)+'px');kd.style.setProperty('--kz',e);
-  LT.forEach((s,j)=>{const L=AZ[j],ok=has(L),x=lerp(j*W-cL,ok?X[FIRST[L]]-cR:j*W-cL,e),d=Math.abs(j-lp);
+  // opened up to records, the marks sit over their first records, which can be closer than the marks are wide:
+  // the one you're on stays, then each nearest one that has room, and the rest fade out
+  const xs=AZ.map((L,j)=>lerp(j*W-cL,has(L)?X[FIRST[L]]-cR:j*W-cL,e)),room=new Set();
+  if(e>.01){const gap=(kd.dataset.marks==="years"?46:18)*e,kept=[],c=Math.max(0,AZ.indexOf(curL));
+    AZ.map((L,j)=>j).filter(j=>has(AZ[j])).sort((a,b)=>(a!==c)-(b!==c)||Math.abs(xs[a])-Math.abs(xs[b])).forEach(j=>{if(kept.every(x=>Math.abs(x-xs[j])>=gap)){kept.push(xs[j]);room.add(j)}})}
+  LT.forEach((s,j)=>{const L=AZ[j],ok=has(L),x=xs[j],d=Math.abs(j-lp);
     s.style.transform=`translate(${x}px,${-lerp(17,44,e)+bend(x)}px) rotate(${tilt(x)}deg) scale(${lerp(1+.35*Math.max(0,1-d),.72,e)})`;
-    s.style.opacity=ok?1:.35*(1-e);s.style.visibility=Math.abs(x)>half?'hidden':'';s.classList.toggle('on',e<.5?d<.5:L===curL)});
+    s.style.opacity=ok?(e>.01&&!room.has(j)?1-e:1):.35*(1-e);s.style.visibility=Math.abs(x)>half?'hidden':'';s.classList.toggle('on',e<.5?d<.5:L===curL)});
   TH.forEach((s,i)=>{if(e<.01){s.style.visibility='hidden';return}
     const x=lerp(slot(i)*W-cL,X[i]-cR,e);if(Math.abs(x)>half){s.style.visibility='hidden';return}
     const near=Math.max(0,1-Math.abs(X[i]-cR)/WR);
