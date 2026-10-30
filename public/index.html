@@ -791,8 +791,8 @@ html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
 .hv.on{pointer-events:auto;cursor:pointer;opacity:1;translate:0;transition:opacity .25s,translate .55s var(--flip),top .45s var(--flip)}
 .hv b{display:block;font-weight:500;color:var(--fg);text-wrap:balance}
 .hv span{display:block;color:var(--m)}
-/* the same tokens as the record view's peek hints, with the same small label above */
-.hv::before{content:'Open →';font:400 12px/1 var(--mono);color:var(--m);margin-bottom:6px}
+/* the same tokens as the record view's peek hints, with a small label below */
+.hv::after{content:'Open →';font:400 12px/1 var(--mono);color:var(--m);margin-top:6px}
 @media(hover:none){.hv{display:none}}
 @media(prefers-reduced-motion:reduce){.hv,.hv.on{translate:0;transition:opacity .2s}}
 /* tabbed dividers: one stands just behind the record before each letter, all the way back, its tab above the tops and
