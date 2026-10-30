@@ -1059,6 +1059,16 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
 .tsm i{font-style:normal;color:#fff}
 @keyframes tsmIn{from{opacity:0;scale:.96}}
 @media(prefers-reduced-motion:reduce){.tsm{animation:none}}
+/* Safari on iPhone tints its toolbars from solid fixed strips at the very top and bottom of the screen
+   (joshpuckett.me/seamless-mobile-safari). Without them the bottom bar falls back to its own lighter gray.
+   Each strip shows 5px of the page color, the least Safari picks up; About sits in the top layer, so it carries its own. */
+.sedge,.about::before,.about::after{display:none}
+@media(pointer:coarse){
+  .sedge,.about::before,.about::after{display:block;content:'';position:fixed;left:0;right:0;z-index:100;height:12px;background:var(--edge,#121212);pointer-events:none}
+  .sedge.t,.about::before{top:-7px}
+  .sedge.b,.about::after{bottom:-7px}
+  html:has(.play.on) .sedge{--edge:#0d0d0d} /* the Play menu dims the page behind it; the toolbars dim with it */
+}
 </style>
 </head>
 <body>
@@ -2951,5 +2961,6 @@ build();at=cur;
   if(vv){const fit=()=>{const kb=Math.max(0,innerHeight-vv.height-vv.offsetTop);root.style.setProperty('--kb',kb.toFixed(0)+'px')};vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit)}
 })();
 </script>
+<div class="sedge t" aria-hidden="true"></div><div class="sedge b" aria-hidden="true"></div>
 </body>
 </html>
