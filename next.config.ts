@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   // the link preview card (src/lib/og.tsx) reads its fonts from disk, and the two pages below read their HTML
-  outputFileTracingIncludes: { "/og": ["./assets/fonts/*.ttf"], "/og/make": ["./assets/fonts/*.ttf"], "/home": ["./public/index.html"], "/make": ["./public/vinyl-make.html"] },
+  outputFileTracingIncludes: { "/og": ["./assets/fonts/*.ttf"], "/og/make": ["./assets/fonts/*.ttf"], "/og/p/[kind]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/og/r/[slug]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/home": ["./public/index.html", "./public/vinyl/covers.json"], "/make": ["./public/vinyl-make.html"] },
   // the crate is a single static page (public/index.html); the address stays "/".
   // It and the make page come through src/app/home and src/app/make, which add the domain to their link preview tags (src/lib/page.ts)
   async rewrites() {

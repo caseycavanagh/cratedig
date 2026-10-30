@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social share</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
+:root{--sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;--bg:#121212;--fg:#fff;--m:#8e8e93;--t1:#d6d6d8;--t2:#a5a5aa;--line:rgba(255,255,255,.13);--soft:#232325;--glass:rgba(30,30,32,.72);--ring:#ffffff3d;--rec:6px;--flip:cubic-bezier(.22,1,.36,1)}
+*,*::before,*::after{box-sizing:border-box}*{margin:0}
+html,body{background:#0b0b0c;color-scheme:dark}
+body{font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+.wrap{max-width:1400px;margin:0 auto;padding:56px 28px 96px}
+@media(max-width:720px){.wrap{padding:40px 16px 80px}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:28px}
+.top h1{font-size:17px;font-weight:500}.top p{color:var(--m);margin-top:4px;max-width:720px;font-size:15px}
+.tools{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.picks{font:12px var(--mono);color:var(--m)}
+.pill{all:unset;cursor:pointer;height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;font-size:13px;transition:transform .5s var(--flip),border-color .2s}
+.pill:hover{border-color:var(--m)}.pill:active{transform:scale(.98);transition-duration:.08s}.pill:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+#tt{font:12px var(--mono);color:var(--m);user-select:all}
+.grp{font-size:17px;font-weight:500;margin:52px 0 4px}.grp:first-of-type{margin-top:0}
+.grp+p{font-size:15px;color:var(--m);margin-bottom:18px;max-width:760px}
+.sheet{display:grid;gap:18px}
+.st{position:relative;border-radius:18px;background:#161617;padding:46px 18px 18px;min-width:0}
+@media(max-width:720px){.st{padding:46px 10px 14px}}
+.st .id{position:absolute;top:14px;left:18px;right:48px;font:500 11px var(--mono);color:var(--m);text-transform:uppercase;letter-spacing:.04em}.st .id b{color:var(--fg);font-weight:500;margin-right:8px}
+.st .use{display:block;margin:14px 4px 2px;font-size:14px;color:var(--m);line-height:1.5;max-width:720px}
+.star{all:unset;cursor:pointer;position:absolute;top:9px;right:10px;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;color:var(--m);font-size:15px;z-index:5}
+.star:hover{background:var(--soft);color:var(--fg)}.star:focus-visible{outline:1px solid var(--ring)}
+.st.picked{box-shadow:inset 0 0 0 2px #fff}.st.picked .star{color:#fff}
+.pair{display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap}
+.dev{flex:none;position:relative;overflow:hidden;border-radius:14px;outline:1px solid #2a2a2c;background:var(--bg)}
+.dev>.s{position:absolute;left:0;top:0;transform-origin:0 0;font-size:16px;line-height:1.4;color:var(--fg)}
+.ph{width:215px;height:464px;border-radius:22px}.ph>.s{width:390px;height:844px;transform:scale(.55)}
+.lp{width:640px;height:400px}.lp>.s{width:1280px;height:800px;transform:scale(.5)}
+@media(max-width:720px){.lp{width:333px;height:208px}.lp>.s{transform:scale(.26)}}
+.cap{position:absolute;left:8px;bottom:6px;font:10px var(--mono);color:#ffffff66;z-index:9}
+.abs{position:absolute}
+.cov{background:#333 center/cover;border-radius:var(--rec)}
+.dim{position:absolute;inset:0;background:#000a}
+.ib{position:absolute;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:#fff}
+.ib svg{width:20px;height:20px}
+.ib.on{background:#3a3a3d}
+/* the sheet pieces */
+.panel{position:absolute;background:#1e1e20;border:1px solid var(--line);box-shadow:0 20px 60px #000c;overflow:hidden}
+.bot{left:0;right:0;bottom:0;border-radius:28px 28px 0 0;padding:10px 18px 30px}
+.grab{width:38px;height:5px;border-radius:3px;background:#ffffff33;margin:0 auto 14px}
+.pop{border-radius:20px;padding:12px}
+.apps{display:flex;gap:14px}
+.app{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12px;color:var(--t2);width:60px;flex:none}
+.app i{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;flex:none}
+.app i svg{width:26px;height:26px}
+.app.sq i{border-radius:16px}
+.row{display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;background:#2a2a2d;font-size:16px;color:#fff}
+.row svg{width:19px;height:19px;color:var(--t2)}
+.rows{display:grid;gap:8px}
+.rows.two{grid-template-columns:1fr 1fr}
+.strip{display:flex;align-items:center;gap:12px}
+.strip .cov{width:52px;height:52px;flex:none}
+.strip b{display:block;font-weight:500;font-size:15px;line-height:1.25}.strip span{display:block;color:var(--m);font-size:13px}
+.tabs{display:flex;gap:6px;justify-content:center}.tabs span{height:28px;padding:0 12px;border-radius:999px;display:inline-flex;align-items:center;font-size:13px;color:var(--t2)}.tabs span.on{background:#fff;color:#111}
+.cta{height:50px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:500;font-size:16px}
+.cta svg{width:20px;height:20px}
+/* graphics, drawn at 1/1 inside a scaled box */
+.g{position:relative;overflow:hidden;flex:none}
+.g>.gs{position:absolute;left:0;top:0;transform-origin:0 0;color:#ecebe8}
+.gc{width:1200px;height:630px;background:#121212}
+.gq{width:1080px;height:1080px;background:#121212}
+.gy{width:1080px;height:1920px;background:#121212}
+.gmk{display:block}
+.gl{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;overflow-x:auto}
+.st{overflow:hidden}
+.glab{font:11px var(--mono);color:var(--m);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Social share</h1><p>Share sheets for a social crowd: the classic apps, and the picture going along with the link. Shown sharing a record; the crate gets the same sheet with its own picture. Star what you like, then copy your picks.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy picks</button><button class="pill" id="clear" type="button">Clear</button><span id="tt"></span></div>
+  </div>
+
+  <h2 class="grp">The sheet</h2>
+  <p>Where the picture sits and how the apps are laid out. A phone gets a sheet from the bottom; a laptop a panel under the share button.</p>
+  <div class="sheet" id="S"></div>
+
+  <h2 class="grp">The pictures</h2>
+  <p>What goes out with the link. The link card is what Messages, X, Facebook and the rest draw on their own. A square post and a story are image files, for the apps that take a picture and not a link (Instagram, Snapchat, TikTok): on a phone they go through the phone’s own share sheet, on a laptop they download.</p>
+  <div class="sheet" id="G"></div>
+
+  <h2 class="grp">The apps</h2>
+  <p>Which ones, in order. Messages, WhatsApp and the rest open with the link filled in; Instagram, Snapchat and TikTok take the picture.</p>
+  <div class="sheet" id="A"></div>
+
+  <h2 class="grp">The marks</h2>
+  <p>How the app icons are drawn.</p>
+  <div class="sheet" id="B"></div>
+</div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const BR={"instagram":{"p":"M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077","c":"#FF0069","t":"Instagram"},"facebook":{"p":"M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z","c":"#0866FF","t":"Facebook"},"x":{"p":"M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z","c":"#000000","t":"X"},"threads":{"p":"M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.734 7.847c.98-1.454 2.568-2.256 4.478-2.256h.044c3.194.02 5.097 1.975 5.287 5.388.108.046.216.094.321.142 1.49.7 2.58 1.761 3.154 3.07.797 1.82.871 4.79-1.548 7.158-1.85 1.81-4.094 2.628-7.277 2.65Zm1.003-11.69c-.242 0-.487.007-.739.021-1.836.103-2.98.946-2.916 2.143.067 1.256 1.452 1.839 2.784 1.767 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 0 0-2.215-.221z","c":"#000000","t":"Threads"},"whatsapp":{"p":"M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z","c":"#25D366","t":"WhatsApp"},"imessage":{"p":"M5.285 0A5.273 5.273 0 0 0 0 5.285v13.43A5.273 5.273 0 0 0 5.285 24h13.43A5.273 5.273 0 0 0 24 18.715V5.285A5.273 5.273 0 0 0 18.715 0ZM12 4.154a8.809 7.337 0 0 1 8.809 7.338A8.809 7.337 0 0 1 12 18.828a8.809 7.337 0 0 1-2.492-.303A8.656 7.337 0 0 1 5.93 19.93a9.929 7.337 0 0 0 1.54-2.155 8.809 7.337 0 0 1-4.279-6.283A8.809 7.337 0 0 1 12 4.154","c":"#34DA50","t":"iMessage"},"bluesky":{"p":"M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z","c":"#0285FF","t":"Bluesky"},"reddit":{"p":"M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.314 3.515 8.485l-2.286 2.286C.775 23.225 1.097 24 1.738 24H12c6.627 0 12-5.373 12-12S18.627 0 12 0Zm4.388 3.199c1.104 0 1.999.895 1.999 1.999 0 1.105-.895 2-1.999 2-.946 0-1.739-.657-1.947-1.539v.002c-1.147.162-2.032 1.15-2.032 2.341v.007c1.776.067 3.4.567 4.686 1.363.473-.363 1.064-.58 1.707-.58 1.547 0 2.802 1.254 2.802 2.802 0 1.117-.655 2.081-1.601 2.531-.088 3.256-3.637 5.876-7.997 5.876-4.361 0-7.905-2.617-7.998-5.87-.954-.447-1.614-1.415-1.614-2.538 0-1.548 1.255-2.802 2.803-2.802.645 0 1.239.218 1.712.585 1.275-.79 2.881-1.291 4.64-1.365v-.01c0-1.663 1.263-3.034 2.88-3.207.188-.911.993-1.595 1.959-1.595Zm-8.085 8.376c-.784 0-1.459.78-1.506 1.797-.047 1.016.64 1.429 1.426 1.429.786 0 1.371-.369 1.418-1.385.047-1.017-.553-1.841-1.338-1.841Zm7.406 0c-.786 0-1.385.824-1.338 1.841.047 1.017.634 1.385 1.418 1.385.785 0 1.473-.413 1.426-1.429-.046-1.017-.721-1.797-1.506-1.797Zm-3.703 4.013c-.974 0-1.907.048-2.77.135-.147.015-.241.168-.183.305.483 1.154 1.622 1.964 2.953 1.964 1.33 0 2.47-.81 2.953-1.964.057-.137-.037-.29-.184-.305-.863-.087-1.795-.135-2.769-.135Z","c":"#FF4500","t":"Reddit"},"pinterest":{"p":"M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z","c":"#BD081C","t":"Pinterest"},"tumblr":{"p":"M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z","c":"#36465D","t":"Tumblr"},"snapchat":{"p":"M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.464-1.723.884-.853.599-1.826 1.288-3.294 1.288-.06 0-.119-.015-.18-.015h-.149c-1.468 0-2.427-.675-3.279-1.288-.599-.42-1.107-.779-1.707-.884-.314-.045-.629-.074-.928-.074-.54 0-.958.089-1.272.149-.211.043-.391.074-.54.074-.374 0-.523-.224-.583-.42-.061-.192-.09-.389-.135-.567-.046-.181-.105-.494-.166-.57-1.918-.222-2.95-.642-3.189-1.226-.031-.063-.052-.15-.055-.225-.015-.243.165-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.332-.809-.121-.029-.24-.074-.346-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.104.3.234 0 .384-.06.465-.105l-.046-.569c-.098-1.626-.225-3.651.307-4.837C7.392 1.077 10.739.807 11.727.807l.419-.015h.06z","c":"#FFFC00","t":"Snapchat"},"tiktok":{"p":"M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z","c":"#000000","t":"TikTok"}};
+const P=d=>`<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="${d}"/></svg>`;
+const I={
+  share:P('M220,112v96a20,20,0,0,1-20,20H56a20,20,0,0,1-20-20V112A20,20,0,0,1,56,92H76a12,12,0,0,1,0,24H60v88H196V116H180a12,12,0,0,1,0-24h20A20,20,0,0,1,220,112ZM96.49,72.49,116,53v83a12,12,0,0,0,24,0V53l19.51,19.520a12,12,0,1,0,17-17l-40-40a12,12,0,0,0-17,0l-40,40a12,12,0,1,0,17,17Z'),
+  x:P('M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z'),
+  link:P('M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.930,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z'),
+  dl:P('M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0Zm-108.49,8.49a12,12,0,0,0,17,0l40-40a12,12,0,0,0-17-17L140,115V32a12,12,0,0,0-24,0v83L96.49,95.51a12,12,0,0,0-17,17Z'),
+  more:P('M144,128a16,16,0,1,1-16-16A16,16,0,0,1,144,128ZM60,112a16,16,0,1,0,16,16A16,16,0,0,0,60,112Zm136,0a16,16,0,1,0,16,16A16,16,0,0,0,196,112Z'),
+  mail:P('M224,44H32A12,12,0,0,0,20,56V192a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A12,12,0,0,0,224,44ZM193.15,68,128,127.72,62.85,68ZM44,188V83.28l75.89,69.57a12,12,0,0,0,16.22,0L212,83.28V188Z'),
+};
+const MARK='<svg class="gmk" viewBox="0 0 28 28" width="100%" height="100%"><g fill="none" stroke="#ecebe8" stroke-width="2"><circle cx="14" cy="14" r="12.5"/><circle cx="14" cy="14" r="8.5"/><circle cx="14" cy="14" r="4.5"/></g><circle cx="14" cy="14" r="1.6" fill="#ecebe8"/></svg>';
+const COV=s=>`url(/vinyl/${s}-front.webp)`;
+const R={slug:'allison-russell-the-returner',title:'The Returner',artist:'Allison Russell',fx:'2023, Fantasy'};
+const NAMES={imessage:'Messages',whatsapp:'WhatsApp',instagram:'Instagram',threads:'Threads',x:'X',facebook:'Facebook',bluesky:'Bluesky',reddit:'Reddit',pinterest:'Pinterest',snapchat:'Snapchat',tiktok:'TikTok',tumblr:'Tumblr'};
+const svg=(k,fill='currentColor')=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="${fill}" d="${BR[k].p}"/></svg>`;
+// the mark styles: brand circles, white on glass, brand color on glass
+let STYLE='brand';
+const light=c=>{const n=parseInt(c.slice(1),16);return((n>>16)*299+((n>>8)&255)*587+(n&255)*114)/1000>160};
+function chip(k,style=STYLE,sq=false){const c=BR[k].c,dark=c==='#000000';
+  if(style==='brand'){const bg=dark?'#fff':c,fg=dark?'#000':light(c)?'#000':'#fff';return`<div class="app${sq?' sq':''}"><i style="background:${k==='instagram'?'radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)':bg}">${svg(k,fg)}</i><span>${NAMES[k]}</span></div>`}
+  if(style==='mono')return`<div class="app${sq?' sq':''}"><i style="background:#2a2a2d;border:1px solid var(--line)">${svg(k,'#fff')}</i><span>${NAMES[k]}</span></div>`;
+  return`<div class="app${sq?' sq':''}"><i style="background:#2a2a2d;border:1px solid var(--line)">${svg(k,dark?'#fff':c)}</i><span>${NAMES[k]}</span></div>`}
+const APPS=['imessage','whatsapp','instagram','threads','x','facebook'];
+const appRow=(list=APPS,style,sq)=>`<div class="apps">${list.map(k=>chip(k,style,sq)).join('')}</div>`;
+
+// the pictures, drawn full size and scaled into a box w wide
+const card=r=>`<div class="gs gc"><div class="abs cov" style="left:56px;top:56px;width:518px;height:518px;background-image:${COV(r.slug)};box-shadow:0 30px 60px -20px #000"></div>
+  <div class="abs" style="left:640px;right:56px;top:56px;bottom:52px;display:flex;flex-direction:column;justify-content:space-between"><div style="width:44px;height:44px">${MARK}</div>
+  <div><div style="font-size:66px;font-weight:500;letter-spacing:-.03em;line-height:1.06">${r.title}</div><div style="font-size:34px;color:#8f8f93;margin-top:12px">${r.artist}</div><div style="font:24px var(--mono);color:#8f8f93;margin-top:30px">${r.fx}</div></div></div></div>`;
+const post=r=>`<div class="gs gq"><div class="abs cov" style="left:140px;top:110px;width:800px;height:800px;background-image:${COV(r.slug)};border-radius:9px;box-shadow:0 40px 80px -24px #000"></div>
+  <div class="abs" style="left:140px;right:140px;top:950px;display:flex;justify-content:space-between;align-items:baseline;gap:24px"><div style="min-width:0"><span style="font-size:44px;font-weight:500;letter-spacing:-.02em">${r.title}</span><span style="font-size:44px;color:#8f8f93"> ${r.artist}</span></div><div style="width:40px;height:40px;flex:none">${MARK}</div></div></div>`;
+const story=r=>`<div class="gs gy"><div class="abs" style="inset:-100px;background:${COV(r.slug)} center/cover;filter:blur(90px) brightness(.4)"></div>
+  <div class="abs" style="left:90px;top:120px;width:64px;height:64px">${MARK}</div><div class="abs" style="left:180px;top:132px;font:500 40px var(--sans);color:#ecebe8">Crate Dig</div>
+  <div class="abs cov" style="left:90px;top:440px;width:900px;height:900px;background-image:${COV(r.slug)};border-radius:10px;box-shadow:0 50px 100px -30px #000"></div>
+  <div class="abs" style="left:90px;right:90px;top:1420px"><div style="font-size:88px;font-weight:500;letter-spacing:-.03em;line-height:1.05">${r.title}</div><div style="font-size:52px;color:#c9c9cc;margin-top:14px">${r.artist}</div>
+  <div style="font:34px var(--mono);color:#a5a5aa;margin-top:40px">In Casey’s crate</div></div></div>`;
+const G={card:[card,1200,630],post:[post,1080,1080],story:[story,1080,1920]};
+const pic=(kind,w,r=R,ex='')=>{const [f,W,H]=G[kind],k=w/W;return`<div class="g" style="width:${w}px;height:${Math.round(H*k)}px;border-radius:${Math.max(6,w*.02)}px;${ex}">${f(r).replace('class="gs','style="transform:scale('+k+')" class="gs')}</div>`};
+
+// the record behind the sheet
+const phoneRec=extra=>`<div class="dev ph"><div class="s"><span class="ib" style="right:66px;top:14px">${I.share}</span><span class="ib" style="right:14px;top:14px">${I.x}</span>
+  <div class="abs cov" style="left:24px;top:156px;width:342px;height:342px;background-image:${COV(R.slug)}"></div>
+  <div class="abs" style="left:24px;top:516px"><div style="font-size:26px;font-weight:500">${R.title}</div><div style="font-size:17px;color:var(--t2)">${R.artist}</div></div>${extra}</div><span class="cap">phone</span></div>`;
+const lapRec=extra=>`<div class="dev lp"><div class="s"><span class="ib on" style="right:84px;top:12px">${I.share}</span><span class="ib" style="right:24px;top:12px">${I.x}</span>
+  <div class="abs cov" style="left:290px;top:150px;width:500px;height:500px;background-image:${COV(R.slug)}"></div>
+  <div class="abs" style="left:836px;top:330px"><div style="font-size:36px;font-weight:500">${R.title}</div><div style="font-size:20px;color:var(--t2)">${R.artist}</div></div>${extra}</div><span class="cap">laptop</span></div>`;
+const actions=(list=[['link','Copy link'],['dl','Save image'],['more','More']],two=false)=>`<div class="rows${two?' two':''}">${list.map(([i,t])=>`<div class="row">${I[i]}${t}</div>`).join('')}</div>`;
+
+const ALL={};
+function sticker(box,id,name,body,use){ALL[id]=name;
+  $('#'+box).insertAdjacentHTML('beforeend',`<div class="st" data-id="${id}"><span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id}: ${name}">★</button>${body}${use?`<span class="use">${use}</span>`:''}</div>`)}
+
+// S: the sheet
+sticker('S','S1','The card on top, apps under it',
+  `<div class="pair">${phoneRec(`<div class="dim"></div><div class="panel bot"><div class="grab"></div>${pic('card',352,R,'margin:0 auto 18px')}<div style="overflow:hidden;margin:0 -18px 18px;padding-left:18px">${appRow()}</div>${actions([['link','Copy link'],['more','More']],true)}</div>`)}
+   ${lapRec(`<div class="panel pop" style="right:24px;top:66px;width:440px">${pic('card',414,R,'margin-bottom:14px')}<div style="overflow:hidden;margin-bottom:12px">${appRow(APPS)}</div>${actions([['link','Copy link'],['dl','Save image']],true)}</div>`)}</div>`,
+  'The link card the apps will show sits at the top, so you see what they’ll see. A row of apps, then Copy link and More.');
+sticker('S','S2','Pick the picture, then the app',
+  `<div class="pair">${phoneRec(`<div class="dim"></div><div class="panel bot" style="top:70px"><div class="grab"></div><div class="tabs" style="margin-bottom:14px"><span>Link</span><span>Post</span><span class="on">Story</span></div><div style="display:flex;justify-content:center;margin-bottom:16px">${pic('story',190)}</div><div style="overflow:hidden;margin:0 -18px 16px;padding-left:18px">${appRow(['instagram','snapchat','tiktok','imessage','whatsapp'])}</div>${actions([['dl','Save image'],['more','More']],true)}</div>`)}
+   ${lapRec(`<div class="dim"></div><div class="panel pop" style="left:290px;top:110px;width:700px;height:560px;padding:22px;display:flex;gap:24px"><div style="display:flex;flex-direction:column;gap:12px;align-items:center"><div class="tabs"><span>Link</span><span class="on">Post</span><span>Story</span></div>${pic('post',300)}</div><div style="flex:1;display:flex;flex-direction:column;justify-content:space-between"><div style="display:grid;grid-template-columns:repeat(4,60px);gap:18px 14px">${['imessage','whatsapp','instagram','threads','x','facebook','bluesky','reddit'].map(k=>chip(k)).join('')}</div>${actions([['link','Copy link'],['dl','Save image']])}</div></div>`)}</div>`,
+  'Three pictures to choose from: the link card, a square post, a story. The apps change with the picture: Instagram and friends for the post and story, the link apps for the card.');
+sticker('S','S3','Apps first, a small strip for the record',
+  `<div class="pair">${phoneRec(`<div class="dim"></div><div class="panel bot"><div class="grab"></div><div class="strip" style="margin-bottom:18px"><div class="cov" style="background-image:${COV(R.slug)}"></div><div><b>${R.title}</b><span>${R.artist}</span></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px 6px;justify-items:center;margin-bottom:18px">${['imessage','whatsapp','instagram','threads','x','facebook','bluesky','snapchat'].map(k=>chip(k)).join('')}</div>${actions([['link','Copy link'],['more','More']],true)}</div>`)}
+   ${lapRec(`<div class="panel pop" style="right:24px;top:66px;width:380px"><div class="strip" style="margin-bottom:14px"><div class="cov" style="background-image:${COV(R.slug)}"></div><div><b>${R.title}</b><span>${R.artist}</span></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;justify-items:center;margin-bottom:12px">${['imessage','whatsapp','threads','x','facebook','bluesky','reddit','pinterest'].map(k=>chip(k)).join('')}</div>${actions([['link','Copy link'],['dl','Save image']],true)}</div>`)}</div>`,
+  'A grid of apps does the talking; the record is a small strip on top. Fits more apps, shows less picture.');
+sticker('S','S4','Story first',
+  `<div class="pair">${phoneRec(`<div class="dim" style="background:#000d"></div><div class="abs" style="left:0;right:0;top:40px;display:flex;justify-content:center">${pic('story',250)}</div><div class="abs" style="left:18px;right:18px;bottom:28px"><div class="cta" style="background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%);margin-bottom:14px">${svg('instagram','#fff')}Share to your story</div><div style="overflow:hidden;margin:0 -18px;padding-left:18px">${appRow(['imessage','whatsapp','threads','x','facebook','snapchat'])}</div></div>`)}
+   ${lapRec(`<div class="dim" style="background:#000d"></div><div class="abs" style="left:330px;top:60px">${pic('story',380)}</div><div class="abs" style="left:750px;top:200px;width:300px"><div class="cta" style="background:#fff;color:#111;margin-bottom:14px">${I.dl}Save the story</div><div style="display:grid;grid-template-columns:repeat(4,60px);gap:16px 12px">${['imessage','whatsapp','threads','x','facebook','bluesky','reddit','pinterest'].map(k=>chip(k)).join('')}</div><div class="row" style="margin-top:16px">${I.link}Copy link</div></div>`)}</div>`,
+  'The story picture fills the screen, one big button sends it to your Instagram story, the other apps under it. Most like sharing a song from a music app. A laptop saves the picture instead.');
+
+// G: the pictures
+sticker('G','G1','The link card only',`<div class="gl"><div>${pic('card',420)}<div class="glab">Link card, 1200×630</div></div></div>`,'What every link already shows (D1e). Nothing to download.');
+sticker('G','G2','Link card and a square post',`<div class="gl"><div>${pic('card',420)}<div class="glab">Link card</div></div><div>${pic('post',240)}<div class="glab">Post, 1080×1080</div></div></div>`,'Adds a square: the cover big, title and artist on one line under it, the mark at the end.');
+sticker('G','G3','Link card, post and story',`<div class="gl"><div>${pic('card',420)}<div class="glab">Link card</div></div><div>${pic('post',240)}<div class="glab">Post</div></div><div>${pic('story',180)}<div class="glab">Story, 1080×1920</div></div></div>`,'Adds a story: the cover over a blur of itself, the name of the crate up top, “In Casey’s crate” at the foot.');
+
+// A: the apps
+const appsSt=(id,name,list,use)=>sticker('A',id,name,`<div style="overflow-x:auto;padding-bottom:4px">${appRow(list)}</div>`,use);
+appsSt('A1','The big six',['imessage','whatsapp','instagram','threads','x','facebook'],'Messages, WhatsApp, Instagram, Threads, X, Facebook.');
+appsSt('A2','Big six and Bluesky',['imessage','whatsapp','instagram','threads','x','facebook','bluesky'],'Keeps Bluesky from the Field Notes menu.');
+appsSt('A3','Everything',['imessage','whatsapp','instagram','snapchat','tiktok','threads','x','facebook','bluesky','reddit','pinterest','tumblr'],'Adds Snapchat, TikTok, Reddit, Pinterest (which takes the picture too) and Tumblr. Scrolls on a phone.');
+appsSt('A4','Messages first, then posts',['imessage','whatsapp','snapchat','instagram','threads','x','facebook'],'Talking to one friend comes first; posting for everyone after.');
+
+// B: marks
+sticker('B','B1','Brand color circles',`<div style="overflow-x:auto">${appRow(APPS.concat('bluesky'),'brand')}</div>`,'Each app in its own color, the way a phone’s share sheet draws them. Loud, instantly read.');
+sticker('B','B2','White on glass',`<div style="overflow-x:auto">${appRow(APPS.concat('bluesky'),'mono')}</div>`,'Every app in white on the crate’s glass. Calm, matches the rest of the crate.');
+sticker('B','B3','Brand color on glass',`<div style="overflow-x:auto">${appRow(APPS.concat('bluesky'),'tint')}</div>`,'The glass circles, with each mark in its color. In between.');
+sticker('B','B4','Brand color tiles',`<div style="overflow-x:auto">${appRow(APPS.concat('bluesky'),'brand',true)}</div>`,'Rounded squares like app icons, instead of circles.');
+
+let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-social-picks')||'[]'))}catch(e){}
+const save=()=>{try{localStorage.setItem('vinyl-social-picks',JSON.stringify([...picks]))}catch(e){}};
+const text=()=>'Picks: '+([...picks].sort().map(id=>`${id} ${ALL[id]}`).join(', ')||'none');
+const show=()=>{$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)));$('#picks').textContent=picks.size?[...picks].sort().join(' '):''};
+$$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{const t=text();$('#tt').textContent=t;
+  const sel=()=>{const r=document.createRange();r.selectNodeContents($('#tt'));const s=getSelection();s.removeAllRanges();s.addRange(r)};
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1400)},sel)};
+$('#clear').onclick=()=>{picks.clear();save();show();$('#tt').textContent=''};
+show();
+</script>
+</body>
+</html>

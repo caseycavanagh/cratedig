@@ -38,6 +38,106 @@ const MARK = [
   "M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z",
 ];
 
+const fonts = () => [
+  { name: "Instrument Sans", data: regular, weight: 400 as const, style: "normal" as const },
+  { name: "Instrument Sans", data: medium, weight: 500 as const, style: "normal" as const },
+  ...(mono ? [{ name: "Paper Mono", data: mono, weight: 400 as const, style: "normal" as const }] : []),
+];
+
+const mark = (size: number) => (
+  <svg width={size} height={size} viewBox="0 0 350 350">
+    {MARK.map((d, i) => <path key={i} fill="#ecebe8" fillRule="evenodd" d={d} />)}
+  </svg>
+);
+
+// a shared record: the cover inset on the left with a little room around it and corners rounded like the crate's (--rec, about 1.1%), the mark top right,
+// title, artist, then year and label settled at the bottom. A long title steps down a size and stops at three lines
+export function recordCard({ title, artist, facts, cover }: { title: string; artist: string; facts: string; cover: string | null }) {
+  const size = title.length > 44 ? 46 : title.length > 22 ? 54 : 66;
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", background: "#121212", color: "#ecebe8", fontFamily: "Instrument Sans", padding: 56 }}>
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={cover} width={518} height={518} alt="" style={{ borderRadius: 6, boxShadow: "0 30px 60px -20px #000" }} />
+        ) : (
+          <div style={{ width: 518, height: 518, borderRadius: 6, background: "#232325", display: "flex", alignItems: "center", justifyContent: "center" }}>{mark(120)}</div>
+        )}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: 66, paddingBottom: 4 }}>
+          {mark(44)}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ fontSize: size, fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1.06, lineClamp: 3, display: "block" }}>{title}</div>
+            <div style={{ fontSize: 34, color: "#8f8f93", marginTop: 12, lineClamp: 2, display: "block" }}>{artist}</div>
+            {facts ? <div style={{ fontFamily: MONO, fontSize: 24, color: "#8f8f93", marginTop: 30 }}>{facts}</div> : null}
+          </div>
+        </div>
+      </div>
+    ),
+    { width: 1200, height: 630, headers: { "Cache-Control": CACHE }, fonts: fonts() },
+  );
+}
+
+// pictures for apps that take an image and not a link (Instagram, Snapchat, TikTok): a square post and a story.
+// A record: its cover big, with title and artist. The crate: a grid of its first covers.
+type Pic = { title: string; sub: string; cover: string | null; covers?: string[]; blur?: string | null };
+const R = 9; // corner radius on a 900px cover, like the crate's --rec (about 1.1%)
+
+const coverOrGrid = (p: Pic, size: number) =>
+  p.covers?.length ? (
+    <div style={{ width: size, height: size, display: "flex", flexWrap: "wrap", gap: 12 }}>
+      {p.covers.slice(0, 9).map((c, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={i} src={c} width={(size - 24) / 3} height={(size - 24) / 3} alt="" style={{ borderRadius: R * 0.6 }} />
+      ))}
+    </div>
+  ) : p.cover ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={p.cover} width={size} height={size} alt="" style={{ borderRadius: R, boxShadow: "0 40px 80px -24px #000" }} />
+  ) : (
+    <div style={{ width: size, height: size, borderRadius: R, background: "#232325", display: "flex", alignItems: "center", justifyContent: "center" }}>{mark(160)}</div>
+  );
+
+export function postCard(p: Pic) {
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#121212", color: "#ecebe8", fontFamily: "Instrument Sans", padding: "100px 140px 0" }}>
+        {coverOrGrid(p, 800)}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 44, gap: 24 }}>
+          <div style={{ display: "flex", fontSize: 42, letterSpacing: "-0.02em", minWidth: 0, overflow: "hidden", whiteSpace: "nowrap" }}>
+            <span style={{ fontWeight: 500 }}>{p.title}</span>
+            <span style={{ color: "#8f8f93", marginLeft: 14 }}>{p.sub}</span>
+          </div>
+          {mark(40)}
+        </div>
+      </div>
+    ),
+    { width: 1080, height: 1080, headers: { "Cache-Control": CACHE }, fonts: fonts() },
+  );
+}
+
+export function storyCard(p: Pic & { foot: string }) {
+  const size = p.title.length > 40 ? 64 : p.title.length > 20 ? 76 : 88;
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#121212", color: "#ecebe8", fontFamily: "Instrument Sans", padding: "120px 90px 0", position: "relative" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {p.blur ? <img src={p.blur} width={1080} height={1920} alt="" style={{ position: "absolute", left: 0, top: 0 }} /> : null}
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          {mark(60)}
+          <span style={{ fontSize: 40, fontWeight: 500 }}>Crate Dig</span>
+        </div>
+        <div style={{ display: "flex", marginTop: 256 }}>{coverOrGrid(p, 900)}</div>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: 80 }}>
+          <div style={{ fontSize: size, fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1.05, lineClamp: 2, display: "block" }}>{p.title}</div>
+          <div style={{ fontSize: 52, color: "#c9c9cc", marginTop: 14, lineClamp: 1, display: "block" }}>{p.sub}</div>
+          <div style={{ fontFamily: MONO, fontSize: 34, color: "#a5a5aa", marginTop: 40 }}>{p.foot}</div>
+        </div>
+      </div>
+    ),
+    { width: 1080, height: 1920, headers: { "Cache-Control": CACHE }, fonts: fonts() },
+  );
+}
+
 // title big, sub under it in gray, a small mono line along the bottom with the domain the card was asked for
 export function titleCard({ title, sub, foot, host }: { title: string; sub: string; foot: string; host: string }) {
   return new ImageResponse(
