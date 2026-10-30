@@ -529,7 +529,13 @@ body.walling .find .chip{display:none}
 .tile .pl small{font-weight:400;opacity:.7;margin-top:2px}
 .tile .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,#000b);font-size:14px;line-height:1.2;opacity:0;transition:opacity .2s}
 .tile .cap b{display:block;font-weight:500}.tile .cap span{color:#c9c9cc}
-@media (hover:hover){.tile:hover .cap,.tile:focus-visible .cap{opacity:1}}
+/* the grid names a record only when you tab to it; under a pointer, its cover lifts a little instead */
+.tile:focus-visible .cap{opacity:1}
+@media (hover:hover){
+  .tiles .tile{transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1)}
+  .tiles .tile:hover{transform:translateY(-4px);box-shadow:0 14px 28px -12px #000d}
+  .tiles .tile:hover:active{transform:translateY(-4px) scale(.97)}
+}
 /* the canvas: every cover once, in staggered columns, on a board you drag around; its edges give a little and spring back */
 .cv{position:fixed;inset:0;z-index:3;overflow:hidden;background:var(--bg);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .cv[hidden]{display:none}
@@ -540,7 +546,7 @@ body.walling .find .chip{display:none}
 .board .tile img{-webkit-user-drag:none;pointer-events:none}
 .cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--line);color:#d6d6d8;font-size:14px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
 @media (min-width:700px){.wall{padding-left:28px;padding-right:28px}.wall .pills{margin:0 -28px 18px;padding:2px 28px 4px}.tiles{gap:8px}}
-@media(prefers-reduced-motion:reduce){.vw,.tile,.wall .pills button{transition:none}}
+@media(prefers-reduced-motion:reduce){.vw,.tile,.tiles .tile,.wall .pills button{transition:none}.tiles .tile:hover{transform:none}}
 /* the dial, in place of the A–Z rail: letters; slide up on it for every record, down for letters again */
 .az{display:none}
 .kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
@@ -782,8 +788,8 @@ html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
 .hv.on{pointer-events:auto;cursor:pointer;opacity:1;translate:0;transition:opacity .25s,translate .55s var(--flip),top .45s var(--flip)}
 .hv b{display:block;font-weight:500;color:var(--fg);text-wrap:balance}
 .hv span{display:block;color:var(--m)}
-/* the same tokens as the record view's peek hints, with the same small label above */
-.hv::before{content:'Open →';font:400 12px/1 var(--mono);color:var(--m);margin-bottom:6px}
+/* the same tokens as the record view's peek hints, with a small label below */
+.hv::after{content:'Open →';font:400 12px/1 var(--mono);color:var(--m);margin-top:6px}
 @media(hover:none){.hv{display:none}}
 @media(prefers-reduced-motion:reduce){.hv,.hv.on{translate:0;transition:opacity .2s}}
 /* tabbed dividers: one stands just behind the record before each letter, all the way back, its tab above the tops and
@@ -1407,7 +1413,8 @@ function playHTML(r){
   const go=([k,n],logo)=>`<a class="btn" href="${l[k]}" target="_blank" rel="noopener">${logo&&mark(k)||PLAY_ICON}Play<span class="sr"> on ${n}</span>${NEW_TAB}</a>`;
   // one service: Play goes straight there
   if(on.length===1)return`<div class="play">${go(on[0])}</div>`;
-  const mine=on.find(([k])=>k===picked());
+  // until a visitor picks, Spotify is the pick, so Play goes there and the caret beside it offers the rest
+  const mine=on.find(([k])=>k===picked())||on.find(([k])=>k==='spotify');
   const menu=`<div class="play-m" id="playM"><p class="pm-h">Play on</p>${on.map(([k,n])=>`<a href="${l[k]}" target="_blank" rel="noopener" data-k="${k}"${k===mine?.[0]?' aria-current="true"':''}>${mark(k)}<span>${n}</span>${NEW_TAB}</a>`).join('')}</div>`;
   // a remembered pick: Play wears its logo and goes there; the caret beside it switches
   if(mine)return`<div class="play"><div class="pair">${go(mine,true)}<button class="sw" id="playB" aria-expanded="false" aria-controls="playM" aria-label="Play somewhere else">${CARET}<span class="tip" aria-hidden="true">Play somewhere else</span></button></div>${menu}</div>`;
@@ -1645,13 +1652,13 @@ function aimNudge(){
   if(ptr&&!reduce&&!raf&&!moved&&open.hidden){const b=frontBox||=n.firstElementChild.getBoundingClientRect();if(ptr.x>=b.left&&ptr.x<=b.right&&ptr.y>=b.top&&ptr.y<=b.bottom)t=Math.max(-1,Math.min(1,((ptr.x-b.left)/b.width-.5)*2))}
   nudgeTo(n,Math.round(t*100)/100);
 }
-// the name of the record under a resting pointer, beside the front record
+// the name of the front record, beside it, while a resting pointer is on it
 var hvI=-1,hvT=0,hvGo=0,onHv=false;const hv=$('#hv');
 function hvOff(){clearTimeout(hvT);clearTimeout(hvGo);hvT=0;onHv=false;hvI=-1;document.getElementById('hv')?.classList.remove('on')}
 function hoverPeek(){
   const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.elementFromPoint(ptr.x,ptr.y),onTab=el?.closest?.('.dv');
   if(onTab)return hvOff();
-  const i=el?nodes.indexOf(el.closest?.('.rc')):-1;
+  let i=el?nodes.indexOf(el.closest?.('.rc')):-1;if(i!==cur)i=-1; // the records behind it stay unnamed
   if(i<0){if(hv.classList.contains('on')&&!onHv){clearTimeout(hvGo);hvGo=setTimeout(hvOff,500)}else if(!onHv)hvOff();return} // a moment's grace, on the way over to the name
   clearTimeout(hvGo);
   const f=nodes[cur].firstElementChild.getBoundingClientRect(),room=innerWidth-f.right-72;
@@ -1805,8 +1812,8 @@ crate.addEventListener('pointermove',e=>{
   aim=Math.max(0,Math.min(order.length-1,drag.i+dy/PULL));kick(); // pull toward you to flip forward
   const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
-// a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
-const end=()=>{if(drag&&!moved&&drag.dv)jump(+drag.dv.dataset.j);else if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
+// a click without a drag opens the front record; a click on one behind it flips to it
+const end=()=>{if(drag&&!moved&&drag.dv)jump(+drag.dv.dataset.j);else if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);else openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
     if(fl){vel=Math.max(-40,Math.min(40,v));glide(fl);go(Math.round(aim)+fl)}else go(cur,false)}drag=null;moved=false;crate.classList.remove('dragging','pulling')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 // a finger on the pile: down flips the top record toward you, up stands the last one back up, a tap opens it; sideways does nothing
