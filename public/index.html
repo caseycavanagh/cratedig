@@ -2351,6 +2351,9 @@ function pkTo(t,tau=.09){
 }
 const pkDrop=()=>{cancelAnimationFrame(pk.f);pk.f=0;pk.y=pk.t=pk.v=0;crate.classList.remove('lifting');pkPaint()};
 const onFront=e=>open.hidden&&!busy&&!!nodes[cur]&&e.target.closest?.('.rc')===nodes[cur];
+// on a phone the front record fills most of the crate, and up is how you stand the last one back up, so only its top edge
+// (where you'd pinch a sleeve) pulls it out; up anywhere else flips back as it always has
+const onLip=e=>{if(!onFront(e))return false;const b=nodes[cur].getBoundingClientRect();return e.clientY<=b.top+Math.max(56,b.height*.22)};
 // where the record is for a hand this far up: a little give while it's caught, then nearly with the hand once it's free, up to the stop
 function pullTo(s,y){
   let d=Math.max(0,s.y-y);const C=PHONE?44:40,END=PHONE?120:110;
@@ -2385,8 +2388,8 @@ crate.addEventListener('pointerdown',e=>{
   if(!PHONE||busy||!e.isPrimary)return;
   cancelAnimationFrame(raf);raf=0;tick.t=0;spr=null; // catch the pile where it is, mid-flight or not
   const now=performance.now();
-  dd={x:e.clientX,y:e.clientY,p:pos,b:aim,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,ax:null,lip:onFront(e)};
-  crate.setPointerCapture(e.pointerId);crate.classList.add('pressing');if(dd.lip)pkTo(PK_GRIP); // a finger on the front record has it: it lifts a hair
+  dd={x:e.clientX,y:e.clientY,p:pos,b:aim,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,ax:null,lip:onLip(e)};
+  crate.setPointerCapture(e.pointerId);crate.classList.add('pressing');if(dd.lip)pkTo(PK_GRIP); // a finger on its top edge has it: it lifts a hair
 });
 crate.addEventListener('pointermove',e=>{
   if(!dd)return;
