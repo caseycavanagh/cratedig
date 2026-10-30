@@ -851,9 +851,10 @@ html.phone.deck .dv{display:none}
 
 /* the mark: a record. Loading, it spins at 33⅓ and its grooves light from the label out as the covers come in */
 .loading{--p:0}
-.loading .mk{width:min(480px,60vw,60vh);height:min(480px,60vw,60vh);fill:#fff;animation:spin 1.8s linear infinite} /* 480 on a laptop, about 60% of a phone's width */
+.loading .mk{width:min(480px,60vw,60vh);height:min(480px,60vw,60vh);fill:#fff;animation:spin 1.8s linear infinite,mk-in .8s ease-out both} /* 480 on a laptop, about 60% of a phone's width */
 .loading .mk path{transition:opacity .4s}
 @keyframes spin{to{rotate:360deg}}
+@keyframes mk-in{from{opacity:0}}
 /* in the bar it sits between search and layout, and turns a little with the crate */
 .logo{order:2;flex:none;display:grid;place-items:center;width:44px;height:44px;margin:0 auto;border-radius:50%;color:#fff;transition:transform .5s var(--flip),opacity .2s}
 .logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s cubic-bezier(.22,1,.36,1)}
@@ -863,7 +864,7 @@ html.phone.deck .dv{display:none}
 .logo:active{transform:scale(.96);transition-duration:.08s}
 .logo:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .find:has(.q:focus-within) .logo,.find:has(.q.has) .logo{opacity:0;pointer-events:none}
-@media(prefers-reduced-motion:reduce){.loading .mk{animation:none}}
+@media(prefers-reduced-motion:reduce){.loading .mk{animation:mk-in .8s ease-out both}}
 /* the details and links, in a sheet of their own over the record */
 .own-d{width:min(520px,calc(100vw - 32px));max-height:calc(100svh - 48px);overflow:auto;overscroll-behavior:contain}
 .own-f{display:grid;gap:18px}
