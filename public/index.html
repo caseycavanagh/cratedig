@@ -1064,9 +1064,8 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
 @media(min-height:501px){
   html.phone .stage{position:sticky;top:calc(env(safe-area-inset-top) + var(--top));opacity:calc(1 - var(--rise,0)*.8)}
   html.phone .peek{filter:brightness(calc(1 - var(--rise,0)*.8))}
-  html.phone .o-page{overflow:clip} /* the fade's long tail never adds room to scroll into */
   html.phone .o-info{z-index:2} /* over the record, which comes first; the close button stays on top */
-  html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-64px;bottom:-50vh;background:linear-gradient(transparent,var(--bg) 64px);opacity:calc(var(--rise,0)*3);pointer-events:none}
+  html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-64px;bottom:calc(-1*(env(safe-area-inset-bottom) + var(--bot)));background:linear-gradient(transparent,var(--bg) 64px);opacity:calc(var(--rise,0)*3);pointer-events:none}
 }
 /* Safari on iPhone tints its toolbars from solid fixed strips at the very top and bottom of the screen
    (joshpuckett.me/seamless-mobile-safari). Without them the bottom bar falls back to its own lighter gray.
@@ -1884,7 +1883,10 @@ stage.addEventListener('pointerdown',e=>{if(busy||!e.isPrimary)return;const now=
 function slide(e){
   const s=sdrag,dx=e.clientX-s.x,dy=e.clientY-s.y,now=performance.now(),dt=Math.max(8,now-s.lt);
   s.vx=.5*s.vx+.5*(e.clientX-s.lx)/dt;s.vy=.5*s.vy+.5*(e.clientY-s.ly)/dt;s.lt=now;s.lx=e.clientX;s.ly=e.clientY;
-  if(!s.ax){if(Math.hypot(dx,dy)<8)return;s.far=true;s.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';lift.style.transition='none';cancelAnimationFrame(unpullF);unpullF=0;root.classList.add(s.ax==='x'?'sliding':'pulldown')}
+  if(!s.ax){if(Math.hypot(dx,dy)<8)return;s.far=true;s.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';
+    if(s.ax==='y'&&(dy<0||open.scrollTop>0)&&open.scrollHeight>open.clientHeight){s.ax='s';s.st=open.scrollTop+dy;return} // up, or back down once scrolled: the details move and the record stays
+    lift.style.transition='none';cancelAnimationFrame(unpullF);unpullF=0;root.classList.add(s.ax==='x'?'sliding':'pulldown')}
+  if(s.ax==='s'){open.scrollTop=s.st-dy;return}
   if(s.ax==='x'){
     s.dx=order[cur+(dx<0?1:-1)]?dx:dx*.25/(1+Math.abs(dx)/400); // nothing that way: it gives a little
     lift.style.transform=`translateX(${s.dx.toFixed(1)}px) rotate(${(s.dx/s.w*3).toFixed(2)}deg)`;open.style.setProperty('--dx',s.dx.toFixed(1)+'px');
@@ -1895,6 +1897,7 @@ function slide(e){
 }
 function settle(s){
   const home=()=>{lift.style.transition='transform .5s var(--flip)';lift.style.transform='';later(()=>{if(!sdrag)lift.style.transition=''},500)};
+  if(s.ax==='s'){coast(-s.vy);return}
   if(s.ax==='x'){
     const dir=s.dx<0?1:-1,fling=Math.abs(s.vx)>.4&&Math.sign(s.vx)===-dir;
     root.classList.remove('sliding');
@@ -1904,6 +1907,15 @@ function settle(s){
   if(s.dy>110||s.vy>.5&&s.dy>24){quick=true;closeRecord();return}
   unpull();home();
 }
+// a scroll started on the record carries on after you let go and slows to a stop, the way the page itself does (v in px/ms)
+let coastF=0;
+function coast(v){
+  cancelAnimationFrame(coastF);coastF=0;if(reduce||Math.abs(v)<.05)return;let t0=0;
+  const f=t=>{const dt=t0?Math.min(32,t-t0):16;t0=t;v*=Math.pow(.997,dt);const y=open.scrollTop;open.scrollTop=y+v*dt;
+    coastF=Math.abs(v)>.02&&open.scrollTop!==y?requestAnimationFrame(f):0};
+  coastF=requestAnimationFrame(f);
+}
+open.addEventListener('pointerdown',()=>{cancelAnimationFrame(coastF);coastF=0},true);
 // not far enough: the view fades back in step with the record, then the pile hides again without a flash
 // (the pull is set on the open view's page and the crate alone, so each move restyles only them)
 const opage=$('.o-page'),veil=$('#veil'),setPull=p=>{opage.style.setProperty('--pull',p.toFixed(3));veil.style.opacity=(1-p).toFixed(3)};
