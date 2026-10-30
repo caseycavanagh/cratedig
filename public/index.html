@@ -910,28 +910,31 @@ html.phone .sx{height:44px}
 /* phones show the laptop's crate, set lower so the pile behind clears the bar; the dial's fade takes the records that fall forward */
 html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 /* About: the mark opens a page about the crate over a blurred crate; the close button, Esc or a tap anywhere but the words puts it away */
-.about{position:fixed;inset:0;width:auto;height:auto;max-width:none;max-height:none;margin:0;padding:0;border:0;background:rgba(18,18,18,.55);color:var(--fg);overflow:hidden auto;overscroll-behavior:contain;opacity:0;transition:opacity .2s}
+.about{position:fixed;inset:0;width:auto;height:auto;max-width:none;max-height:none;margin:0;padding:0;border:0;background:rgba(18,18,18,0);color:var(--fg);overflow:hidden auto;overscroll-behavior:contain;transition:background-color .2s}
 .about::backdrop{background:none;-webkit-backdrop-filter:blur(28px) saturate(1.1);backdrop-filter:blur(28px) saturate(1.1);opacity:0;transition:opacity .2s}
-.about.in,.about.in::backdrop{opacity:1;transition-duration:.35s}
-.about .ab-mk{position:fixed;z-index:1;top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));width:44px;height:44px;display:grid;place-items:center;color:#fff}
-.about .ab-mk svg{width:24px;height:24px;fill:currentColor}
+.about.in{background:rgba(18,18,18,.55);transition-duration:.35s}
+.about.in::backdrop{opacity:1;transition-duration:.35s}
+/* the words and the close button fade; the mark flies in from the top bar instead (see aboutOpen) */
+.about .ab-x,.ab-in>:not(.ab-mk){opacity:0;transition:opacity .2s}
+.about.in .ab-x,.about.in .ab-in>:not(.ab-mk){opacity:1;transition:opacity .35s .1s}
 .about .ab-x{position:fixed;z-index:1;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px;color:#fff;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 .about .ab-x:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.ab-in{min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-end;gap:28px;padding:96px max(64px,env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom)) max(64px,env(safe-area-inset-left));translate:0 10px;transition:translate .5s cubic-bezier(.22,1,.36,1)}
-.about.in .ab-in{translate:0 0}
+.ab-in{min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-end;gap:28px;padding:96px max(24px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
 .ab-in>*{margin:0;width:fit-content}
-.ab-name{font-size:15px;font-weight:500;color:var(--m);margin-bottom:-12px}
+.ab-mk{width:88px;height:88px;fill:#fff;margin-bottom:8px}
 .ab-in h2{max-width:16ch;font-size:68px;font-weight:500;letter-spacing:-.035em;line-height:1.02;text-wrap:balance}
-.ab-body{max-width:40ch;font-size:19px;line-height:1.5;color:#d6d6d8;display:grid;gap:10px}
-.ab-body p{margin:0}.ab-body .fut{color:var(--m)}
-.ab-cr{display:grid;grid-template-columns:auto 1fr;gap:4px 20px;margin-top:12px;font-size:14px}
-.ab-cr dt{color:var(--m)}.ab-cr dd{margin:0;color:#d6d6d8}
-html.phone .ab-in{gap:20px;padding:88px max(24px,env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
+.ab-body{max-width:34ch;font-size:22px;line-height:1.4;color:#d6d6d8}
+.ab-cr{margin-top:20px;font:400 12px/1.6 'Paper Mono',ui-monospace,monospace;color:var(--m)}
+.ab-cr a{color:#d6d6d8;text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:3px;transition:color .2s,text-decoration-color .2s}
+.ab-cr a:hover{color:#fff;text-decoration-color:currentColor}
+.ab-cr a:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:2px}
+html.phone .ab-in{gap:20px;padding:88px max(24px,env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
+html.phone .ab-mk{width:64px;height:64px;margin-bottom:4px}
 html.phone .ab-in h2{font-size:38px}
-html.phone .ab-body{font-size:17px}
-html.phone .ab-cr{font-size:13px;gap:4px 14px}
+html.phone .ab-body{font-size:18px}
+html.phone .ab-cr{margin-top:12px}
 @media(max-width:700px){.ab-in h2{font-size:44px}}
-@media(prefers-reduced-motion:reduce){.ab-in{translate:none;transition:none}}
+@media(prefers-reduced-motion:reduce){.ab-mk{opacity:0;transition:opacity .2s}.about.in .ab-mk{opacity:1;transition-duration:.35s}}
 </style>
 </head>
 <body>
@@ -993,14 +996,13 @@ html.phone .ab-cr{font-size:13px;gap:4px 14px}
   </div>
 </div>
 
-<dialog class="about" id="about" aria-labelledby="abN">
-  <span class="ab-mk" aria-hidden="true"><svg><use href="#mark"/></svg></span>
+<dialog class="about" id="about" aria-label="About Crate Dig">
   <button class="btn ab-x" id="abX"><svg width="18" height="18" viewBox="0 0 256 256" aria-hidden="true" style="display:block"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg><span class="sr">Close</span></button>
   <div class="ab-in">
-    <p class="ab-name" id="abN">Crate Dig</p>
+    <svg class="ab-mk" role="img" aria-label="Crate Dig"><use href="#mark"/></svg>
     <h2>Every record Casey owns, in one crate.</h2>
-    <div class="ab-body"><p>Flip through, pull one out, turn it over.</p><p class="fut">Before long, you’ll be able to make a crate of your own.</p></div>
-    <dl class="ab-cr"><dt>Covers</dt><dd>Apple Music and the Cover Art Archive</dd><dt>Facts</dt><dd>MusicBrainz</dd><dt>Made by</dt><dd>Casey Cavanagh</dd></dl>
+    <p class="ab-body">Flip through, pull one out, turn it over. Before long, you’ll be able to make a crate of your own.</p>
+    <p class="ab-cr">Covers from Apple Music and the Cover Art Archive · Facts from MusicBrainz<br>Made by <a href="https://caseycavanagh.com" target="_blank" rel="noopener">Casey Cavanagh</a> · © <span id="abY">2026</span></p>
   </div>
 </dialog>
 
@@ -1721,12 +1723,35 @@ hv.addEventListener('pointerleave',e=>{onHv=false;if(crate.contains(e.relatedTar
 // the name opens its record
 hv.addEventListener('click',()=>{const i=hvI;if(i<0||!open.hidden)return;hvOff();if(i!==cur)go(i);openRecord(false)});
 // the mark opens the about page; the close button, Esc or a tap anywhere but the words puts it away
-const about=$('#about');
-function aboutOpen(){if(about.open)return;about.showModal();document.documentElement.style.overflow='hidden';requestAnimationFrame(()=>about.classList.add('in'))}
+const about=$('#about');$('#abY').textContent=new Date().getFullYear();
+const mk=$('.ab-mk'),lgA=$('.logo'),lgS=$('.logo svg');let spin=0,spinV=0,spinOn=false,spinF=0,flight=null;
+// the top bar's mark as it sits now: its center, size and turn (the crate turns it as it flips; hover tilts it)
+const markAt=el=>{const r=el.getBoundingClientRect(),cs=getComputedStyle(el),m=new DOMMatrix(cs.transform);
+  return {x:r.left+r.width/2,y:r.top+r.height/2,w:parseFloat(cs.width),a:(parseFloat(cs.rotate)||0)+Math.atan2(m.b,m.a)*180/Math.PI}};
+// the mark comes with the page: the top bar's mark flies down and grows into the big one, and flies back on close
+function abFly(back){
+  const f=markAt(lgS),t=markAt(mk),sc=f.w/t.w,from={translate:`${f.x-t.x}px ${f.y-t.y}px`,scale:sc,rotate:f.a+'deg'};
+  let to={translate:'0px 0px',scale:1,rotate:spin+'deg'};
+  if(back){from.rotate=(f.a+360*Math.round((spin-f.a)/360))+'deg';to={...to,rotate:spin+'deg'}}
+  flight?.cancel();
+  return flight=mk.animate(back?[to,from]:[from,to],{duration:back?380:620,easing:back?'cubic-bezier(.4,0,.2,1)':'cubic-bezier(.22,1,.36,1)',fill:back?'forwards':'none'});
+}
+function aboutOpen(){if(about.open)return;about.showModal();document.documentElement.style.overflow='hidden';
+  if(!reduce){spin=markAt(lgS).a;mk.style.rotate=spin+'deg';lgA.style.visibility='hidden';abFly(false)}
+  requestAnimationFrame(()=>about.classList.add('in'))}
 function aboutClose(){if(!about.open||about.closing)return;about.classList.remove('in');about.closing=true;
-  setTimeout(()=>{about.close();about.closing=false;if(open.hidden)document.documentElement.style.overflow=''},reduce?0:200)}
+  spinOn=false;spinV=0;cancelAnimationFrame(spinF);spinF=0;
+  let ended=false;const done=()=>{if(ended)return;ended=true;flight?.cancel();flight=null;lgA.style.visibility='';about.close();about.closing=false;document.activeElement?.blur();if(open.hidden)document.documentElement.style.overflow=''};
+  if(reduce){setTimeout(done,200);return}
+  abFly(true).finished.then(done,done);setTimeout(done,500)} // the timer is a backstop if the animation never settles
 $('.logo').addEventListener('click',e=>{e.preventDefault();aboutOpen()});
 $('#abX').onclick=aboutClose;
+// hovering the big mark spins it like a record at 33⅓ rpm; moving off lets it coast to a stop where it is
+{let t0=0;
+  const step=now=>{const dt=Math.min(.05,(now-t0)/1000);t0=now;spinV+=((spinOn?200:0)-spinV)*(1-Math.exp(-dt*(spinOn?3:2.5)));spin=(spin+spinV*dt)%360;
+    mk.style.rotate=spin.toFixed(2)+'deg';spinF=!spinOn&&spinV<1?0:requestAnimationFrame(step)};
+  const go=o=>{if(about.closing)return;spinOn=o;if(!spinF&&!reduce){t0=performance.now();spinF=requestAnimationFrame(step)}};
+  mk.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')go(true)});mk.addEventListener('pointerleave',()=>go(false))}
 about.addEventListener('cancel',e=>{e.preventDefault();aboutClose()});
 about.addEventListener('click',e=>{if(!e.target.closest('.ab-in>*,a,button'))aboutClose()});
 crate.addEventListener('pointerdown',hvOff);crate.addEventListener('wheel',hvOff,{passive:true});
