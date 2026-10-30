@@ -454,9 +454,20 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:#1e1e20}
 /* below Play: a few lines about the record, then covers of others that share its artist, label or year */
 .o-info .ab,.o-info .near{margin-top:28px}
 .o-info .ohd{margin:0 0 8px;font-size:11px;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
-.o-info .about{margin:0;font-size:15px;line-height:1.5;color:#d6d6d8;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.o-info .about{margin:0;font-size:15px;line-height:1.5;color:#d6d6d8}
+/* while About is on its way: its label and a few quiet lines in its place; then the text fades in, or the block fades away */
+.ab .sk{display:grid;gap:9.5px;padding:6px 0 10px}
+.ab .sk i{display:block;height:13px;border-radius:3px;background:rgba(255,255,255,.07)}
+.ab .sk i:nth-child(3){width:82%}.ab .sk i:nth-child(4){width:30%;margin-top:4px}
+.ab.in>*{animation:linerIn .35s ease-out both}
+.ab.gone{opacity:0;transition:opacity .15s}
+@keyframes linerIn{from{opacity:0}}
+@media(prefers-reduced-motion:no-preference){.ab .sk i,.tl.wait li>*{animation:linerWait 1.4s ease-in-out infinite alternate}}
+@keyframes linerWait{to{opacity:.45}}
 .o-info .ab a{display:inline-block;margin-top:6px;font-size:14px;color:var(--m);text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em}
 .o-info .ab a:hover{color:var(--fg)}
+.o-info .near .ohd{display:block;text-decoration:none;transition:color .15s}
+.o-info .near .ohd:hover{color:var(--fg)}
 .thumbs{display:flex;gap:10px}
 .nb{all:unset;cursor:pointer;flex:0 0 76px;width:76px;height:76px;border-radius:1px;overflow:hidden;box-shadow:0 6px 14px -8px #000c}
 .nb img,.nb i{display:block;width:100%;height:100%;object-fit:cover}
@@ -478,6 +489,10 @@ html.phone .nb{flex-basis:72px;width:72px;height:72px}
 .tl li{display:grid;grid-template-columns:2.15em minmax(0,1fr)}
 .tl li i{font-style:normal;font-size:.78em;opacity:.62;padding-top:.15em}
 .tl li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl:not(.wait){animation:linerIn .35s ease-out both}
+.tl.wait li{height:1.5em;align-items:center}
+.tl.wait li>*{display:block;height:.62em;border-radius:.2em;background:currentColor;opacity:.12}
+.tl.wait li i{width:1.2em}.tl.wait li span{width:58%}.tl.wait li:nth-child(3n) span{width:72%}.tl.wait li:nth-child(4n) span{width:44%}
 /* phones: the record view is laid out for a title of up to three lines. The record's size leaves room for all three,
    so a long title never pushes Play off the screen and the record stays the same size from one to the next; a shorter
    title just leaves more air above Play. The artist and the facts each keep to one line. */
@@ -931,6 +946,19 @@ html.phone .sx{height:44px}
 .qnone:has(ul) .qh{padding:6px 8px 8px}
 /* phones show the laptop's crate, set lower so the pile behind clears the bar; the dial's fade takes the records that fall forward */
 html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
+/* the filter you're in, from a record's details: a pill in the middle of the top bar; tap it for the whole crate */
+.chip,html.phone .chip{display:inline-flex!important;position:absolute;top:0;left:50%;translate:-50% 0;height:44px;max-width:min(360px,calc(100vw - 236px));box-sizing:border-box;padding:0 12px 0 16px;gap:8px;font-size:15px;background:var(--glass);color:#fff;border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,border-color .2s}
+.chip[hidden],.find:has(.q:focus-within) .chip,.find:has(.q.has) .chip{display:none!important}
+.chip:hover{background:var(--glass);border-color:#ffffff40}
+.chip svg{color:#a5a5aa;width:12px;height:12px}
+.chip:hover svg{color:#fff}
+.chip:not([hidden]){animation:trayIn .3s cubic-bezier(.22,1,.36,1)}
+@media(prefers-reduced-motion:reduce){.chip:not([hidden]){animation:none}}
+/* Play: a slimmer button */
+.play .btn,html.phone .play .btn{height:44px;padding:0 22px 0 18px;font-size:15px;gap:8px}
+html.phone .play .btn{height:var(--pb);font-size:16px}
+html.phone{--pb:46px}
+@media(max-height:700px){html.phone{--pb:44px}}
 </style>
 </head>
 <body>
@@ -1156,6 +1184,8 @@ const byName=(a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||yr
 const fold=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/×/g,'x').replace(/[’'.]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const letter=r=>{const c=fold(name(r))[0]||'';return /[a-z]/.test(c)?c.toUpperCase():'#'};
 // A filter narrows the crate to one artist, label, year or format (from a record's details) or to a search; null is the whole crate
+// a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
+const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
 const FIELD={artist:r=>r.artist,label:r=>r.label,year:r=>r.year,format:r=>r.format},KIND={artist:'Artist',label:'Label',year:'Year',format:'Format'};
 const same=(a,b)=>!!a&&fold(a)===fold(b);
 const matchQ=(r,v)=>{const h=fold([r.artist,r.sortAs,r.title,r.label,r.year,r.format].join(' '));return fold(v).split(' ').filter(Boolean).every(t=>h.includes(t))};
@@ -1366,8 +1396,9 @@ $('#qx').onclick=()=>{q.value='';search();q.focus()};
 const X_ICON='<svg width="14" height="14" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
 function showChip(){
   const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;if(!f)return;
-  chip.innerHTML=`<span class="k">${KIND[f.k]}</span><b>${f.v}</b><span class="n">${order.length}</span>${X_ICON}`;
-  chip.setAttribute('aria-label',`${KIND[f.k]} ${f.v}, ${order.length} records. Show the whole crate`);
+  const v=f.k==='label'?labelName(f.v):f.v;
+  chip.innerHTML=`<b>${v}</b>${X_ICON}`;
+  chip.setAttribute('aria-label',`${KIND[f.k]||''} ${v}. Show the whole crate`);
 }
 chip.onclick=()=>{arrange(null);say('The whole crate.');crate.focus({preventScroll:true})};
 
@@ -1486,24 +1517,23 @@ const shEnd=()=>{
 $('#oinfo').addEventListener('pointerup',shEnd);$('#oinfo').addEventListener('pointercancel',shEnd);
 $('#oinfo').addEventListener('click',e=>{if(performance.now()-shBlock<400&&e.target.closest('#playM')){e.preventDefault();e.stopImmediatePropagation()}},true);
 $('#oinfo').addEventListener('focusout',e=>{if(playMenu()&&!e.relatedTarget?.closest?.('.play')&&e.relatedTarget)togglePlay(false)});
-// a detail other records share is a button that fills the crate with all of them
-// a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
-const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
+// a detail other records share is a button that fills the crate with all of them (the artist, and the Also heading)
 const metaHTML=(r,k)=>{const v=FIELD[k](r),n=v?RECORDS.filter(x=>same(FIELD[k](x),v)).length:0,s=k==='label'?labelName(v):v;return n>1?`<button type="button" class="meta" data-f="${k}">${s}<span class="sr">, show all ${n}</span></button>`:s};
 // other records in the crate that share the artist, else the label, else the year: a few covers that open them
 function nearby(r){
   for(const[k,head]of[['artist',()=>'Also by '+r.artist],['label',()=>'Also on '+labelName(r.label)],['year',()=>'Also from '+r.year]]){
     const v=FIELD[k](r);if(!v)continue;
     const more=order.filter(x=>x!==r&&same(FIELD[k](x),v)).slice(0,4);
-    if(more.length)return`<div class="near"><p class="ohd">${head()}</p><div class="thumbs">${more.map(x=>`<button type="button" class="nb" data-slug="${x.slug}" aria-label="${x.title} by ${x.artist}">${x.front?`<img alt="" src="${img(x.thumb||x.front)}" decoding="async" draggable="false">`:`<i style="background:${spineBg(x)}"></i>`}</button>`).join('')}</div></div>`;
+    if(more.length)return`<div class="near"><button type="button" class="meta ohd" data-f="${k}">${head()}<span aria-hidden="true"> →</span><span class="sr">, show them all in the crate</span></button><div class="thumbs">${more.map(x=>`<button type="button" class="nb" data-slug="${x.slug}" aria-label="${x.title} by ${x.artist}">${x.front?`<img alt="" src="${img(x.thumb||x.front)}" decoding="async" draggable="false">`:`<i style="background:${spineBg(x)}"></i>`}</button>`).join('')}</div></div>`;
   }
   return'';
 }
 function info(r){
-  const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${metaHTML(r,k)}</span>`).join('');
+  // plain facts: the way into the rest of the crate is the Also heading below, so they aren't links twice
+  const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${k==='label'?labelName(r.label):FIELD[k](r)}</span>`).join('');
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
       ${facts?`<p class="facts">${facts}</p>`:''}
-    ${playHTML(r)}<div class="ab" id="oabout" hidden></div>${nearby(r)}${ownHTML(r)}`;
+    ${playHTML(r)}<div class="ab" id="oabout"></div>${nearby(r)}${ownHTML(r)}`;
   liner(r);
 }
 // liner notes come from /api/liner: a few lines from Wikipedia for every record, and for a record with no back cover
@@ -1512,15 +1542,36 @@ const LINER=new Map();
 const linerQ=r=>{const q=new URLSearchParams({artist:r.artist,title:r.title});
   if(r.src==='d')q.set('d',r.id);else if(r.src==='a')q.set('a',r.id);else{const mb=r.src==='m'?r.id:r.release;if(mb)q.set('mb',mb)}
   if(r.group)q.set('g',r.group);return q};
+const LDONE=new Map(); // answers already in, drawn at once with no placeholder
 function liner(r){
   let p=LINER.get(r.slug);
-  if(!p){p=fetch('/api/liner?'+linerQ(r)).then(x=>x.ok?x.json():null).catch(()=>null);LINER.set(r.slug,p)}
-  p.then(l=>{
-    if(!l||order[cur]!==r||open.hidden)return;
+  if(!p){p=fetch('/api/liner?'+linerQ(r)).then(x=>x.ok?x.json():null).catch(()=>null).then(l=>(LDONE.set(r.slug,l),l));LINER.set(r.slug,p)}
+  const show=l=>{
+    if(order[cur]!==r||open.hidden)return;
     const ab=$('#oabout');
-    if(ab&&l.about){ab.innerHTML=`<p class="ohd">About</p><p class="about">${esc(l.about.text)}</p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;ab.hidden=false}
-    if(!r.back&&l.sides?.length)requestAnimationFrame(()=>tracks(r,l.sides));
-  });
+    if(ab&&l?.about){ab.className='ab in';ab.innerHTML=`<p class="ohd">About</p><p class="about"></p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;fitAbout(ab.children[1],l.about.text)}
+    else if(ab){ab.className='ab gone';setTimeout(()=>{if(ab.classList.contains('gone'))ab.hidden=true},200)}
+    if(!r.back)requestAnimationFrame(()=>tracks(r,l?.sides||[]));
+  };
+  if(LDONE.has(r.slug)){show(LDONE.get(r.slug));return}
+  // still on its way: the About block holds its place with quiet lines, and a sleeve with no back shows faint ones too
+  $('#oabout').className='ab wait';$('#oabout').innerHTML='<p class="ohd">About</p><div class="sk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>';
+  if(!r.back)requestAnimationFrame(()=>tracks(r,null));
+  p.then(show);
+}
+// About ends where a sentence ends: as many whole sentences as fit three lines, else the first one up to a comma or dash,
+// else up to a word, never mid-word
+function fitAbout(el,text){
+  const max=parseFloat(getComputedStyle(el).lineHeight)*3+2,fits=s=>{el.textContent=s;return el.scrollHeight<=max};
+  const sents=typeof Intl.Segmenter==='function'?[...new Intl.Segmenter('en',{granularity:'sentence'}).segment(text)].map(s=>s.segment):text.split(/(?<=[.!?])\s+/);
+  let out='';
+  for(const s of sents){const t=(out+' '+s).trim();if(fits(t))out=t;else break}
+  if(!out){
+    const first=sents[0].trim();
+    for(const m of first.matchAll(/[,;:–—](?=\s)/g)){const t=first.slice(0,m.index)+'…';if(fits(t))out=t;else break}
+    if(!out){const w=first.split(' ');let n=w.length;while(n>1&&!fits(w.slice(0,n).join(' ')+'…'))n--;out=w.slice(0,n).join(' ')+'…'}
+  }
+  el.textContent=out;
 }
 // WCAG contrast: white type on the jacket when it passes 4.5:1, else near black
 const lumOf=hex=>{const m=/^#([0-9a-f]{6})$/i.exec(hex||'');if(!m)return 0;const n=parseInt(m[1],16);
@@ -1530,6 +1581,8 @@ const tlInk=hex=>{const L=lumOf(hex);return(1.05)/(L+.05)>=4.5?'#fff':'#111'};
 // The type steps down until the whole list fits the square, so a long record never scrolls or gets cut
 function tracks(r,sides){
   const bk=$('#sleeve .bk');if(!bk||order[cur]!==r)return;
+  if(!sides){bk.querySelector('.tl')?.remove();bk.insertAdjacentHTML('beforeend',`<div class="tl wait" style="color:${tlInk(spineBg(r))}" aria-hidden="true"><ol>${'<li><i></i><span></span></li>'.repeat(6)}</ol></div>`);return}
+  if(!sides.length){bk.querySelector('.tl')?.remove();return}
   const n=sides.reduce((a,s)=>a+s.tracks.length,0);
   const rows=sides.map(s=>`<ol>${s.tracks.map((t,j)=>`<li><i>${s.side?s.side+(j+1):j+1}</i><span>${esc(t)}</span></li>`).join('')}</ol>`).join('');
   bk.querySelector('.tl')?.remove();
