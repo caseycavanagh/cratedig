@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#121212">
-<title>Records: the icon everywhere</title>
+<title>Crate Dig: the icon everywhere</title>
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -141,7 +141,7 @@ function pixels(svg,n,zoom,c){
   const im=new Image();im.onload=()=>{const x=cv.getContext('2d');x.fillStyle=c;x.fillRect(0,0,n,n);x.drawImage(im,0,0,n,n)};
   im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sized(svg.replace('currentColor','#3c4043'),n));return cv;
 }
-const strip=(svg,mode,title='Records')=>`<div class="strip ${mode}"><div class="tab"><span class="ph" style="width:16px;height:16px;border-radius:50%;background:${mode=='light'?'#9aa0a6':'#5f6368'};flex:none"></span><span>Inbox</span></div><div class="tab on">${sized(svg,16)}<span>${title}</span></div><div class="tab pin">${sized(svg,16)}</div></div>`;
+const strip=(svg,mode,title='Crate Dig')=>`<div class="strip ${mode}"><div class="tab"><span class="ph" style="width:16px;height:16px;border-radius:50%;background:${mode=='light'?'#9aa0a6':'#5f6368'};flex:none"></span><span>Inbox</span></div><div class="tab on">${sized(svg,16)}<span>${title}</span></div><div class="tab pin">${sized(svg,16)}</div></div>`;
 const card=(id,n,use,body)=>`<article class="st" data-id="${id}"><div class="stage">${body}</div><button class="star" type="button" aria-pressed="false" aria-label="Pick ${id} ${n}">★</button><div class="meta"><span class="id"><b>${id}</b>${n}</span><p class="use">${use}</p></div></article>`;
 
 // A: how many rings at small sizes. Tile flips with the browser, as on caseycavanagh.com
@@ -149,7 +149,7 @@ const card=(id,n,use,body)=>`<article class="st" data-id="${id}"><div class="sta
  ['A2','Two rings','Drop the outer ring and draw the rest bigger. Still a record with grooves at 16, and the split down the middle survives.','two',.78],
  ['A3','One ring and the label','Just the inner ring and the label, drawn big. Clearest at 16, closer to a target than a record.','one',.74]].forEach(([id,n,use,rings,fill])=>{
   const L=icon({rings,fill,c:DARK}),D=icon({rings,fill,c:LIGHT});
-  $('#A').insertAdjacentHTML('beforeend',card(id,n,use,`${strip(L,'light')}${strip(D,'dark')}<div class="serp"><span class="fav">${sized(L,18)}</span><span><b>Records</b><small>Every record Casey owns</small></span></div><div class="px" data-r="${rings}" data-f="${fill}"></div>`));
+  $('#A').insertAdjacentHTML('beforeend',card(id,n,use,`${strip(L,'light')}${strip(D,'dark')}<div class="serp"><span class="fav">${sized(L,18)}</span><span><b>Crate Dig</b><small>Every record Casey owns</small></span></div><div class="px" data-r="${rings}" data-f="${fill}"></div>`));
   const px=$(`[data-id=${id}] .px`);
   [[L,16,'#fff','16 in a light tab'],[D,16,'#35363a','16 in a dark tab'],[L,32,'#fff','32, a retina tab']].forEach(([s,sz,bg,t])=>{const f=document.createElement('figure');f.append(pixels(s,sz,sz==16?4:2,bg));f.insertAdjacentHTML('beforeend',`<figcaption class="lbl">${t}</figcaption>`);px.append(f)});
 });
@@ -169,23 +169,23 @@ const grayApps=k=>Array.from({length:k},()=>`<div class="app"><i></i><span>App</
  ['C2','Big record','The record fills most of the square. Reads from across the room, the grooves get more room.',{rings:'full',fill:.86}],
  ['C3','Off the edge','The record is bigger than the square and runs off the right side, like one sliding out of its sleeve.',{rings:'full',fill:1.5,cx:130}]].forEach(([id,n,use,o])=>{
   const s=icon({...o,c:DARK,rx:0});
-  const app=`<div class="app"><i>${s}</i><span>Records</span></div>`;
-  $('#C').insertAdjacentHTML('beforeend',card(id,n,use,`<div class="homes"><div class="phone">${grayApps(5)}${app}${grayApps(6)}</div><div class="favs"><div class="fv"><i></i>Mail</div><div class="fv"><i>${s}</i>Records</div><div class="fv"><i></i>News</div></div></div><div class="big"><i>${s}</i><span class="lbl">120, the size it's seen up close</span></div>`));
+  const app=`<div class="app"><i>${s}</i><span>Crate Dig</span></div>`;
+  $('#C').insertAdjacentHTML('beforeend',card(id,n,use,`<div class="homes"><div class="phone">${grayApps(5)}${app}${grayApps(6)}</div><div class="favs"><div class="fv"><i></i>Mail</div><div class="fv"><i>${s}</i>Crate Dig</div><div class="fv"><i></i>News</div></div></div><div class="big"><i>${s}</i><span class="lbl">120, the size it's seen up close</span></div>`));
 });
 
 // D: link previews. The card is real HTML at 1200 × 630, scaled down into each preview
 const MARK=icon({rings:'full',fill:1,tile:false}).replace('currentColor','#ecebe8');
 const COVERS=['jason-isbell-southeastern','james-taylor-jt','gram-parsons-grievous-angel','hiss-golden-messenger-lateness-of-dancers','gregory-alan-isakov-appaloosa-bones'];
 const OG={
-  title:`<div class="card">${sized(MARK,64)}<div><div class="t">Records</div><div class="s">Every record Casey owns, flipped through like a crate</div><div class="f"><span>Casey Cavanagh</span><span>cratedig</span></div></div></div>`,
-  mark:`<div class="card" style="flex-direction:row;align-items:center;justify-content:flex-start;gap:80px">${sized(MARK,360)}<div><div class="t">Records</div><div class="s" style="font-size:44px">Every record Casey owns,<br>flipped through like a crate</div><div class="f" style="margin-top:48px;gap:40px;justify-content:flex-start"><span>Casey Cavanagh</span></div></div></div>`,
-  covers:`<div class="card">${sized(MARK,64)}<div class="fan">${COVERS.map((c,i)=>`<img src="vinyl/${c}-front.webp" alt="" style="left:${i*52}px;top:${[40,20,0,20,40][i]}px;rotate:${(i-2)*4}deg;z-index:${i<3?i:5-i}">`).join('')}</div><div style="max-width:620px"><div class="t">Records</div><div class="s">Every record Casey owns, flipped through like a crate</div><div class="f"><span>Casey Cavanagh</span></div></div></div>`};
+  title:`<div class="card">${sized(MARK,64)}<div><div class="t">Crate Dig</div><div class="s">Every record Casey owns, flipped through like a crate</div><div class="f"><span>Casey Cavanagh</span><span>cratedig-dun.vercel.app</span></div></div></div>`,
+  mark:`<div class="card" style="flex-direction:row;align-items:center;justify-content:flex-start;gap:80px">${sized(MARK,360)}<div><div class="t">Crate Dig</div><div class="s" style="font-size:44px">Every record Casey owns,<br>flipped through like a crate</div><div class="f" style="margin-top:48px;gap:40px;justify-content:flex-start"><span>Casey Cavanagh</span></div></div></div>`,
+  covers:`<div class="card">${sized(MARK,64)}<div class="fan">${COVERS.map((c,i)=>`<img src="vinyl/${c}-front.webp" alt="" style="left:${i*52}px;top:${[40,20,0,20,40][i]}px;rotate:${(i-2)*4}deg;z-index:${i<3?i:5-i}">`).join('')}</div><div style="max-width:620px"><div class="t">Crate Dig</div><div class="s">Every record Casey owns, flipped through like a crate</div><div class="f"><span>Casey Cavanagh</span></div></div></div>`};
 const shot=(html,w)=>`<div class="shot" data-w="${w}">${html}</div>`;
 [['D1','Title card','The caseycavanagh.com card turned dark: the mark small at the top, the name big, a mono line along the bottom.','title'],
  ['D2','The mark, big','The record large on the left, the words beside it. The mark does the talking in a small preview.','mark'],
  ['D3','Some covers','The title card with a few records fanned out on the right, so the preview shows what’s inside.','covers']].forEach(([id,n,use,k])=>{
   const lg=sized(icon({rings:'two',fill:.78,c:DARK}),16);
-  $('#D').insertAdjacentHTML('beforeend',card(id,n,use,`<div class="previews"><div class="imsg">${shot(OG[k],240)}<div class="cap"><b>Records</b><small>cratedig.vercel.app</small></div></div><div class="slack"><span class="site">${lg}Records</span><a href="#" onclick="return false">Records</a><span>Every record Casey owns, flipped through like a crate.</span>${shot(OG[k],0)}</div></div>`));
+  $('#D').insertAdjacentHTML('beforeend',card(id,n,use,`<div class="previews"><div class="imsg">${shot(OG[k],240)}<div class="cap"><b>Crate Dig</b><small>cratedig-dun.vercel.app</small></div></div><div class="slack"><span class="site">${lg}Crate Dig</span><a href="#" onclick="return false">Crate Dig</a><span>Every record Casey owns, flipped through like a crate.</span>${shot(OG[k],0)}</div></div>`));
 });
 // scale each 1200 × 630 card to its box
 function fit(){$$('.shot').forEach(s=>{const w=s.clientWidth;s.style.height=w*630/1200+'px';$('.card',s).style.transform=`scale(${w/1200})`})}

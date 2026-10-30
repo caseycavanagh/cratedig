@@ -25,6 +25,7 @@ async function paperMono(): Promise<ArrayBuffer | null> {
 }
 const mono = await paperMono();
 const MONO = mono ? "Paper Mono" : "Instrument Sans";
+const HOST = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? ""; // the site's domain, from Vercel at build
 
 // the record mark, public/vinyl/records-logo.svg
 const MARK = [
@@ -50,7 +51,7 @@ export function titleCard({ title, sub, foot }: { title: string; sub: string; fo
           <div style={{ fontSize: 50, color: "#8f8f93", marginTop: 18, letterSpacing: "-0.01em" }}>{sub}</div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 72, fontFamily: MONO, fontSize: 30, color: "#8f8f93" }}>
             <span>{foot}</span>
-            <span>cratedig</span>
+            <span>{HOST}</span>
           </div>
         </div>
       </div>
