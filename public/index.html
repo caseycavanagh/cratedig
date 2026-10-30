@@ -1013,6 +1013,23 @@ html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 .chip:hover{background:var(--glass);border-color:#ffffff40}
 .chip svg{color:var(--t2);width:12px;height:12px}
 .chip:hover svg{color:#fff}
+/* it sits in the row, not over it: centered on the screen while there's room, and when there isn't (a phone, a narrow window)
+   it slides toward the logo to clear the buttons on the right, and its name gives way last. The spacer before it stands in
+   for the buttons' extra width (share, search, sort, layout less the logo), and gives that up first */
+.find:has(>.chip:not([hidden])),html.phone .find:has(>.chip:not([hidden])){flex-wrap:nowrap}
+.find:has(>.chip:not([hidden]))>.logo{order:-1;margin-right:0}
+.find:has(>.chip:not([hidden]))>.sp{display:block;order:0;flex:0 100000 148px;min-width:0}
+.find:has(>.chip:not([hidden])):has(>.fb.sb[hidden])>.sp{flex-basis:96px}
+.chip,html.phone .chip{position:static;translate:none;order:1;flex:0 1 auto;min-width:0;max-width:360px;margin:0 auto}
+.find .chip .cx{flex:none}
+/* small phones: the row draws in a little so a year still fits whole; the smallest have no room left in it at all,
+   so there it hangs just under the bar, in the middle */
+@media(max-width:380px){
+  html.phone .find:has(>.chip:not([hidden])){gap:6px}
+  html.phone .chip .cn{padding-left:14px}
+  html.phone .chip .cx{padding:0 12px 0 6px}
+}
+@media(max-width:369px){html.phone .chip{position:absolute;top:52px;left:50%;translate:-50% 0;max-width:calc(100vw - 28px)}}
 .chip:not([hidden]){animation:trayIn .3s cubic-bezier(.22,1,.36,1)}
 @media(prefers-reduced-motion:reduce){.chip:not([hidden]){animation:none}}
 /* Play: a slimmer button */
