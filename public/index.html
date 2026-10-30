@@ -1826,6 +1826,7 @@ function openRecord(deep){
   // each record gets its own address: #record/<slug>
   if(deep)history.replaceState(null,'','#record/'+r.slug);else if(!history.state?.open)history.pushState({open:1},'','#record/'+r.slug);
   open.focus({preventScroll:true});
+  window.hintTurn?.();
 }
 // on a phone the peeks line up with the record rather than the screen
 const aimPeeks=()=>{const b=stage.getBoundingClientRect();open.style.setProperty('--py',b.top+b.height/2+'px');open.style.setProperty('--dx','0px')};
@@ -2956,9 +2957,54 @@ dl.addEventListener('keydown',e=>{const k=e.key;
 
 // follow the crate: every change of the record in front goes through place(); a new filter goes through arrange()
 window.dialBusy=()=>!!drag||(!!raf&&user);
+// the first-time hint: the dial rises to its records on its own, then drops back to its letters
+window.dialHint=on=>{if(drag)return false;setDepth(on?'r':'l');return true};
 const place0=place;place=function(...a){const r=place0.apply(this,a);sync();return r};
 const arrange1=arrange;arrange=function(...a){const n=arrange1.apply(this,a);if(n){build();at=cur}return n};
 build();at=cur;
+})();
+
+// First-time hints: the first time you meet them, the crate, the dial and a pulled-out record each do their own gesture once, by
+// themselves, and settle back. The front record tips toward you, the dial rises to its records and drops back, the sleeve turns to
+// its back and returns. No words. Each plays once ever (open the page with ?hints to see them again); a hand on anything calls one off.
+(()=>{
+const KS=['crate','dial','turn'],KEY=k=>'records-hint-'+k;
+if(/[?&]hints(&|=|$)/.test(location.search))try{KS.forEach(k=>localStorage.removeItem(KEY(k)))}catch{}
+const seen=k=>{try{return!!localStorage.getItem(KEY(k))}catch{return true}}; // no storage, no hints: none beats one every visit
+const saw=k=>{try{localStorage.setItem(KEY(k),'1')}catch{}};
+let T=[],undo=null;
+const at=(f,ms)=>T.push(setTimeout(f,ms));
+// any touch, key or scroll cancels what's waiting, and puts back what's mid-play before the gesture itself gets the event
+addEventListener('pointerdown',e=>stop(e),{capture:true});addEventListener('keydown',e=>stop(e),{capture:true});addEventListener('wheel',e=>stop(e),{capture:true,passive:true});
+function stop(e){T.forEach(clearTimeout);T=[];if(undo){const u=undo;undo=null;u(e)}}
+// only on a still page: not mid-search, in a dialog, editing, or another view
+const calm=()=>!reduce&&!document.hidden&&!editing&&!document.querySelector('dialog[open]')&&!document.activeElement?.closest?.('input,textarea')&&!window.dialBusy?.();
+const inCrate=()=>calm()&&open.hidden&&document.body.classList.contains('ready')&&!document.body.classList.contains('walling');
+function tip(){
+  if(seen('crate')||!inCrate()||raf||cur>=order.length-1)return false;
+  saw('crate');const i=cur,back=()=>{undo=null;aim=i;kick()};
+  aim=i+.42;kick();undo=back;at(back,650);return true;
+}
+function rise(){
+  if(seen('dial')||!inCrate()||!window.dialHint?.(true))return false;
+  saw('dial');
+  undo=e=>{if(!e?.target?.closest?.('#kd'))window.dialHint(false)}; // a hand on the dial keeps it where the hint left it
+  at(()=>{undo=null;window.dialHint(false)},1500);return true;
+}
+// called from openRecord: once the record has settled, the sleeve turns to its back and returns
+window.hintTurn=()=>{
+  if(seen('turn'))return;
+  at(()=>{
+    if(open.hidden||busy||!calm())return;
+    saw('turn');const b=base,back=()=>{undo=null;ry=b;rx=TILT;setS()};
+    ry=b+180;rx=TILT;setS();
+    undo=e=>{if(!e?.target?.closest?.('#lift'))back()}; // a hand on the sleeve takes it from wherever it's turned to
+    at(back,1700);
+  },1800);
+};
+const arrive=()=>at(()=>{if(tip())at(rise,2200);else rise()},1800);
+if(document.body.classList.contains('ready'))arrive();
+else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('ready')){mo.disconnect();arrive()}});mo.observe(document.body,{attributes:true,attributeFilter:['class']})}
 })();
 </script>
 <script>
