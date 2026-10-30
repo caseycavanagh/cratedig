@@ -113,6 +113,10 @@ button{font:inherit;color:inherit}
   <h2 class="grp">A record's link preview</h2>
   <p>The card Messages, Slack or Discord shows for a record's link, with a short title and a long one. The crate keeps today's card.</p>
   <div class="sheet" id="D"></div>
+
+  <h2 class="grp">Riffs on D1</h2>
+  <p>Cover on the left, words on the right, varied in type and order. Each with a short title and a long one. Picked: D1.</p>
+  <div class="sheet" id="F"></div>
 </div>
 
 <script>
@@ -258,6 +262,28 @@ sticker('D','D1','Cover on the left, words on the right',cardPair(D1),'The cover
 sticker('D','D2','Just the cover',cardPair(D2),'The cover, big, over a blur of itself. The words come from the app showing the link, under the picture.');
 sticker('D','D3','The crate’s card, with the cover',cardPair(D3),'Today’s title card with the record in place of the mark. Matches the crate’s own preview; a long title cuts off.');
 sticker('D','D4','Pulled from the crate',cardPair(D4),'The cover with the crate’s other spines beside it, title after. Most like the crate itself.');
+
+// F: riffs on D1. Everything sits on the same 1200×630, cover 630 square on the left
+const MK=(z)=>LOGO.replace('class="logo"',`style="width:${z}px;height:${z}px;display:block"`);
+const coverL=(r,{inset=0}={})=>inset?`<div style="position:absolute;left:${inset}px;top:${inset}px;width:${630-inset*2}px;height:${630-inset*2}px;background:${COV(r.slug)} center/cover;box-shadow:0 30px 60px -20px #000"></div>`:`<div style="position:absolute;left:0;top:0;width:630px;height:630px;background:${COV(r.slug)} center/cover"></div>`;
+const right=(inner,{left=702,pad=64}={})=>`<div style="position:absolute;left:${left}px;right:${pad}px;top:${pad}px;bottom:${pad-8}px;display:flex;flex-direction:column;justify-content:space-between;min-width:0">${inner}</div>`;
+const clamp=n=>`display:-webkit-box;-webkit-line-clamp:${n};-webkit-box-orient:vertical;overflow:hidden`;
+const M='font-family:var(--mono);color:#8f8f93';
+const yl=r=>r.fx;
+const F={
+  a:r=>`<div class="s">${coverL(r)}${right(`${MK(48)}<div><div style="font-size:${r===LONG?56:70}px;font-weight:500;letter-spacing:-.03em;line-height:1.05;${clamp(3)}">${r.title}</div><div style="font-size:38px;color:#8f8f93;margin-top:14px">${r.artist}</div><div style="font:26px var(--mono);color:#8f8f93;margin-top:40px">${yl(r)}</div></div>`)}</div>`,
+  b:r=>`<div class="s">${coverL(r)}${right(`<div><div style="font-size:${r===LONG?60:76}px;font-weight:500;letter-spacing:-.03em;line-height:1.04;${clamp(3)}">${r.title}</div><div style="font-size:40px;color:#8f8f93;margin-top:16px">${r.artist}</div></div><div style="display:flex;justify-content:space-between;font-size:24px;${M}"><span>${yl(r)}</span><span>Crate Dig</span></div>`)}</div>`,
+  c:r=>`<div class="s">${coverL(r)}${right(`<div style="font-size:24px;${M};letter-spacing:.02em">From Casey’s crate</div><div><div style="font-size:${r===LONG?54:66}px;font-weight:500;letter-spacing:-.025em;line-height:1.08;${clamp(3)}">${r.title}</div><div style="font-size:${r===LONG?54:66}px;font-weight:500;letter-spacing:-.025em;line-height:1.08;color:#8f8f93">${r.artist}</div></div><div style="font-size:24px;${M}">${yl(r)}</div>`)}</div>`,
+  d:r=>`<div class="s">${coverL(r)}${right(`<div style="font-size:28px;${M}">${r.artist}</div><div style="font-size:${r===LONG?64:84}px;font-weight:500;letter-spacing:-.035em;line-height:1.02;${clamp(3)}">${r.title}</div><div style="display:flex;align-items:center;gap:14px;font-size:24px;${M}">${MK(28)}<span>${yl(r)}</span></div>`)}</div>`,
+  e:r=>`<div class="s">${coverL(r,{inset:56})}${right(`${MK(44)}<div><div style="font-size:${r===LONG?52:64}px;font-weight:500;letter-spacing:-.03em;line-height:1.06;${clamp(3)}">${r.title}</div><div style="font-size:34px;color:#8f8f93;margin-top:12px">${r.artist}</div><div style="font:24px var(--mono);color:#8f8f93;margin-top:30px">${yl(r)}</div></div>`,{left:640,pad:56})}</div>`,
+  f:r=>`<div class="s">${coverL(r)}${right(`<div></div><div><div style="font-size:${r===LONG?46:54}px;font-weight:400;letter-spacing:-.02em;line-height:1.12;${clamp(3)}">${r.title}</div><div style="font-size:${r===LONG?46:54}px;color:#8f8f93;line-height:1.12">${r.artist}</div><div style="height:1px;background:#ffffff22;margin:36px 0 24px"></div><div style="display:flex;justify-content:space-between;font-size:22px;${M}"><span>${yl(r)}</span><span>${MK(22).replace('display:block','display:inline-block;vertical-align:-4px')}</span></div></div>`)}</div>`,
+};
+sticker('F','D1a','As drawn: mark on top, three sizes',cardPair(F.a),'The D1 you picked, for comparison. Mark top left, big title, gray artist, mono year and label.');
+sticker('F','D1b','No mark, facts along the bottom',cardPair(F.b),'Title and artist up top, a bit bigger. Year and label bottom left, “Crate Dig” bottom right in mono, where the mark was.');
+sticker('F','D1c','Title and artist the same size',cardPair(F.c),'Two lines at one size, artist in gray, like the open record on a phone. A small “From Casey’s crate” above, facts below.');
+sticker('F','D1d','Artist first, title huge',cardPair(F.d),'Artist small in mono at the top, the title as big as it fits in the middle, mark and facts at the foot.');
+sticker('F','D1e','Cover with room around it',cardPair(F.e),'The cover sits inside the card with a shadow, like a sleeve on a table, instead of running to the edges.');
+sticker('F','D1f','Quiet and low, with a rule',cardPair(F.f),'Regular weight, title and artist settled at the bottom over a thin line, facts and a small mark under it. The calmest one.');
 
 // stars stay in this browser
 let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-share-picks')||'[]'))}catch(e){}
