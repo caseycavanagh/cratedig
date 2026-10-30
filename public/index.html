@@ -52,7 +52,7 @@ button{font:inherit;color:inherit}
 /* the records past the drawn ones: one plane along their tops, striped in their colors, so the crate looks as deep as the collection is */
 .tail{position:absolute;left:calc(var(--S)*-8/15);top:0;width:calc(var(--S)*16/15);transform-origin:50% 0;background-repeat:no-repeat;mask-repeat:no-repeat;pointer-events:none;transition:opacity .4s}
 .crate.still .tail{transition:none}
-html.phone .tail{display:none}
+html.phone.deck .tail{display:none}
 .floor{transition:opacity .4s}
 .rc.held{visibility:hidden}
 .rc.gone{display:none} /* out of sight: no layer at all */
@@ -218,15 +218,15 @@ html[data-theme=dark] .play-m{box-shadow:0 12px 32px -12px #000c}
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 200px));-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 html.phone .page{padding:0}
 /* eye level with the bottom of the pile, so a record tipped all the way toward you is edge on and gone, not lying there */
-html.phone .crate{perspective:1500px;perspective-origin:50% calc(50% + 12px + var(--S)/2);cursor:default;-webkit-touch-callout:none} /* eye level at the pile's bottom edge; eye() sets it again in pixels */
-html.phone .stack{transform:none;bottom:calc(50% - 12px - var(--S)/2)} /* the pile, with the records peeking out above, sits dead center */
-html.phone .rc{transform-origin:50% 50%}
-html.phone .floor{display:none}
-html.phone .rc .fr{box-shadow:0 1px 2px #0000001f,0 14px 28px -14px #00000059;transition:scale .5s var(--flip),opacity .4s}
-html.phone[data-theme=dark] .rc .fr{box-shadow:0 1px 2px #0000008c,0 14px 28px -12px #000000b3}
-html.phone .crate.pressing .rc.cur .fr{scale:.985;transition:scale .08s}
+html.phone.deck .crate{perspective:1500px;perspective-origin:50% calc(50% + 12px + var(--S)/2);cursor:default;-webkit-touch-callout:none} /* eye level at the pile's bottom edge; eye() sets it again in pixels */
+html.phone.deck .stack{transform:none;bottom:calc(50% - 12px - var(--S)/2)} /* the pile, with the records peeking out above, sits dead center */
+html.phone.deck .rc{transform-origin:50% 50%}
+html.phone.deck .floor{display:none}
+html.phone.deck .rc .fr{box-shadow:0 1px 2px #0000001f,0 14px 28px -14px #00000059;transition:scale .5s var(--flip),opacity .4s}
+html.phone.deck[data-theme=dark] .rc .fr{box-shadow:0 1px 2px #0000008c,0 14px 28px -12px #000000b3}
+html.phone.deck .crate.pressing .rc.cur .fr{scale:.985;transition:scale .08s}
 /* no labels on the pile, only a first-time hint that goes once you've flipped */
-html.phone .dhint{display:block;position:absolute;left:0;right:0;top:calc(50% + 12px + var(--S)/2 + 28px);text-align:center;font:400 12px/1.4 var(--mono);color:var(--m);pointer-events:none;transition:opacity .4s}
+html.phone.deck .dhint{display:block;position:absolute;left:0;right:0;top:calc(50% + 12px + var(--S)/2 + 28px);text-align:center;font:400 12px/1.4 var(--mono);color:var(--m);pointer-events:none;transition:opacity .4s}
 .crate.swiped .dhint,.crate.lifted .dhint{opacity:0}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - 330px))}
 html.phone .o-page{display:flex;padding:calc(env(safe-area-inset-top) + 64px) 24px calc(env(safe-area-inset-bottom) + 20px)}
@@ -627,8 +627,8 @@ html.phone .fb{width:58px}
 /* the bar stays put while you flip; it fades only for loading and an open record */
 .find{transition:opacity .3s,visibility 0s,translate .5s cubic-bezier(.22,1,.36,1)}
 /* phones keep the flipped pile: records lie toward you, backs up, under the dial and the bar */
-html.phone .crate{perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% + 12px - var(--S)*1.13)} /* the same eye as the desktop crate: above, looking down onto the backs */
-html.phone .kd::before{display:none}
+html.phone.deck .crate{perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% + 12px - var(--S)*1.13)} /* the same eye as the desktop crate: above, looking down onto the backs */
+html.phone.deck .kd::before{display:none}
 /* swapping records: the details, Play and all, leave and arrive together */
 .open.in.swapping .o-info,html.phone .open.in.swapping .o-info{opacity:1;transform:none;transition:none}
 .open.in .o-info>*{transition:transform .5s var(--flip),opacity .3s}
@@ -754,7 +754,7 @@ html.phone .sx{padding:0 2px}
 .face>*,.face::after,.sleeve .sh,.rc .fr{border-radius:1px}
 .face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.tbl .c0 img,.tbl .c0 .sw,.hit img,.hit .ph{border-radius:1px}
 /* phones: the flipped records lying toward you fade out softly instead of ending in hard edges */
-html.phone .crate{-webkit-mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8));mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8))}
+html.phone.deck .crate{-webkit-mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8));mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8))}
 /* phone search: the results card hugs what's in it, and stops above the keyboard */
 html.phone .sl{bottom:auto;max-height:calc(100svh - env(safe-area-inset-top) - 90px - var(--kb,0px) - env(safe-area-inset-bottom))}
 /* phone table: a list. A row of sort pills on top (title, artist, year), then cover, title over artist, year */
@@ -804,7 +804,7 @@ html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
   color:var(--dvt);font:var(--dvf);pointer-events:auto;cursor:pointer}
 .dv.off,.crate.lifted .dv{opacity:0}
 .dv.off span,.crate.lifted .dv span{pointer-events:none}
-html.phone .dv{display:none}
+html.phone.deck .dv{display:none}
 /* D2 kraft: record-store cardboard, the letter stamped in mono */
 [data-dv="2"] .dv{--dvc:#9a7650;--dvt:#1d140b;--dvf:600 calc(var(--S)*.034)/1 'Paper Mono',monospace;--tr:2px}
 /* D3 white index cards */
@@ -903,6 +903,8 @@ html.phone .sx{height:44px}
 .qnone:has(ul){padding:6px;width:max(100%,340px)}
 .qnone .qh{padding:0;margin:0;font:inherit;line-height:1.4;color:#8e8e93}
 .qnone:has(ul) .qh{padding:6px 8px 8px}
+/* phones show the laptop's crate, set lower so the pile behind clears the bar; the dial's fade takes the records that fall forward */
+html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 </style>
 </head>
 <body>
@@ -1191,6 +1193,7 @@ const jit=r=>{let h=0;for(const c of r.slug)h=(h*31+c.charCodeAt(0))|0;const f=k
 // push up to stand the last one back up; tap to pull one out.
 const root=document.documentElement,phoneQ=matchMedia(PHONE_Q);
 let PHONE=phoneQ.matches,deckS=0,dd=null;
+const DECK=false; // phones show the same crate as a laptop; true brings back the old pile of records facing you
 // the top record can also leave its track under your finger: a little give before the first one; it springs back
 const off={x:0,y:0,vx:0,vy:0};
 // where a record sits at a (fractional) distance d below the top of the pile; a flipped one tips toward you on its bottom edge until it's edge on, gone
@@ -1213,12 +1216,12 @@ function seat(d){
 }
 // the crate's eye level again, in pixels: iPhone Safari drops the calc() in the CSS and looks from the middle of the crate,
 // so a phone's flipped records, meant to lie edge on at eye level, show their backs as a slab under the pile
-const eye=()=>{const px=el=>el?parseFloat(getComputedStyle(el).height):0,S=px(nodes[cur]),H=px(crate);if(S&&H){crate.style.perspectiveOrigin=`50% ${(PHONE?H/2+12-S*1.13:H/2-S*1.13).toFixed(1)}px`;crate.style.perspective=PHONE?(S*2.9).toFixed(0)+'px':''}};
+const eye=()=>{const px=el=>el?parseFloat(getComputedStyle(el).height):0,S=px(nodes[cur]),H=px(crate);if(S&&H){crate.style.perspectiveOrigin=`50% ${(DECK?H/2+12-S*1.13:H/2-S*1.13).toFixed(1)}px`;crate.style.perspective=DECK?(S*2.9).toFixed(0)+'px':''}};
 function render(){
   frontBox=null;
   const lg=render.lg||=document.querySelector('.logo svg');if(lg&&!reduce)lg.style.rotate=(pos*-24).toFixed(1)+'deg'; // the mark turns as the crate flips
   if(!deckS){deckS=nodes[cur]?.offsetWidth||0;eye()}
-  if(PHONE){
+  if(DECK){
     const h=deckS/2;
     nodes.forEach((n,j)=>{
       if(!shown[j])return;
@@ -1261,18 +1264,18 @@ const warm=(n,d)=>{if(n._lazy.length)n._lazy=n._lazy.filter(i=>{if(d>4&&i.parent
 // about to jump somewhere (a letter under the pointer): load what will show there
 const warmAt=i=>{if(i==null)return;for(let j=Math.max(0,i-3);j<=Math.min(order.length-1,i+10);j++)warm(nodes[j],j-i)};
 function place(rest){
-  const [lo,hi]=PHONE?[-4,12]:[-6,16];
+  const [lo,hi]=DECK?[-4,12]:[-6,16];
   nodes.forEach((n,j)=>{
-    const d=j-cur;let show=PHONE?d>=-7&&d<=7:d>=-3&&d<=10;
+    const d=j-cur;let show=DECK?d>=-7&&d<=7:d>=-3&&d<=10;
     if(d>=lo&&d<=hi)warm(n,d);
     // on a phone the pile only gains or drops records at rest, out of sight: changing what's drawn mid-flip can make iOS flash the whole pile
-    if(PHONE&&!rest&&show!==shown[j]&&(d<-1||d>3))show=shown[j];
-    const shade=PHONE?(d<0?'rgb(0 0 0/.22)':'#0000'):d<0?'rgb(0 0 0/.06)':d===0?'#0000':'rgb(0 0 0/.16)'; // the pile goes unshaded: no record brightens as it reaches the top
+    if(DECK&&!rest&&show!==shown[j]&&(d<-1||d>3))show=shown[j];
+    const shade=DECK?(d<0?'rgb(0 0 0/.22)':'#0000'):d<0?'rgb(0 0 0/.06)':d===0?'#0000':'rgb(0 0 0/.16)'; // the pile goes unshaded: no record brightens as it reaches the top
     if(n.dataset.shade!==shade){n.dataset.shade=shade;n.style.setProperty('--shade',shade)}
     n.classList.toggle('cur',d===0);n.classList.toggle('fell',d<0);
     if(shown[j]!==show){shown[j]=show;n.classList.toggle('gone',!show)}
   });
-  tailN=PHONE?0:Math.max(0,order.length-cur-11);
+  tailN=DECK?0:Math.max(0,order.length-cur-11);
   if(tail){tail.style.display=tailN?'':'none';tail.style.height=tailN*GAP+'px';tail.style.backgroundPosition=`0 0,0 ${-(cur+11)*GAP}px`;tail.style.maskPosition=`0 ${-(cur+11)*GAP}px`}
   lampOn();
   if(!PHONE)queueNudge();
