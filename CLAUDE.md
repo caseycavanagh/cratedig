@@ -21,7 +21,7 @@ Env vars (never print them): CRATE_KEY, KV_REST_API_URL and KV_REST_API_TOKEN (t
 
 ## Design
 
-- Always dark. Instrument Sans for text, Paper Mono where something should look mono; both in `public/fonts`. Tabular figures.
+- Always dark. The system font for text (`--sans`: system-ui), Geist Mono where something should look mono (`public/fonts/geist-mono.woff2`). Tabular figures. Link previews (`src/lib/og.tsx`) still draw in Instrument Sans, since they render on a server with no system font.
 - Motion is calm: springs without overshoot, quick fades out. Respect reduced motion.
 - A quiet interface: no instructions, no counts or "n of n" on the dial.
 - Voice: plain, warm, short, sentence case, US English.
