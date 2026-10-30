@@ -2966,43 +2966,46 @@ build();at=cur;
 
 // First-time hints: the first time you meet them, the crate, the dial and a pulled-out record each do their own gesture once, by
 // themselves, and settle back. The front record tips toward you, the dial rises to its records and drops back, the sleeve turns to
-// its back and returns. No words. Each plays once ever (open the page with ?hints to see them again); a hand on anything calls one off.
+// its back and returns. No words, one hint a visit, each once ever, and only while the mouse is still (open the page with ?hints to
+// see them again). A touch, a key or a scroll calls a hint off; moving the mouse puts one back and waits for it to be still again.
 (()=>{
-const KS=['crate','dial','turn'],KEY=k=>'records-hint-'+k;
-if(/[?&]hints(&|=|$)/.test(location.search))try{KS.forEach(k=>localStorage.removeItem(KEY(k)))}catch{}
+const KS=['crate','dial','turn'],KEY=k=>'records-hint-'+k,STILL=1500;
+// ?hints clears them once, and leaves the address, so a reload doesn't clear them again
+if(/[?&]hints(&|=|$)/.test(location.search)){try{KS.forEach(k=>localStorage.removeItem(KEY(k)))}catch{}
+  const u=new URL(location.href);u.searchParams.delete('hints');history.replaceState(history.state,'',u.pathname+u.search+u.hash)}
 const seen=k=>{try{return!!localStorage.getItem(KEY(k))}catch{return true}}; // no storage, no hints: none beats one every visit
 const saw=k=>{try{localStorage.setItem(KEY(k),'1')}catch{}};
-let T=[],undo=null;
-const at=(f,ms)=>T.push(setTimeout(f,ms));
-// any touch, key or scroll cancels what's waiting, and puts back what's mid-play before the gesture itself gets the event
-addEventListener('pointerdown',e=>stop(e),{capture:true});addEventListener('keydown',e=>stop(e),{capture:true});addEventListener('wheel',e=>stop(e),{capture:true,passive:true});
-function stop(e){T.forEach(clearTimeout);T=[];if(undo){const u=undo;undo=null;u(e)}}
+let wT=0,bT=0,next=null,undo=null,played=false,moved=-1e9;
+// a hint waits its beat, then for the mouse to have been still a while
+const wait=(f,ms)=>{next=f;clearTimeout(wT);wT=setTimeout(()=>{const s=performance.now()-moved;if(s<STILL){wait(f,STILL-s);return}next=null;f()},ms)};
+const stop=e=>{clearTimeout(wT);clearTimeout(bT);next=null;if(undo){const u=undo;undo=null;u(e)}};
+// any touch, key or scroll ends this visit's hint, putting back what's mid-play before the gesture itself gets the event
+addEventListener('pointerdown',stop,{capture:true});addEventListener('keydown',stop,{capture:true});addEventListener('wheel',stop,{capture:true,passive:true});
+addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||!e.movementX&&!e.movementY)return;moved=performance.now();
+  if(undo){const u=undo;undo=null;clearTimeout(bT);u(e)}else if(next)wait(next,STILL)},{passive:true});
 // only on a still page: not mid-search, in a dialog, editing, or another view
-const calm=()=>!reduce&&!document.hidden&&!editing&&!document.querySelector('dialog[open]')&&!document.activeElement?.closest?.('input,textarea')&&!window.dialBusy?.();
+const calm=()=>!played&&!reduce&&!document.hidden&&!editing&&!document.querySelector('dialog[open]')&&!document.activeElement?.closest?.('input,textarea')&&!window.dialBusy?.();
 const inCrate=()=>calm()&&open.hidden&&document.body.classList.contains('ready')&&!document.body.classList.contains('walling');
+const play=(k,go,back,hold,keep)=>{played=true;saw(k);go();
+  const done=()=>{undo=null;back()};undo=e=>{if(!keep?.(e))back()};bT=setTimeout(done,hold)};
 function tip(){
   if(seen('crate')||!inCrate()||raf||cur>=order.length-1)return false;
-  saw('crate');const i=cur,back=()=>{undo=null;aim=i;kick()};
-  aim=i+.42;kick();undo=back;at(back,650);return true;
+  const i=cur;play('crate',()=>{aim=i+.42;kick()},()=>{aim=i;kick()},650);return true;
 }
 function rise(){
-  if(seen('dial')||!inCrate()||!window.dialHint?.(true))return false;
-  saw('dial');
-  undo=e=>{if(!e?.target?.closest?.('#kd'))window.dialHint(false)}; // a hand on the dial keeps it where the hint left it
-  at(()=>{undo=null;window.dialHint(false)},1500);return true;
+  if(seen('dial')||!inCrate()||window.dialBusy?.())return false;
+  play('dial',()=>window.dialHint(true),()=>window.dialHint(false),1500,e=>e?.target?.closest?.('#kd')); // a hand on the dial keeps it where the hint left it
+  return true;
 }
 // called from openRecord: once the record has settled, the sleeve turns to its back and returns
 window.hintTurn=()=>{
-  if(seen('turn'))return;
-  at(()=>{
+  if(played||seen('turn'))return;
+  wait(()=>{
     if(open.hidden||busy||!calm())return;
-    saw('turn');const b=base,back=()=>{undo=null;ry=b;rx=TILT;setS()};
-    ry=b+180;rx=TILT;setS();
-    undo=e=>{if(!e?.target?.closest?.('#lift'))back()}; // a hand on the sleeve takes it from wherever it's turned to
-    at(back,1700);
+    const b=base;play('turn',()=>{ry=b+180;rx=TILT;setS()},()=>{ry=b;rx=TILT;setS()},1700,e=>e?.target?.closest?.('#lift')); // a hand on the sleeve takes it from wherever it's turned to
   },1800);
 };
-const arrive=()=>at(()=>{if(tip())at(rise,2200);else rise()},1800);
+const arrive=()=>wait(()=>tip()||rise(),1800);
 if(document.body.classList.contains('ready'))arrive();
 else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('ready')){mo.disconnect();arrive()}});mo.observe(document.body,{attributes:true,attributeFilter:['class']})}
 })();
