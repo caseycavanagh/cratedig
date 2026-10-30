@@ -946,11 +946,12 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .find .vw button:hover{background:var(--hov);color:#fff}
 .find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:var(--sel);color:#fff;border:0}
 .find .vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
-.find .vw .vs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;padding:4px 2px 0;border-top:1px solid var(--line)}
-.find .vw .vs[hidden]{display:none}
-.find .vw .vs p{flex:0 0 100%;margin:0;padding:6px 10px 2px;font:400 12px/16px var(--sans);color:var(--t3)}
-.find .vw .vs button,html.phone .find .vw .vs button{width:auto;height:34px;padding:0 10px;gap:3px;font-size:14px;border-radius:10px}
-.find .vw .vs i{font-style:normal;color:var(--t2)}
+.fb.sb[hidden]{display:none}
+.fb.sb svg{width:22px;height:22px}
+.cw{width:18px;height:18px;border-radius:50%;background:conic-gradient(from 0deg,#e5534b,#e8a33d,#e6d84a,#6cc24a,#3fb8b0,#4a8fe6,#8a5ae6,#e05aa8,#e5534b);box-shadow:inset 0 0 0 3px #0000001f}
+.find .vw.so button svg{width:20px;height:20px;flex:none}
+.find .vw.so .cw{width:16px;height:16px;margin:0 2px;flex:none}
+.find .vw.so button i{margin-left:auto;font-style:normal;color:var(--t2)}
 /* an open record closes from where the view button sits: top right, the same 44px circle, so the mark keeps the top left */
 #close,html.phone #close{left:auto;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;font-size:18px;border:1px solid var(--line);box-sizing:border-box}
 /* a record's name over its mark on the dial, after a short rest; it leaves on a quick fade */
@@ -3016,15 +3017,6 @@ build();at=cur;
     wall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
     table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>'};
   $$('button',vwEl).forEach(b=>{const v=b.dataset.v,l=b.textContent;b.innerHTML=ICON[v]+`<span>${l}</span>`});
-  // the sort, under the views: one for the crate and the grid, and the lit one again flips it. The table sorts by its headers.
-  const vs=document.createElement('div');vs.className='vs';vs.setAttribute('role','group');vs.setAttribute('aria-label','Sort');vwEl.append(vs);
-  const drawSort=()=>{vs.innerHTML='<p aria-hidden="true">Sort</p>'+Object.entries(SORTS).map(([k,o])=>{const on=SORT.k===k,dir=k==='color'?'':SORT.d>0?'↑':'↓';
-    return`<button type="button" data-k="${k}" aria-pressed="${on}" aria-label="Sort by ${o.l.toLowerCase()}${on&&dir?`, ${k==='year'?(SORT.d>0?'oldest':'newest')+' first':SORT.d>0?'A to Z':'Z to A'}`:''}">${o.l}${on&&dir?`<i aria-hidden="true">${dir}</i>`:''}</button>`}).join('')};
-  vs.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
-    SORT=SORT.k===k?{k,d:k==='color'?1:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
-    drawSort();vs.querySelector(`[data-k=${k}]`).focus({focusVisible:false});
-    arrange(filt,null);$('#wall').scrollTop=0}); // a new sort starts from its front: the oldest record, the first letter, the reds
-  drawSort();
   vwEl.id='views';vwEl.hidden=true;vwEl.setAttribute('role','group');vwEl.setAttribute('aria-label','Layout');
   const fb=document.createElement('button');fb.type='button';fb.className='fb';fb.setAttribute('aria-expanded','false');fb.setAttribute('aria-controls','pills');
   fb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sr">Filters</span>';
@@ -3032,12 +3024,38 @@ build();at=cur;
   // layout: one button showing the current view; it drops a small menu of the three
   const lb=document.createElement('button');lb.type='button';lb.className='fb lb';lb.setAttribute('aria-expanded','false');lb.setAttribute('aria-controls','views');
   fb.after(lb);
-  const lmark=()=>{const b=$('[data-v][aria-pressed=true]',vwEl)||$('[data-v]',vwEl);vs.hidden=b.dataset.v==='table';lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
+  // the sort: its own button, beside the layout one, wearing what it sorts by (a person, the letters of a title, a calendar,
+  // a record's label, a color wheel). It drops a menu like the layout one; the lit one again flips it. One sort for the crate
+  // and the grid; the table sorts by its headers, so there the button steps aside.
+  const SICON={
+    artist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"/></svg>',
+    title:'<svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans);letter-spacing:-.02em">Aa</text></svg>',
+    year:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>',
+    label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
+    color:'<i class="cw" aria-hidden="true"></i>'};
+  const sb=document.createElement('button');sb.type='button';sb.className='fb lb sb';sb.setAttribute('aria-expanded','false');sb.setAttribute('aria-controls','sorts');
+  fb.after(sb);
+  const so=document.createElement('div');so.className='vw tray so';so.id='sorts';so.hidden=true;so.setAttribute('role','group');so.setAttribute('aria-label','Sort');
+  const dirOf=k=>k==='color'?'':SORT.d>0?'↑':'↓',dirSay=k=>k==='color'?'':k==='year'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
+  const drawSort=()=>{
+    sb.innerHTML=SICON[SORT.k];sb.dataset.k=SORT.k;sb.setAttribute('aria-label',`Sort: ${SORTS[SORT.k].l}${dirSay(SORT.k)?', '+dirSay(SORT.k):''}`);
+    so.innerHTML=Object.entries(SORTS).map(([k,o])=>{const on=SORT.k===k;
+      return`<button type="button" data-k="${k}" aria-pressed="${on}" aria-label="Sort by ${o.l.toLowerCase()}${on&&dirSay(k)?', '+dirSay(k):''}">${SICON[k]}<span>${o.l}</span>${on&&dirOf(k)?`<i aria-hidden="true">${dirOf(k)}</i>`:''}</button>`}).join('')};
+  drawSort();
+  const sorts=on=>{so.hidden=!on;sb.setAttribute('aria-expanded',on);if(on){views(false);tray(false);const r=sb.getBoundingClientRect();so.style.right=Math.max(14,innerWidth-r.right)+'px'}};
+  sb.onclick=()=>sorts(so.hidden);
+  so.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
+    SORT=SORT.k===k?{k,d:k==='color'?1:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
+    drawSort();so.querySelector(`[data-k=${k}]`).focus({focusVisible:false});
+    arrange(filt,null);$('#wall').scrollTop=0}); // a new sort starts from its front: the oldest record, the first letter, the reds
+  so.addEventListener('keydown',e=>{if(e.key==='Escape'){sorts(false);sb.focus({focusVisible:false})}});
+  addEventListener('pointerdown',e=>{if(!so.hidden&&!so.contains(e.target)&&!sb.contains(e.target))sorts(false)});
+  const lmark=()=>{const b=$('[data-v][aria-pressed=true]',vwEl)||$('[data-v]',vwEl);sb.hidden=b.dataset.v==='table';if(sb.hidden)sorts(false);lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
   new MutationObserver(lmark).observe(vwEl,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});lmark();
   pills.className='tray';pills.hidden=true;find.prepend(pills);
-  vwEl.classList.add('tray');find.prepend(vwEl);
+  vwEl.classList.add('tray');find.prepend(vwEl,so);
   const mark=()=>{const on=!!(filt&&filt.k!=='q');fb.classList.toggle('on',on);fb.setAttribute('aria-label',on?`Filters: ${filt.v}`:'Filters')};
-  const views=on=>{vwEl.hidden=!on;lb.setAttribute('aria-expanded',on);if(on)tray(false);document.body.classList.toggle('filtering',on||!pills.hidden)};
+  const views=on=>{vwEl.hidden=!on;lb.setAttribute('aria-expanded',on);if(on){tray(false);if(!so.hidden)sorts(false)}document.body.classList.toggle('filtering',on||!pills.hidden)};
   const tray=on=>{pills.hidden=!on;fb.setAttribute('aria-expanded',on);if(on&&!vwEl.hidden){vwEl.hidden=true;lb.setAttribute('aria-expanded',false)}document.body.classList.toggle('filtering',on||!vwEl.hidden);
     if(on){const b=$('[aria-pressed=true]',pills);b&&b.scrollIntoView({inline:'center',block:'nearest'})}};
   fb.onclick=()=>tray(pills.hidden);
