@@ -583,11 +583,13 @@ body.walling .find .chip{display:none}
 .wall .pills small{font-size:13px;opacity:.55}
 .wall .in{max-width:1400px;margin:0 auto}
 .tiles{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px}
-.tiles{position:relative;margin:0 34px} /* the group labels sit in the left margin; the same space on the right keeps the covers centered */
+.tiles{position:relative;margin:0 -2px 0 34px}
 .gms p{position:absolute;right:calc(100% + 8px);margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:500 14px/1 var(--sans);color:var(--t1);pointer-events:none}
 .gms .yr{font:400 11px/1 'Geist Mono',ui-monospace,monospace;letter-spacing:-.03em;color:var(--t2)}
 .gms i{width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
 @media (min-width:700px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:15px}.gms .yr{font-size:13px}.gms i{width:22px;height:22px}}
+/* on a phone the group labels start where the logo does, and the covers end where the buttons at the top do */
+@media (max-width:699px){.gms p{right:auto;left:-26px;width:22px;align-items:flex-start}.gms .yr{font-size:10px}}
 .tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
