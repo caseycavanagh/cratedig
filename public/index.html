@@ -947,6 +947,12 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:var(--sel);color:#fff;border:0}
 .find .vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
 .fb.sb[hidden]{display:none}
+.fb.sb.on,.find:has(.q:focus-within) .fb.sb.on{background:#fff;color:#111;border-color:#fff} /* sorted some other way than artist, A to Z */
+.fb.sb.on[aria-expanded=true]{background:#e6e6e6}
+/* a name for each icon button, after a short rest on it with a mouse */
+.tt{position:fixed;z-index:30;left:0;top:0;padding:6px 10px;border-radius:10px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);font:400 13px/1.2 var(--sans);color:var(--t1);white-space:nowrap;pointer-events:none;opacity:0;translate:0 -2px;transition:opacity .1s,translate 0s .1s}
+.tt.on{opacity:1;translate:0;transition:opacity .15s,translate .35s cubic-bezier(.22,1,.36,1)}
+@media(prefers-reduced-motion:reduce){.tt,.tt.on{transition:opacity .15s}}
 .fb.sb svg{width:22px;height:22px}
 .cw{width:18px;height:18px;border-radius:50%;background:conic-gradient(from 0deg,#e5534b,#e8a33d,#e6d84a,#6cc24a,#3fb8b0,#4a8fe6,#8a5ae6,#e05aa8,#e5534b);box-shadow:inset 0 0 0 3px #0000001f}
 .find .vw.so button svg{width:20px;height:20px;flex:none}
@@ -3036,16 +3042,16 @@ build();at=cur;
   const sb=document.createElement('button');sb.type='button';sb.className='fb lb sb';sb.setAttribute('aria-expanded','false');sb.setAttribute('aria-controls','sorts');
   fb.after(sb);
   const so=document.createElement('div');so.className='vw tray so';so.id='sorts';so.hidden=true;so.setAttribute('role','group');so.setAttribute('aria-label','Sort');
-  const dirOf=k=>k==='color'?'':SORT.d>0?'↑':'↓',dirSay=k=>k==='color'?'':k==='year'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
+  const dirOf=k=>SORT.d>0?'↑':'↓',dirSay=k=>k==='color'?(SORT.d>0?'reds first':'darks first'):k==='year'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
   const drawSort=()=>{
-    sb.innerHTML=SICON[SORT.k];sb.dataset.k=SORT.k;sb.setAttribute('aria-label',`Sort: ${SORTS[SORT.k].l}${dirSay(SORT.k)?', '+dirSay(SORT.k):''}`);
+    sb.innerHTML=SICON[SORT.k];sb.dataset.k=SORT.k;sb.classList.toggle('on',SORT.k!=='artist'||SORT.d<0);sb.setAttribute('aria-label',`Sort: ${SORTS[SORT.k].l}${dirSay(SORT.k)?', '+dirSay(SORT.k):''}`);
     so.innerHTML=Object.entries(SORTS).map(([k,o])=>{const on=SORT.k===k;
       return`<button type="button" data-k="${k}" aria-pressed="${on}" aria-label="Sort by ${o.l.toLowerCase()}${on&&dirSay(k)?', '+dirSay(k):''}">${SICON[k]}<span>${o.l}</span>${on&&dirOf(k)?`<i aria-hidden="true">${dirOf(k)}</i>`:''}</button>`}).join('')};
   drawSort();
   const sorts=on=>{so.hidden=!on;sb.setAttribute('aria-expanded',on);if(on){views(false);tray(false);const r=sb.getBoundingClientRect();so.style.right=Math.max(14,innerWidth-r.right)+'px'}};
   sb.onclick=()=>sorts(so.hidden);
   so.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
-    SORT=SORT.k===k?{k,d:k==='color'?1:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
+    SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
     drawSort();so.querySelector(`[data-k=${k}]`).focus({focusVisible:false});
     arrange(filt,null);$('#wall').scrollTop=0}); // a new sort starts from its front: the oldest record, the first letter, the reds
   so.addEventListener('keydown',e=>{if(e.key==='Escape'){sorts(false);sb.focus({focusVisible:false})}});
@@ -3066,6 +3072,34 @@ build();at=cur;
   addEventListener('pointerdown',e=>{if(e.target.closest('.find'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
   const arrange2=arrange;arrange=function(...a){const n=arrange2.apply(this,a);mark();return n};
   mark();
+})();
+</script>
+<script>
+// Tooltips: rest the mouse on a button that's only an icon and its name comes up beside it, the one its aria-label gives.
+// After one has shown, the next comes at once, until the mouse has been off the buttons a moment. Never on touch.
+(()=>{
+  const tt=document.createElement('div');tt.className='tt';tt.setAttribute('aria-hidden','true');document.body.append(tt);
+  let el=null,t=0,warm=0;
+  const iconOnly=b=>{if(!b.getAttribute('aria-label'))return false;const c=b.cloneNode(true);c.querySelectorAll('.sr,svg,i').forEach(n=>n.remove());return!c.textContent.trim()};
+  const off=()=>{clearTimeout(t);el=null;tt.classList.remove('on')};
+  $('#qf').dataset.tip='Search';$('#close').dataset.tip='Close';
+  function show(){
+    if(!el||!el.isConnected||el.closest('[hidden]'))return off();
+    tt.textContent=el.dataset.tip||el.getAttribute('aria-label').replace(/\. .*$/,'');
+    const r=el.getBoundingClientRect(),w=tt.offsetWidth,h=tt.offsetHeight,below=r.top+r.height/2<innerHeight/2;
+    tt.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2))+'px';
+    tt.style.top=(below?r.bottom+8:r.top-h-8)+'px';tt.classList.add('on');warm=performance.now();
+  }
+  addEventListener('pointerover',e=>{
+    if(e.pointerType!=='mouse')return;
+    let b=e.target.closest?.('button,a,[role=button],[data-tip]');
+    if(b?.matches('.q')&&b.matches(':focus-within,.has'))b=null; // the search, once it's open, says what it is
+    if(b===el)return;
+    if(!b||!(b.dataset.tip?b.innerText.trim()!==b.dataset.tip:iconOnly(b))){if(el){off();warm=performance.now()}return}
+    off();el=b;const now=performance.now();
+    if(now-warm<500)show();else t=setTimeout(show,600);
+  },true);
+  addEventListener('pointerdown',off,true);addEventListener('scroll',off,true);addEventListener('keydown',off,true);addEventListener('blur',off);
 })();
 </script>
 <script>
