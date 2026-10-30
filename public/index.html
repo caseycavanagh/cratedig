@@ -3040,13 +3040,11 @@ build();at=cur;
 })();
 </script>
 <style>
-/* sharing: the crate from the top corner, the layout menu and About; a record from beside its close. A phone opens its own
-   share sheet; a laptop copies the link, and the button says so for a moment with a check */
-.shb{all:unset;pointer-events:auto;cursor:pointer;flex:none;order:1;box-sizing:border-box;height:44px;min-width:44px;padding:0 11px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:#fff;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s var(--spring),background-color .2s}
-.shb svg{width:20px;height:20px;flex:none;display:block}
-.shb .w{max-width:0;overflow:hidden;white-space:nowrap;opacity:0;font-size:15px;transition:max-width .35s var(--spring),margin .35s var(--spring),opacity .15s}
-.shb.ok .w{max-width:90px;margin:0 3px 0 7px;opacity:1;transition:max-width .35s var(--spring),margin .35s var(--spring),opacity .2s .08s}
-.shb:hover{background:var(--soft3)}
+/* sharing: the crate from the top corner, the layout menu and About; a record from beside its close. Each opens the same small
+   share menu as the Field Notes on caseycavanagh.com: copy the link, Bluesky, LinkedIn, email, and the phone's own sheet under More */
+.shb{all:unset;pointer-events:auto;cursor:pointer;flex:none;order:1;box-sizing:border-box;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s var(--spring),background-color .2s}
+.shb svg{width:20px;height:20px;display:block}
+.shb:hover,.shb[aria-expanded=true]{background:var(--soft3)}
 .shb:active{transform:scale(.96)}
 .shb:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .find:has(.q:focus-within) .shb,html.phone body.searching .shb{display:none}
@@ -3058,62 +3056,102 @@ html.pulldown .open.in #shareR{opacity:calc(1 - var(--pull,0)*3);transition:none
 .ab-sh{margin-top:24px;height:40px;padding:0 18px 0 14px;font-size:15px;gap:8px}
 .ab-sh svg{width:18px;height:18px;flex:none}
 html.phone .ab-sh{margin-top:20px}
-@media(prefers-reduced-motion:reduce){.shb .w,.shb.ok .w{transition:opacity .15s}}
+.shm{position:fixed;z-index:30;min-width:200px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);transform-origin:top right;animation:shmIn .35s cubic-bezier(.22,1,.36,1)}
+.shm.up{transform-origin:bottom right}.shm.left{transform-origin:top left}.shm.up.left{transform-origin:bottom left}
+.shm[hidden]{display:none}
+.shm.out{animation:shmOut .12s ease-in forwards}
+@keyframes shmIn{from{opacity:0;transform:scale(.96) translateY(-4px)}}
+@keyframes shmOut{to{opacity:0}}
+.shm .mi{all:unset;cursor:pointer;box-sizing:border-box;height:42px;padding:0 12px;border-radius:12px;display:flex;align-items:center;gap:10px;font-size:15px;color:var(--t1);transition:background-color .15s,transform .3s var(--spring)}
+.shm .mi:hover{background:var(--hov);color:#fff}
+.shm .mi:active{transform:scale(.99)}
+.shm .mi:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.shm .mi svg{width:17px;height:17px;flex:none;fill:currentColor;color:var(--t2)}
+html.phone .shm .mi{height:48px;font-size:16px}
+@media(prefers-reduced-motion:reduce){.shm,.shm.out{animation:none}}
 </style>
 <script>
 (()=>{
-  const P=d=>`<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="${d}"/></svg>`;
-  const SHARE=P('M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z'),
-    LINK=P('M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z'),
-    CHECK=P('M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z');
-  // a phone hands the link to its own share sheet; anything with a pointer copies it
-  const sheet=()=>!!navigator.share&&matchMedia('(hover:none) and (pointer:coarse)').matches;
-  const mark=()=>sheet()?SHARE:LINK;
+  // icons: Phosphor, as on caseycavanagh.com's Field Notes; Bluesky and LinkedIn their own marks
+  const P=(d,v='0 0 256 256')=>`<svg viewBox="${v}" aria-hidden="true"><path fill="currentColor" d="${d}"/></svg>`;
+  const I={
+    share:P('M220,112v96a20,20,0,0,1-20,20H56a20,20,0,0,1-20-20V112A20,20,0,0,1,56,92H76a12,12,0,0,1,0,24H60v88H196V116H180a12,12,0,0,1,0-24h20A20,20,0,0,1,220,112ZM96.49,72.49,116,53v83a12,12,0,0,0,24,0V53l19.51,19.52a12,12,0,1,0,17-17l-40-40a12,12,0,0,0-17,0l-40,40a12,12,0,1,0,17,17Z'),
+    link:P('M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z'),
+    check:P('M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z'),
+    mail:P('M224,44H32A12,12,0,0,0,20,56V192a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A12,12,0,0,0,224,44ZM193.15,68,128,127.72,62.85,68ZM44,188V83.28l75.89,69.57a12,12,0,0,0,16.22,0L212,83.28V188Z'),
+    more:P('M144,128a16,16,0,1,1-16-16A16,16,0,0,1,144,128ZM60,112a16,16,0,1,0,16,16A16,16,0,0,0,60,112Zm136,0a16,16,0,1,0,16,16A16,16,0,0,0,196,112Z'),
+    bsky:P('M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8z','0 0 24 24'),
+    li:P('M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.064 2.064 0 1 1 0-4.128 2.064 2.064 0 0 1 0 4.128zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0z','0 0 24 24'),
+  };
   // the crate's address: someone else's crate keeps what's in its address, Casey's is the plain site
   const crateURL=()=>{const u=new URL(location.href);u.hash='';u.searchParams.delete('edit');return u.href};
   // a record of Casey's goes as ?r=, which the server reads for its own link preview; a visitor's crate keeps its address and names the record after #
   const recURL=r=>{const u=new URL(crateURL());if(visiting)u.hash='record/'+r.slug;else u.searchParams.set('r',r.slug);return u.href};
   const copy=t=>(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{
-    const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;opacity:0';document.body.append(a);a.select();
+    const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;opacity:0';(document.querySelector('dialog[open]')||document.body).append(a);a.select();
     const ok=document.execCommand('copy');a.remove();if(!ok)throw 0});
-  // b: the button; what: {title,url}; done(b,ok): how the button says so
-  function share(b,what,done){
-    if(sheet()){navigator.share(what).catch(()=>{});return}
-    copy(what.url).then(()=>done(b,true),()=>toast('Couldn’t copy the link'));
-  }
-  // an icon button grows into "Copied" with a check, then goes back
-  const flash=(b,dur=1600)=>{clearTimeout(b.t);b.querySelector('svg').outerHTML=CHECK;b.classList.add('ok');
-    b.t=setTimeout(()=>{b.classList.remove('ok');b.querySelector('svg').outerHTML=mark()},dur)};
-  const iconBtn=(id,label)=>{const b=document.createElement('button');b.type='button';b.className='shb';b.id=id;b.setAttribute('aria-label',label);
-    b.innerHTML=mark()+'<span class="w" aria-hidden="true">Copied</span>';return b};
   const crate=()=>({title:'Crate Dig',url:crateURL()});
+  const rec=()=>{const r=order[cur];return r?{title:`${r.title} by ${r.artist}`,url:recURL(r)}:crate()};
+
+  // the menu: one, moved to whichever button opened it; it opens below that button, or above when there's no room, its edge on the button's
+  const m=document.createElement('div');m.className='shm';m.id='shm';m.setAttribute('role','menu');m.setAttribute('aria-label','Share');m.hidden=true;document.body.append(m);
+  let from=null;
+  const items=()=>$$('.mi',m);
+  function shut(focus){if(m.hidden)return;from?.setAttribute('aria-expanded','false');const b=from;from=null;removeEventListener('pointerdown',away,true);removeEventListener('resize',drop);
+    m.classList.add('out');setTimeout(()=>{m.hidden=true;m.classList.remove('out')},120);if(focus&&b?.isConnected)b.focus({focusVisible:false})}
+  const away=e=>{if(!e.target.closest('.shm')&&e.target.closest('[aria-controls=shm]')!==from)shut()};
+  const drop=()=>shut();
+  function open(b,what,keyboard){
+    if(from===b)return shut(true);if(from)shut();
+    const u=encodeURIComponent(what.url),t=encodeURIComponent(what.title);
+    const out=(label,href,svg)=>`<a class="mi" role="menuitem" href="${href}" target="_blank" rel="noopener" aria-label="${label} (opens in a new tab)">${svg}<span>${label}</span></a>`;
+    m.innerHTML=`<button class="mi" role="menuitem" type="button" data-via="copy">${I.link}<span>Copy link</span></button>`
+      +out('Bluesky',`https://bsky.app/intent/compose?text=${t}%20${u}`,I.bsky)+out('LinkedIn',`https://www.linkedin.com/sharing/share-offsite/?url=${u}`,I.li)
+      +`<a class="mi" role="menuitem" href="mailto:?subject=${t}&body=${u}">${I.mail}<span>Email</span></a>`
+      +(navigator.share?`<button class="mi" role="menuitem" type="button" data-via="native">${I.more}<span>More</span></button>`:'');
+    (b.closest('dialog')||document.body).append(m); // About is a dialog, drawn above everything else; the menu goes in with it
+    m.hidden=false;from=b;b.setAttribute('aria-expanded','true');
+    const r=b.getBoundingClientRect(),h=m.offsetHeight,w=m.offsetWidth,up=r.bottom+8+h>innerHeight-8&&r.top-8-h>8,left=r.left+w<innerWidth-8&&r.left+r.width/2<innerWidth/2;
+    m.classList.toggle('up',up);m.classList.toggle('left',left);
+    m.style.top=(up?r.top-8-h:r.bottom+8)+'px';
+    if(left){m.style.left=r.left+'px';m.style.right=''}else{m.style.right=Math.max(8,innerWidth-r.right)+'px';m.style.left=''}
+    $$('.mi',m).forEach(x=>x.addEventListener('click',()=>{const via=x.dataset.via;
+      if(via==='copy'){copy(what.url).then(()=>{x.innerHTML=I.check+'<span>Link copied</span>';setTimeout(()=>shut(true),700)},()=>{shut();toast('Couldn’t copy the link')});return}
+      if(via==='native')navigator.share(what).catch(()=>{});shut()}));
+    if(keyboard)items()[0].focus();
+    addEventListener('pointerdown',away,true);addEventListener('resize',drop);
+  }
+  m.addEventListener('keydown',e=>{const l=items(),i=l.indexOf(document.activeElement);
+    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();shut(true)}
+    else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();l[(i+(e.key==='ArrowDown'?1:-1)+l.length)%l.length].focus()}
+    else if(e.key==='Tab')shut()});
+  // a button that opens it. Keyboard opens (Enter, Space) put focus in the menu; a tap or click leaves it where it was
+  const wire=(b,what)=>{b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-expanded','false');b.setAttribute('aria-controls','shm');
+    b.addEventListener('click',e=>{e.stopPropagation();open(b,what(),e.detail===0)})};
+  const iconBtn=(id,label)=>{const b=document.createElement('button');b.type='button';b.className='shb';b.id=id;b.setAttribute('aria-label',label);b.innerHTML=I.share;return b};
 
   // the crate, in the top corner
-  const sc=iconBtn('shareC','Share this crate');$('#qf').before(sc);
-  sc.onclick=()=>share(sc,crate(),b=>flash(b));
+  const sc=iconBtn('shareC','Share this crate');$('#qf').before(sc);wire(sc,crate);
 
-  // the crate, last in the layout menu
-  const vwEl=$('#views')||$('.vw');
-  const sm=document.createElement('button');sm.type='button';sm.dataset.share='';sm.innerHTML=mark()+'<span>Share crate</span>';
+  // the crate, last in the layout menu: the layout menu gives way to the share menu, under the layout button
+  const vwEl=$('#views')||$('.vw'),lb=$('.fb.lb');
+  const sm=document.createElement('button');sm.type='button';sm.dataset.share='';sm.innerHTML=I.share+'<span>Share crate</span>';
   vwEl.append(document.createElement('hr'),sm);
-  sm.addEventListener('click',e=>{e.stopPropagation();const shut=()=>{if(!vwEl.hidden)$('.fb.lb')?.click()};
-    if(sheet()){shut();share(sm,crate());return}
-    share(sm,crate(),()=>{sm.innerHTML=CHECK+'<span>Copied</span>';setTimeout(shut,700);setTimeout(()=>{sm.innerHTML=mark()+'<span>Share crate</span>'},1000)})});
+  sm.addEventListener('click',e=>{e.stopPropagation();const kb=e.detail===0;if(!vwEl.hidden)lb.click();requestAnimationFrame(()=>open(lb,crate(),kb))});
 
   // the crate, in About
-  const sa=document.createElement('button');sa.type='button';sa.className='btn ab-sh';sa.innerHTML=mark()+'<span>Share this crate</span>';
-  $('#about .ab-body').after(sa);
-  sa.onclick=()=>share(sa,crate(),()=>{clearTimeout(sa.t);sa.innerHTML=CHECK+'<span>Copied</span>';sa.t=setTimeout(()=>{sa.innerHTML=mark()+'<span>Share this crate</span>'},1600)});
+  const sa=document.createElement('button');sa.type='button';sa.className='btn ab-sh';sa.innerHTML=I.share+'<span>Share this crate</span>';
+  $('#about .ab-body').after(sa);wire(sa,crate);
+  $('#about').addEventListener('close',()=>shut());
 
   // a record, beside its close. It follows whatever sits left of close (search, when there is one) wherever that goes, 8px further left
-  const sr=iconBtn('shareR','Share this record'),cl=$('#close');cl.before(sr);
+  const sr=iconBtn('shareR','Share this record'),cl=$('#close');cl.before(sr);wire(sr,rec);
   const place=()=>{const c=($('#oq')||cl).getBoundingClientRect();if(!c.width)return;sr.style.top=c.top+'px';sr.style.right=(innerWidth-c.left+8)+'px'};
-  sr.onclick=()=>{const r=order[cur];if(!r)return;share(sr,{title:`${r.title} by ${r.artist}`,url:recURL(r)},b=>flash(b))};
   const o2=openRecord;openRecord=function(...a){const n=o2.apply(this,a);requestAnimationFrame(place);setTimeout(place,400);return n};
+  const c2=closeRecord;closeRecord=function(...a){shut();return c2.apply(this,a)};
   addEventListener('resize',()=>{if(!$('#open').hidden)place()});
-  // a phone and a laptop draw different marks; a window dragged between screens, or a tablet with a keyboard, can change which
-  matchMedia('(hover:none) and (pointer:coarse)').addEventListener?.('change',()=>{[sc,sr].forEach(b=>{if(!b.classList.contains('ok'))b.querySelector('svg').outerHTML=mark()});
-    sm.querySelector('svg').outerHTML=mark();sa.querySelector('svg').outerHTML=mark()});
+  // flipping to the next record while the menu is open would share the wrong one
+  addEventListener('keydown',e=>{if(from===sr&&(e.key==='ArrowLeft'||e.key==='ArrowRight'))shut()},true);
 })();
 </script>
 <div class="sedge t" aria-hidden="true"></div><div class="sedge b" aria-hidden="true"></div>
