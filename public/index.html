@@ -870,6 +870,8 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .find .vw button:hover{background:#ffffff0d;color:#fff}
 .find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:#ffffff1f;color:#fff;border:0}
 .find .vw button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+/* an open record closes from where the view button sits: top right, the same 44px circle, so the mark keeps the top left */
+#close,html.phone #close{left:auto;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;font-size:18px;border:1px solid var(--line);box-sizing:border-box}
 /* a phone, searching: the list takes over, so Cancel stands in for the view button */
 html.phone body.searching .fb.lb{display:none}
 html.phone .sx{height:44px}
