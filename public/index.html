@@ -582,7 +582,7 @@ body.walling .find .chip{display:none}
 .wall .pills small{font-size:13px;opacity:.55}
 .wall .in{max-width:1400px;margin:0 auto}
 .tiles{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px}
-.tiles{position:relative;margin-left:34px}
+.tiles{position:relative;margin:0 34px} /* the group labels sit in the left margin; the same space on the right keeps the covers centered */
 .gms p{position:absolute;right:calc(100% + 8px);margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:500 14px/1 var(--sans);color:var(--t1);pointer-events:none}
 .gms .yr{font:400 11px/1 'Geist Mono',ui-monospace,monospace;letter-spacing:-.03em;color:var(--t2)}
 .gms i{width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
