@@ -618,12 +618,8 @@ html.phone .fb{width:58px}
 .kd{transition:opacity .4s .25s,visibility 0s .25s,bottom .35s cubic-bezier(.22,1,.36,1)}
 /* while you type, search gets the whole bar */
 .find:has(.q:focus-within) .fb{width:0;opacity:0;margin-left:-8px;padding:0;border-width:0;overflow:hidden}
-/* the bar steps aside while your hand is moving the records, and comes back when you let go */
+/* the bar stays put while you flip; it fades only for loading and an open record */
 .find{transition:opacity .3s,visibility 0s,translate .5s cubic-bezier(.22,1,.36,1)}
-body.quiet .find{translate:0 calc(100% + 40px);opacity:0;pointer-events:none;transition:opacity .2s,translate .35s cubic-bezier(.4,0,.2,1)}
-body.quiet .find *{pointer-events:none}
-body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px)}
-@media(prefers-reduced-motion:reduce){body.quiet .find{translate:none}}
 /* phones keep the flipped pile: records lie toward you, backs up, under the dial and the bar */
 html.phone .crate{perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% + 12px - var(--S)*1.13)} /* the same eye as the desktop crate: above, looking down onto the backs */
 html.phone .kd::before{display:none}
@@ -730,7 +726,6 @@ body:has(.find .q:focus-within) .kd,body:has(.find .q.has) .kd{opacity:0;visibil
 .find,html.phone .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto;max-width:none;padding:0 14px}
 html.phone body.searching .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto}
 .find .vw{order:5}
-body.quiet .find{translate:0 calc(-100% - 40px)}
 .qnone,html.phone .qnone{top:calc(100% + 10px);bottom:auto}
 html.phone .sl{top:calc(env(safe-area-inset-top) + 80px);bottom:calc(var(--kb,0px) + 10px + env(safe-area-inset-bottom))}
 .kd{--kw:min(520px,100vw)}
@@ -853,7 +848,7 @@ html.phone .dv{display:none}
 .own-f #ownFs{background:#fff;color:#111;border-color:#fff}
 @media(max-width:600px){.own-f fieldset{grid-template-columns:1fr}}
 /* the top bar: the mark top left; search and one view button top right. Search grows in place to the left of the view
-   button, which stays put; the view button drops a small menu of the three views */
+   button, which stays put; the view button drops a small menu of the three views, the one you're in lit */
 .find,html.phone .find{justify-content:flex-start;align-items:center;gap:8px;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left))}
 .logo,.find:has(.q:focus-within) .logo,.find:has(.q.has) .logo{order:0;margin:0 auto 0 0;opacity:1;pointer-events:auto}
 .find .q,html.phone .find .q{order:1;height:44px;min-width:44px;max-width:44px;flex:0 1 auto}
@@ -868,13 +863,12 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .fb.lb,.find:has(.q:focus-within) .fb.lb,html.phone .fb.lb{order:2;width:44px;height:44px;margin:0;padding:0;opacity:1;border-width:1px;color:#fff;overflow:visible}
 .fb.lb[aria-expanded=true]{background:#3a3a3d}
 .fb.lb:active{transform:scale(.96)}
-.find .vw,html.phone .find .vw{position:absolute;top:calc(100% + 8px);right:max(14px,env(safe-area-inset-right));order:9;flex:none;width:188px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 14px 40px #0008;transform-origin:100% 0}
+.find .vw,html.phone .find .vw{position:absolute;top:calc(100% + 8px);left:auto;right:max(14px,env(safe-area-inset-right));translate:none;margin:0;order:9;flex:none;width:188px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 14px 40px #0008;transform-origin:100% 0}
 .find .vw:not([hidden]){animation:menuIn .35s cubic-bezier(.22,1,.36,1)}
 @keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.98)}}
-.find .vw button,html.phone .find .vw button{width:auto;height:42px;padding:0 12px;border:0;border-radius:12px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:400;color:#d6d6d8}
+.find .vw button,html.phone .find .vw button{width:100%;box-sizing:border-box;height:42px;padding:0 12px;border:0;border-radius:12px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:400;color:#d6d6d8}
 .find .vw button:hover{background:#ffffff0d;color:#fff}
-.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:none;color:#fff;border:0}
-.find .vw button[aria-pressed=true]::after{content:'';margin-left:auto;width:6px;height:6px;border-radius:50%;background:#fff}
+.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:#ffffff1f;color:#fff;border:0}
 .find .vw button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
 /* a phone, searching: the list takes over, so Cancel stands in for the view button */
 html.phone body.searching .fb.lb{display:none}
@@ -2507,29 +2501,6 @@ build();at=cur;
   addEventListener('pointerdown',e=>{if(e.target.closest('.find'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
   const arrange2=arrange;arrange=function(...a){const n=arrange2.apply(this,a);mark();return n};
   mark();
-  // show and hide, tied to your hand: the bar steps aside while a finger (or the mouse button, or the wheel) is moving the
-  // records, and comes back as soon as you let go. No timers while you're holding on, no surprises when you aren't.
-  let qT=0;
-  const held=()=>!pills.hidden||!vwEl.hidden||find.contains(document.activeElement)||!open.hidden;
-  const quiet=on=>{if(on&&held())return;document.body.classList.toggle('quiet',on)};
-  const back=ms=>{clearTimeout(qT);qT=setTimeout(()=>quiet(false),ms)};
-  const CONTENT='.crate,.wall,.tbl,.cv';
-  let hand=null;
-  const down=(x,y,t)=>{if(t.closest?.(CONTENT)&&!t.closest('.find,.kd'))hand={x,y,moved:false}};
-  const move=(x,y)=>{if(hand&&!hand.moved&&Math.hypot(x-hand.x,y-hand.y)>6){hand.moved=true;clearTimeout(qT);quiet(true)}};
-  const up=()=>{if(!hand)return;const m=hand.moved;hand=null;if(m)back(180)};
-  addEventListener('touchstart',e=>{if(e.touches.length===1)down(e.touches[0].clientX,e.touches[0].clientY,e.target)},{passive:true});
-  addEventListener('touchmove',e=>move(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
-  addEventListener('touchend',e=>{if(!e.touches.length)up()},{passive:true});
-  addEventListener('touchcancel',up,{passive:true});
-  addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')down(e.clientX,e.clientY,e.target)});
-  addEventListener('pointermove',e=>{if(e.pointerType!=='touch')move(e.clientX,e.clientY)},{passive:true});
-  addEventListener('pointerup',e=>{if(e.pointerType!=='touch')up()});
-  addEventListener('wheel',e=>{if(!e.target.closest?.(CONTENT)||e.target.closest('.find,.kd'))return;clearTimeout(qT);quiet(true);back(350)},{passive:true});
-  // a mouse heading for the bottom of the window brings it straight back
-  addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&e.clientY>innerHeight-150&&document.body.classList.contains('quiet')){clearTimeout(qT);quiet(false)}},{passive:true});
-  addEventListener('keydown',e=>{if(e.key==='/'||e.key==='Tab'){clearTimeout(qT);quiet(false)}});
-  new MutationObserver(()=>{if(!open.hidden){clearTimeout(qT);quiet(false)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
 })();
 </script>
 <script>
