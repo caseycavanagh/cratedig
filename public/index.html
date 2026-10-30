@@ -2732,7 +2732,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   }
   // on a phone the sort is one quiet line, "Sorted by Artist ↑"; it opens a small menu like the view menu
   const narrow=matchMedia('(max-width:700px)'),tsm=document.createElement('div');tsm.className='tsm';tsm.setAttribute('role','menu');tsm.hidden=true;document.body.append(tsm);
-  const sortBy=k=>{ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable()};
+  const sortBy=k=>{ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable();window.settle?.()};
   const tsmOff=()=>{if(tsm.hidden)return;tsm.hidden=true;$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.setAttribute('aria-expanded','false')};
   function tsmOn(h){
     tsm.innerHTML=COLS.slice(0,3).map(([k,l])=>`<button type="button" role="menuitemradio" aria-checked="${ts.k===k}" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`).join('');
@@ -3072,6 +3072,16 @@ build();at=cur;
   addEventListener('pointerdown',e=>{if(e.target.closest('.find'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
   const arrange2=arrange;arrange=function(...a){const n=arrange2.apply(this,a);mark();return n};
   mark();
+  // a filter or a sort going on or coming off: the view settles into its new order. The grid's covers already glide;
+  // the crate rises a little out of a fade, the table's rows too, the dial's marks fade in. Typing in the search doesn't.
+  window.settle=()=>{
+    if(reduce||!document.body.classList.contains('ready'))return;
+    const E={duration:460,easing:'cubic-bezier(.22,1,.36,1)'},rise=[{opacity:.3,translate:'0 10px'},{opacity:1,translate:'0 0'}];
+    if(!$('#tbl').hidden)$('#tbl tbody').animate(rise,E);
+    else if(!$('#wall').hidden)$$('#tiles .gh').forEach(h=>h.animate([{opacity:0},{opacity:1}],{duration:300,delay:140,fill:'backwards'}));
+    else{crate.animate(rise,E);$('#kd .kd-c')?.animate([{opacity:0},{opacity:1}],{duration:320,easing:'ease-out'})}
+  };
+  const arrange3=arrange;arrange=function(f,...a){const was=filt,n=arrange3.call(this,f,...a);if(n&&f?.k!=='q'&&was?.k!=='q')settle();return n};
 })();
 </script>
 <script>
