@@ -1015,11 +1015,11 @@ html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 .chip:hover svg{color:#fff}
 /* it sits in the row, not over it: centered on the screen while there's room, and when there isn't (a phone, a narrow window)
    it slides toward the logo to clear the buttons on the right, and its name gives way last. The spacer before it stands in
-   for the buttons' extra width (share, search, sort, layout less the logo), and gives that up first */
+   for the buttons' extra width (search, sort, layout less the logo), and gives that up first */
 .find:has(>.chip:not([hidden])),html.phone .find:has(>.chip:not([hidden])){flex-wrap:nowrap}
 .find:has(>.chip:not([hidden]))>.logo{order:-1;margin-right:0}
-.find:has(>.chip:not([hidden]))>.sp{display:block;order:0;flex:0 100000 148px;min-width:0}
-.find:has(>.chip:not([hidden])):has(>.fb.sb[hidden])>.sp{flex-basis:96px}
+.find:has(>.chip:not([hidden]))>.sp{display:block;order:0;flex:0 100000 96px;min-width:0}
+.find:has(>.chip:not([hidden])):has(>.fb.sb[hidden])>.sp{flex-basis:44px}
 .chip,html.phone .chip{position:static;translate:none;order:1;flex:0 1 auto;min-width:0;max-width:360px;margin:0 auto}
 .find .chip .cx{flex:none}
 /* small phones: the row draws in a little so a year still fits whole; the smallest have no room left in it at all,
@@ -3347,7 +3347,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
 })();
 </script>
 <style>
-/* sharing: the crate from the top corner, the layout menu and About; a record from beside its close. Each opens the share sheet:
+/* sharing: the crate from About; a record from beside its close. Each opens the share sheet:
    the record's story picture big, a button that sends it to a story (on a phone) or saves it (on a laptop), and every app under it */
 .shb{all:unset;pointer-events:auto;cursor:pointer;flex:none;order:1;box-sizing:border-box;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s var(--spring),background-color .2s}
 .shb svg{width:20px;height:20px;display:block}
@@ -3358,8 +3358,6 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
 #shareR{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 10px);right:calc(max(14px,env(safe-area-inset-right)) + 52px);opacity:0;transition:opacity .3s,transform .3s var(--spring),background-color .2s}
 .open.in #shareR{opacity:1}
 html.pulldown .open.in #shareR{opacity:calc(1 - var(--pull,0)*3);transition:none}
-.find .vw hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
-.find .vw button[data-share] svg{width:20px;height:20px;padding:1px;box-sizing:border-box}
 .ab-sh{margin-top:24px;height:40px;padding:0 18px 0 14px;font-size:15px;gap:8px}
 .ab-sh svg{width:18px;height:18px;flex:none}
 html.phone .ab-sh{margin-top:20px}
@@ -3543,15 +3541,6 @@ html.phone .sh-row{display:none}
   const wire=(b,w)=>{b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-expanded','false');b.setAttribute('aria-controls','shs');
     b.addEventListener('click',e=>{e.stopPropagation();openSheet(b,w())})};
   const iconBtn=(id,label)=>{const b=document.createElement('button');b.type='button';b.className='shb';b.id=id;b.setAttribute('aria-label',label);b.innerHTML=I.share;return b};
-
-  // the crate, in the top corner
-  const sc=iconBtn('shareC','Share this crate');$('#qf').before(sc);wire(sc,crate);
-
-  // the crate, last in the layout menu, which closes behind the sheet
-  const vwEl=$('#views')||$('.vw'),lb=$('.fb.lb');
-  const sm=document.createElement('button');sm.type='button';sm.dataset.share='';sm.innerHTML=I.share+'<span>Share crate</span>';
-  vwEl.append(document.createElement('hr'),sm);
-  sm.addEventListener('click',e=>{e.stopPropagation();if(!vwEl.hidden)lb.click();openSheet(lb,crate())});
 
   // the crate, in About
   const sa=document.createElement('button');sa.type='button';sa.className='btn ab-sh';sa.innerHTML=I.share+'<span>Share this crate</span>';
