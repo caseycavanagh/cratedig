@@ -1926,7 +1926,7 @@ addEventListener('popstate',()=>{const m=location.hash.match(/^#record\/(.+)$/),
   if(j>=0){go(j,true);openRecord(true)}else closeRecord(true)});
 $('#close').onclick=()=>closeRecord();
 stage.addEventListener('pointerdown',e=>{if(busy||!e.isPrimary)return;const now=performance.now();sdrag={x:e.clientX,y:e.clientY,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,far:false,ax:null,ry:sv.ry,w:stage.offsetWidth};stage.setPointerCapture(e.pointerId);stage.classList.add('dragging')});
-// phones: sideways brings in the next record, down puts this one back, a tap turns it over
+// phones: sideways brings in the next record, down puts this one back, a tap turns it over; on a laptop, down puts it back too
 function slide(e){
   const s=sdrag,dx=e.clientX-s.x,dy=e.clientY-s.y,now=performance.now(),dt=Math.max(8,now-s.lt);
   s.vx=.5*s.vx+.5*(e.clientX-s.lx)/dt;s.vy=.5*s.vy+.5*(e.clientY-s.ly)/dt;s.lt=now;s.lx=e.clientX;s.ly=e.clientY;
@@ -1979,7 +1979,9 @@ function unpull(){
 }
 stage.addEventListener('pointermove',e=>{
   if(sdrag&&PHONE){slide(e);return}
-  if(sdrag){if(Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>5)sdrag.far=true;
+  if(sdrag&&(sdrag.ax||!sdrag.turning&&Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>8&&e.clientY-sdrag.y>Math.abs(e.clientX-sdrag.x))){ // down: the reverse of pulling it out
+    if(!sdrag.ax){ry=sv.ry=sdrag.ry;sv.vy=0;rx=sv.rx=TILT;paintS()}slide(e);return}
+  if(sdrag){if(Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>5)sdrag.far=true;if(Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>8)sdrag.turning=true;
     const now=performance.now(),y=sdrag.ry+(e.clientX-sdrag.x)*.6;sv.vy=.6*sv.vy+.4*(y-sv.ry)/Math.max(.008,(now-sdrag.lt)/1000);sdrag.lt=now;
     ry=sv.ry=y;rx=sv.rx=TILT;paintS();return} // the sleeve follows your hand exactly
   if(reduce||busy||e.pointerType!=='mouse')return;
@@ -1987,7 +1989,7 @@ stage.addEventListener('pointermove',e=>{
 });
 // a tap turns it over; a drag lands on whichever side it's heading for, carrying its speed
 const sEnd=()=>{if(!sdrag)return;const s=sdrag,tap=!sdrag.far&&performance.now()-sdrag.t<400;sdrag=null;stage.classList.remove('dragging');
-  if(PHONE&&s.ax){settle(s);return}
+  if(s.ax){settle(s);return}
   if(tap)sv.vy=0;base=tap?base+180:REST+180*Math.round((sv.ry+sv.vy*.12-REST)/180);ry=base;rx=TILT;setS()};
 stage.addEventListener('pointerup',sEnd);stage.addEventListener('pointercancel',sEnd);
 stage.addEventListener('mouseleave',()=>{if(!sdrag&&!busy){ry=base;rx=TILT;setS()}});
@@ -2207,7 +2209,7 @@ void main(){
 })():null;
 addEventListener('resize',()=>{frontBox=null;deckS=0;tailS=0;if(nodes.length&&!raf)render();if(PHONE&&!open.hidden)aimPeeks()});
 // Pulling a record out: grab the front record and lift. It holds in the crate for the first stretch, giving only a little, then comes
-// free with a tick and follows the hand. Let go once it's free, or pull it as far as it goes, and it carries on out into the open view;
+// free with a tick and follows the hand up to a stop, where it holds. Let go once it's free and it carries on out into the open view;
 // bring it back down before letting go and it catches again and settles back in. Down on it flips, as does any drag off it.
 const PK_GRIP=6;
 // only the front record moves while it's pulled, so only it is redrawn
@@ -2220,11 +2222,11 @@ function pkTo(t){
 }
 const pkDrop=()=>{cancelAnimationFrame(pk.f);pk.f=0;pk.y=pk.t=pk.v=0;crate.classList.remove('lifting');pkPaint()};
 const onFront=e=>open.hidden&&!busy&&!!nodes[cur]&&e.target.closest?.('.rc')===nodes[cur];
-// where the record is for a hand this far up: a little give while it's caught, then nearly with the hand once it's free, up to where it goes on its own
+// where the record is for a hand this far up: a little give while it's caught, then nearly with the hand once it's free, up to the stop
 function pullTo(s,y){
-  const d=Math.max(0,s.y-y),C=PHONE?44:40,END=PHONE?120:110;
+  let d=Math.max(0,s.y-y);const C=PHONE?44:40,END=PHONE?120:110;
   if(!s.free&&d>=C){s.free=true;buzz()}else if(s.free&&d<C*.55)s.free=false; // changed your mind: it catches again
-  if(s.free&&d>=END)return true;
+  if(d>END)d=END+10*(1-Math.exp(-(d-END)/40)); // as far as it goes: past the stop it only gives a hair
   pkTo(s.free?PK_GRIP+(d-C*.4)*.92:PK_GRIP+10*(1-Math.exp(-d/22)));
 }
 function letGo(s){crate.classList.remove('lifting');if(s.free&&!busy&&open.hidden){buzz();openRecord(false,true)}else pkTo(0)}
@@ -2234,7 +2236,7 @@ crate.addEventListener('pointermove',e=>{
   const dy=e.clientY-drag.y,now=performance.now(),dt=Math.max(8,now-drag.lt);drag.vy=.2*drag.vy+.8*(e.clientY-drag.ly)/dt;drag.lt=now;drag.ly=e.clientY;
   if(Math.abs(dy)>6&&!moved){moved=true;if(drag.lip&&dy<0)drag.pull={y:drag.y,free:false};else{crate.classList.add('pulling');if(drag.lip){crate.classList.remove('lifting');pkTo(0)}}}
   if(!moved)return;
-  if(drag.pull){if(pullTo(drag.pull,e.clientY)){const s=drag.pull;drag=null;moved=false;crate.classList.remove('dragging');letGo(s)}return}
+  if(drag.pull){pullTo(drag.pull,e.clientY);return}
   aim=Math.max(0,Math.min(order.length-1,drag.i+dy/PULL));kick(); // pull toward you to flip forward
   const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
@@ -2262,7 +2264,7 @@ crate.addEventListener('pointermove',e=>{
   const dx=e.clientX-dd.x,dy=e.clientY-dd.y,now=performance.now(),dt=Math.max(8,now-dd.lt);
   dd.vx=.5*dd.vx+.5*(e.clientX-dd.lx)/dt;dd.vy=.2*dd.vy+.8*(e.clientY-dd.ly)/dt;dd.lt=now;dd.lx=e.clientX;dd.ly=e.clientY;
   if(!dd.ax){if(Math.hypot(dx,dy)<8)return;dd.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';crate.classList.remove('pressing');if(dd.lip&&dd.ax==='y'&&dy<0)dd.pull={y:dd.y,free:false};else if(dd.lip)pkTo(0)}
-  if(dd.pull){if(pullTo(dd.pull,e.clientY)){const s=dd.pull;dd=null;letGo(s)}return}
+  if(dd.pull){pullTo(dd.pull,e.clientY);return}
   if(dd.ax!=='y')return;
   const hi=order.length-1;let p=dd.p+dy/deckS;off.y=0;
   if(p<0){off.y=-rub(-p*deckS);p=0} // nothing before the first: it lifts a little
