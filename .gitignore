@@ -42,3 +42,6 @@ next-env.d.ts
 
 # git bundles used to move work between machines
 *.bundle
+
+# small copies of the covers, made by scripts/vinyl-thumbs.mjs at build time
+/public/vinyl/t/
