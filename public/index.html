@@ -630,6 +630,7 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd-t{width:1px;height:12px;margin-left:-.5px;background:var(--t4);transform-origin:50% 100%}
 /* sorted by year the marks are years, in mono; by color, dots in each color */
 .kd[data-marks=years] .kd-l{width:58px;margin-left:-29px;font:400 16px/24px 'Geist Mono',ui-monospace,monospace;letter-spacing:-.02em}
+.kd[data-marks=years] .kd-l.kd-nd{width:72px;margin-left:-36px;padding-left:22px;box-sizing:border-box;font-size:12px} /* nudged right, clear of the last year */
 .kd[data-marks=colors] .kd-l{display:grid;place-items:center}
 .kd[data-marks=colors] .kd-l i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
 .kd[data-marks=colors] .kd-l.on i{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px #fff}
@@ -2644,7 +2645,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     let g0=null;
     order.forEach(r=>{let g=group(r);if(SORT.k==='year')g=g==='—'?g:g.slice(0,3)+'0';
       if(g!==g0){g0=g;const h=document.createElement('p');h.className='gh';h.setAttribute('aria-hidden','true');
-        if(SORT.k==='color')h.innerHTML=`<i style="background:${hueInk(+g)}"></i>${HUES[+g]}`;else h.textContent=SORT.k==='year'?(g==='—'?'No year':g+'s'):g;
+        if(SORT.k==='color')h.innerHTML=`<i style="background:${hueInk(+g)}"></i>${HUES[+g]}`;else h.textContent=SORT.k==='year'?(g==='—'?'No date':g+'s'):g;
         if(SORT.k==='year')h.classList.add('yr');f.append(h)}
       f.append(tileFor(r))});
     tiles.replaceChildren(f);drawPills();
@@ -2886,7 +2887,7 @@ function build(){
   if(lettered){AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];if(has('#'))AZ.push('#');if(SORT.d<0)AZ.reverse()}else AZ=Object.keys(FIRST).sort((a,b)=>FIRST[a]-FIRST[b]);
   W=k==='year'?58:k==='color'?30:36;kd.dataset.marks=k==='year'?'years':k==='color'?'colors':'letters';
   dl.setAttribute('aria-label',`Turn to ${k==='year'?'a year':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='color'?'colors':'letters'} and records.`);
-  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l" data-k="${j}">${k==='color'?`<i style="background:${hueInk(+L)}"></i>`:L}</span>`).join('');
+  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l${L==='—'?' kd-nd':''}" data-k="${j}">${k==='color'?`<i style="background:${hueInk(+L)}"></i>`:L==='—'?'No date':L}</span>`).join('');
   LT=[...clip.querySelectorAll('.kd-l')];TH=[...clip.querySelectorAll('.kd-t')];
   at=-1;rest('l');rest('r');render();label();
 }
@@ -2912,7 +2913,7 @@ function render(){
   else{const k=nearR(cR);if(k!==lastR){lastR=k;if(user){toRecord(k);buzz(2)}}}
   labC.style.opacity=clamp(1-e*1.8,0,1);labC.style.transform=`translateY(${-8*e}px)`;labA.style.opacity=clamp(e*1.8-.8,0,1);labA.style.transform=`translateY(${8*(1-e)}px)`;
 }
-function label(){const r=order[cur];if(!r)return;const g=group(r),L=SORT.k==='color'?HUES[+g]:g==='—'?'No year':g,n=CNT[g],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
+function label(){const r=order[cur];if(!r)return;const g=group(r),L=SORT.k==='color'?HUES[+g]:g==='—'?'No date':g,n=CNT[g],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
   labC.textContent=``;labA.textContent=r.artist;
   dl.setAttribute('aria-valuetext',mode()==='l'?`${L}, ${n} record${n>1?'s':''}`:`${r.title}, ${r.artist}`)}
 function loop(ts){
