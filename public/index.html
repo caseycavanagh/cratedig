@@ -1064,7 +1064,7 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
    Each strip shows 5px of the page color, the least Safari picks up; About sits in the top layer, so it carries its own. */
 .sedge,.about::before,.about::after{display:none}
 @media(pointer:coarse){
-  .sedge,.about::before,.about::after{display:block;content:'';position:fixed;left:0;right:0;z-index:100;height:12px;background:var(--edge,#121212);pointer-events:none}
+  .sedge,.about::before,.about::after{display:block;content:'';position:fixed;left:0;right:0;z-index:100;height:12px;background:var(--edge,var(--bg));pointer-events:none}
   .sedge.t,.about::before{top:-7px}
   .sedge.b,.about::after{bottom:-7px}
   html:has(.play.on) .sedge{--edge:#0d0d0d} /* the Play menu dims the page behind it; the toolbars dim with it */
