@@ -77,6 +77,67 @@ export function recordCard({ title, artist, facts, cover }: { title: string; art
   );
 }
 
+// pictures for apps that take an image and not a link (Instagram, Snapchat, TikTok): a square post and a story.
+// A record: its cover big, with title and artist. The crate: a grid of its first covers.
+type Pic = { title: string; sub: string; cover: string | null; covers?: string[]; blur?: string | null };
+const R = 9; // corner radius on a 900px cover, like the crate's --rec (about 1.1%)
+
+const coverOrGrid = (p: Pic, size: number) =>
+  p.covers?.length ? (
+    <div style={{ width: size, height: size, display: "flex", flexWrap: "wrap", gap: 12 }}>
+      {p.covers.slice(0, 9).map((c, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={i} src={c} width={(size - 24) / 3} height={(size - 24) / 3} alt="" style={{ borderRadius: R * 0.6 }} />
+      ))}
+    </div>
+  ) : p.cover ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={p.cover} width={size} height={size} alt="" style={{ borderRadius: R, boxShadow: "0 40px 80px -24px #000" }} />
+  ) : (
+    <div style={{ width: size, height: size, borderRadius: R, background: "#232325", display: "flex", alignItems: "center", justifyContent: "center" }}>{mark(160)}</div>
+  );
+
+export function postCard(p: Pic) {
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#121212", color: "#ecebe8", fontFamily: "Instrument Sans", padding: "100px 140px 0" }}>
+        {coverOrGrid(p, 800)}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 44, gap: 24 }}>
+          <div style={{ display: "flex", fontSize: 42, letterSpacing: "-0.02em", minWidth: 0, overflow: "hidden", whiteSpace: "nowrap" }}>
+            <span style={{ fontWeight: 500 }}>{p.title}</span>
+            <span style={{ color: "#8f8f93", marginLeft: 14 }}>{p.sub}</span>
+          </div>
+          {mark(40)}
+        </div>
+      </div>
+    ),
+    { width: 1080, height: 1080, headers: { "Cache-Control": CACHE }, fonts: fonts() },
+  );
+}
+
+export function storyCard(p: Pic & { foot: string }) {
+  const size = p.title.length > 40 ? 64 : p.title.length > 20 ? 76 : 88;
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#121212", color: "#ecebe8", fontFamily: "Instrument Sans", padding: "120px 90px 0", position: "relative" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {p.blur ? <img src={p.blur} width={1080} height={1920} alt="" style={{ position: "absolute", left: 0, top: 0 }} /> : null}
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          {mark(60)}
+          <span style={{ fontSize: 40, fontWeight: 500 }}>Crate Dig</span>
+        </div>
+        <div style={{ display: "flex", marginTop: 256 }}>{coverOrGrid(p, 900)}</div>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: 80 }}>
+          <div style={{ fontSize: size, fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1.05, lineClamp: 2, display: "block" }}>{p.title}</div>
+          <div style={{ fontSize: 52, color: "#c9c9cc", marginTop: 14, lineClamp: 1, display: "block" }}>{p.sub}</div>
+          <div style={{ fontFamily: MONO, fontSize: 34, color: "#a5a5aa", marginTop: 40 }}>{p.foot}</div>
+        </div>
+      </div>
+    ),
+    { width: 1080, height: 1920, headers: { "Cache-Control": CACHE }, fonts: fonts() },
+  );
+}
+
 // title big, sub under it in gray, a small mono line along the bottom with the domain the card was asked for
 export function titleCard({ title, sub, foot, host }: { title: string; sub: string; foot: string; host: string }) {
   return new ImageResponse(

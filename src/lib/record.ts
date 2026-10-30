@@ -44,8 +44,8 @@ export async function findRecord(slug: string): Promise<Shared | null> {
   return { ...r, title: p.title || r.title, artist: p.artist || r.artist, year: pick(p.year, r.year), label: pick(p.label, r.label), front: p.front || r.front };
 }
 
-// the cover as a JPEG data URL the card can draw (it can't read WebP): a file in public/, or a cover Casey uploaded
-export async function coverData(front: string | undefined, size = 560): Promise<string | null> {
+// a cover's bytes: a file in public/, a cover Casey uploaded, or one from elsewhere
+async function coverBytes(front: string | undefined): Promise<Buffer | null> {
   if (!front) return null;
   try {
     let buf: Buffer | null = null;
@@ -64,12 +64,41 @@ export async function coverData(front: string | undefined, size = 560): Promise<
       const res = await fetch(front, { signal: AbortSignal.timeout(4000) });
       if (res.ok) buf = Buffer.from(await res.arrayBuffer());
     }
-    if (!buf) return null;
-    const jpg = await sharp(buf).resize(size, size, { fit: "cover" }).jpeg({ quality: 84 }).toBuffer();
-    return `data:image/jpeg;base64,${jpg.toString("base64")}`;
+    return buf;
   } catch {
     return null;
   }
+}
+
+const jpeg = async (img: sharp.Sharp) => `data:image/jpeg;base64,${(await img.jpeg({ quality: 84 }).toBuffer()).toString("base64")}`;
+
+// the cover as a JPEG data URL a card can draw (it can't read WebP)
+export async function coverData(front: string | undefined, size = 560): Promise<string | null> {
+  const buf = await coverBytes(front);
+  try {
+    return buf ? await jpeg(sharp(buf).resize(size, size, { fit: "cover" })) : null;
+  } catch {
+    return null;
+  }
+}
+
+// the cover blurred and darkened to fill a w×h background (the card can't blur)
+export async function blurData(front: string | undefined, w: number, h: number): Promise<string | null> {
+  const buf = await coverBytes(front);
+  try {
+    if (!buf) return null;
+    // shrink, blur and darken, then scale back up in a second pass (sharp keeps only one resize per pipeline)
+    const small = await sharp(buf).resize(Math.round(w / 20), Math.round(h / 20), { fit: "cover" }).blur(2).modulate({ brightness: 0.42 }).png().toBuffer();
+    return await jpeg(sharp(small).resize(w, h).blur(24));
+  } catch {
+    return null;
+  }
+}
+
+// the crate's own picture: the first few records with covers, in the crate's order
+export async function crateCovers(n: number, size: number): Promise<string[]> {
+  const all = [...(await base()).values()].filter((r) => r.front).slice(0, n);
+  return (await Promise.all(all.map((r) => coverData(r.front, size)))).filter((x): x is string => !!x);
 }
 
 export const facts = (r: Shared) => [r.year, r.label].filter(Boolean).join(", ");
