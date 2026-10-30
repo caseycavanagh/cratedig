@@ -580,6 +580,10 @@ body.walling .find .chip{display:none}
 .wall .pills small{font-size:13px;opacity:.55}
 .wall .in{max-width:1400px;margin:0 auto}
 .tiles{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px}
+.tiles .gh{grid-column:1/-1;margin:0;padding:22px 0 4px;font:500 15px/1 var(--sans);color:var(--t1);display:flex;align-items:center;gap:8px}
+.tiles .gh:first-child{padding-top:4px}
+.tiles .gh.yr{font:400 14px/1 'Geist Mono',ui-monospace,monospace;color:var(--t2)}
+.tiles .gh i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
 .tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
@@ -624,6 +628,11 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd-l{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font:500 18px/24px var(--sans);color:var(--t3);transform-origin:50% 70%}
 .kd-l.on{color:#fff}
 .kd-t{width:1px;height:12px;margin-left:-.5px;background:var(--t4);transform-origin:50% 100%}
+/* sorted by year the marks are years, in mono; by color, dots in each color */
+.kd[data-marks=years] .kd-l{width:58px;margin-left:-29px;font:400 16px/24px 'Geist Mono',ui-monospace,monospace;letter-spacing:-.02em}
+.kd[data-marks=colors] .kd-l{display:grid;place-items:center}
+.kd[data-marks=colors] .kd-l i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
+.kd[data-marks=colors] .kd-l.on i{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px #fff}
 .kd-t.on{background:#fff}
 .kd-m{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:#fff;bottom:calc(var(--kh,58px) - 4px);opacity:calc(1 - var(--kz,0))}
 .kd-b{position:absolute;left:24px;right:24px;bottom:calc(var(--kh,58px) + 12px);height:18px;text-align:center;font:400 13px/18px var(--sans);color:var(--m)}
@@ -936,6 +945,11 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .find .vw button:hover{background:var(--hov);color:#fff}
 .find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:var(--sel);color:#fff;border:0}
 .find .vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.find .vw .vs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;padding:4px 2px 0;border-top:1px solid var(--line)}
+.find .vw .vs[hidden]{display:none}
+.find .vw .vs p{flex:0 0 100%;margin:0;padding:6px 10px 2px;font:400 12px/16px var(--sans);color:var(--t3)}
+.find .vw .vs button,html.phone .find .vw .vs button{width:auto;height:34px;padding:0 10px;gap:3px;font-size:14px;border-radius:10px}
+.find .vw .vs i{font-style:normal;color:var(--t2)}
 /* an open record closes from where the view button sits: top right, the same 44px circle, so the mark keeps the top left */
 #close,html.phone #close{left:auto;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;font-size:18px;border:1px solid var(--line);box-sizing:border-box}
 /* a record's name over its mark on the dial, after a short rest; it leaves on a quick fade */
@@ -1324,7 +1338,25 @@ const yr=r=>+r.year||9999;
 const byName=(a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||yr(a)-yr(b)||a.title.localeCompare(b.title);
 // for matching, text folds to plain lowercase letters and digits: "ivan alyosha" finds Ivan & Alyosha, "2x" finds 2×LP
 const fold=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/×/g,'x').replace(/[’'.]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-const letter=r=>{const c=fold(name(r))[0]||'';return /[a-z]/.test(c)?c.toUpperCase():'#'};
+const initial=s=>{const c=fold(s)[0]||'';return /[a-z]/.test(c)?c.toUpperCase():'#'};
+const letter=r=>initial(name(r));
+// The crate and the grid share one sort (the table keeps its own): artist, title, year, label or color; d is 1, or -1 reversed.
+// A record with no year or no label goes last either way.
+const ttl=r=>r.title.replace(/^(the|an?) /i,'');
+const hsl=r=>{const n=parseInt((/^#[0-9a-f]{6}$/i.test(spineBg(r))?spineBg(r):'#333333').slice(1),16),R=(n>>16&255)/255,G=(n>>8&255)/255,B=(n&255)/255,mx=Math.max(R,G,B),mn=Math.min(R,G,B),l=(mx+mn)/2,d=mx-mn;
+  let h=0;if(d){h=mx===R?((G-B)/d)%6:mx===G?(B-R)/d+2:(R-G)/d+4;h*=60;if(h<0)h+=360}return{h,s:d?d/(1-Math.abs(2*l-1)):0,l}};
+// twelve hues around the wheel, then the sleeves with hardly any color: light, grey, dark
+const hue=r=>{const c=hsl(r);if(c.s<.18||c.l<.1||c.l>.92)return c.l>.6?12:c.l>.25?13:14;return Math.round(c.h/30)%12};
+const HUES=['Red','Orange','Amber','Yellow','Lime','Green','Teal','Cyan','Blue','Indigo','Violet','Pink','Light','Grey','Dark'];
+const hueInk=i=>i<12?`hsl(${i*30} 62% 52%)`:['#e6e3dc','#7d7c79','#2b2b2d'][i-12];
+const cmpS=(a,b)=>a.localeCompare(b,'en',{sensitivity:'base'});
+const SORTS={artist:{l:'Artist',by:byName},title:{l:'Title',by:(a,b)=>cmpS(ttl(a),ttl(b))||byName(a,b)},year:{l:'Year',by:(a,b)=>yr(a)-yr(b)||byName(a,b)},
+  label:{l:'Label',by:(a,b)=>cmpS(labelName(a.label),labelName(b.label))||byName(a,b)},color:{l:'Color',by:(a,b)=>hue(a)-hue(b)||hsl(b).l-hsl(a).l||byName(a,b)}};
+let SORT={k:'artist',d:1};try{const s=JSON.parse(localStorage.getItem('records-sort'));if(s&&SORTS[s.k])SORT={k:s.k,d:s.d<0?-1:1}}catch{}
+const unsorted=r=>SORT.k==='year'?!+r.year:SORT.k==='label'&&!r.label;
+const bySort=(a,b)=>unsorted(a)-unsorted(b)||SORTS[SORT.k].by(a,b)*SORT.d;
+// where a record falls in the sort: a letter, a year, or a color
+const group=r=>{const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='color'?String(hue(r)):letter(r)};
 // A filter narrows the crate to one artist, label, year or format (from a record's details) or to a search; null is the whole crate
 // a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
 const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
@@ -1339,7 +1371,7 @@ function matching(f){
 // the crate holds what a filter keeps, the record in front staying in front when it's among them; a filter that keeps nothing changes nothing
 function arrange(f,keep=order[cur]){
   const list=matching(f);if(!list.length)return 0;
-  filt=f;order=[...list].sort(byName);build();go(Math.max(0,order.indexOf(keep)),true);
+  filt=f;order=[...list].sort(bySort);build();go(Math.max(0,order.indexOf(keep)),true);
   if(f?.k!=='q'&&q.value){q.value='';qSync()}
   showChip();
   if(f)say(f.k==='q'?`${list.length} ${list.length>1?'records match':'record matches'}.`:`${list.length} records, ${KIND[f.k].toLowerCase()} ${f.v}.`);
@@ -2607,7 +2639,13 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     if(animate&&!reduce)for(const [k,n] of keep)if(n.isConnected)before.set(k,n.getBoundingClientRect());
     tiles.style.setProperty('--cols',cols());sizeTiles();
     const f=document.createDocumentFragment();
-    order.forEach(r=>f.append(tileFor(r)));
+    // a small heading over each turn of the sort: a letter, a decade, or a color
+    let g0=null;
+    order.forEach(r=>{let g=group(r);if(SORT.k==='year')g=g==='—'?g:g.slice(0,3)+'0';
+      if(g!==g0){g0=g;const h=document.createElement('p');h.className='gh';h.setAttribute('aria-hidden','true');
+        if(SORT.k==='color')h.innerHTML=`<i style="background:${hueInk(+g)}"></i>${HUES[+g]}`;else h.textContent=SORT.k==='year'?(g==='—'?'No year':g+'s'):g;
+        if(SORT.k==='year')h.classList.add('yr');f.append(h)}
+      f.append(tileFor(r))});
     tiles.replaceChildren(f);drawPills();
     if(!before.size)return;
     // covers glide from where they were; new ones grow in
@@ -2808,10 +2846,10 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
 // Two positions in px (letters, records) and a depth z (0 letters, 1 records), each a spring. The crate keeps its own motion.
 (()=>{
 const kd=$('#kd'),dl=$('.kd-d',kd),clip=$('.kd-c',kd),labC=$('.kd-b .c',kd),labA=$('.kd-b .a',kd);
-const W=36,WR=12,H0=58,H1=78,lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+let W=36;const WR=12,H0=58,H1=78,lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const buzz=ms=>{try{navigator.vibrate?.(ms)}catch{}};
 let AZ=[],FIRST={},CNT={},X=[],LT=[],TH=[],at=-1;
-const has=L=>FIRST[L]!=null,slot=i=>AZ.indexOf(letter(order[i]));
+const has=L=>FIRST[L]!=null,slot=i=>AZ.indexOf(group(order[i]));
 const S={l:{x:0,v:0,t:0},r:{x:0,v:0,t:0},z:{x:0,v:0,t:0}},K={l:[260,33],r:[260,33],z:[520,46]};
 let raf=0,drag=null,user=false,lastL=-1,lastR=-1,acc=0;
 const mode=()=>S.z.x>=.5?'r':'l',lMax=()=>(AZ.length-1)*W,rMax=()=>X[X.length-1]||0;
@@ -2834,22 +2872,26 @@ function lite(r){const n=nodes[cur],a=n?.querySelector('.fr img.art'),sa=sleeve.
   dress(sleeve,r);info(r);document.title=`${r.title} · Crate Dig`;base=REST;ry=base;rx=TILT;lite.p=true;return true}
 const follow=i=>{want=i;const now=performance.now();clearTimeout(lT);
   if(now-lt>90){lt=now;live(i)}else lT=setTimeout(()=>{lt=performance.now();live(want)},90-(now-lt))};
-const toLetter=L=>{if(!has(L))return;if(!open.hidden){follow(FIRST[L]);return}if(letter(order[cur])!==L)jump(FIRST[L])};
+const toLetter=L=>{if(!has(L))return;if(!open.hidden){follow(FIRST[L]);return}if(group(order[cur])!==L)jump(FIRST[L])};
 const toRecord=i=>{if(!open.hidden){follow(i);return}if(i!==cur)go(i)};
 const apply=t=>{clearTimeout(lT);live(t);if(lite.p&&!open.hidden){lite.p=false;peek(prevP,order[cur-1]);peek(nextP,order[cur+1])}};
 
 function build(){
-  AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];FIRST={};CNT={};
-  order.forEach((r,i)=>{const L=letter(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
+  // the marks follow the sort: every letter (the empty ones dim), or the years or colors the crate has, in the crate's order
+  const k=SORT.k,lettered=k!=='year'&&k!=='color';FIRST={};CNT={};
+  order.forEach((r,i)=>{const L=group(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
     X[i]=i*WR});
-  X.length=order.length;if(has('#'))AZ.push('#');
-  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l" data-k="${j}">${L}</span>`).join('');
+  X.length=order.length;
+  if(lettered){AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];if(has('#'))AZ.push('#');if(SORT.d<0)AZ.reverse()}else AZ=Object.keys(FIRST).sort((a,b)=>FIRST[a]-FIRST[b]);
+  W=k==='year'?58:k==='color'?30:36;kd.dataset.marks=k==='year'?'years':k==='color'?'colors':'letters';
+  dl.setAttribute('aria-label',`Turn to ${k==='year'?'a year':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='color'?'colors':'letters'} and records.`);
+  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l" data-k="${j}">${k==='color'?`<i style="background:${hueInk(+L)}"></i>`:L}</span>`).join('');
   LT=[...clip.querySelectorAll('.kd-l')];TH=[...clip.querySelectorAll('.kd-t')];
   at=-1;rest('l');rest('r');render();label();
 }
 const BOW=12; // how far the dial's ends drop, in pixels
 function render(){
-  const z=clamp(S.z.x,0,1),e=z*z*(3-2*z),cL=S.l.x,cR=S.r.x,lp=cL/W,half=kd.clientWidth/2+30,curL=letter(order[cur]);
+  const z=clamp(S.z.x,0,1),e=z*z*(3-2*z),cL=S.l.x,cR=S.r.x,lp=cL/W,half=kd.clientWidth/2+30,curL=group(order[cur]);
   // the dial curves away a little at its ends, like the edge of a wheel: each mark drops and leans with its distance from the middle
   const R=half*half/BOW,bend=x=>+(x*x/R).toFixed(2),tilt=x=>(Math.atan(2*x/R)*180/Math.PI).toFixed(2);
   kd.style.setProperty('--kh',lerp(H0,H1,e)+'px');kd.style.setProperty('--kz',e);
@@ -2864,7 +2906,7 @@ function render(){
   else{const k=nearR(cR);if(k!==lastR){lastR=k;if(user){toRecord(k);buzz(2)}}}
   labC.style.opacity=clamp(1-e*1.8,0,1);labC.style.transform=`translateY(${-8*e}px)`;labA.style.opacity=clamp(e*1.8-.8,0,1);labA.style.transform=`translateY(${8*(1-e)}px)`;
 }
-function label(){const r=order[cur];if(!r)return;const L=letter(r),n=CNT[L],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
+function label(){const r=order[cur];if(!r)return;const g=group(r),L=SORT.k==='color'?HUES[+g]:g==='—'?'No year':g,n=CNT[g],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
   labC.textContent=``;labA.textContent=r.artist;
   dl.setAttribute('aria-valuetext',mode()==='l'?`${L}, ${n} record${n>1?'s':''}`:`${r.title}, ${r.artist}`)}
 function loop(ts){
@@ -2967,6 +3009,15 @@ build();at=cur;
     wall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
     table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>'};
   $$('button',vwEl).forEach(b=>{const v=b.dataset.v,l=b.textContent;b.innerHTML=ICON[v]+`<span>${l}</span>`});
+  // the sort, under the views: one for the crate and the grid, and the lit one again flips it. The table sorts by its headers.
+  const vs=document.createElement('div');vs.className='vs';vs.setAttribute('role','group');vs.setAttribute('aria-label','Sort');vwEl.append(vs);
+  const drawSort=()=>{vs.innerHTML='<p aria-hidden="true">Sort</p>'+Object.entries(SORTS).map(([k,o])=>{const on=SORT.k===k,dir=k==='color'?'':SORT.d>0?'↑':'↓';
+    return`<button type="button" data-k="${k}" aria-pressed="${on}" aria-label="Sort by ${o.l.toLowerCase()}${on&&dir?`, ${k==='year'?(SORT.d>0?'oldest':'newest')+' first':SORT.d>0?'A to Z':'Z to A'}`:''}">${o.l}${on&&dir?`<i aria-hidden="true">${dir}</i>`:''}</button>`}).join('')};
+  vs.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
+    SORT=SORT.k===k?{k,d:k==='color'?1:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
+    drawSort();vs.querySelector(`[data-k=${k}]`).focus({focusVisible:false});
+    arrange(filt,null);$('#wall').scrollTop=0}); // a new sort starts from its front: the oldest record, the first letter, the reds
+  drawSort();
   vwEl.id='views';vwEl.hidden=true;vwEl.setAttribute('role','group');vwEl.setAttribute('aria-label','Layout');
   const fb=document.createElement('button');fb.type='button';fb.className='fb';fb.setAttribute('aria-expanded','false');fb.setAttribute('aria-controls','pills');
   fb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sr">Filters</span>';
@@ -2974,7 +3025,7 @@ build();at=cur;
   // layout: one button showing the current view; it drops a small menu of the three
   const lb=document.createElement('button');lb.type='button';lb.className='fb lb';lb.setAttribute('aria-expanded','false');lb.setAttribute('aria-controls','views');
   fb.after(lb);
-  const lmark=()=>{const b=$('[aria-pressed=true]',vwEl)||$('button',vwEl);lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
+  const lmark=()=>{const b=$('[data-v][aria-pressed=true]',vwEl)||$('[data-v]',vwEl);vs.hidden=b.dataset.v==='table';lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
   new MutationObserver(lmark).observe(vwEl,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});lmark();
   pills.className='tray';pills.hidden=true;find.prepend(pills);
   vwEl.classList.add('tray');find.prepend(vwEl);
@@ -2984,7 +3035,7 @@ build();at=cur;
     if(on){const b=$('[aria-pressed=true]',pills);b&&b.scrollIntoView({inline:'center',block:'nearest'})}};
   fb.onclick=()=>tray(pills.hidden);
   lb.onclick=()=>views(vwEl.hidden);
-  vwEl.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>views(false),120)});
+  vwEl.addEventListener('click',e=>{if(e.target.closest('button[data-v]'))setTimeout(()=>views(false),120)});
   pills.addEventListener('keydown',e=>{if(e.key==='Escape'){tray(false);fb.focus()}});
   vwEl.addEventListener('keydown',e=>{if(e.key==='Escape'){views(false);lb.focus()}});
   addEventListener('pointerdown',e=>{if(e.target.closest('.find'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
