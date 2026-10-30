@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pull to open</title>
+<link rel="icon" href="vinyl/records-icon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
+:root{--bg:#0f0f10;--soft:#19191b;--tile:#222225;--fg:#ecebe8;--m:#8f8f93;--line:#2e2e32;--accent:#ca72c7;--sans:system-ui,-apple-system,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}*{margin:0}
+html{background:var(--bg)}
+body{font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+.wrap{max-width:1400px;margin:0 auto;padding:56px 28px 96px}
+@media(max-width:680px){.wrap{padding:40px 16px 80px}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:28px;font-size:15px}
+.top h1{font-size:16px;font-weight:500}.top p{color:var(--m);margin-top:4px;max-width:680px}
+.tools{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.picks{font:400 12px var(--mono);color:var(--m)}
+.pill{all:unset;cursor:pointer;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--tile);display:inline-flex;align-items:center;font-size:13px}
+.pill:hover{border-color:var(--m)}.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grp{font-size:16px;font-weight:500;margin:48px 0 4px}.grp:first-of-type{margin-top:0}
+.grp+p{font-size:15px;color:var(--m);margin-bottom:16px;max-width:720px}
+.sheet{max-width:1000px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,1000px),1fr));gap:18px;align-items:start}
+.st{position:relative;border-radius:18px;background:var(--soft);padding:46px 18px 18px;min-width:0}
+@media(max-width:680px){.st{padding:46px 8px 14px}}
+.st .id{position:absolute;top:14px;left:18px;right:44px;font:500 11px var(--mono);color:var(--m)}.st .id b{color:var(--fg);font-weight:500;margin-right:6px}
+.st .use{display:block;margin:14px 4px 2px;font-size:13px;color:var(--m);line-height:1.5}
+.st .use b{color:var(--fg);font-weight:500}
+.star{all:unset;cursor:pointer;position:absolute;top:9px;right:10px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;color:var(--m);font-size:15px;z-index:5}
+.star:hover{background:var(--tile);color:var(--fg)}.star:focus-visible{outline:2px solid var(--accent)}
+.st.picked{box-shadow:inset 0 0 0 2px var(--accent)}.st.picked .star{color:var(--accent)}
+
+/* a laptop and a phone, side by side; both take a mouse, the phone takes a finger too */
+.pair{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
+.dev{position:relative;overflow:hidden;background:#121212;border-radius:10px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;outline:none}
+.dev.desk{aspect-ratio:16/10}
+.dev.phone{width:clamp(150px,22vw,210px);aspect-ratio:9/19.5;border-radius:22px}
+@media(max-width:520px){.pair{grid-template-columns:1fr}.dev.phone{width:min(100%,260px);justify-self:center}}
+.dev .tag{position:absolute;left:10px;bottom:8px;font:400 10px var(--mono);color:#5d5d61;pointer-events:none;z-index:300}
+.rec{position:absolute;transform-origin:50% 0;background:#2a2a2a center/cover no-repeat;border-radius:1px;will-change:transform,opacity}
+.rec::after{content:'';position:absolute;inset:0;background:#000;opacity:var(--dk,0);pointer-events:none}
+.rec.front{box-shadow:0 0 0 .5px #ffffff14}
+.cap{position:absolute;left:0;right:0;text-align:center;pointer-events:none;opacity:0;font-size:13px;line-height:1.35;z-index:250}
+.cap b{display:block;font-weight:500}.cap i{font-style:normal;color:#8f8f93}
+.phone .cap{font-size:11px}
+.dev.grab{cursor:grab}.dev.grabbing{cursor:grabbing}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>Pull to open</h1><p>Grab the front record and pull it up out of the crate to open it, alongside the click and tap that open it today. Every sticker is live: drag down to flip through, then try pulling one out. Click or tap an open record to put it back. Star one from each group.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy my picks</button><button class="pill" id="clear" type="button">Clear</button></div></div>
+  <h2 class="grp">What starts a pull</h2><p>Drag down already flips forward and drag up already stands the last record back up, so a pull up has to be told apart from that somehow. Each of these follows the finger the F1 way.</p><div class="sheet" id="G"></div>
+  <h2 class="grp">How it follows</h2><p>What the record does under the finger, and what decides that letting go opens it rather than dropping it back. Each of these starts the G1 way, so it's quick to compare.</p><div class="sheet" id="F"></div>
+</div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const COVERS=[['jason-isbell-southeastern','Southeastern','Jason Isbell'],['fleetwood-mac-rumours','Rumours','Fleetwood Mac'],['bon-iver-for-emma-forever-ago','For Emma, Forever Ago','Bon Iver'],['allison-russell-the-returner','The Returner','Allison Russell'],['boygenius-boygenius','boygenius','boygenius'],['bruce-springsteen-nebraska','Nebraska','Bruce Springsteen'],['father-john-misty-fear-fun','Fear Fun','Father John Misty'],['gregory-alan-isakov-this-empty-northern-hemisphere','This Empty Northern Hemisphere','Gregory Alan Isakov'],['james-taylor-jt','JT','James Taylor'],['creedence-clearwater-revival-green-river','Green River','Creedence Clearwater Revival'],['daughter-if-you-leave','If You Leave','Daughter'],['gram-parsons-grievous-angel','Grievous Angel','Gram Parsons'],['dawes-nothing-is-wrong','Nothing Is Wrong','Dawes'],['billy-joel-piano-man','Piano Man','Billy Joel'],['chris-stapleton-traveller','Traveller','Chris Stapleton'],['blake-mills-heigh-ho','Heigh Ho','Blake Mills']];
+
+const G={
+  G1:{name:'Up pulls it out',use:'<b>Drag up on the front record</b> and it comes up out of the crate; drag down flips, as now. Standing the last record back up moves to a drag up on the records behind it (and the wheel and dial on a laptop). The most literal one, and the one cupps described, but it takes the back gesture off most of a phone screen.'},
+  G2:{name:'Grab the top edge',use:'<b>Start the drag on the top edge</b> of the front record, where you would pinch a sleeve, and up pulls it out. Anywhere else, drags flip both ways as now. On a laptop the edge lifts a hair and the cursor turns to a hand when you’re over it. The edge is small on purpose, so it can be hard to find on a phone.'},
+  G3:{name:'Hold, then pull',use:'<b>Press and hold</b> for a moment: the record lifts a hair (and ticks on a phone), and from there up pulls it out. A drag that starts moving straight away flips both ways, exactly as now. Nothing changes for flipping, but the hold is something you have to discover.'},
+};
+const F={
+  F1:{name:'Rides the finger',use:'<b>The record rises with the finger</b> one for one, growing a touch as it comes toward you. Let go a third of the way up, or flick it, and it carries on into the open view; any less and it settles back into the crate.'},
+  F2:{name:'Catches, then comes free',use:'<b>It holds in the crate</b> for the first stretch and only gives a little, then comes free with a tick and follows the finger. Once it’s free, letting go opens it. A clear point of no return, so a pull is never half-made.'},
+  F3:{name:'A short tug',use:'<b>A small tug is enough</b>: the record only lifts a little under the finger, and letting go after any real pull up (or a flick) opens it with the usual lift-out. Quickest, least physical.'},
+};
+
+const spring=(s,k,dt)=>{for(const key of ['p','u','o']){const a=s[key],t=s[key+'T'];const K=k[key]||170,c=2*Math.sqrt(K);s[key+'V']+=(-K*(a-t)-c*s[key+'V'])*dt;s[key]+=s[key+'V']*dt}};
+function buzz(){
+  if(navigator.vibrate){navigator.vibrate(8);return}
+  const l=document.createElement('label');l.ariaHidden='true';l.style.display='none';l.innerHTML='<input type="checkbox" switch>';
+  document.head.append(l);l.click();l.remove();
+}
+
+class Demo{
+  constructor(dev,gest,feel){
+    this.dev=dev;this.gest=gest;this.feel=feel;this.phone=dev.classList.contains('phone');
+    this.s={p:0,pT:0,pV:0,u:0,uT:0,uV:0,o:0,oT:0,oV:0};this.open=false;this.raf=0;
+    this.els=COVERS.map(([slug])=>{const e=document.createElement('div');e.className='rec';e.style.backgroundImage=`url(vinyl/${slug}-front.webp)`;dev.append(e);return e});
+    this.cap=document.createElement('div');this.cap.className='cap';dev.append(this.cap);
+    const tag=document.createElement('span');tag.className='tag';tag.textContent=this.phone?'phone':'laptop';dev.append(tag);
+    dev.tabIndex=0;
+    new ResizeObserver(()=>{this.measure();this.render()}).observe(dev);
+    dev.addEventListener('pointerdown',e=>this.down(e));
+    dev.addEventListener('pointermove',e=>this.move(e));
+    dev.addEventListener('pointerup',e=>this.up(e));
+    dev.addEventListener('pointercancel',e=>this.up(e));
+    dev.addEventListener('pointerleave',()=>{if(!this.d)this.hoverLip(false)});
+    dev.addEventListener('wheel',e=>{if(this.open)return;e.preventDefault();this.acc=(this.acc||0)+e.deltaY;if(Math.abs(this.acc)>40){this.flipTo(Math.round(this.s.pT)+Math.sign(this.acc));this.acc=0}},{passive:false});
+    dev.addEventListener('keydown',e=>{if(e.key==='Escape'&&this.open){e.preventDefault();this.close()}if((e.key==='Enter'||e.key===' ')&&!this.open){e.preventDefault();this.openIt()}});
+  }
+  measure(){
+    const W=this.dev.clientWidth,H=this.dev.clientHeight;this.W=W;this.H=H;
+    const S=this.phone?W*.82:H*.56;this.S=S;
+    this.y0=this.phone?H*.30:H*.33;this.G=this.phone?S*.5:S*.42;
+    this.So=this.phone?W*.86:H*.64;this.yo=this.phone?H*.13:(H-this.So)/2-H*.05;
+    this.els.forEach(e=>{e.style.width=e.style.height=S+'px';e.style.left=(W-S)/2+'px';e.style.top=this.y0+'px'});
+  }
+  front(){return Math.max(0,Math.min(COVERS.length-1,Math.round(this.s.p)))}
+  render(){
+    const {p,u,o}=this.s,{S,G,y0,So,yo}=this,f=Math.round(this.s.pT);
+    this.els.forEach((e,i)=>{
+      const d=i-p;let ty,sc,op=1,dk=0,z=200-i;
+      if(d<-1.2||d>16){e.style.visibility='hidden';return}e.style.visibility='';
+      if(d<0){ty=-d*S*.55;sc=1-d*.05;op=Math.max(0,1+d*1.3)}
+      else{const g=1-Math.exp(-d/5);ty=-G*g;sc=1-.16*g;dk=Math.min(.7,d*.09)}
+      if(i===f){
+        // lifted by u, then carried to the open spot by o
+        ty=(ty-u*S*.55)*(1-o)+(yo-y0)*o;
+        sc=sc*(1+.1*u)*(1-o)+(So/S)*o;op=Math.max(op,o);
+        dk=dk*(1-o);z=220;
+        e.style.boxShadow=`0 ${10+30*Math.max(u,o)}px ${30+40*Math.max(u,o)}px -10px rgba(0,0,0,${Math.min(.75,(u+o)*1.6)})`;
+        e.classList.add('front');
+      }else{op*=(1-.92*o)*(1-Math.min(.35,u*.6));e.style.boxShadow='';e.classList.remove('front')}
+      e.style.transform=`translateY(${ty}px) scale(${sc})`;e.style.opacity=op;e.style.setProperty('--dk',dk);e.style.zIndex=z;
+    });
+    const r=COVERS[f];this.cap.innerHTML=`<b>${r[1]}</b><i>${r[2]}</i>`;this.cap.style.top=yo+So+12+'px';this.cap.style.opacity=Math.max(0,o*1.6-.6);this.cap.style.transform=`translateY(${(1-o)*8}px)`;
+  }
+  go(){
+    if(this.raf)return;let last=performance.now();
+    const step=t=>{const dt=Math.min(.032,(t-last)/1000);last=t;
+      if(!this.d||this.d.mode!=='flip'&&this.d.mode!=='pull'){spring(this.s,{p:170,u:200,o:120},dt)}
+      else if(this.d.mode==='flip'){const s=this.s;spring(s,{u:200,o:120},dt);s.pT=s.p;s.pV=0}
+      else{const s=this.s;s.pV=0;s.oV=0}
+      this.render();
+      const s=this.s,rest=['p','u','o'].every(k=>Math.abs(s[k]-s[k+'T'])<.001&&Math.abs(s[k+'V'])<.01);
+      if(rest&&!this.d){['p','u','o'].forEach(k=>{s[k]=s[k+'T'];s[k+'V']=0});this.render();this.raf=0;return}
+      this.raf=requestAnimationFrame(step)};
+    if(reduce){['p','u','o'].forEach(k=>{this.s[k]=this.s[k+'T'];this.s[k+'V']=0});this.render();return}
+    this.raf=requestAnimationFrame(step);
+  }
+  flipTo(j){j=Math.max(0,Math.min(COVERS.length-1,j));if(j!==Math.round(this.s.pT))buzz();this.s.pT=j;this.go()}
+  openIt(v=0){this.open=true;this.s.oT=1;this.s.uT=0;this.s.oV=Math.max(this.s.oV,v);this.go()}
+  close(){this.open=false;this.s.oT=0;this.s.uT=0;this.go()}
+  frontRect(){const r=this.dev.getBoundingClientRect(),e=this.els[Math.round(this.s.pT)].getBoundingClientRect();return{top:e.top-r.top,bottom:e.bottom-r.top,left:e.left-r.left,right:e.right-r.left}}
+  lipAt(x,y){const f=this.frontRect(),band=Math.max(this.phone?28:18,(f.bottom-f.top)*.16);return x>=f.left&&x<=f.right&&y>=f.top-6&&y<=f.top+band}
+  onFront(x,y){const f=this.frontRect();return x>=f.left&&x<=f.right&&y>=f.top&&y<=f.bottom}
+  hoverLip(on){if(this.gest!=='G2'||this.open)return;if(on===this.lip)return;this.lip=on;this.dev.classList.toggle('grab',on);this.s.uT=on?.025:0;this.go()}
+  down(e){
+    if(!e.isPrimary)return;
+    const r=this.dev.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,now=performance.now();
+    this.dev.setPointerCapture(e.pointerId);
+    this.d={x:e.clientX,y:e.clientY,t:now,lt:now,ly:e.clientY,vy:0,mode:null,p0:this.s.p,front:this.onFront(x,y),lip:this.lipAt(x,y),held:false,free:false,u0:this.s.u};
+    if(this.open)return;
+    this.s.pT=this.s.p;this.s.pV=0;
+    if(this.gest==='G3'&&!this.open)this.d.timer=setTimeout(()=>{if(!this.d||this.d.mode)return;this.d.held=true;buzz();this.s.uT=.05;this.dev.classList.add('grabbing');this.go()},320);
+    if(this.gest==='G2'&&this.d.lip)this.dev.classList.add('grabbing');
+  }
+  move(e){
+    const r=this.dev.getBoundingClientRect();
+    if(!this.d){if(e.pointerType==='mouse')this.hoverLip(this.lipAt(e.clientX-r.left,e.clientY-r.top));return}
+    const d=this.d,dx=e.clientX-d.x,dy=e.clientY-d.y,now=performance.now(),dt=Math.max(8,now-d.lt);
+    d.vy=.2*d.vy+.8*(e.clientY-d.ly)/dt;d.lt=now;d.ly=e.clientY;
+    if(this.open)return;
+    if(!d.mode){
+      if(Math.hypot(dx,dy)<7)return;
+      clearTimeout(d.timer);
+      if(Math.abs(dx)>Math.abs(dy)){d.mode='none';return}
+      const up=dy<0;let pull=false;
+      if(this.gest==='G1')pull=up&&d.front;
+      if(this.gest==='G2')pull=up&&d.lip;
+      if(this.gest==='G3')pull=up&&d.held;
+      d.mode=pull?'pull':'flip';d.oy=e.clientY;
+      if(d.mode==='flip'&&d.held){this.s.uT=0;this.dev.classList.remove('grabbing')}
+      if(d.mode==='flip'&&this.gest==='G1'&&up&&d.front){d.mode='flip'}
+      this.go();
+    }
+    if(d.mode==='flip'){
+      const deck=this.phone?this.H*.42:this.H*.5,hi=COVERS.length-1;
+      let p=d.p0+dy/deck;
+      // G1: an up drag that starts on the front record is a pull, so up only stands records back up from the stack behind it
+      if(p<0)p=-.25*(1-Math.exp(p*2));if(p>hi)p=hi+.25*(1-Math.exp(-(p-hi)*2));
+      this.s.p=p;this.s.pT=p;
+      const j=Math.round(p);if(j!==d.j&&d.j!=null&&j>=0&&j<=hi)buzz();d.j=j;
+    }
+    if(d.mode==='pull'){
+      const dist=Math.max(0,d.y-e.clientY),S=this.S;let u;
+      if(this.feel==='F1')u=dist/(S*.9);
+      if(this.feel==='F2'){const C=this.phone?54:44;if(!d.free&&dist>=C){d.free=true;buzz()}u=d.free?.07+(dist-C)/(S*.9):.07*(1-Math.exp(-dist/(C*.6)))}
+      if(this.feel==='F3')u=.12*(1-Math.exp(-dist/40));
+      if(this.gest==='G3')u+=.05*(1-Math.min(1,dist/40));
+      this.s.u=u;this.s.uT=u;this.s.uV=0;
+      if(!this.raf)this.render();
+    }
+  }
+  up(e){
+    const d=this.d;if(!d)return;this.d=null;clearTimeout(d.timer);this.dev.classList.remove('grabbing');
+    const quick=performance.now()-d.t<500,v=performance.now()-d.lt>80?0:d.vy; // px/ms, negative is up
+    if(this.open){if(!d.mode&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<7)this.close();return}
+    if(!d.mode){
+      if(d.held){this.s.uT=0;this.go();return}
+      if(quick&&e.type==='pointerup'&&d.front){this.openIt();return}
+      this.s.uT=this.lip?.025:0;this.go();return;
+    }
+    if(d.mode==='flip'){
+      const moved=this.s.p-d.p0,vr=v/(this.phone?this.H*.42:this.H*.5)*1000;let to=Math.round(d.p0);
+      if(moved>.2||vr>.9&&moved>.02)to++;else if(moved<-.2||vr<-.9&&moved<-.02)to--;
+      if(Math.abs(vr)>2.4)to=Math.round(this.s.p)+Math.sign(vr)*Math.min(8,Math.round((Math.abs(vr)-1.2)*1.1));
+      this.s.pV=vr*.6;this.flipTo(to);return;
+    }
+    if(d.mode==='pull'){
+      const dist=Math.max(0,d.y-e.clientY),flick=v<-.5;let go=false;
+      if(this.feel==='F1')go=dist>this.S*.3||flick&&dist>12;
+      if(this.feel==='F2')go=d.free;
+      if(this.feel==='F3')go=dist>18||flick;
+      if(go){buzz();this.s.uV=0;this.openIt(Math.min(6,-v*4))}else{this.s.uT=0;this.go()}
+    }
+  }
+}
+
+const ALL={};
+function sticker(host,id,o,gest,feel){
+  ALL[id]=o.name;
+  const s=document.createElement('div');s.className='st';s.dataset.id=id;
+  s.innerHTML=`<span class="id"><b>${id}</b>${o.name}</span><button class="star" type="button" aria-label="Pick ${id} ${o.name}">★</button><div class="pair"><div class="dev desk" aria-label="Laptop demo"></div><div class="dev phone" aria-label="Phone demo"></div></div><span class="use">${o.use}</span>`;
+  $(host).append(s);
+  $$('.dev',s).forEach(dv=>new Demo(dv,gest,feel));
+}
+for(const k in G)sticker('#G',k,G[k],k,'F1');
+for(const k in F)sticker('#F',k,F[k],'G1',k);
+
+let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-pull-picks')||'[]'))}catch(e){}
+const save=()=>{try{localStorage.setItem('vinyl-pull-picks',JSON.stringify([...picks]))}catch(e){}};
+const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
+$$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{const t=[...picks].sort().map(id=>`${id} ${ALL[id]}`).join(', ')||'No picks yet';navigator.clipboard?.writeText(t).catch(()=>{});$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy my picks',1200)};
+$('#clear').onclick=()=>{picks.clear();save();show()};
+show();
+</script>
+</body>
+</html>

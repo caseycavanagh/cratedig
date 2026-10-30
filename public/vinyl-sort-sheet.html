@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<title>Crate Dig: sorting</title>
+<link rel="icon" href="vinyl/records-icon.svg" type="image/svg+xml">
+<style>
+/* Sticker sheet for sorting the crate and the grid, and the dial following the sort.
+   Every screen is live: sort it, drag the dial, scroll the grid. Data from vinyl-prototype.html and vinyl/covers.json. */
+@font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
+:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--sheet:#1e1e20;--glass:rgba(30,30,32,.72);
+  --t1:#d6d6d8;--t2:#a5a5aa;--t3:#6c6c70;--t4:#5f5f64;--sel:#ffffff1f;--ring:#ffffff3d;--sans:system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'Geist Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.22,1,.36,1)}
+*,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
+html{background:var(--bg);color-scheme:dark}
+body{font-family:var(--sans);font-size:16px;line-height:1.4;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.wrap{max-width:1500px;margin:0 auto;padding:40px 20px 80px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+.top h1{font-size:32px;font-weight:500;letter-spacing:-.02em}
+.top p{color:var(--m);max-width:680px;margin-top:6px}
+.tools{display:flex;align-items:center;gap:10px;font-size:14px;flex-wrap:wrap}
+.picks{color:var(--m)}
+.tool{height:40px;padding:0 18px;border-radius:99px;border:1px solid var(--line);font-size:14px;font-weight:500;transition:transform .3s var(--ease)}
+.tool:hover{background:var(--soft)}
+.tool:active{transform:scale(.98)}
+#copied{width:100%;text-align:right;font:13px/1.4 var(--mono);color:var(--t2);min-height:18px}
+h2{font-size:22px;font-weight:500;margin:52px 0 4px;letter-spacing:-.01em}
+h2+p{color:var(--m);margin-bottom:22px;max-width:720px}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,980px),1fr));gap:28px}
+.st{position:relative;padding:52px 18px 18px;border-radius:26px;background:#19191b;min-width:0}
+.st .id{position:absolute;top:17px;left:20px;right:56px;font-size:15px;color:var(--m)}.st .id b{color:var(--fg);font-weight:500;margin-right:8px}
+.st .use{margin:16px 4px 0;font-size:14px;color:var(--m);line-height:1.5;max-width:760px}
+.star{position:absolute;top:10px;right:12px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--m);font-size:18px;transition:transform .3s var(--ease)}
+.star:hover{background:var(--soft);color:var(--fg)}
+.star:active{transform:scale(.96)}
+.st.picked{box-shadow:inset 0 0 0 2px #fff}.st.picked .star{color:#fff}
+.frames{display:flex;gap:22px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+.flab{font-size:12px;color:var(--t3);text-align:center;margin-top:12px}
+.lapw+.flab{margin-top:28px}
+/* sheet controls under a card's screens: not part of the design */
+.sw{display:flex;justify-content:center;gap:4px;margin-top:14px;flex-wrap:wrap}
+.sw button{height:30px;padding:0 12px;border-radius:99px;font-size:13px;color:var(--t2);border:1px dashed #ffffff26}
+.sw button[aria-pressed=true]{color:var(--fg);border-style:solid;border-color:#ffffff59}
+
+/* ---------- a screen ---------- */
+.lapw{position:relative;flex:none}
+.lapw .bez{position:absolute;inset:-10px -10px -18px;border-radius:18px;background:#0b0b0c;box-shadow:0 0 0 1px #2a2a2c}
+.scr{position:absolute;left:0;top:0;transform-origin:0 0;background:var(--bg);overflow:hidden;isolation:isolate;user-select:none;-webkit-user-select:none;container-type:size}
+.phw{position:relative;flex:none;width:360px;height:740px;border-radius:46px;box-shadow:0 0 0 7px #2a2a2c,0 0 0 8px #3a3a3d;overflow:hidden}
+.phw .scr{position:absolute;inset:0;width:100%;height:100%}
+.hd{position:absolute;z-index:6;left:0;right:0;top:0;height:76px;display:flex;align-items:center;gap:10px;padding:0 16px;pointer-events:none}
+.lap .hd{padding:0 24px;height:64px}
+.hd img{width:26px;height:26px;margin-right:auto;pointer-events:auto}
+.circ{pointer-events:auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--t1);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);transition:transform .4s var(--ease),background-color .2s}
+.circ:active{transform:scale(.96)}
+.circ[aria-expanded=true]{background:#2e2e31}
+.circ svg{width:22px;height:22px}
+/* the crate */
+.cr{position:absolute;inset:0}
+.pile{position:absolute;left:50%;transform:translateX(-50%)}
+.pile .cv{position:absolute;inset:0;background:#2a2a2d;box-shadow:0 30px 50px -20px #000}
+.pile .cv img{width:100%;height:100%;object-fit:cover;display:block}
+.pile .sp{position:absolute;left:50%;height:3px;transform:translateX(-50%)}
+.cr .fade{position:absolute;left:0;right:0;bottom:0;height:150px;background:linear-gradient(#12121200,#121212e6 45%,#121212);pointer-events:none}
+.cap{position:absolute;left:24px;right:24px;text-align:center;font-size:13px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.cap b{color:var(--t1);font-weight:400}
+/* the dial */
+.dl{position:absolute;left:50%;height:60px;touch-action:none;cursor:grab;outline:0}
+.dl:active{cursor:grabbing}
+.dl .c{position:absolute;inset:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
+.dl .c>*{position:absolute;left:50%;bottom:10px;will-change:transform;white-space:nowrap}
+.mk{width:60px;margin-left:-30px;text-align:center;font:500 18px/24px var(--sans);color:var(--t3);transform-origin:50% 70%}
+.mk.no{opacity:.35}
+.mk.on{color:#fff}
+.mk.mono{font-family:var(--mono);font-weight:400;font-size:16px;letter-spacing:-.02em}
+.tk{width:1px;margin-left:-.5px;background:var(--t4);transform-origin:50% 100%}
+.tk.on{background:#fff}
+.tl{width:60px;margin-left:-30px;text-align:center;font:400 12px/14px var(--mono);color:var(--t3)}
+.tl.on{color:#fff}
+.dot{width:12px;height:12px;margin-left:-6px;border-radius:50%;transform-origin:50% 50%;box-shadow:0 0 0 1px #ffffff1a}
+.dot.on{box-shadow:0 0 0 2px #121212,0 0 0 3.5px #fff}
+.cm{position:absolute;left:50%;bottom:58px;width:2px;height:8px;margin-left:-1px;border-radius:2px;background:#fff;pointer-events:none}
+/* the grid */
+.gr{position:absolute;inset:0;overflow:hidden auto;overscroll-behavior:contain;scrollbar-width:none;padding:84px 16px 40px}
+.gr::-webkit-scrollbar{display:none}
+.lap .gr{padding:72px 28px 40px}
+.tiles{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:8px}
+.tile{position:relative;aspect-ratio:1;background:#2a2a2d;overflow:hidden}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+.gh{grid-column:1/-1;font:500 15px/1 var(--sans);color:var(--t1);padding:22px 0 4px}
+.gh:first-child{padding-top:4px}
+.gh.mono{font:400 14px/1 var(--mono);color:var(--t2)}
+.gh.sw8{display:flex;align-items:center;gap:8px}.gh.sw8 i{width:12px;height:12px;border-radius:50%}
+.tag{position:absolute;left:6px;top:6px;padding:4px 8px;border-radius:99px;background:#121212d9;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 12px/1 var(--sans);color:#fff}
+.tag.mono{font:400 11px/1 var(--mono)}
+.stk{position:absolute;z-index:5;left:50%;top:84px;transform:translate(-50%,-6px);padding:8px 16px;border-radius:99px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);font:500 15px/1 var(--sans);opacity:0;transition:opacity .2s,transform .4s var(--ease);pointer-events:none}
+.stk.on{opacity:1;transform:translate(-50%,0)}
+.lap .stk{top:72px}
+/* sort controls */
+.sl{display:inline-flex;align-items:center;gap:6px;font-size:15px;color:var(--m);height:34px;pointer-events:auto}
+.sl b{color:#fff;font-weight:400}
+.sl svg{width:14px;height:14px;color:var(--t2)}
+.gr .sl{margin:0 0 12px}
+.cr .slw{position:absolute;left:0;right:0;display:flex;justify-content:center}
+.words{display:flex;gap:18px;font-size:15px;pointer-events:auto}
+.words button{color:var(--t3);height:34px;display:inline-flex;align-items:center;gap:4px;transition:color .15s}
+.words button[aria-pressed=true]{color:#fff}
+.gr .words{margin:0 0 12px}
+
+.menu{position:absolute;z-index:8;min-width:190px;padding:6px;border-radius:22px;background:#1f1f21f2;border:1px solid var(--line);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:0 14px 40px #0008;transform-origin:var(--o,100% 0);animation:mIn .3s var(--ease)}
+@keyframes mIn{from{opacity:0;transform:scale(.96)}}
+.menu[hidden]{display:none}
+.menu .h{font-size:12px;color:var(--t3);padding:10px 14px 4px}
+.menu button{display:flex;align-items:center;gap:12px;width:100%;height:44px;padding:0 14px;border-radius:16px;font-size:16px;color:var(--t1);text-align:left}
+.menu button:hover{background:#ffffff0f}
+.menu button[aria-checked=true],.menu button[aria-pressed=true]{background:var(--sel);color:#fff}
+.menu button i{margin-left:auto;font-style:normal;color:var(--t2);font-size:14px}
+.menu button svg{width:20px;height:20px;flex:none}
+.menu hr{border:0;height:1px;background:var(--line);margin:6px 8px}
+.menu .segs{display:flex;gap:4px;padding:4px}
+.menu .segs button{flex:1;justify-content:center;height:38px;padding:0 10px;font-size:14px;gap:4px}
+@media(prefers-reduced-motion:reduce){.menu{animation:none}.stk{transition:opacity .2s}}
+@media(max-width:600px){.wrap{padding:28px 12px 60px}.st{padding:52px 10px 14px}.top h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Sorting</h1><p>Sort the crate and the grid the way the table sorts. In the crate, the dial follows the sort: letters for names, years for years. Every screen is live: sort it, drag the dial, scroll the grid. The dashed buttons under each card are for the sheet, not the design.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="tool" id="copy" type="button">Copy picks</button><button class="tool" id="clear" type="button">Clear</button><div id="copied" aria-live="polite"></div></div>
+  </div>
+
+  <h2>A. Where the sort lives</h2>
+  <p>One sort for the crate and the grid; the table keeps its headers. Same control in both views, so it reads as one setting.</p>
+  <div class="sheet" id="A"></div>
+
+  <h2>B. The dial, sorted by year</h2>
+  <p>Each starts sorted by year. Sort by artist or title from the line above the dial and it turns back into letters.</p>
+  <div class="sheet" id="B"></div>
+
+  <h2>C. The grid, in groups</h2>
+  <p>The grid has no dial, so this is how it shows where you are in the sort.</p>
+  <div class="sheet" id="C"></div>
+
+  <h2>D. What you can sort by</h2>
+  <p>The table sorts by title, artist, year, label and format. The crate doesn't need all of them.</p>
+  <div class="sheet" id="D"></div>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>`&#${c.charCodeAt(0)};`);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const slugOf=r=>(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const fold=s=>String(s??'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const name=r=>(r.sortAs||r.artist).replace(/^the /i,'');
+const ttl=r=>r.title.replace(/^(the|a|an) /i,'');
+const labelName=l=>String(l||'').replace(/‐/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
+const first=s=>{const c=fold(s).replace(/[^a-z0-9]/g,'')[0]||'';return /[a-z]/.test(c)?c.toUpperCase():'#'};
+const cmp=(a,b)=>String(a).localeCompare(String(b),'en',{sensitivity:'base'});
+const yr=r=>+r.year||0;
+const hex2hsl=h=>{const n=parseInt((h||'#333333').slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;
+  let hu=0;if(d){hu=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;hu*=60;if(hu<0)hu+=360}const s=d?d/(1-Math.abs(2*l-1)):0;return{h:hu,s,l}};
+// colors: twelve hues, then the greys light to dark
+const HUES=['Red','Orange','Amber','Yellow','Lime','Green','Teal','Cyan','Blue','Indigo','Violet','Pink'];
+const hueOf=r=>{const c=hex2hsl(r.spine);if(c.s<.18||c.l<.1||c.l>.92)return c.l>.6?12:c.l>.25?13:14;return Math.round(c.h/30)%12};
+const HUE_DOT=i=>i<12?`hsl(${i*30} 62% 52%)`:['#e6e3dc','#7d7c79','#2b2b2d'][i-12];
+const HUE_NAME=i=>i<12?HUES[i]:['Light','Grey','Dark'][i-12];
+
+let R=[];
+const SORTS={
+  artist:{l:'Artist',key:r=>[name(r),yr(r)||9999,r.title]},
+  title:{l:'Title',key:r=>[ttl(r),name(r)]},
+  year:{l:'Year',key:r=>[yr(r)||9999,name(r),r.title]},
+  label:{l:'Label',key:r=>[labelName(r.label)||'~',name(r)]},
+  color:{l:'Color',key:r=>{const c=hex2hsl(r.spine);return[hueOf(r),-c.l,name(r)]}},
+};
+function sorted(s){
+  const k=SORTS[s.k].key,list=[...R].sort((a,b)=>{const x=k(a),y=k(b);for(let i=0;i<x.length;i++){const c=typeof x[i]==='number'?x[i]-y[i]:cmp(x[i],y[i]);if(c)return c}return 0});
+  if(s.d<0){list.reverse();if(s.k==='year'){const no=list.filter(r=>!yr(r));return[...list.filter(r=>yr(r)),...no]}} // no year always goes last
+  return list;
+}
+// the group a record falls in, for the dial (mode) or the grid
+function groupOf(r,k,mode){
+  if(k==='artist')return first(name(r));
+  if(k==='title')return first(ttl(r));
+  if(k==='label')return r.label?first(labelName(r.label)):'#';
+  if(k==='color')return String(hueOf(r));
+  const y=yr(r);if(!y)return'—';
+  if(mode==='decade'||mode==='grid')return String(Math.floor(y/10)*10);
+  return String(y);
+}
+const AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+// the dial's marks for a sort, in order: [{g, label, ok, first}]
+function marks(list,s,mode){
+  const firstAt={};list.forEach((r,i)=>{const g=groupOf(r,s.k,mode);if(firstAt[g]==null)firstAt[g]=i});
+  let gs;
+  if(s.k==='year'){
+    const ys=list.map(yr).filter(Boolean),lo=Math.min(...ys),hi=Math.max(...ys);
+    if(mode==='ruler'){gs=[];for(let y=lo;y<=hi;y++)gs.push(String(y))}
+    else gs=[...new Set(list.map(r=>groupOf(r,'year',mode)))].filter(g=>g!=='—');
+    if(s.d<0&&mode==='ruler')gs.reverse();
+    if('—' in firstAt)gs.push('—');
+  }else if(s.k==='color'){gs=[...Array(15).keys()].map(String);if(s.d<0)gs.reverse()}
+  else{gs=[...AZ,...('#' in firstAt?['#']:[])];if(s.d<0)gs.reverse()}
+  const lab=g=>{
+    if(s.k!=='year'||g==='—')return g;
+    if(mode==='yy')return'’'+g.slice(2);
+    if(mode==='decade')return'’'+g.slice(2)+'s';
+    return g;
+  };
+  return gs.map(g=>({g,label:lab(g),ok:firstAt[g]!=null,first:firstAt[g]}));
+}
+
+const IC={
+  search:'<svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg>',
+  crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
+  grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
+  table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>',
+  sort:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5"/></svg>',
+  down:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg>',
+};
+const arrow=s=>s.k==='color'?'':(s.d>0?'↑':'↓');
+const dirWord=s=>s.k==='year'?(s.d>0?'oldest first':'newest first'):s.k==='color'?'':s.d>0?'A to Z':'Z to A';
+
+/* ---------- one live screen ----------
+   o: {lap, view, sort, control:'line'|'menu'|'button'|'words', dial, groups, sorts, menuOpen} */
+function App(scr,o){
+  const st={view:o.view||'crate',sort:o.sort||{k:'artist',d:1},cur:0};
+  const W=scr.clientWidth||parseFloat(scr.style.width),H=scr.clientHeight||parseFloat(scr.style.height);
+  let list=[],mk=[],dial=null;
+  const app={set(p){Object.assign(st,p);draw()},st};
+  const setSort=k=>{const s=st.sort;st.sort=s.k===k?{k,d:k==='color'?1:-s.d}:{k,d:1};st.cur=0;draw();app.onsort?.(st.sort)};
+  function header(){
+    return`<div class="hd"><img src="vinyl/records-logo.svg" alt="">${o.control==='button'?`<button class="circ" data-a="sortm" aria-label="Sort" aria-expanded="false">${IC.sort}</button>`:''}
+      <button class="circ" aria-label="Search" tabindex="-1">${IC.search}</button><button class="circ" data-a="views" aria-label="Layout" aria-expanded="false">${IC[st.view]}</button></div>`;
+  }
+  function control(where){
+    const s=st.sort,ks=o.sorts||['artist','title','year'];
+    if(o.control==='line')return`<button class="sl" data-a="sortm" aria-expanded="false">Sorted by <b>${SORTS[s.k].l}</b><span>${arrow(s)}</span>${IC.down}</button>`;
+    if(o.control==='words')return`<div class="words">${ks.map(k=>`<button data-k="${k}" aria-pressed="${s.k===k}">${SORTS[k].l}${s.k===k&&k!=='color'?`<span>${s.k==='year'?(s.d>0?'↑':'↓'):arrow(s)}</span>`:''}</button>`).join('')}</div>`;
+    return'';
+  }
+  function menuHTML(kind){
+    const s=st.sort,ks=o.sorts||['artist','title','year'];
+    const items=ks.map(k=>`<button role="menuitemradio" data-k="${k}" aria-checked="${s.k===k}">${SORTS[k].l}<i>${s.k===k?(k==='year'?(s.d>0?'Oldest first':'Newest first'):arrow(s)):''}</i></button>`).join('');
+    if(kind==='views'&&o.control==='menu')return`${['crate','grid','table'].map(v=>`<button data-v="${v}" aria-pressed="${st.view===v}">${IC[v]}${v[0].toUpperCase()+v.slice(1)}</button>`).join('')}<hr><p class="h">Sort</p><div class="segs">${ks.map(k=>`<button data-k="${k}" aria-pressed="${s.k===k}">${SORTS[k].l}${s.k===k&&k!=='color'?`<span>${k==='year'?(s.d>0?'↑':'↓'):arrow(s)}</span>`:''}</button>`).join('')}</div>`;
+    if(kind==='views')return['crate','grid','table'].map(v=>`<button data-v="${v}" aria-pressed="${st.view===v}">${IC[v]}${v[0].toUpperCase()+v.slice(1)}</button>`).join('');
+    return items;
+  }
+  function draw(){
+    list=sorted(st.sort);
+    scr.innerHTML=header()+(st.view==='grid'?gridHTML():crateHTML())+'<div class="menu" role="menu" hidden></div>';
+    if(st.view==='grid')wireGrid();else wireCrate();
+    if(o.menuOpen){o.menuOpen=false;const b=$('[data-a=sortm]',scr)||$('[data-a=views]',scr);openMenu(b,b.dataset.a==='views'?'views':'sort')}
+  }
+  // the crate
+  function geo(){
+    const S=o.lap?H*.56:Math.min(W*.82,H*.42);
+    return{S,top:o.lap?H*.19:H*.24,dialB:o.lap?22:26,dialW:o.lap?Math.min(560,W*.42):W};
+  }
+  function crateHTML(){
+    const g=geo(),behind=list.slice(st.cur+1,st.cur+40);
+    const sp=behind.map((r,i)=>{const t=i/40,w=g.S*(1-.12*t)*(1-.25*t);return`<i class="sp" style="top:${-6-i*(o.lap?2.6:3.3)}px;width:${w}px;background:${r.spine||'#333'};filter:brightness(${1-.55*t})"></i>`}).reverse().join('');
+    const ctl=control('crate');
+    return`<div class="cr"><div class="pile" style="top:${g.top}px;width:${g.S}px;height:${g.S}px">${sp}<div class="cv"></div></div>
+      <div class="fade"></div>
+      ${ctl?`<div class="slw" style="bottom:${g.dialB+64}px">${ctl}</div>`:''}
+      <div class="dl" tabindex="0" role="slider" aria-label="Dial" style="bottom:${g.dialB}px;width:${g.dialW}px;margin-left:${-g.dialW/2}px"><div class="c"></div></div></div>`;
+  }
+  function front(){
+    const r=list[st.cur],cv=$('.cv',scr);if(!r||!cv)return;
+    cv.style.background=r.spine||'#2a2a2d';
+    cv.innerHTML=r.front?`<img alt="" src="vinyl/${r.front}" decoding="async">`:'';
+    const g=geo(),sp=$$('.sp',scr),behind=list.slice(st.cur+1,st.cur+1+sp.length).reverse();sp.forEach((s,i)=>{if(behind[i])s.style.background=behind[i].spine||'#333'});
+  }
+  function wireCrate(){
+    front();
+    const mode=st.sort.k==='year'?(o.dial||'yy'):st.sort.k==='color'?'color':'az';
+    mk=marks(list,st.sort,mode);
+    dial=Dial($('.dl',scr),mk,mode,i=>{if(i!==st.cur){st.cur=i;front()}});
+    dial.to(mk.findIndex(m=>m.ok&&m.first<=st.cur&&!mk.some(n=>n.ok&&n.first<=st.cur&&n.first>m.first)),true);
+    wireCommon();
+  }
+  // the grid
+  function gridHTML(){
+    const k=st.sort.k,gm=o.groups||'none',ctl=control('grid');
+    let h='',last=null;
+    const lab=g=>k==='year'?(g==='—'?'No year':g+'s'):k==='color'?HUE_NAME(+g):g;
+    list.forEach(r=>{const g=groupOf(r,k,'grid'),start=g!==last;last=g;
+      if(start&&gm==='heads')h+=k==='color'?`<p class="gh sw8"><i style="background:${HUE_DOT(+g)}"></i>${lab(g)}</p>`:`<p class="gh${k==='year'?' mono':''}">${lab(g)}</p>`;
+      h+=`<div class="tile" data-g="${esc(lab(g))}" style="background:${r.spine||'#2a2a2d'}">${r.front?`<img alt="" loading="lazy" decoding="async" src="vinyl/${r.front}">`:''}${start&&gm==='tag'?`<span class="tag${k==='year'?' mono':''}">${lab(g)}</span>`:''}</div>`});
+    return`<div class="gr">${ctl}<div class="tiles" style="--cols:${o.lap?6:3}">${h}</div></div>${gm==='sticky'?'<div class="stk"></div>':''}`;
+  }
+  function wireGrid(){
+    wireCommon();
+    if(o.groups!=='sticky')return;
+    const gr=$('.gr',scr),stk=$('.stk',scr);let t=0;
+    gr.addEventListener('scroll',()=>{const y=gr.getBoundingClientRect().top+(o.lap?scale(scr)*90:100);
+      const tile=$$('.tile',gr).find(n=>n.getBoundingClientRect().bottom>y);if(!tile)return;
+      stk.textContent=tile.dataset.g;stk.classList.add('on');clearTimeout(t);t=setTimeout(()=>stk.classList.remove('on'),900)},{passive:true});
+  }
+  // menus and controls
+  function openMenu(b,kind){
+    const m=$('.menu',scr);
+    if(!m.hidden&&m.dataset.kind===kind){closeMenu();return}
+    m.dataset.kind=kind;m.innerHTML=menuHTML(kind);m.hidden=false;
+    $$('[aria-expanded]',scr).forEach(x=>x.setAttribute('aria-expanded',x===b));
+    const k=scale(scr),sb=scr.getBoundingClientRect(),bb=b.getBoundingClientRect(),x=(bb.left-sb.left)/k,y=(bb.bottom-sb.top)/k,yb=(sb.bottom-bb.top)/k,w=m.offsetWidth;
+    const inCrate=st.view==='crate'&&b.classList.contains('sl');
+    m.style.left=Math.max(12,Math.min(W-w-12,b.classList.contains('circ')?x+bb.width/k-w:inCrate?x+bb.width/k/2-w/2:x))+'px';
+    if(inCrate){m.style.top='';m.style.bottom=yb+8+'px';m.style.setProperty('--o','50% 100%')}else{m.style.bottom='';m.style.top=y+8+'px';m.style.setProperty('--o',b.classList.contains('circ')?'100% 0':'0 0')}
+  }
+  function closeMenu(){const m=$('.menu',scr);if(m)m.hidden=true;$$('[aria-expanded]',scr).forEach(x=>x.setAttribute('aria-expanded','false'))}
+  function wireCommon(){
+    scr.onclick=e=>{
+      const b=e.target.closest('button');
+      if(!b){if(!e.target.closest('.menu'))closeMenu();return}
+      if(b.dataset.a==='sortm')return openMenu(b,'sort');
+      if(b.dataset.a==='views')return openMenu(b,'views');
+      if(b.dataset.v){if(b.dataset.v!=='table'){st.view=b.dataset.v;draw();app.onview?.(st.view)}else closeMenu();return}
+      if(b.dataset.k){const inMenu=!!b.closest('.menu');setSort(b.dataset.k);if(inMenu&&o.control==='menu'){const v=$('[data-a=views]',scr);openMenu(v,'views')}return}
+    };
+  }
+  draw();
+  return app;
+}
+const scale=scr=>scr.getBoundingClientRect().width/scr.offsetWidth||1;
+
+/* ---------- the dial: marks along a gently bowed strip; drag, flick, tap, wheel or arrow keys ---------- */
+function Dial(el,mk,mode,onPick){
+  const c=$('.c',el),w=el.clientWidth,half=w/2+30;
+  const SP=mode==='ruler'?10:mode==='yyyy'?58:mode==='decade'?58:mode==='color'?30:mode==='yy'?44:34;
+  c.innerHTML=mk.map((m,i)=>{
+    if(mode==='ruler'){const dec=m.g!=='—'&&+m.g%10===0;return`<i class="tk" data-i="${i}" style="height:${m.ok?16:7}px"></i>${dec||m.g==='—'?`<span class="tl" data-i="${i}">${m.g==='—'?'—':m.g}</span>`:''}`}
+    if(mode==='color')return`<i class="dot${m.ok?'':' no'}" data-i="${i}" style="background:${HUE_DOT(+m.g)};${m.ok?'':'opacity:.25'}"></i>`;
+    return`<span class="mk${m.ok?'':' no'}${mode==='yy'||mode==='yyyy'||mode==='decade'?' mono':''}" data-i="${i}">${m.label}</span>`}).join('');
+  const els=$$('[data-i]',c),R=half*half/12;
+  let x=0,t=0,v=0,raf=0,at=-1,drag=null;
+  const near=px=>{let b=-1,bd=1e9;mk.forEach((m,i)=>{if(!m.ok)return;const d=Math.abs(i*SP-px);if(d<bd){bd=d;b=i}});return b};
+  function render(){
+    const lp=x/SP;
+    els.forEach(e=>{const i=+e.dataset.i,px=i*SP-x,d=Math.abs(i-lp),bend=px*px/R,tilt=Math.atan(2*px/R)*180/Math.PI;
+      if(Math.abs(px)>half){e.style.visibility='hidden';return}e.style.visibility='';
+      const on=i===at;e.classList.toggle('on',on);
+      if(e.classList.contains('tk')){e.style.transform=`translate(${px}px,${bend}px) rotate(${tilt}deg)`;if(on)e.style.height='22px';else e.style.height=mk[i].ok?'16px':'7px'}
+      else if(e.classList.contains('tl'))e.style.transform=`translate(${px}px,${bend-26}px) rotate(${tilt}deg)`;
+      else if(e.classList.contains('dot'))e.style.transform=`translate(${px}px,${bend-4}px) scale(${1+.5*Math.max(0,1-d)})`;
+      else e.style.transform=`translate(${px}px,${bend}px) rotate(${tilt}deg) scale(${1+.35*Math.max(0,1-d)})`;
+    });
+    const k=near(x);if(k!==at&&k>=0){at=k;onPick(mk[k].first);render()}
+  }
+  function loop(){v+=(-240*(x-t)-31*v)/60;x+=v/60;if(Math.abs(x-t)<.05&&Math.abs(v)<1){x=t;v=0;raf=0;render();return}render();raf=requestAnimationFrame(loop)}
+  const kick=()=>{if(reduce){x=t;render();return}if(!raf)raf=requestAnimationFrame(loop)};
+  const to=(i,now)=>{if(i<0)i=near(0);t=i*SP;if(now){x=t;v=0;at=i;render()}else kick()};
+  const step=d=>{let i=at+d;while(i>=0&&i<mk.length&&!mk[i].ok)i+=d;if(i>=0&&i<mk.length)to(i)};
+  const max=(mk.length-1)*SP,soft=p=>p<0?-40*(1-Math.exp(p/40)):p>max?max+40*(1-Math.exp((max-p)/40)):p;
+  el.addEventListener('pointerdown',e=>{cancelAnimationFrame(raf);raf=0;drag={x0:e.clientX,x:e.clientX,far:0,h:[[e.timeStamp,x]],k:scale(el.closest('.scr'))};el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointermove',e=>{if(!drag)return;const dx=(e.clientX-drag.x)/drag.k;drag.x=e.clientX;drag.far=Math.max(drag.far,Math.abs(e.clientX-drag.x0));x=t=soft(x-dx);drag.h.push([e.timeStamp,x]);while(drag.h.length>2&&e.timeStamp-drag.h[0][0]>90)drag.h.shift();render()});
+  const up=e=>{if(!drag)return;const d=drag;drag=null;
+    if(d.far<6){const hit=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.dataset?.i!=null&&el.contains(n));
+      if(hit&&mk[+hit.dataset.i].ok)return to(+hit.dataset.i);const b=el.getBoundingClientRect();return to(near(x+(e.clientX-(b.left+b.width/2))/d.k))}
+    const [t0,x0]=d.h[0],vel=(x-x0)/Math.max(16,e.timeStamp-t0);v=vel*1000;to(near(Math.max(0,Math.min(max,x+vel*280))))};
+  el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  let acc=0;el.addEventListener('wheel',e=>{e.preventDefault();acc+=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(Math.abs(acc)>30){step(Math.sign(acc));acc=0}},{passive:false});
+  el.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();step(e.key==='ArrowLeft'?-1:1)}});
+  return{to};
+}
+
+/* ---------- frames ---------- */
+function laptop(){
+  const w=document.createElement('div');w.className='lapw';
+  const SW=1280,SH=800;w.innerHTML=`<div class="bez"></div><div class="scr lap" style="width:${SW}px;height:${SH}px"></div>`;
+  const fit=()=>{const cw=w.closest('.st')?.clientWidth||600,avail=cw>=1240?Math.min(820,cw-36-360-22):Math.min(820,cw-36),k=avail/SW;w.style.width=SW*k+'px';w.style.height=SH*k+'px';$('.scr',w).style.transform=`scale(${k})`};
+  w.fit=fit;return w;
+}
+function phone(){const w=document.createElement('div');w.className='phw';w.innerHTML='<div class="scr"></div>';return w}
+
+function card(sec,id,title,use,make){
+  const st=document.createElement('div');st.className='st';st.dataset.id=id;
+  st.innerHTML=`<span class="id"><b>${id}</b>${esc(title)}</span><button class="star" type="button" aria-label="Pick ${id}">★</button><div class="frames"></div><div class="sw"></div><p class="use">${use}</p>`;
+  $('#'+sec).append(st);
+  const L=laptop(),P=phone(),fr=$('.frames',st);
+  const lw=document.createElement('div');lw.append(L);lw.insertAdjacentHTML('beforeend','<p class="flab">Laptop</p>');
+  const pw=document.createElement('div');pw.append(P);pw.insertAdjacentHTML('beforeend','<p class="flab">Phone</p>');
+  fr.append(lw,pw);L.fit();
+  make($('.scr',L),$('.scr',P),$('.sw',st));
+  addEventListener('resize',()=>L.fit());
+}
+// sheet switches under a card
+function switches(box,opts,cur,on){
+  box.innerHTML+=`<span style="display:flex;gap:4px">${opts.map(([v,l])=>`<button type="button" data-v="${v}" aria-pressed="${v===cur}">${l}</button>`).join('')}</span>`;
+  const grp=box.lastElementChild;
+  grp.onclick=e=>{const b=e.target.closest('button');if(!b)return;$$('button',grp).forEach(x=>x.setAttribute('aria-pressed',x===b));on(b.dataset.v)};
+  return v=>$$('button',grp).forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v));
+}
+function pair(lapScr,phScr,o,box,{views=true}={}){
+  const a=App(lapScr,{...o,lap:true}),b=App(phScr,{...o});
+  const both=p=>{a.set(p);b.set(p)};
+  let mark;
+  if(views)mark=switches(box,[['crate','Crate'],['grid','Grid']],o.view||'crate',v=>both({view:v}));
+  a.onview=b.onview=v=>mark?.(v);
+  return{a,b,both};
+}
+
+/* ---------- the options ---------- */
+function build(){
+  card('A','A1','A line that opens a menu','“Sorted by Artist ↑” like the phone table, on every view. In the grid it heads the covers; in the crate it sits over the dial, so the sort and the dial read together. Tap it for the menu; pick the same one again to flip it.',
+    (l,p,sw)=>pair(l,p,{control:'line',dial:'yy'},sw));
+  card('A','A2','In the layout menu','No new control. The layout button already says how you’re looking; the menu gains a Sort row under the three views. Tap the lit one again to flip it. Out of sight most of the time, which suits a quiet crate.',
+    (l,p,sw)=>pair(l,p,{control:'menu',dial:'yy',menuOpen:true},sw));
+  card('A','A3','Its own button','A third circle next to search: two arrows. A short menu, like the view menu, with the direction beside the one you’re on. Easy to find, one more thing in the corner.',
+    (l,p,sw)=>pair(l,p,{control:'button',dial:'yy'},sw));
+  card('A','A4','Words, always out','Artist · Title · Year as plain words: the one you’re on is white, with its arrow. One tap to change, no menu. Over the dial in the crate, over the covers in the grid. The most visible; the least quiet.',
+    (l,p,sw)=>pair(l,p,{control:'words',dial:'yy'},sw));
+
+  const B=[
+    ['B1','Two-digit years','yy','Every year you have a record from, as ’66 ’67 ’69… in Geist Mono. Years with nothing are left out, so ’84 sits next to ’04 and the dial stays as dense as the letters.'],
+    ['B2','Decades','decade','Six marks: ’60s ’70s ’80s ’00s ’10s ’20s. Each jumps to its decade’s oldest record; swipe up for record depth to go year by year. Calm, but the years themselves only show on the cover.'],
+    ['B3','A ruler','ruler','Every year from 1966 to 2026 as a tick, a tall one where you have records, labeled each decade. The gap from ’85 to ’03 shows as an empty stretch: the dial becomes a timeline of the collection.'],
+    ['B4','Full years','yyyy','1966, 1967… years you have, four digits, spaced wider. Clearest to read, fewest on screen at once.'],
+  ];
+  for(const [id,t,mode,use] of B)card('B',id,t,use,(l,p,sw)=>{const x=pair(l,p,{control:'line',dial:mode,sort:{k:'year',d:1}},sw);
+    switches(sw,[['1','Oldest first'],['-1','Newest first']],'1',d=>x.both({sort:{k:'year',d:+d},cur:0}))});
+
+  const C=[
+    ['C1','Just the order','none','Covers in sort order, nothing between them. The grid stays a wall of covers; the sort line is the only word.'],
+    ['C2','Headings','heads','A small heading over each letter or decade: A, B… or 1960s, 1970s. Easy to scan; breaks the wall into rows that end early.'],
+    ['C3','A label while you scroll','sticky','One floating label at the top says where you are (B, 1970s, Blue) while you scroll, and fades when you stop. Like the dial’s letter bubble.'],
+    ['C4','A tag on the first cover','tag','The first cover of each letter or decade wears a small tag in its corner. The wall stays whole; the tags mark the turns.'],
+  ];
+  for(const [id,t,g,use] of C)card('C',id,t,use,(l,p,sw)=>{const x=pair(l,p,{control:'line',groups:g,view:'grid',sort:{k:'year',d:1},sorts:['artist','title','year','label','color']},sw,{views:false});
+    const m=switches(sw,[['artist','Artist'],['title','Title'],['year','Year'],['label','Label'],['color','Color']],'year',k=>x.both({sort:{k,d:1}}));
+    x.a.onsort=x.b.onsort=s=>{m(s.k)}});
+
+  card('D','D1','Artist, title, year','The three a phone table offers. Label and format stay in the table.',
+    (l,p,sw)=>pair(l,p,{control:'line',sorts:['artist','title','year'],menuOpen:true},sw));
+  card('D','D2','Add label','Label too: letters on the dial (Anti-, Capitol, Columbia, Dualtone…). Handy for a crate that leans on a few labels.',
+    (l,p,sw)=>pair(l,p,{control:'line',sorts:['artist','title','year','label'],menuOpen:true},sw));
+  card('D','D3','Add color','Sort by the sleeves’ colors: reds into oranges into blues, then the whites, greys and blacks. The dial turns into a row of colored dots. Only a crate can do this one.',
+    (l,p,sw)=>pair(l,p,{control:'line',sorts:['artist','title','year','label','color'],sort:{k:'color',d:1}},sw));
+}
+
+async function load(){
+  const [src,meta]=await Promise.all([fetch('vinyl-prototype.html').then(r=>r.text()),fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}))]);
+  const m=src.match(/const RECORDS=\[([\s\S]*?)\]\.map\(/);
+  R=(m?Function('return ['+m[1]+']')():[]).map(r=>({...meta[slugOf(r)],...r}));
+  build();wire();
+}
+function wire(){
+  let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('records-sort-picks')||'[]'))}catch{}
+  const save=()=>{try{localStorage.setItem('records-sort-picks',JSON.stringify([...picks]))}catch{}};
+  const text=()=>picks.size?'Picks: '+[...picks].sort().join(', '):'';
+  const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
+  $$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+  $('#copy').onclick=()=>{const t=text();if(!t){$('#copied').textContent='Star a few first';return}
+    const done=()=>{$('#copy').textContent='Copied';$('#copied').textContent=t;setTimeout(()=>$('#copy').textContent='Copy picks',1400)};
+    const fallback=()=>{const o=$('#copied');o.textContent=t;const r=document.createRange();r.selectNodeContents(o);const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy')}catch{}$('#copy').textContent='Selected'};
+    navigator.clipboard?.writeText(t).then(done,fallback)??fallback()};
+  $('#clear').onclick=()=>{picks.clear();save();show();$('#copied').textContent=''};
+  show();
+}
+load();
+</script>
+</body>
+</html>
