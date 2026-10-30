@@ -1083,6 +1083,30 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   .sedge.b,.about::after{bottom:-7px}
   html:has(.play.on) .sedge{--edge:#0d0d0d} /* the Play menu dims the page behind it; the toolbars dim with it */
 }
+/* laptops: the controls line up with the record, not the screen's corners. The row runs from the left of an open
+   record's details' mirror to the right edge of its details, so the crate and an open record put them in the same place */
+:root{--OE:min(var(--R),calc(100vw - 680px));--edge:max(14px,calc(50vw - var(--OE)/2 - 48px - min(340px,calc((100vw - var(--OE))/2 - 80px))))}
+@media(max-width:1040px){:root{--edge:max(14px,calc(50vw - var(--R)/2))}}
+html:not(.phone) .find{padding:0 var(--edge)}
+html:not(.phone) .find .vw{right:var(--edge)}
+html:not(.phone) #close,html:not(.phone) .about .ab-x{right:var(--edge)}
+#oq{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 10px);right:calc(max(14px,env(safe-area-inset-right)) + 52px);width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px;color:#fff;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);opacity:0;transition:opacity .3s,transform .5s var(--flip)}
+html:not(.phone) #oq{right:calc(var(--edge) + 52px)}
+.open.in #oq{opacity:1}
+html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3);transition:none}
+#oq:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+body.seek .find{opacity:1!important;visibility:visible!important;transition:none!important}
+/* searching on a laptop: the matches drop down under the field while the crate narrows behind them */
+html:not(.phone) .sl{position:fixed;z-index:5;top:calc(env(safe-area-inset-top) + 62px);right:calc(var(--edge) + 52px);width:min(420px,calc(100vw - 28px));max-height:min(60vh,520px);box-sizing:border-box;padding:6px;overflow:auto;overscroll-behavior:contain;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float)}
+html:not(.phone) body.searching .sl:not(.idle){display:block;animation:menuIn .3s cubic-bezier(.22,1,.36,1)}
+html:not(.phone) .sl button{padding:6px;border-radius:12px;gap:12px}
+html:not(.phone) .sl .sw,html:not(.phone) .sl .pic{width:40px;height:40px}
+html:not(.phone) .sl b{font-size:15px}
+html:not(.phone) .sl button:hover{background:var(--hov)}
+html:not(.phone) .sl button.on{background:var(--sel)}
+body.searching .qnone{display:none}
+html.phone body.searching .page>:not(.find){opacity:.3}
+@media(prefers-reduced-motion:reduce){html:not(.phone) body.searching .sl:not(.idle){animation:none}}
 </style>
 </head>
 <body>
@@ -1136,6 +1160,7 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   <button class="peek next" id="nextP" tabindex="-1" aria-hidden="true"></button>
   <span class="phint prev" aria-hidden="true"></span><span class="phint next" aria-hidden="true"></span>
   <div class="o-page">
+    <button class="btn" id="oq" type="button"><svg width="18" height="18" viewBox="0 0 256 256" aria-hidden="true" style="display:block"><path fill="currentColor" d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg><span class="sr">Search the crate</span></button>
     <button class="btn" id="close"><span><svg width="18" height="18" viewBox="0 0 256 256" aria-hidden="true" style="display:block"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg><span class="cl">Close</span></span></button>
     <span class="o-count" id="ocount" aria-hidden="true"></span>
     <div class="o-grid">
@@ -1894,7 +1919,7 @@ function closeRecord(fromPop){
   history.replaceState(null,'',plain());setHash(); // the crate's address is plain again; the record on top now is remembered, even after cycling
   timers.forEach(clearTimeout);timers=[];
   const done=()=>{open.hidden=true;lampOn();lamp.copy?.remove();lamp.copy=null;lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
-    $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');veil.style.transition='';root.classList.remove('pulldown','sliding');busy=false;document.activeElement?.blur()};
+    $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');veil.style.transition='';root.classList.remove('pulldown','sliding');busy=false;if(document.activeElement!==q)document.activeElement?.blur()};
   open.classList.remove('in');crate.classList.remove('still');
   if(reduce){quick=false;vanish=false;done();return}
   if(vanish){vanish=quick=false;busy=true;open.style.transition='opacity .2s';open.style.opacity='0';later(()=>{open.style.transition=open.style.opacity='';done()},200);return}
@@ -1925,6 +1950,9 @@ addEventListener('popstate',()=>{clearTimeout(addr.t);const m=location.hash.matc
   if(j>=0&&!open.hidden){const h=()=>busy?setTimeout(h,100):hop(j);h();return} // Back and Forward among the covers opened from More from
   if(j>=0){go(j,true);openRecord(true)}else closeRecord(true)});
 $('#close').onclick=()=>closeRecord();
+// search with a record out: the bar comes back at once with the field ready, and the record goes home behind it
+function seek(){document.body.classList.add('seek');q.focus({preventScroll:true});closeRecord();setTimeout(()=>document.body.classList.remove('seek'),900)}
+$('#oq').onclick=seek;
 stage.addEventListener('pointerdown',e=>{if(busy||!e.isPrimary)return;const now=performance.now();sdrag={x:e.clientX,y:e.clientY,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,far:false,ax:null,ry:sv.ry,w:stage.offsetWidth};stage.setPointerCapture(e.pointerId);stage.classList.add('dragging')});
 // phones: sideways brings in the next record, down puts this one back, a tap turns it over
 function slide(e){
@@ -2278,7 +2306,7 @@ addEventListener('keydown',e=>{
     if(e.key==='Home'||e.key==='End'){e.preventDefault();items.at(e.key==='Home'?0:-1).focus()}
     return;
   }
-  if(!open.hidden){if(e.key==='Escape')closeRecord();const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];if(f){e.preventDefault();swap(f)}return}
+  if(!open.hidden){if(e.key==='/'){e.preventDefault();seek();return}if(e.key==='Escape')closeRecord();const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];if(f){e.preventDefault();swap(f)}return}
   if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,a')){e.preventDefault();openRecord();return}
   const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];
   if(f){e.preventDefault();go(cur+f)}
@@ -2993,16 +3021,18 @@ build();at=cur;
 })();
 </script>
 <script>
-// Phone search: focusing the search opens a list of every record above the keyboard, narrowing as you type.
+// Search opens a list: on a phone, focusing it lists every record above the keyboard; on a laptop the matches drop down
+// under the field as you type. Either way the crate narrows behind the list.
 (()=>{
   const q=$('#q'),qf=$('#qf'),body=document.body,root=document.documentElement;
   const sl=document.createElement('div');sl.className='sl';sl.id='sl';sl.setAttribute('role','listbox');sl.setAttribute('aria-label','Records');document.body.append(sl);
   const sx=document.createElement('button');sx.type='button';sx.className='sx';sx.textContent='Cancel';qf.parentNode.insertBefore(sx,qf.nextSibling.nextSibling);
-  const on=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
+  const on=()=>!editing,ph=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
   const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
   function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
+    sl.classList.toggle('idle',!v&&!ph()); // a laptop lists only what you've typed
     if(!rs.length){sl.innerHTML='<p class="none">Not in the crate</p>';return}
-    if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;return}
+    if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;if(!ph())$('button',sl)?.classList.add('on');return}
     let L='',h='';for(const r of rs){const l=letter(r);if(l!==L){if(L)h+='</ul>';L=l;h+=`<h4>${l}</h4><ul>`}h+=row(r)}sl.innerHTML=h+'</ul>'}
   // covers come from the small copies the grid uses; until one is ready the row shows a plain square
   // only rows on screen ask for one, so typing never queues work for covers nobody sees
@@ -3014,13 +3044,21 @@ build();at=cur;
   function enter(){if(open1||!on())return;open1=true;body.classList.add('searching');list();sl.scrollTop=0}
   function leave(keep){if(!open1)return;open1=false;body.classList.remove('searching');if(!keep){q.value='';qSync();if(filt?.k==='q')arrange(null)}q.blur()}
   q.addEventListener('focus',enter);
-  // while the list is up, typing narrows the list, not the crate
-  addEventListener('input',e=>{if(open1&&e.target===q){e.stopImmediatePropagation();qSync();list()}},true);
+  // while the list is up, typing narrows the list and the crate behind it
+  q.addEventListener('input',()=>{if(open1)list()});
+  // a laptop: the arrows move through the list and Enter pulls out the one that's lit
+  const lit=()=>$('button.on',sl);
+  q.addEventListener('keydown',e=>{if(!open1||ph())return;const k={ArrowDown:1,ArrowUp:-1}[e.key];if(!k)return;
+    const bs=$$('button',sl),i=bs.indexOf(lit()),n=bs[Math.max(0,Math.min(bs.length-1,i+k))];if(!n)return;
+    e.preventDefault();lit()?.classList.remove('on');n.classList.add('on');n.scrollIntoView({block:'nearest'})});
   // Go keeps the crate narrowed to what matches
-  addEventListener('submit',e=>{if(open1&&e.target===qf){e.preventDefault();e.stopImmediatePropagation();const v=q.value.trim();
+  addEventListener('submit',e=>{if(open1&&e.target===qf&&!ph()&&lit()){e.preventDefault();e.stopImmediatePropagation();clearTimeout(qT);lit().click();return}
+    if(open1&&e.target===qf){e.preventDefault();e.stopImmediatePropagation();const v=q.value.trim();
     if(v&&all().some(r=>matchQ(r,v))){arrange({k:'q',v});leave(true)}else if(!v)leave()}},true);
   addEventListener('keydown',e=>{if(open1&&e.key==='Escape'&&e.target===q){e.stopImmediatePropagation();leave()}},true);
   sx.onclick=()=>leave();
+  // a laptop: a click anywhere else puts the list away and leaves the crate as you narrowed it
+  addEventListener('pointerdown',e=>{if(open1&&!ph()&&!e.target.closest('.find,.sl'))leave(true)},true);
   // a record from the list opens straight from the whole crate
   sl.addEventListener('click',e=>{const b=e.target.closest('[data-slug]');if(!b)return;const r=RECORDS.find(x=>x.slug===b.dataset.slug);
     const im=b.querySelector('img,.sw');pickFrom=im?im.getBoundingClientRect():null;clearTimeout(pickT);pickT=setTimeout(()=>{pickFrom=null},900);
