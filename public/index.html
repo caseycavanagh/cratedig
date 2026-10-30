@@ -1061,8 +1061,13 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
 @media(prefers-reduced-motion:reduce){.tsm{animation:none}}
 /* phones: the record stays put while you scroll; the details rise over it out of a soft fade, and the record dims behind them.
    --rise goes 0 to 1 over the first 120px of scrolling */
+/* The record and the title-to-Play block are laid out once, from their reserved sizes (what a three-line title needs), so About,
+   More from and the rest arriving below never move the record or Play. --slack is the spare height, split above and below */
+.o-head{display:contents}
 @media(min-height:501px){
-  html.phone .stage{position:sticky;top:calc(env(safe-area-inset-top) + var(--top));opacity:calc(1 - var(--rise,0)*.8)}
+  html.phone .o-grid{justify-content:flex-start;--slack:max(0px,calc((100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--top) - var(--bot) - var(--O) - var(--gap) - var(--info))/2))}
+  html.phone .o-head{display:flex;flex-direction:column;min-height:var(--info)}
+  html.phone .stage{margin-top:var(--slack);position:sticky;top:calc(env(safe-area-inset-top) + var(--top) + var(--slack));opacity:calc(1 - var(--rise,0)*.8)}
   html.phone .peek{filter:brightness(calc(1 - var(--rise,0)*.8))}
   html.phone .o-info{z-index:2} /* over the record, which comes first; the close button stays on top */
   html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-64px;bottom:calc(-1*(env(safe-area-inset-bottom) + var(--bot)));background:linear-gradient(transparent,var(--bg) 64px);opacity:calc(var(--rise,0)*3);pointer-events:none}
@@ -1700,9 +1705,9 @@ function nearby(r){
 function info(r){
   // year, then label, quiet and gray; each fills the crate with the rest from that year or label, when there are any
   const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${metaHTML(r,k)}</span>`).join('');
-  $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
+  $('#oinfo').innerHTML=`<div class="o-head"><h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
       ${facts?`<p class="facts">${facts}</p>`:''}
-    ${playHTML(r)}<div class="ab" id="oabout" hidden></div>${nearby(r)}${ownHTML(r)}`;
+    ${playHTML(r)}</div><div class="ab" id="oabout" hidden></div>${nearby(r)}${ownHTML(r)}`;
   liner(r);
 }
 // liner notes come from /api/liner: a few lines from Wikipedia for every record, and for a record with no back cover
