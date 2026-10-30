@@ -773,10 +773,6 @@ html.phone .sl{bottom:auto;max-height:calc(100svh - env(safe-area-inset-top) - 9
   .tbl td.c-title b{font-size:16px;line-height:1.3}
   .tbl td.c-year{font-size:14px}
 }
-/* the scrubber stays with you in the record view, above it, and the record makes room for it */
-html:has(.open:not([hidden])) body .kd{opacity:1;visibility:visible;z-index:11;transition:opacity .35s .25s,visibility 0s}
-html:has(.open:not([hidden])) body:not(.ready) .kd{opacity:0}
-html.phone .o-page{padding-bottom:calc(env(safe-area-inset-bottom) + 92px)}
 html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
 /* edit (Casey only) sits at the bottom right; on a phone, just above the scrubber */
 .ed,html.phone .ed{position:fixed;top:auto;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;margin:0;z-index:12}
