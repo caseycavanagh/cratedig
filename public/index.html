@@ -1601,13 +1601,13 @@ function aimNudge(){
   if(ptr&&!reduce&&!raf&&!moved&&open.hidden){const b=frontBox||=n.firstElementChild.getBoundingClientRect();if(ptr.x>=b.left&&ptr.x<=b.right&&ptr.y>=b.top&&ptr.y<=b.bottom)t=Math.max(-1,Math.min(1,((ptr.x-b.left)/b.width-.5)*2))}
   nudgeTo(n,Math.round(t*100)/100);
 }
-// the name of the record under a resting pointer, beside the front record
+// the name of the front record, beside it, while a resting pointer is on it
 var hvI=-1,hvT=0,hvGo=0,onHv=false;const hv=$('#hv');
 function hvOff(){clearTimeout(hvT);clearTimeout(hvGo);hvT=0;onHv=false;hvI=-1;document.getElementById('hv')?.classList.remove('on')}
 function hoverPeek(){
   const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.elementFromPoint(ptr.x,ptr.y),onTab=el?.closest?.('.dv');
   if(onTab)return hvOff();
-  const i=el?nodes.indexOf(el.closest?.('.rc')):-1;
+  let i=el?nodes.indexOf(el.closest?.('.rc')):-1;if(i!==cur)i=-1; // the records behind it stay unnamed
   if(i<0){if(hv.classList.contains('on')&&!onHv){clearTimeout(hvGo);hvGo=setTimeout(hvOff,500)}else if(!onHv)hvOff();return} // a moment's grace, on the way over to the name
   clearTimeout(hvGo);
   const f=nodes[cur].firstElementChild.getBoundingClientRect(),room=innerWidth-f.right-72;
@@ -1761,8 +1761,8 @@ crate.addEventListener('pointermove',e=>{
   aim=Math.max(0,Math.min(order.length-1,drag.i+dy/PULL));kick(); // pull toward you to flip forward
   const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
-// a click without a drag always opens the front record; only dragging, scrolling or the arrow keys flip
-const end=()=>{if(drag&&!moved&&drag.dv)jump(+drag.dv.dataset.j);else if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
+// a click without a drag opens the front record; a click on one behind it flips to it
+const end=()=>{if(drag&&!moved&&drag.dv)jump(+drag.dv.dataset.j);else if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);else openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
     if(fl){vel=Math.max(-40,Math.min(40,v));glide(fl);go(Math.round(aim)+fl)}else go(cur,false)}drag=null;moved=false;crate.classList.remove('dragging','pulling')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 // a finger on the pile: down flips the top record toward you, up stands the last one back up, a tap opens it; sideways does nothing
