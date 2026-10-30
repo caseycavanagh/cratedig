@@ -55,6 +55,8 @@ button{font:inherit;color:inherit}
 /* the crate */
 .crate{position:relative;height:calc(var(--S)*1.95);margin-top:8px;perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% - var(--S)*1.13);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:none}
 .crate.dragging{cursor:grabbing}
+/* the front record is a handle: grab it and lift it out */
+.rc.cur{cursor:grab}.crate.lifting,.crate.lifting .rc{cursor:grabbing}
 /* hover nudges the front cover a few pixels toward the pointer's side: on the cover, so it never disturbs the crate's motion, and on its own spring in JS (see "nudge") */
 .rc .fr{transition:opacity .4s}
 .stack{position:absolute;left:50%;bottom:calc(50% - var(--S)/2);width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt,-16deg))}
@@ -580,6 +582,11 @@ body.walling .find .chip{display:none}
 .wall .pills small{font-size:13px;opacity:.55}
 .wall .in{max-width:1400px;margin:0 auto}
 .tiles{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px}
+.tiles{position:relative;margin-left:34px}
+.gms p{position:absolute;right:calc(100% + 8px);margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:500 14px/1 var(--sans);color:var(--t1);pointer-events:none}
+.gms .yr{font:400 11px/1 'Geist Mono',ui-monospace,monospace;letter-spacing:-.03em;color:var(--t2)}
+.gms i{width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
+@media (min-width:700px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:15px}.gms .yr{font-size:13px}.gms i{width:22px;height:22px}}
 .tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
@@ -624,6 +631,12 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd-l{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font:500 18px/24px var(--sans);color:var(--t3);transform-origin:50% 70%}
 .kd-l.on{color:#fff}
 .kd-t{width:1px;height:12px;margin-left:-.5px;background:var(--t4);transform-origin:50% 100%}
+/* sorted by year the marks are years, in mono; by color, dots in each color */
+.kd[data-marks=years] .kd-l{width:58px;margin-left:-29px;font:400 16px/24px 'Geist Mono',ui-monospace,monospace;letter-spacing:-.02em}
+.kd[data-marks=years] .kd-l.kd-nd{width:72px;margin-left:-36px;padding-left:22px;box-sizing:border-box;font-size:12px} /* nudged right, clear of the last year */
+.kd[data-marks=colors] .kd-l{display:grid;place-items:center}
+.kd[data-marks=colors] .kd-l i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
+.kd[data-marks=colors] .kd-l.on i{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px #fff}
 .kd-t.on{background:#fff}
 .kd-m{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:#fff;bottom:calc(var(--kh,58px) - 4px);opacity:calc(1 - var(--kz,0))}
 .kd-b{position:absolute;left:24px;right:24px;bottom:calc(var(--kh,58px) + 12px);height:18px;text-align:center;font:400 13px/18px var(--sans);color:var(--m)}
@@ -744,6 +757,11 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .tbl table{width:100%;max-width:1400px;margin:0 auto;border-collapse:collapse;font-size:15px;table-layout:auto}
 .tbl thead th{position:sticky;top:-8px;z-index:1;background:var(--bg);text-align:left;font-weight:400;padding:10px 12px 8px;border-bottom:1px solid var(--line)}
 .tbl th button{all:unset;cursor:pointer;color:var(--m);font-size:13px;display:inline-flex;gap:4px;align-items:center}
+.tbl th>span{color:var(--m);font-size:13px;font-weight:400} /* format doesn't sort */
+/* the covers' column sorts by color: a small color wheel, lit when it's the sort */
+.tbl th.c0 .cw{width:14px;height:14px;opacity:.5;transition:opacity .2s}
+.tbl th.c0 .cn{display:none}
+.tbl th.c0 button:hover .cw,.tbl th.c0[aria-sort=ascending] .cw,.tbl th.c0[aria-sort=descending] .cw{opacity:1}
 .tbl th button:hover,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{color:#fff}
 .tbl th button:focus-visible{outline:1px solid var(--ring);outline-offset:2px;border-radius:4px}
 .tbl th i{font-style:normal;font-size:12px;width:10px}
@@ -939,6 +957,18 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .find .vw button:hover{background:var(--hov);color:#fff}
 .find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:var(--sel);color:#fff;border:0}
 .find .vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.fb.sb[hidden]{display:none}
+.fb.lb.sb.on,html.phone .fb.lb.sb.on,.find:has(.q:focus-within) .fb.lb.sb.on{background:#fff;color:#111;border-color:#fff} /* sorted some other way than artist, A to Z */
+.fb.lb.sb.on[aria-expanded=true]{background:#e6e6e6}
+/* a name for each icon button, after a short rest on it with a mouse */
+.tt{position:fixed;z-index:30;left:0;top:0;padding:6px 10px;border-radius:10px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);font:400 13px/1.2 var(--sans);color:var(--t1);white-space:nowrap;pointer-events:none;opacity:0;translate:0 -2px;transition:opacity .1s,translate 0s .1s}
+.tt.on{opacity:1;translate:0;transition:opacity .15s,translate .35s cubic-bezier(.22,1,.36,1)}
+@media(prefers-reduced-motion:reduce){.tt,.tt.on{transition:opacity .15s}}
+.fb.sb svg{width:22px;height:22px}
+.cw{width:18px;height:18px;border-radius:50%;background:conic-gradient(from 0deg,#e5534b,#e8a33d,#e6d84a,#6cc24a,#3fb8b0,#4a8fe6,#8a5ae6,#e05aa8,#e5534b);box-shadow:inset 0 0 0 3px #0000001f}
+.find .vw.so button svg{width:20px;height:20px;flex:none}
+.find .vw.so .cw{width:16px;height:16px;margin:0 2px;flex:none}
+.find .vw.so button i{margin-left:auto;font-style:normal;color:var(--t2)}
 /* an open record closes from where the view button sits: top right, the same 44px circle, so the mark keeps the top left */
 #close,html.phone #close{left:auto;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;font-size:18px;border:1px solid var(--line);box-sizing:border-box}
 /* a record's name over its mark on the dial, after a short rest; it leaves on a quick fade */
@@ -1039,6 +1069,7 @@ html.phone .ab-body{font-size:18px}
 html.phone .ab-cr{margin-top:12px}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
 .find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
+.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-82px - env(safe-area-inset-bottom));background:#121212;opacity:calc(var(--kz,0)*.94);-webkit-mask:linear-gradient(#0000,#000 50%);mask:linear-gradient(#0000,#000 50%);pointer-events:none} /* opened up to records, the dial darkens what's behind it */
 .kd::before,.kd::before{top:-80px;background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%)}
 html.phone body.searching .find::before{display:none}
 .find::before{transition:opacity .3s}
@@ -1049,6 +1080,8 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
 @media (max-width:700px){
   .tbl thead tr{padding:4px 18px 10px;background:none}
   .tbl thead th[aria-sort=none]{display:none}
+  .tbl thead th.c0:not([aria-sort=none]){display:block;width:auto} /* sorted by color, the line reads "Sorted by Color" */
+  .tbl th.c0 .cw{display:none}.tbl th.c0 .cn{display:inline;font-weight:inherit}
   .tbl th button,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{height:auto;padding:6px 0;border:0;border-radius:0;background:none;font-size:14px;color:#fff;gap:6px}
   .tbl th button::before{content:'Sorted by';color:var(--m)}
   .tbl th button::after{content:'';width:7px;height:7px;margin:-4px 0 0 2px;border:solid var(--m);border-width:0 1.5px 1.5px 0;rotate:45deg}
@@ -1086,6 +1119,50 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   .sedge.b,.about::after{bottom:-7px}
   html:has(.play.on) .sedge{--edge:#0d0d0d} /* the Play menu dims the page behind it; the toolbars dim with it */
 }
+/* laptops: the controls line up with the record, not the screen's corners. The row runs from the left of an open
+   record's details' mirror to the right edge of its details, so the crate and an open record put them in the same place */
+:root{--OE:min(var(--R),calc(100vw - 680px));--edge:max(14px,calc(50vw - var(--OE)/2 - 48px - min(340px,calc((100vw - var(--OE))/2 - 80px))))}
+@media(max-width:1040px){:root{--edge:max(14px,calc(50vw - var(--R)/2))}}
+html:not(.phone) .find{padding:0 var(--edge)}
+html:not(.phone) .find .vw{right:var(--edge)}
+html:not(.phone) #close,html:not(.phone) .about .ab-x{right:var(--edge)}
+#oq{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 10px);right:calc(max(14px,env(safe-area-inset-right)) + 52px);width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px;color:#fff;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);opacity:0;transition:opacity .3s,transform .5s var(--flip)}
+html:not(.phone) #oq{right:calc(var(--edge) + 52px)}
+.open.in #oq{opacity:1}
+html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3);transition:none}
+#oq:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+body.seek .find{z-index:11}
+body.seek .find::before{opacity:0}
+body.seek .crate.lifted~.find>.q,body.seek .crate.lifted~.find>.sx{opacity:1;visibility:visible;pointer-events:auto;scale:1;transition:none}
+html:has(.crate.lifted) body.seek #oq{opacity:0;visibility:hidden}
+html body.seek .sl,html:not(.phone) body.seek .sl{z-index:12}
+html.phone body.seek #close{opacity:0;visibility:hidden}
+/* searching on a laptop: the matches drop down under the field while the crate narrows behind them */
+html:not(.phone) .sl{position:fixed;z-index:5;top:calc(env(safe-area-inset-top) + 62px);right:calc(var(--edge) + 52px);width:min(420px,calc(100vw - 28px));max-height:min(60vh,520px);box-sizing:border-box;padding:6px;overflow:auto;overscroll-behavior:contain;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float)}
+html:not(.phone) body.searching .sl:not(.idle){display:block;animation:menuIn .3s cubic-bezier(.22,1,.36,1)}
+html:not(.phone) .sl button{padding:6px;border-radius:12px;gap:12px}
+html:not(.phone) .sl .sw,html:not(.phone) .sl .pic{width:40px;height:40px}
+html:not(.phone) .sl b{font-size:15px}
+html:not(.phone) .sl button:hover{background:var(--hov)}
+html:not(.phone) .sl button.on{background:var(--sel)}
+body.searching .qnone{display:none}
+html.phone body.searching .page>:not(.find){opacity:.3}
+@media(prefers-reduced-motion:reduce){html:not(.phone) body.searching .sl:not(.idle){animation:none}}
+/* the bar hands over to an open record's buttons in place: search never moves or blinks (the two buttons swap in the same
+   frame, on the same signal), the layout button turns into × and back, and the rest ease out and in around them */
+.crate.lifted~.find{opacity:1;visibility:visible;transition:none}
+.find>*{transition:opacity .35s .12s,scale .5s var(--spring) .12s,rotate .5s var(--spring) .12s,visibility 0s .12s}
+.crate.lifted~.find>*{opacity:0;visibility:hidden;scale:.92;pointer-events:none;transition:opacity .15s,scale .3s var(--spring),rotate .3s var(--spring),visibility 0s .15s}
+.crate.lifted~.find>.fb.lb{rotate:90deg;scale:.6}
+html:has(.crate.lifted) .find>.q,html:not(:has(.crate.lifted)) #oq{transition:none}
+html:has(.crate.lifted) .find>.q{scale:1}
+#oq,.open.in #oq{opacity:0;transition:none}
+html:has(.crate.lifted) #oq{opacity:1}
+#close{scale:.6;rotate:-90deg;transition:opacity .15s,scale .3s var(--spring),rotate .3s var(--spring)}
+html:has(.crate.lifted) .open:not([hidden]) #close{opacity:1;scale:1;rotate:0deg;transition:opacity .3s .08s,scale .5s var(--spring) .08s,rotate .5s var(--spring) .08s}
+.find>.fb.lb{transition-delay:0s}
+html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3)}
+@media(prefers-reduced-motion:reduce){.find>*,.crate.lifted~.find>*,#close,html:has(.crate.lifted) .open:not([hidden]) #close{transition:opacity .15s;scale:none;rotate:none}.crate.lifted~.find>.fb.lb{scale:none;rotate:none}}
 </style>
 </head>
 <body>
@@ -1139,6 +1216,7 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   <button class="peek next" id="nextP" tabindex="-1" aria-hidden="true"></button>
   <span class="phint prev" aria-hidden="true"></span><span class="phint next" aria-hidden="true"></span>
   <div class="o-page">
+    <button class="btn" id="oq" type="button"><svg width="18" height="18" viewBox="0 0 256 256" aria-hidden="true" style="display:block"><path fill="currentColor" d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg><span class="sr">Search the crate</span></button>
     <button class="btn" id="close"><span><svg width="18" height="18" viewBox="0 0 256 256" aria-hidden="true" style="display:block"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg><span class="cl">Close</span></span></button>
     <span class="o-count" id="ocount" aria-hidden="true"></span>
     <div class="o-grid">
@@ -1327,7 +1405,25 @@ const yr=r=>+r.year||9999;
 const byName=(a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||yr(a)-yr(b)||a.title.localeCompare(b.title);
 // for matching, text folds to plain lowercase letters and digits: "ivan alyosha" finds Ivan & Alyosha, "2x" finds 2×LP
 const fold=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/×/g,'x').replace(/[’'.]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-const letter=r=>{const c=fold(name(r))[0]||'';return /[a-z]/.test(c)?c.toUpperCase():'#'};
+const initial=s=>{const c=fold(s)[0]||'';return /[a-z]/.test(c)?c.toUpperCase():'#'};
+const letter=r=>initial(name(r));
+// The crate and the grid share one sort (the table keeps its own): artist, title, year, label or color; d is 1, or -1 reversed.
+// A record with no year or no label goes last either way.
+const ttl=r=>r.title.replace(/^(the|an?) /i,'');
+const hsl=r=>{const n=parseInt((/^#[0-9a-f]{6}$/i.test(spineBg(r))?spineBg(r):'#333333').slice(1),16),R=(n>>16&255)/255,G=(n>>8&255)/255,B=(n&255)/255,mx=Math.max(R,G,B),mn=Math.min(R,G,B),l=(mx+mn)/2,d=mx-mn;
+  let h=0;if(d){h=mx===R?((G-B)/d)%6:mx===G?(B-R)/d+2:(R-G)/d+4;h*=60;if(h<0)h+=360}return{h,s:d?d/(1-Math.abs(2*l-1)):0,l}};
+// twelve hues around the wheel, then the sleeves with hardly any color: light, grey, dark
+const hue=r=>{const c=hsl(r);if(c.s<.18||c.l<.1||c.l>.92)return c.l>.6?12:c.l>.25?13:14;return Math.round(c.h/30)%12};
+const HUES=['Red','Orange','Amber','Yellow','Lime','Green','Teal','Cyan','Blue','Indigo','Violet','Pink','Light','Grey','Dark'];
+const hueInk=i=>i<12?`hsl(${i*30} 62% 52%)`:['#e6e3dc','#7d7c79','#2b2b2d'][i-12];
+const cmpS=(a,b)=>a.localeCompare(b,'en',{sensitivity:'base'});
+const SORTS={artist:{l:'Artist',by:byName},title:{l:'Title',by:(a,b)=>cmpS(ttl(a),ttl(b))||byName(a,b)},year:{l:'Year',by:(a,b)=>yr(a)-yr(b)||byName(a,b)},
+  label:{l:'Label',by:(a,b)=>cmpS(labelName(a.label),labelName(b.label))||byName(a,b)},color:{l:'Color',by:(a,b)=>hue(a)-hue(b)||hsl(b).l-hsl(a).l||byName(a,b)}};
+let SORT={k:'artist',d:1};try{const s=JSON.parse(localStorage.getItem('records-sort'));if(s&&SORTS[s.k])SORT={k:s.k,d:s.d<0?-1:1}}catch{}
+const unsorted=r=>SORT.k==='year'?!+r.year:SORT.k==='label'&&!r.label;
+const bySort=(a,b)=>unsorted(a)-unsorted(b)||SORTS[SORT.k].by(a,b)*SORT.d;
+// where a record falls in the sort: a letter, a year, or a color
+const group=r=>{const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='color'?String(hue(r)):letter(r)};
 // A filter narrows the crate to one artist, label, year or format (from a record's details) or to a search; null is the whole crate
 // a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
 const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
@@ -1342,7 +1438,7 @@ function matching(f){
 // the crate holds what a filter keeps, the record in front staying in front when it's among them; a filter that keeps nothing changes nothing
 function arrange(f,keep=order[cur]){
   const list=matching(f);if(!list.length)return 0;
-  filt=f;order=[...list].sort(byName);build();go(Math.max(0,order.indexOf(keep)),true);
+  filt=f;order=[...list].sort(bySort);build();go(Math.max(0,order.indexOf(keep)),true);
   if(f?.k!=='q'&&q.value){q.value='';qSync()}
   showChip();
   if(f)say(f.k==='q'?`${list.length} ${list.length>1?'records match':'record matches'}.`:`${list.length} records, ${KIND[f.k].toLowerCase()} ${f.v}.`);
@@ -1407,6 +1503,7 @@ function deckSeat(d,q){
 }
 // One spring drives the crate: pos chases aim, so a flip can be interrupted, retargeted or dragged without restarting
 let pos=0,vel=0,aim=0,raf=0;
+const pk={y:0,v:0,t:0,f:0}; // how far the front record is pulled up out of the crate (see "Pulling a record out")
 const K=220,C=27;let spr=null; // a throw glides on a softer spring, critically damped, then K and C again
 // where a record sits at a (fractional) distance d behind the front one
 function seat(d){
@@ -1414,6 +1511,11 @@ function seat(d){
   if(d>=0)return{z:-BEHIND*d,a:10+.5*d,m:.5+.5*d};
   if(d>-1){const t=-d;return{z:AHEAD*t,a:10-70*t,m:.5+.5*t}} // falling forward
   const k=-d-1;return{z:AHEAD+k*FGAP,a:-(60+Math.min(k,8)*1.2),m:1}; // flipped records pile up, fanned a little, leaning far enough to show only their backs
+}
+// a record's place in the crate; the front one also slides up along itself as it's pulled out
+function tfOf(j){
+  const p=seat(j-pos),q=jits[j];
+  return`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg)${j===cur&&pk.y?` translateY(${(-pk.y).toFixed(1)}px)`:''}`;
 }
 // the crate's eye level again, in pixels: iPhone Safari drops the calc() in the CSS and looks from the middle of the crate,
 // so a phone's flipped records, meant to lie edge on at eye level, show their backs as a slab under the pile
@@ -1432,11 +1534,7 @@ function render(){
     });
     return;
   }
-  nodes.forEach((n,j)=>{
-    if(!shown[j])return;
-    const p=seat(j-pos),q=jits[j];
-    n.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg)`;
-  });
+  nodes.forEach((n,j)=>{if(shown[j])n.style.transform=tfOf(j)});
   // each divider stands just behind the record before its letter, parallel to it, so the two never cross; it leaves as that record flips
   for(const v of dvs){const j=+v.dataset.j-1,d=j-pos,off=d<0||DV===8&&d>6;if(v._off!==off){v._off=off;v.classList.toggle('off',off)}
     if(!off){const p=seat(d),q=jits[j],g=Math.max(1.5,(p.z-seat(d+1).z)*.45);
@@ -1802,7 +1900,7 @@ $('#oinfo').addEventListener('click',e=>{
   if(!(filt&&filt.k===f.k&&same(filt.v,f.v)))arrange(f); // the crate changes behind the record, then the record goes home into it
   closeRecord();
 });
-function openRecord(deep){
+function openRecord(deep,pulled){
   const r=order[cur];fill(r);
   timers.forEach(clearTimeout);timers=[];
   open.hidden=false;open.scrollTop=0;lampOn();
@@ -1819,13 +1917,14 @@ function openRecord(deep){
     if(ps){lift.style.transform=ps.tf;stage.style.perspective=ps.P+'px';stage.style.perspectiveOrigin=`${ps.ox}px ${ps.oy}px`}
     snapS(0,0);
     held.classList.add('held');void lift.offsetWidth;
-    later(()=>{lift.classList.add('moving');stage.classList.add('moving');lift.style.transform='';stage.style.perspective=stage.style.perspectiveOrigin='';setS()},120);
-    later(()=>open.classList.add('in'),380);
+    later(()=>{lift.classList.add('moving');stage.classList.add('moving');lift.style.transform='';stage.style.perspective=stage.style.perspectiveOrigin='';setS()},pulled?16:120);
+    later(()=>open.classList.add('in'),pulled?280:380);
     later(()=>{busy=false;lift.classList.remove('moving');stage.classList.remove('moving')},1100);
   }
   // each record gets its own address: #record/<slug>
   if(deep)history.replaceState(null,'','#record/'+r.slug);else if(!history.state?.open)history.pushState({open:1},'','#record/'+r.slug);
   open.focus({preventScroll:true});
+  if(pk.y||pk.t)pkDrop(); // the sleeve has taken over from the record it was pulled by; that one goes back to its seat, out of sight
   window.hintTurn?.();
 }
 // on a phone the peeks line up with the record rather than the screen
@@ -1898,7 +1997,7 @@ function closeRecord(fromPop){
   history.replaceState(null,'',plain());setHash(); // the crate's address is plain again; the record on top now is remembered, even after cycling
   timers.forEach(clearTimeout);timers=[];
   const done=()=>{open.hidden=true;lampOn();lamp.copy?.remove();lamp.copy=null;lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
-    $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');veil.style.transition='';root.classList.remove('pulldown','sliding');busy=false;document.activeElement?.blur()};
+    $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));crate.classList.remove('lifted');veil.style.transition='';root.classList.remove('pulldown','sliding');busy=false;if(document.activeElement!==q)document.activeElement?.blur()};
   open.classList.remove('in');crate.classList.remove('still');
   if(reduce){quick=false;vanish=false;done();return}
   if(vanish){vanish=quick=false;busy=true;open.style.transition='opacity .2s';open.style.opacity='0';later(()=>{open.style.transition=open.style.opacity='';done()},200);return}
@@ -1929,8 +2028,11 @@ addEventListener('popstate',()=>{clearTimeout(addr.t);const m=location.hash.matc
   if(j>=0&&!open.hidden){const h=()=>busy?setTimeout(h,100):hop(j);h();return} // Back and Forward among the covers opened from More from
   if(j>=0){go(j,true);openRecord(true)}else closeRecord(true)});
 $('#close').onclick=()=>closeRecord();
+// search with a record out: the field opens where the button was, over the record, which stays out until you pick another
+function seek(){document.body.classList.add('seek');q.focus({preventScroll:true})}
+$('#oq').onclick=seek;
 stage.addEventListener('pointerdown',e=>{if(busy||!e.isPrimary)return;const now=performance.now();sdrag={x:e.clientX,y:e.clientY,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,far:false,ax:null,ry:sv.ry,w:stage.offsetWidth};stage.setPointerCapture(e.pointerId);stage.classList.add('dragging')});
-// phones: sideways brings in the next record, down puts this one back, a tap turns it over
+// phones: sideways brings in the next record, down puts this one back, a tap turns it over; on a laptop, down puts it back too
 function slide(e){
   const s=sdrag,dx=e.clientX-s.x,dy=e.clientY-s.y,now=performance.now(),dt=Math.max(8,now-s.lt);
   s.vx=.5*s.vx+.5*(e.clientX-s.lx)/dt;s.vy=.5*s.vy+.5*(e.clientY-s.ly)/dt;s.lt=now;s.lx=e.clientX;s.ly=e.clientY;
@@ -1943,7 +2045,7 @@ function slide(e){
     lift.style.transform=`translateX(${s.dx.toFixed(1)}px) rotate(${(s.dx/s.w*3).toFixed(2)}deg)`;open.style.setProperty('--dx',s.dx.toFixed(1)+'px');
   }else{
     s.dy=dy>0?dy:dy*.2/(1-dy/200);const p=Math.max(0,Math.min(1,s.dy/(innerHeight*.45)));
-    lift.style.transform=`translate(${(dx*.3).toFixed(1)}px,${s.dy.toFixed(1)}px) scale(${(1-p*.3).toFixed(4)})`;setPull(p);
+    lift.style.transform=`translate(${(dx*.3).toFixed(1)}px,${s.dy.toFixed(1)}px)`;setPull(p); // it moves with the hand, the size it is
   }
 }
 function settle(s){
@@ -1983,7 +2085,9 @@ function unpull(){
 }
 stage.addEventListener('pointermove',e=>{
   if(sdrag&&PHONE){slide(e);return}
-  if(sdrag){if(Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>5)sdrag.far=true;
+  if(sdrag&&(sdrag.ax||!sdrag.turning&&Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>8&&e.clientY-sdrag.y>Math.abs(e.clientX-sdrag.x))){ // down: the reverse of pulling it out
+    if(!sdrag.ax){ry=sv.ry=sdrag.ry;sv.vy=0;rx=sv.rx=TILT;paintS()}slide(e);return}
+  if(sdrag){if(Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>5)sdrag.far=true;if(Math.hypot(e.clientX-sdrag.x,e.clientY-sdrag.y)>8)sdrag.turning=true;
     const now=performance.now(),y=sdrag.ry+(e.clientX-sdrag.x)*.6;sv.vy=.6*sv.vy+.4*(y-sv.ry)/Math.max(.008,(now-sdrag.lt)/1000);sdrag.lt=now;
     ry=sv.ry=y;rx=sv.rx=TILT;paintS();return} // the sleeve follows your hand exactly
   if(reduce||busy||e.pointerType!=='mouse')return;
@@ -1991,7 +2095,7 @@ stage.addEventListener('pointermove',e=>{
 });
 // a tap turns it over; a drag lands on whichever side it's heading for, carrying its speed
 const sEnd=()=>{if(!sdrag)return;const s=sdrag,tap=!sdrag.far&&performance.now()-sdrag.t<400;sdrag=null;stage.classList.remove('dragging');
-  if(PHONE&&s.ax){settle(s);return}
+  if(s.ax){settle(s);return}
   if(tap)sv.vy=0;base=tap?base+180:REST+180*Math.round((sv.ry+sv.vy*.12-REST)/180);ry=base;rx=TILT;setS()};
 stage.addEventListener('pointerup',sEnd);stage.addEventListener('pointercancel',sEnd);
 stage.addEventListener('mouseleave',()=>{if(!sdrag&&!busy){ry=base;rx=TILT;setS()}});
@@ -2210,18 +2314,45 @@ void main(){
   }};
 })():null;
 addEventListener('resize',()=>{frontBox=null;deckS=0;tailS=0;if(nodes.length&&!raf)render();if(PHONE&&!open.hidden)aimPeeks()});
-crate.addEventListener('pointerdown',e=>{if(PHONE)return;spr=null;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc'),dv:e.target.closest('.dv'),vy:0,lt:performance.now(),ly:e.clientY};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging')});
+// Pulling a record out: grab the front record and lift. It holds in the crate for the first stretch, giving only a little, then comes
+// free with a tick and follows the hand up to a stop, where it holds. Let go once it's free and it carries on out into the open view;
+// bring it back down before letting go and it catches again and settles back in. Down on it flips, as does any drag off it.
+const PK_GRIP=6;
+// only the front record moves while it's pulled, so only it is redrawn
+const pkPaint=()=>{const n=nodes[cur];if(n&&!DECK)n.style.transform=tfOf(cur)};
+// the record eases toward where it should be, closing the same share of the gap each moment: steady at any frame rate, it never
+// overshoots or trembles under a still hand. Held, it keeps close to the hand (tau, seconds); let go, it settles more slowly.
+function pkTo(t,tau=.09){
+  pk.t=t;pk.tau=tau;if(reduce){pk.y=t;pkPaint();return}if(pk.f)return;let l=0;
+  const st=now=>{const dt=l?Math.min(.05,(now-l)/1000):1/60;l=now;pk.y+=(pk.t-pk.y)*(1-Math.exp(-dt/pk.tau));
+    if(Math.abs(pk.y-pk.t)<.2){pk.y=pk.t;pk.f=0;pkPaint();return}pkPaint();pk.f=requestAnimationFrame(st)};
+  pk.f=requestAnimationFrame(st);
+}
+const pkDrop=()=>{cancelAnimationFrame(pk.f);pk.f=0;pk.y=pk.t=pk.v=0;crate.classList.remove('lifting');pkPaint()};
+const onFront=e=>open.hidden&&!busy&&!!nodes[cur]&&e.target.closest?.('.rc')===nodes[cur];
+// where the record is for a hand this far up: a little give while it's caught, then nearly with the hand once it's free, up to the stop
+function pullTo(s,y){
+  let d=Math.max(0,s.y-y);const C=PHONE?44:40,END=PHONE?120:110;
+  if(!s.free&&d>=C){s.free=true;buzz()}else if(s.free&&d<C*.55)s.free=false; // changed your mind: it catches again
+  if(d>END)d=END+10*(1-Math.exp(-(d-END)/40)); // as far as it goes: past the stop it only gives a hair
+  pkTo(Math.round(s.free?PK_GRIP+(d-C*.4)*.92:PK_GRIP+10*(1-Math.exp(-d/22))),.04); // whole pixels: a still hand holds it still
+}
+function letGo(s){crate.classList.remove('lifting');if(s.free&&!busy&&open.hidden){buzz();openRecord(false,true)}else pkTo(0)}
+crate.addEventListener('pointerdown',e=>{if(PHONE)return;spr=null;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc'),dv:e.target.closest('.dv'),vy:0,lt:performance.now(),ly:e.clientY,lip:onFront(e)};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging');if(drag.lip){crate.classList.add('lifting');pkTo(PK_GRIP)}});
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
   const dy=e.clientY-drag.y,now=performance.now(),dt=Math.max(8,now-drag.lt);drag.vy=.2*drag.vy+.8*(e.clientY-drag.ly)/dt;drag.lt=now;drag.ly=e.clientY;
-  if(Math.abs(dy)>6&&!moved){moved=true;crate.classList.add('pulling')}
+  if(Math.abs(dy)>6&&!moved){moved=true;if(drag.lip&&dy<0)drag.pull={y:drag.y,free:false};else{crate.classList.add('pulling');if(drag.lip){crate.classList.remove('lifting');pkTo(0)}}}
   if(!moved)return;
+  if(drag.pull){pullTo(drag.pull,e.clientY);return}
   aim=Math.max(0,Math.min(order.length-1,drag.i+dy/PULL));kick(); // pull toward you to flip forward
   const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
 // a click without a drag opens the front record; a click on one behind it flips to it
-const end=()=>{if(drag&&!moved&&drag.dv)jump(+drag.dv.dataset.j);else if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);else openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
-    if(fl){vel=Math.max(-40,Math.min(40,v));glide(fl);go(Math.round(aim)+fl)}else go(cur,false)}drag=null;moved=false;crate.classList.remove('dragging','pulling')};
+const end=()=>{if(drag?.pull){const s=drag.pull;drag=null;moved=false;crate.classList.remove('dragging','lifting');letGo(s);return}
+  if(drag?.lip&&!moved)pkTo(0);
+  if(drag&&!moved&&drag.dv)jump(+drag.dv.dataset.j);else if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);else openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
+    if(fl){vel=Math.max(-40,Math.min(40,v));glide(fl);go(Math.round(aim)+fl)}else go(cur,false)}drag=null;moved=false;crate.classList.remove('dragging','pulling','lifting')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
 // a finger on the pile: down flips the top record toward you, up stands the last one back up, a tap opens it; sideways does nothing
 // how many records a flick of v records a second carries past where the finger let go
@@ -2233,14 +2364,15 @@ crate.addEventListener('pointerdown',e=>{
   if(!PHONE||busy||!e.isPrimary)return;
   cancelAnimationFrame(raf);raf=0;tick.t=0;spr=null; // catch the pile where it is, mid-flight or not
   const now=performance.now();
-  dd={x:e.clientX,y:e.clientY,p:pos,b:aim,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,ax:null};
-  crate.setPointerCapture(e.pointerId);crate.classList.add('pressing');
+  dd={x:e.clientX,y:e.clientY,p:pos,b:aim,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,ax:null,lip:onFront(e)};
+  crate.setPointerCapture(e.pointerId);crate.classList.add('pressing');if(dd.lip)pkTo(PK_GRIP); // a finger on the front record has it: it lifts a hair
 });
 crate.addEventListener('pointermove',e=>{
   if(!dd)return;
   const dx=e.clientX-dd.x,dy=e.clientY-dd.y,now=performance.now(),dt=Math.max(8,now-dd.lt);
   dd.vx=.5*dd.vx+.5*(e.clientX-dd.lx)/dt;dd.vy=.2*dd.vy+.8*(e.clientY-dd.ly)/dt;dd.lt=now;dd.lx=e.clientX;dd.ly=e.clientY;
-  if(!dd.ax){if(Math.hypot(dx,dy)<8)return;dd.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';crate.classList.remove('pressing')}
+  if(!dd.ax){if(Math.hypot(dx,dy)<8)return;dd.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';crate.classList.remove('pressing');if(dd.lip&&dd.ax==='y'&&dy<0)dd.pull={y:dd.y,free:false};else if(dd.lip)pkTo(0)}
+  if(dd.pull){pullTo(dd.pull,e.clientY);return}
   if(dd.ax!=='y')return;
   const hi=order.length-1;let p=dd.p+dy/deckS;off.y=0;
   if(p<0){off.y=-rub(-p*deckS);p=0} // nothing before the first: it lifts a little
@@ -2251,6 +2383,8 @@ crate.addEventListener('pointermove',e=>{
 });
 const deckEnd=e=>{
   if(!dd)return;const s=dd;dd=null;crate.classList.remove('pressing');
+  if(s.pull){letGo(s.pull);return}
+  if(s.lip&&!s.ax)pkTo(0);
   if(!s.ax){if(e.type==='pointerup'&&performance.now()-s.t<500&&Math.abs(s.p-s.b)<.05)openTop();else kick();return}
   if(s.ax!=='y'){kick();return}
   // one pull, one record: far enough or fast enough and it flips, carrying the flick's speed
@@ -2282,7 +2416,7 @@ addEventListener('keydown',e=>{
     if(e.key==='Home'||e.key==='End'){e.preventDefault();items.at(e.key==='Home'?0:-1).focus()}
     return;
   }
-  if(!open.hidden){if(e.key==='Escape')closeRecord();const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];if(f){e.preventDefault();swap(f)}return}
+  if(!open.hidden){if(e.key==='/'){e.preventDefault();seek();return}if(e.key==='Escape')closeRecord();const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];if(f){e.preventDefault();swap(f)}return}
   if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,a')){e.preventDefault();openRecord();return}
   const f={ArrowDown:1,ArrowRight:1,j:1,ArrowUp:-1,ArrowLeft:-1,k:-1}[e.key];
   if(f){e.preventDefault();go(cur+f)}
@@ -2612,13 +2746,25 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     tiles.style.setProperty('--cols',cols());sizeTiles();
     const f=document.createDocumentFragment();
     order.forEach(r=>f.append(tileFor(r)));
-    tiles.replaceChildren(f);drawPills();
+    tiles.replaceChildren(f,marks);placeMarks();drawPills();
     if(!before.size)return;
     // covers glide from where they were; new ones grow in
     for(const r of order){const n=keep.get(r.slug),a=before.get(r.slug),b=n.getBoundingClientRect();
       if(a)n.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width})`,transformOrigin:'0 0'},{transform:'none',transformOrigin:'0 0'}],{duration:480,easing:'cubic-bezier(.22,1,.36,1)'});
       else n.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'})}
   }
+  // the turns of the sort sit in the margin beside the rows, off the grid, so the covers stay one even wall:
+  // a letter, a decade, or a dot of the color, level with the row where it starts
+  const marks=document.createElement('div');marks.className='gms';marks.setAttribute('aria-hidden','true');
+  function placeMarks(){
+    if(view!=='wall')return;
+    const n=cols(),rows=new Map();let g0=null;
+    order.forEach((r,i)=>{let g=group(r);if(SORT.k==='year')g=g==='—'?g:g.slice(0,3)+'0';if(g===g0)return;g0=g;
+      const row=Math.floor(i/n);if(!rows.has(row))rows.set(row,[]);rows.get(row).push(g)});
+    const ts=tiles.querySelectorAll('.tile');
+    marks.innerHTML=[...rows].map(([row,gs])=>`<p style="top:${ts[row*n]?.offsetTop||0}px">${gs.map(g=>SORT.k==='color'?`<i style="background:${hueInk(+g)}"></i>`:`<span${SORT.k==='year'?' class="yr"':''}>${SORT.k==='year'?(g==='—'?'No date':'’'+g.slice(2)+'s'):g}</span>`).join('')}</p>`).join('');
+  }
+  new ResizeObserver(()=>placeMarks()).observe(tiles);
   function setView(v,focus,stay){
     if(v==='canvas')v='wall';
     view=v;document.body.classList.toggle('under',(v==='wall'?wall:v==='table'?tbl:null)?.scrollTop>2);wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
@@ -2678,21 +2824,20 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   // ---- the table: every record in the crate (as narrowed) as a row; the headers sort it
   const tbl=$('#tbl'),tkeep=new Map();
   const COLS=[['title','Title',r=>r.title],['artist','Artist',r=>name(r)],['year','Year',r=>+r.year||9999],['label','Label',r=>r.label||'~'],['format','Format',r=>r.format||'~']];
-  let ts={k:'artist',d:1};try{ts=JSON.parse(localStorage.getItem('records-table-sort'))||ts}catch{}
+  // the table shares the crate's sort: its headers set it, and the sort button shows it (sorted by color, no header is lit)
   function drawTable(){
-    const c=COLS.find(x=>x[0]===ts.k)||COLS[1],key=c[2];
-    const rows=[...order].sort((a,b)=>{const x=key(a),y=key(b);return(typeof x==='number'?x-y:String(x).localeCompare(String(y),'en',{sensitivity:'base'}))*ts.d||byName(a,b)});
-    $('thead',tbl).innerHTML=`<tr><th class="c0"><span class="sr">Cover</span></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button></th>`).join('')}</tr>`;
+    const rows=order,ts=SORT;
+    $('thead',tbl).innerHTML=`<tr><th class="c0" aria-sort="${ts.k==='color'?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="color" aria-label="Sort by color"><i class="cw" aria-hidden="true"></i><b class="cn" aria-hidden="true">Color</b><i aria-hidden="true">${ts.k==='color'?(ts.d>0?'↑':'↓'):''}</i></button></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}">${SORTS[k]?`<button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`:`<span>${l}</span>`}</th>`).join('')}</tr>`;
     tkeep.clear();
     $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
     for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
   // on a phone the sort is one quiet line, "Sorted by Artist ↑"; it opens a small menu like the view menu
   const narrow=matchMedia('(max-width:700px)'),tsm=document.createElement('div');tsm.className='tsm';tsm.setAttribute('role','menu');tsm.hidden=true;document.body.append(tsm);
-  const sortBy=k=>{ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable()};
+  const sortBy=k=>window.setSort(k);
   const tsmOff=()=>{if(tsm.hidden)return;tsm.hidden=true;$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.setAttribute('aria-expanded','false')};
   function tsmOn(h){
-    tsm.innerHTML=COLS.slice(0,3).map(([k,l])=>`<button type="button" role="menuitemradio" aria-checked="${ts.k===k}" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`).join('');
+    const ts=SORT;tsm.innerHTML=[...COLS.slice(0,3),['color','Color']].map(([k,l])=>`<button type="button" role="menuitemradio" aria-checked="${ts.k===k}" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`).join('');
     const r=h.getBoundingClientRect();tsm.style.left=r.left+'px';tsm.style.top=r.bottom+8+'px';tsm.hidden=false;h.setAttribute('aria-expanded','true');$('button[aria-checked=true]',tsm).focus({preventScroll:true});
   }
   tsm.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tsmOff();sortBy(b.dataset.k)});
@@ -2812,10 +2957,10 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
 // Two positions in px (letters, records) and a depth z (0 letters, 1 records), each a spring. The crate keeps its own motion.
 (()=>{
 const kd=$('#kd'),dl=$('.kd-d',kd),clip=$('.kd-c',kd),labC=$('.kd-b .c',kd),labA=$('.kd-b .a',kd);
-const W=36,WR=12,H0=58,H1=78,lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+let W=36;const WR=12,H0=58,H1=78,lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const buzz=ms=>{try{navigator.vibrate?.(ms)}catch{}};
 let AZ=[],FIRST={},CNT={},X=[],LT=[],TH=[],at=-1;
-const has=L=>FIRST[L]!=null,slot=i=>AZ.indexOf(letter(order[i]));
+const has=L=>FIRST[L]!=null,slot=i=>AZ.indexOf(group(order[i]));
 const S={l:{x:0,v:0,t:0},r:{x:0,v:0,t:0},z:{x:0,v:0,t:0}},K={l:[260,33],r:[260,33],z:[520,46]};
 let raf=0,drag=null,user=false,lastL=-1,lastR=-1,acc=0;
 const mode=()=>S.z.x>=.5?'r':'l',lMax=()=>(AZ.length-1)*W,rMax=()=>X[X.length-1]||0;
@@ -2838,28 +2983,37 @@ function lite(r){const n=nodes[cur],a=n?.querySelector('.fr img.art'),sa=sleeve.
   dress(sleeve,r);info(r);document.title=`${r.title} · Crate Dig`;base=REST;ry=base;rx=TILT;lite.p=true;return true}
 const follow=i=>{want=i;const now=performance.now();clearTimeout(lT);
   if(now-lt>90){lt=now;live(i)}else lT=setTimeout(()=>{lt=performance.now();live(want)},90-(now-lt))};
-const toLetter=L=>{if(!has(L))return;if(!open.hidden){follow(FIRST[L]);return}if(letter(order[cur])!==L)jump(FIRST[L])};
+const toLetter=L=>{if(!has(L))return;if(!open.hidden){follow(FIRST[L]);return}if(group(order[cur])!==L)jump(FIRST[L])};
 const toRecord=i=>{if(!open.hidden){follow(i);return}if(i!==cur)go(i)};
 const apply=t=>{clearTimeout(lT);live(t);if(lite.p&&!open.hidden){lite.p=false;peek(prevP,order[cur-1]);peek(nextP,order[cur+1])}};
 
 function build(){
-  AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];FIRST={};CNT={};
-  order.forEach((r,i)=>{const L=letter(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
+  // the marks follow the sort: every letter (the empty ones dim), or the years or colors the crate has, in the crate's order
+  const k=SORT.k,lettered=k!=='year'&&k!=='color';FIRST={};CNT={};
+  order.forEach((r,i)=>{const L=group(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
     X[i]=i*WR});
-  X.length=order.length;if(has('#'))AZ.push('#');
-  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l" data-k="${j}">${L}</span>`).join('');
+  X.length=order.length;
+  if(lettered){AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];if(has('#'))AZ.push('#');if(SORT.d<0)AZ.reverse()}else AZ=Object.keys(FIRST).sort((a,b)=>FIRST[a]-FIRST[b]);
+  W=k==='year'?58:k==='color'?30:36;kd.dataset.marks=k==='year'?'years':k==='color'?'colors':'letters';
+  dl.setAttribute('aria-label',`Turn to ${k==='year'?'a year':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='color'?'colors':'letters'} and records.`);
+  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l${L==='—'?' kd-nd':''}" data-k="${j}">${k==='color'?`<i style="background:${hueInk(+L)}"></i>`:L==='—'?'No date':L}</span>`).join('');
   LT=[...clip.querySelectorAll('.kd-l')];TH=[...clip.querySelectorAll('.kd-t')];
   at=-1;rest('l');rest('r');render();label();
 }
 const BOW=12; // how far the dial's ends drop, in pixels
 function render(){
-  const z=clamp(S.z.x,0,1),e=z*z*(3-2*z),cL=S.l.x,cR=S.r.x,lp=cL/W,half=kd.clientWidth/2+30,curL=letter(order[cur]);
+  const z=clamp(S.z.x,0,1),e=z*z*(3-2*z),cL=S.l.x,cR=S.r.x,lp=cL/W,half=kd.clientWidth/2+30,curL=group(order[cur]);
   // the dial curves away a little at its ends, like the edge of a wheel: each mark drops and leans with its distance from the middle
   const R=half*half/BOW,bend=x=>+(x*x/R).toFixed(2),tilt=x=>(Math.atan(2*x/R)*180/Math.PI).toFixed(2);
   kd.style.setProperty('--kh',lerp(H0,H1,e)+'px');kd.style.setProperty('--kz',e);
-  LT.forEach((s,j)=>{const L=AZ[j],ok=has(L),x=lerp(j*W-cL,ok?X[FIRST[L]]-cR:j*W-cL,e),d=Math.abs(j-lp);
+  // opened up to records, the marks sit over their first records, which can be closer than the marks are wide:
+  // the one you're on stays, then each nearest one that has room, and the rest fade out
+  const xs=AZ.map((L,j)=>lerp(j*W-cL,has(L)?X[FIRST[L]]-cR:j*W-cL,e)),room=new Set();
+  if(e>.01){const gap=(kd.dataset.marks==="years"?46:18)*e,kept=[],c=Math.max(0,AZ.indexOf(curL));
+    AZ.map((L,j)=>j).filter(j=>has(AZ[j])).sort((a,b)=>(a!==c)-(b!==c)||Math.abs(xs[a])-Math.abs(xs[b])).forEach(j=>{if(kept.every(x=>Math.abs(x-xs[j])>=gap)){kept.push(xs[j]);room.add(j)}})}
+  LT.forEach((s,j)=>{const L=AZ[j],ok=has(L),x=xs[j],d=Math.abs(j-lp);
     s.style.transform=`translate(${x}px,${-lerp(17,44,e)+bend(x)}px) rotate(${tilt(x)}deg) scale(${lerp(1+.35*Math.max(0,1-d),.72,e)})`;
-    s.style.opacity=ok?1:.35*(1-e);s.style.visibility=Math.abs(x)>half?'hidden':'';s.classList.toggle('on',e<.5?d<.5:L===curL)});
+    s.style.opacity=ok?(e>.01&&!room.has(j)?1-e:1):.35*(1-e);s.style.visibility=Math.abs(x)>half?'hidden':'';s.classList.toggle('on',e<.5?d<.5:L===curL)});
   TH.forEach((s,i)=>{if(e<.01){s.style.visibility='hidden';return}
     const x=lerp(slot(i)*W-cL,X[i]-cR,e);if(Math.abs(x)>half){s.style.visibility='hidden';return}
     const near=Math.max(0,1-Math.abs(X[i]-cR)/WR);
@@ -2868,7 +3022,7 @@ function render(){
   else{const k=nearR(cR);if(k!==lastR){lastR=k;if(user){toRecord(k);buzz(2)}}}
   labC.style.opacity=clamp(1-e*1.8,0,1);labC.style.transform=`translateY(${-8*e}px)`;labA.style.opacity=clamp(e*1.8-.8,0,1);labA.style.transform=`translateY(${8*(1-e)}px)`;
 }
-function label(){const r=order[cur];if(!r)return;const L=letter(r),n=CNT[L],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
+function label(){const r=order[cur];if(!r)return;const g=group(r),L=SORT.k==='color'?HUES[+g]:g==='—'?'No date':g,n=CNT[g],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
   labC.textContent=``;labA.textContent=r.artist;
   dl.setAttribute('aria-valuetext',mode()==='l'?`${L}, ${n} record${n>1?'s':''}`:`${r.title}, ${r.artist}`)}
 function loop(ts){
@@ -3026,35 +3180,101 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   // layout: one button showing the current view; it drops a small menu of the three
   const lb=document.createElement('button');lb.type='button';lb.className='fb lb';lb.setAttribute('aria-expanded','false');lb.setAttribute('aria-controls','views');
   fb.after(lb);
-  const lmark=()=>{const b=$('[aria-pressed=true]',vwEl)||$('button',vwEl);lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
+  // the sort: its own button, beside the layout one, wearing what it sorts by (a person, the letters of a title, a calendar,
+  // a record's label, a color wheel). It drops a menu like the layout one; the lit one again flips it. One sort for the crate
+  // and the grid; the table sorts by its headers, so there the button steps aside.
+  const SICON={
+    artist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"/></svg>',
+    title:'<svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans);letter-spacing:-.02em">Aa</text></svg>',
+    year:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>',
+    label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
+    color:'<i class="cw" aria-hidden="true"></i>'};
+  const sb=document.createElement('button');sb.type='button';sb.className='fb lb sb';sb.setAttribute('aria-expanded','false');sb.setAttribute('aria-controls','sorts');
+  fb.after(sb);
+  const so=document.createElement('div');so.className='vw tray so';so.id='sorts';so.hidden=true;so.setAttribute('role','group');so.setAttribute('aria-label','Sort');
+  const dirOf=k=>SORT.d>0?'↑':'↓',dirSay=k=>k==='color'?(SORT.d>0?'reds first':'darks first'):k==='year'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
+  const drawSort=()=>{
+    sb.innerHTML=SICON[SORT.k];sb.dataset.k=SORT.k;sb.classList.toggle('on',SORT.k!=='artist'||SORT.d<0);sb.setAttribute('aria-label',`Sort: ${SORTS[SORT.k].l}${dirSay(SORT.k)?', '+dirSay(SORT.k):''}`);
+    so.innerHTML=Object.entries(SORTS).map(([k,o])=>{const on=SORT.k===k;
+      return`<button type="button" data-k="${k}" aria-pressed="${on}" aria-label="Sort by ${o.l.toLowerCase()}${on&&dirSay(k)?', '+dirSay(k):''}">${SICON[k]}<span>${o.l}</span>${on&&dirOf(k)?`<i aria-hidden="true">${dirOf(k)}</i>`:''}</button>`}).join('')};
+  drawSort();
+  const sorts=on=>{so.hidden=!on;sb.setAttribute('aria-expanded',on);if(on){views(false);tray(false);const r=sb.getBoundingClientRect();so.style.right=Math.max(14,innerWidth-r.right)+'px'}};
+  sb.onclick=()=>sorts(so.hidden);
+  // one way to sort, for the menu and the table's headers: the lit one again flips it
+  window.setSort=k=>{SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
+    drawSort();arrange(filt,null);$('#wall').scrollTop=0}; // a new sort starts from its front: the oldest record, the first letter, the reds
+  so.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setSort(b.dataset.k);so.querySelector(`[data-k=${b.dataset.k}]`).focus({focusVisible:false})});
+  so.addEventListener('keydown',e=>{if(e.key==='Escape'){sorts(false);sb.focus({focusVisible:false})}});
+  addEventListener('pointerdown',e=>{if(!so.hidden&&!so.contains(e.target)&&!sb.contains(e.target))sorts(false)});
+  const lmark=()=>{const b=$('[data-v][aria-pressed=true]',vwEl)||$('[data-v]',vwEl);lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
   new MutationObserver(lmark).observe(vwEl,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});lmark();
   pills.className='tray';pills.hidden=true;find.prepend(pills);
-  vwEl.classList.add('tray');find.prepend(vwEl);
+  vwEl.classList.add('tray');find.prepend(vwEl,so);
   const mark=()=>{const on=!!(filt&&filt.k!=='q');fb.classList.toggle('on',on);fb.setAttribute('aria-label',on?`Filters: ${filt.v}`:'Filters')};
-  const views=on=>{vwEl.hidden=!on;lb.setAttribute('aria-expanded',on);if(on)tray(false);document.body.classList.toggle('filtering',on||!pills.hidden)};
+  const views=on=>{vwEl.hidden=!on;lb.setAttribute('aria-expanded',on);if(on){tray(false);if(!so.hidden)sorts(false)}document.body.classList.toggle('filtering',on||!pills.hidden)};
   const tray=on=>{pills.hidden=!on;fb.setAttribute('aria-expanded',on);if(on&&!vwEl.hidden){vwEl.hidden=true;lb.setAttribute('aria-expanded',false)}document.body.classList.toggle('filtering',on||!vwEl.hidden);
     if(on){const b=$('[aria-pressed=true]',pills);b&&b.scrollIntoView({inline:'center',block:'nearest'})}};
   fb.onclick=()=>tray(pills.hidden);
   lb.onclick=()=>views(vwEl.hidden);
-  vwEl.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>views(false),120)});
+  vwEl.addEventListener('click',e=>{if(e.target.closest('button[data-v]'))setTimeout(()=>views(false),120)});
   pills.addEventListener('keydown',e=>{if(e.key==='Escape'){tray(false);fb.focus()}});
   vwEl.addEventListener('keydown',e=>{if(e.key==='Escape'){views(false);lb.focus()}});
   addEventListener('pointerdown',e=>{if(e.target.closest('.find'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
   const arrange2=arrange;arrange=function(...a){const n=arrange2.apply(this,a);mark();return n};
   mark();
+  // a filter or a sort going on or coming off: the view settles into its new order. The grid's covers already glide;
+  // the crate rises a little out of a fade, the table's rows too, the dial's marks fade in. Typing in the search doesn't.
+  window.settle=()=>{
+    if(reduce||!document.body.classList.contains('ready'))return;
+    const E={duration:460,easing:'cubic-bezier(.22,1,.36,1)'},rise=[{opacity:.3,translate:'0 10px'},{opacity:1,translate:'0 0'}];
+    if(!$('#tbl').hidden)$('#tbl tbody').animate(rise,E);
+    else if(!$('#wall').hidden)$('#tiles .gms')?.animate([{opacity:0},{opacity:1}],{duration:300,delay:200,fill:'backwards'});
+    else{crate.animate(rise,E);$('#kd .kd-c')?.animate([{opacity:0},{opacity:1}],{duration:320,easing:'ease-out'})}
+  };
+  const arrange3=arrange;arrange=function(f,...a){const was=filt,n=arrange3.call(this,f,...a);if(n&&f?.k!=='q'&&was?.k!=='q')settle();return n};
 })();
 </script>
 <script>
-// Phone search: focusing the search opens a list of every record above the keyboard, narrowing as you type.
+// Tooltips: rest the mouse on a button that's only an icon and its name comes up beside it, the one its aria-label gives.
+// After one has shown, the next comes at once, until the mouse has been off the buttons a moment. Never on touch.
+(()=>{
+  const tt=document.createElement('div');tt.className='tt';tt.setAttribute('aria-hidden','true');document.body.append(tt);
+  let el=null,t=0,warm=0;
+  const iconOnly=b=>{if(!b.getAttribute('aria-label'))return false;const c=b.cloneNode(true);c.querySelectorAll('.sr,svg,i').forEach(n=>n.remove());return!c.textContent.trim()};
+  const off=()=>{clearTimeout(t);el=null;tt.classList.remove('on')};
+  $('#qf').dataset.tip='Search';$('#close').dataset.tip='Close';
+  function show(){
+    if(!el||!el.isConnected||el.closest('[hidden]'))return off();
+    tt.textContent=el.dataset.tip||el.getAttribute('aria-label').replace(/\. .*$/,'');
+    const r=el.getBoundingClientRect(),w=tt.offsetWidth,h=tt.offsetHeight,below=r.top+r.height/2<innerHeight/2;
+    tt.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2))+'px';
+    tt.style.top=(below?r.bottom+8:r.top-h-8)+'px';tt.classList.add('on');warm=performance.now();
+  }
+  addEventListener('pointerover',e=>{
+    if(e.pointerType!=='mouse')return;
+    let b=e.target.closest?.('button,a,[role=button],[data-tip]');
+    if(b?.matches('.q')&&b.matches(':focus-within,.has'))b=null; // the search, once it's open, says what it is
+    if(b===el)return;
+    if(!b||!(b.dataset.tip?b.innerText.trim()!==b.dataset.tip:iconOnly(b))){if(el){off();warm=performance.now()}return}
+    off();el=b;const now=performance.now();
+    if(now-warm<500)show();else t=setTimeout(show,600);
+  },true);
+  addEventListener('pointerdown',off,true);addEventListener('scroll',off,true);addEventListener('keydown',off,true);addEventListener('blur',off);
+})();
+</script>
+<script>
+// Search opens a list: on a phone, focusing it lists every record above the keyboard; on a laptop the matches drop down
+// under the field as you type. Either way the crate narrows behind the list.
 (()=>{
   const q=$('#q'),qf=$('#qf'),body=document.body,root=document.documentElement;
   const sl=document.createElement('div');sl.className='sl';sl.id='sl';sl.setAttribute('role','listbox');sl.setAttribute('aria-label','Records');document.body.append(sl);
   const sx=document.createElement('button');sx.type='button';sx.className='sx';sx.textContent='Cancel';qf.parentNode.insertBefore(sx,qf.nextSibling.nextSibling);
-  const on=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
+  const on=()=>!editing,ph=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
   const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
   function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
+    sl.classList.toggle('idle',!v&&!ph()); // a laptop lists only what you've typed
     if(!rs.length){sl.innerHTML='<p class="none">Not in the crate</p>';return}
-    if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;return}
+    if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;if(!ph())$('button',sl)?.classList.add('on');return}
     let L='',h='';for(const r of rs){const l=letter(r);if(l!==L){if(L)h+='</ul>';L=l;h+=`<h4>${l}</h4><ul>`}h+=row(r)}sl.innerHTML=h+'</ul>'}
   // covers come from the small copies the grid uses; until one is ready the row shows a plain square
   // only rows on screen ask for one, so typing never queues work for covers nobody sees
@@ -3064,18 +3284,33 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   new MutationObserver(fill).observe(sl,{childList:true});
   let open1=false;
   function enter(){if(open1||!on())return;open1=true;body.classList.add('searching');list();sl.scrollTop=0}
-  function leave(keep){if(!open1)return;open1=false;body.classList.remove('searching');if(!keep){q.value='';qSync();if(filt?.k==='q')arrange(null)}q.blur()}
+  const seeking=()=>body.classList.contains('seek');
+  function leave(keep){if(!open1)return;open1=false;body.classList.remove('searching');if(seeking()){body.classList.remove('seek');keep=false}if(!keep){q.value='';qSync();if(filt?.k==='q')arrange(null)}q.blur()}
   q.addEventListener('focus',enter);
-  // while the list is up, typing narrows the list, not the crate
-  addEventListener('input',e=>{if(open1&&e.target===q){e.stopImmediatePropagation();qSync();list()}},true);
+  // while the list is up, typing narrows the list and the crate behind it; with a record out, only the list
+  q.addEventListener('input',()=>{if(open1)list()});
+  addEventListener('input',e=>{if(open1&&seeking()&&e.target===q){e.stopImmediatePropagation();qSync();list()}},true);
+  new MutationObserver(()=>{if(open.hidden&&seeking())leave()}).observe(open,{attributes:true,attributeFilter:['hidden']});
+  // a laptop: the arrows move through the list and Enter pulls out the one that's lit
+  const lit=()=>$('button.on',sl);
+  q.addEventListener('keydown',e=>{if(!open1||ph())return;const k={ArrowDown:1,ArrowUp:-1}[e.key];if(!k)return;
+    const bs=$$('button',sl),i=bs.indexOf(lit()),n=bs[Math.max(0,Math.min(bs.length-1,i+k))];if(!n)return;
+    e.preventDefault();lit()?.classList.remove('on');n.classList.add('on');n.scrollIntoView({block:'nearest'})});
   // Go keeps the crate narrowed to what matches
-  addEventListener('submit',e=>{if(open1&&e.target===qf){e.preventDefault();e.stopImmediatePropagation();const v=q.value.trim();
+  addEventListener('submit',e=>{const b=open1&&e.target===qf&&(seeking()?lit()||$('button',sl):!ph()&&lit());
+    if(b){e.preventDefault();e.stopImmediatePropagation();clearTimeout(qT);b.click();return}
+    if(open1&&e.target===qf&&seeking()){e.preventDefault();e.stopImmediatePropagation();return}
+    if(open1&&e.target===qf){e.preventDefault();e.stopImmediatePropagation();const v=q.value.trim();
     if(v&&all().some(r=>matchQ(r,v))){arrange({k:'q',v});leave(true)}else if(!v)leave()}},true);
   addEventListener('keydown',e=>{if(open1&&e.key==='Escape'&&e.target===q){e.stopImmediatePropagation();leave()}},true);
   sx.onclick=()=>leave();
+  // a laptop: a click anywhere else puts the list away and leaves the crate as you narrowed it
+  addEventListener('pointerdown',e=>{if(open1&&(!ph()||seeking())&&!e.target.closest('.find,.sl'))leave(true)},true);
   // a record from the list opens straight from the whole crate
   sl.addEventListener('click',e=>{const b=e.target.closest('[data-slug]');if(!b)return;const r=RECORDS.find(x=>x.slug===b.dataset.slug);
     const im=b.querySelector('img,.sw');pickFrom=im?im.getBoundingClientRect():null;clearTimeout(pickT);pickT=setTimeout(()=>{pickFrom=null},900);
+    if(!open.hidden){const R=pickFrom;leave();pickFrom=null;let i=order.indexOf(r);if(i<0){arrange(null);i=order.indexOf(r)}if(i<0||busy)return; // a record is out: the pick takes its place
+      clearTimeout(addr.t);const st=history.state||{};history.pushState({open:st.open||0,d:(st.d||0)+1},'','#record/'+r.slug);hop(i,R);return}
     leave();if(filt)arrange(null);const j=order.indexOf(r);if(j<0)return;go(j,true);requestAnimationFrame(()=>openRecord(false))});
   // a record picked from the list lifts out of its row, not out of the crate behind
   let pickFrom=null,pickT=0;
