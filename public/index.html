@@ -3372,7 +3372,7 @@ html.phone .ab-sh{margin-top:20px}
 .sh-apps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px}
 .sh-app{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0;transition:transform .3s var(--spring)}
 .sh-app i{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:#2a2a2d;border:1px solid var(--line);box-sizing:border-box;transition:background-color .2s}
-.sh-app svg{width:24px;height:24px;fill:#fff;display:block}
+.sh-app svg{width:24px;height:24px;color:#fff;display:block}
 .sh-app span{font-size:12px;color:var(--t2);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .sh-app:hover i{background:var(--soft3)}
 .sh-app:active{transform:scale(.96)}
@@ -3439,7 +3439,7 @@ html.phone .sh-row{display:none}
   const NAMES={imessage:'Messages',whatsapp:'WhatsApp',instagram:'Instagram',snapchat:'Snapchat',tiktok:'TikTok',threads:'Threads',x:'X',facebook:'Facebook',bluesky:'Bluesky',reddit:'Reddit',pinterest:'Pinterest',tumblr:'Tumblr'};
   // Instagram, Snapchat and TikTok take a picture, not a link: on a phone the picture goes to them through the phone's own sheet
   const PICS=new Set(['instagram','snapchat','tiktok']);
-  const mk=k=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${MK[k]}"/></svg>`;
+  const mk=k=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="${MK[k]}"/></svg>`;
   const phone=()=>root.classList.contains('phone');
 
   // the crate's address: someone else's crate keeps what's in its address, Casey's is the plain site
