@@ -55,8 +55,8 @@ button{font:inherit;color:inherit}
 /* the crate */
 .crate{position:relative;height:calc(var(--S)*1.95);margin-top:8px;perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% - var(--S)*1.13);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:none}
 .crate.dragging{cursor:grabbing}
-/* the top edge of the front record is a handle: grab it and lift the record out */
-.crate.lip,.crate.lip .rc{cursor:grab}.crate.lifting,.crate.lifting .rc{cursor:grabbing}
+/* the front record is a handle: grab it and lift it out */
+.rc.cur{cursor:grab}.crate.lifting,.crate.lifting .rc{cursor:grabbing}
 /* hover nudges the front cover a few pixels toward the pointer's side: on the cover, so it never disturbs the crate's motion, and on its own spring in JS (see "nudge") */
 .rc .fr{transition:opacity .4s}
 .stack{position:absolute;left:50%;bottom:calc(50% - var(--S)/2);width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt,-16deg))}
@@ -1415,6 +1415,11 @@ function seat(d){
   if(d>-1){const t=-d;return{z:AHEAD*t,a:10-70*t,m:.5+.5*t}} // falling forward
   const k=-d-1;return{z:AHEAD+k*FGAP,a:-(60+Math.min(k,8)*1.2),m:1}; // flipped records pile up, fanned a little, leaning far enough to show only their backs
 }
+// a record's place in the crate; the front one also slides up along itself as it's pulled out
+function tfOf(j){
+  const p=seat(j-pos),q=jits[j];
+  return`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg)${j===cur&&pk.y?` translateY(${(-pk.y).toFixed(1)}px)`:''}`;
+}
 // the crate's eye level again, in pixels: iPhone Safari drops the calc() in the CSS and looks from the middle of the crate,
 // so a phone's flipped records, meant to lie edge on at eye level, show their backs as a slab under the pile
 const eye=()=>{const px=el=>el?parseFloat(getComputedStyle(el).height):0,S=px(nodes[cur]),H=px(crate);if(S&&H){crate.style.perspectiveOrigin=`50% ${(DECK?H/2+12-S*1.13:H/2-S*1.13).toFixed(1)}px`;crate.style.perspective=DECK?(S*2.9).toFixed(0)+'px':''}};
@@ -1432,11 +1437,7 @@ function render(){
     });
     return;
   }
-  nodes.forEach((n,j)=>{
-    if(!shown[j])return;
-    const p=seat(j-pos),q=jits[j];
-    n.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg)${j===cur&&pk.y?` translateY(${(-pk.y).toFixed(1)}px)`:''}`;
-  });
+  nodes.forEach((n,j)=>{if(shown[j])n.style.transform=tfOf(j)});
   // each divider stands just behind the record before its letter, parallel to it, so the two never cross; it leaves as that record flips
   for(const v of dvs){const j=+v.dataset.j-1,d=j-pos,off=d<0||DV===8&&d>6;if(v._off!==off){v._off=off;v.classList.toggle('off',off)}
     if(!off){const p=seat(d),q=jits[j],g=Math.max(1.5,(p.z-seat(d+1).z)*.45);
@@ -2205,41 +2206,41 @@ void main(){
   }};
 })():null;
 addEventListener('resize',()=>{frontBox=null;deckS=0;tailS=0;if(nodes.length&&!raf)render();if(PHONE&&!open.hidden)aimPeeks()});
-// Pulling a record out: grab the front record by its top edge and lift. It holds in the crate for the first stretch, giving only a little,
-// then comes free with a tick and follows the hand; let go once it's free and it carries on out into the open view. Bring it back
-// down before letting go and it catches again and settles back in. Anywhere else on the crate, a drag flips as it always has.
-const PK_HOVER=5,PK_GRIP=7;let lipOn=false;
+// Pulling a record out: grab the front record and lift. It holds in the crate for the first stretch, giving only a little, then comes
+// free with a tick and follows the hand. Let go once it's free, or pull it as far as it goes, and it carries on out into the open view;
+// bring it back down before letting go and it catches again and settles back in. Down on it flips, as does any drag off it.
+const PK_GRIP=6;
+// only the front record moves while it's pulled, so only it is redrawn
+const pkPaint=()=>{const n=nodes[cur];if(n&&!DECK)n.style.transform=tfOf(cur)};
 function pkTo(t){
-  pk.t=t;if(reduce){pk.y=t;pk.v=0;render();return}if(pk.f)return;let l=0;
-  const st=now=>{const dt=l?Math.min(.032,(now-l)/1000):1/60;l=now;pk.v+=(-500*(pk.y-pk.t)-2*Math.sqrt(500)*pk.v)*dt;pk.y+=pk.v*dt; // critically damped: it never overshoots
-    if(Math.abs(pk.y-pk.t)<.05&&Math.abs(pk.v)<.5){pk.y=pk.t;pk.v=0;pk.f=0;render();return}render();pk.f=requestAnimationFrame(st)};
+  pk.t=t;if(reduce){pk.y=t;pk.v=0;pkPaint();return}if(pk.f)return;let l=0;
+  const st=now=>{const dt=l?Math.min(.032,(now-l)/1000):1/60;l=now;pk.v+=(-700*(pk.y-pk.t)-2*Math.sqrt(700)*pk.v)*dt;pk.y+=pk.v*dt; // critically damped: it never overshoots
+    if(Math.abs(pk.y-pk.t)<.05&&Math.abs(pk.v)<.5){pk.y=pk.t;pk.v=0;pk.f=0;pkPaint();return}pkPaint();pk.f=requestAnimationFrame(st)};
   pk.f=requestAnimationFrame(st);
 }
-const pkDrop=()=>{cancelAnimationFrame(pk.f);pk.f=0;pk.y=pk.t=pk.v=0;lipOn=false;crate.classList.remove('lip','lifting');render()};
-// the handle: a band along the top of the front record (and a little above it), big enough for a thumb
-const lipAt=(x,y)=>{const n=nodes[cur];if(!n||!open.hidden||busy)return false;const b=n.getBoundingClientRect(),band=Math.max(PHONE?40:28,b.height*.18);return x>=b.left&&x<=b.right&&y>=b.top-12&&y<=b.top+band};
-// where the record is for a hand this far up: a little give while it's caught, then most of the way to the hand once it's free
+const pkDrop=()=>{cancelAnimationFrame(pk.f);pk.f=0;pk.y=pk.t=pk.v=0;crate.classList.remove('lifting');pkPaint()};
+const onFront=e=>open.hidden&&!busy&&!!nodes[cur]&&e.target.closest?.('.rc')===nodes[cur];
+// where the record is for a hand this far up: a little give while it's caught, then nearly with the hand once it's free, up to where it goes on its own
 function pullTo(s,y){
-  const d=Math.max(0,s.y-y),C=PHONE?52:44;
+  const d=Math.max(0,s.y-y),C=PHONE?44:40,END=PHONE?120:110;
   if(!s.free&&d>=C){s.free=true;buzz()}else if(s.free&&d<C*.55)s.free=false; // changed your mind: it catches again
+  if(s.free&&d>=END)return true;
   pkTo(s.free?PK_GRIP+(d-C*.4)*.92:PK_GRIP+10*(1-Math.exp(-d/22)));
 }
-function letGo(s){if(s.free&&!busy&&open.hidden){buzz();openRecord(false,true)}else pkTo(0)}
-crate.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||PHONE)return;const on=lipAt(e.clientX,e.clientY);if(on===lipOn)return;lipOn=on;crate.classList.toggle('lip',on);pkTo(on?PK_HOVER:0)});
-crate.addEventListener('pointerleave',()=>{if(!lipOn||drag)return;lipOn=false;crate.classList.remove('lip');pkTo(0)});
-crate.addEventListener('pointerdown',e=>{if(PHONE)return;spr=null;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc'),dv:e.target.closest('.dv'),vy:0,lt:performance.now(),ly:e.clientY,lip:lipAt(e.clientX,e.clientY)};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging');if(drag.lip){crate.classList.add('lifting');pkTo(PK_GRIP)}});
+function letGo(s){crate.classList.remove('lifting');if(s.free&&!busy&&open.hidden){buzz();openRecord(false,true)}else pkTo(0)}
+crate.addEventListener('pointerdown',e=>{if(PHONE)return;spr=null;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc'),dv:e.target.closest('.dv'),vy:0,lt:performance.now(),ly:e.clientY,lip:onFront(e)};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging');if(drag.lip){crate.classList.add('lifting');pkTo(PK_GRIP)}});
 crate.addEventListener('pointermove',e=>{
   if(!drag)return;
   const dy=e.clientY-drag.y,now=performance.now(),dt=Math.max(8,now-drag.lt);drag.vy=.2*drag.vy+.8*(e.clientY-drag.ly)/dt;drag.lt=now;drag.ly=e.clientY;
   if(Math.abs(dy)>6&&!moved){moved=true;if(drag.lip&&dy<0)drag.pull={y:drag.y,free:false};else{crate.classList.add('pulling');if(drag.lip){crate.classList.remove('lifting');pkTo(0)}}}
   if(!moved)return;
-  if(drag.pull){pullTo(drag.pull,e.clientY);return}
+  if(drag.pull){if(pullTo(drag.pull,e.clientY)){const s=drag.pull;drag=null;moved=false;crate.classList.remove('dragging');letGo(s)}return}
   aim=Math.max(0,Math.min(order.length-1,drag.i+dy/PULL));kick(); // pull toward you to flip forward
   const j=Math.max(0,Math.min(order.length-1,drag.i+pulled(dy)));if(j!==cur){cur=j;place();setHash()}
 });
 // a click without a drag opens the front record; a click on one behind it flips to it
 const end=()=>{if(drag?.pull){const s=drag.pull;drag=null;moved=false;crate.classList.remove('dragging','lifting');letGo(s);return}
-  if(drag?.lip&&!moved)pkTo(lipOn?PK_HOVER:0);
+  if(drag?.lip&&!moved)pkTo(0);
   if(drag&&!moved&&drag.dv)jump(+drag.dv.dataset.j);else if(drag&&!moved&&drag.rc){const j=+drag.rc.dataset.j;if(j!==cur)go(j);else openRecord(false)}if(drag&&moved){const v=performance.now()-drag.lt>80?0:drag.vy*1000/PULL,fl=throwOf(v);
     if(fl){vel=Math.max(-40,Math.min(40,v));glide(fl);go(Math.round(aim)+fl)}else go(cur,false)}drag=null;moved=false;crate.classList.remove('dragging','pulling','lifting')};
 crate.addEventListener('pointerup',end);crate.addEventListener('pointercancel',end);
@@ -2253,15 +2254,15 @@ crate.addEventListener('pointerdown',e=>{
   if(!PHONE||busy||!e.isPrimary)return;
   cancelAnimationFrame(raf);raf=0;tick.t=0;spr=null; // catch the pile where it is, mid-flight or not
   const now=performance.now();
-  dd={x:e.clientX,y:e.clientY,p:pos,b:aim,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,ax:null,lip:lipAt(e.clientX,e.clientY)};
-  crate.setPointerCapture(e.pointerId);crate.classList.add('pressing');if(dd.lip)pkTo(PK_GRIP); // a finger on the top edge has it: it lifts a hair
+  dd={x:e.clientX,y:e.clientY,p:pos,b:aim,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,ax:null,lip:onFront(e)};
+  crate.setPointerCapture(e.pointerId);crate.classList.add('pressing');if(dd.lip)pkTo(PK_GRIP); // a finger on the front record has it: it lifts a hair
 });
 crate.addEventListener('pointermove',e=>{
   if(!dd)return;
   const dx=e.clientX-dd.x,dy=e.clientY-dd.y,now=performance.now(),dt=Math.max(8,now-dd.lt);
   dd.vx=.5*dd.vx+.5*(e.clientX-dd.lx)/dt;dd.vy=.2*dd.vy+.8*(e.clientY-dd.ly)/dt;dd.lt=now;dd.lx=e.clientX;dd.ly=e.clientY;
   if(!dd.ax){if(Math.hypot(dx,dy)<8)return;dd.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';crate.classList.remove('pressing');if(dd.lip&&dd.ax==='y'&&dy<0)dd.pull={y:dd.y,free:false};else if(dd.lip)pkTo(0)}
-  if(dd.pull){pullTo(dd.pull,e.clientY);return}
+  if(dd.pull){if(pullTo(dd.pull,e.clientY)){const s=dd.pull;dd=null;letGo(s)}return}
   if(dd.ax!=='y')return;
   const hi=order.length-1;let p=dd.p+dy/deckS;off.y=0;
   if(p<0){off.y=-rub(-p*deckS);p=0} // nothing before the first: it lifts a little
