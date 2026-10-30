@@ -462,17 +462,58 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:#1e1e20}
 /* the way back is a circle */
 #close,html.phone #close{width:52px;height:52px;padding:0;justify-content:center;font-size:20px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 #close .cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
-/* a record's details: big white title, the facts as quiet pills */
+/* a record's details: big white title, then the year and label as one quiet line */
 .o-info h2{font-size:34px;letter-spacing:-.02em;line-height:1.08}
 .o-info .by{font-size:20px}
 .o-info .by .meta{text-decoration:none}.o-info .by .meta:hover{color:var(--fg)}
-.facts,html.phone .facts{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px;margin-top:22px;font:400 14px/1 'Instrument Sans',sans-serif}
-.facts div,html.phone .facts div{display:contents}
-.facts dt{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%)}
-.facts dd{display:inline-flex;align-items:center;height:36px;padding:0 15px;border-radius:99px;border:1px solid var(--line);color:#d6d6d8}
-.facts dd:has(.meta){padding:0}
-.facts .meta{height:100%;padding:0 15px;display:inline-flex;align-items:center;border-radius:99px;text-decoration:none}
-.facts .meta:hover{background:var(--soft)}
+.facts,html.phone .facts{display:flex;margin-top:10px;font:400 15px/24px 'Instrument Sans',sans-serif;gap:0;color:#d6d6d8;white-space:nowrap;min-width:0}
+/* year, label: one gray line, a comma between; a long label trails off */
+.facts,html.phone .facts{color:var(--m)}
+.facts span{flex:none}
+.facts span+span{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.facts span+span::before{content:',\00a0'}
+.facts .meta{text-decoration:none;transition:color .15s}
+.facts .meta:hover{color:var(--fg)}
+.facts .meta{display:inline}
+/* below Play: a few lines about the record, then covers of others that share its artist, label or year */
+.o-info .ab,.o-info .near{margin-top:28px}
+.o-info .ohd{margin:0 0 8px;font-size:11px;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
+.o-info .blurb{margin:0;font-size:15px;line-height:1.5;color:#d6d6d8}
+/* while About is on its way: its label and a few quiet lines in its place; then the text fades in, or the block fades away */
+.ab .sk{display:grid;gap:9.5px;padding:6px 0 10px}
+.ab .sk i{display:block;height:13px;border-radius:3px;background:rgba(255,255,255,.07)}
+.ab .sk i:nth-child(3){width:82%}.ab .sk i:nth-child(4){width:30%;margin-top:4px}
+.ab.in>*{animation:linerIn .35s ease-out both}
+.ab.late>*{animation:linerIn .5s .16s ease-out both}
+.ab.late>:nth-child(2){animation-delay:.22s}.ab.late>:nth-child(3){animation-delay:.28s}
+.ab.gone{opacity:0;transition:opacity .15s}
+@keyframes linerIn{from{opacity:0}}
+@media(prefers-reduced-motion:no-preference){.ab .sk i{animation:linerWait 1.4s ease-in-out infinite alternate}}
+@keyframes linerWait{to{opacity:.45}}
+.o-info .ab a{display:inline-block;margin-top:6px;font-size:14px;color:var(--m);text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em}
+.o-info .ab a:hover{color:var(--fg)}
+.thumbs{display:flex;gap:10px}
+.nb{all:unset;cursor:pointer;flex:0 0 76px;width:76px;height:76px;border-radius:1px;overflow:hidden;box-shadow:0 6px 14px -8px #000c}
+.nb img,.nb i{display:block;width:100%;height:100%;object-fit:cover}
+.nb:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.nb:active{transform:scale(.97)}
+/* like the grid: under a pointer, a cover grows a little */
+@media (hover:hover){
+  .nb{position:relative;transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1)}
+  .nb:hover{z-index:1;transform:scale(1.03);box-shadow:0 18px 36px -14px #000e,0 4px 10px -4px #0009}
+  .nb:hover:active{transform:scale(1)}
+}
+@media(prefers-reduced-motion:reduce){.nb,.nb:hover{transition:none;transform:none}}
+html.phone .thumbs{gap:12px}
+html.phone .nb{flex-basis:72px;width:72px;height:72px}
+/* the track list on the back of a sleeve with no back cover, sized to the sleeve (cqw) and stepped down by --k to fit */
+.tl{position:absolute;inset:7.4cqw;--k:1;font:400 calc(var(--k)*3.05cqw)/1.5 'Instrument Sans',sans-serif;overflow:hidden}
+.tl.two{columns:2;column-gap:5.6cqw}
+.tl ol{margin:0 0 .95em;padding:0;list-style:none;break-inside:avoid} /* a side stays in one column */
+.tl li{display:grid;grid-template-columns:2.15em minmax(0,1fr)}
+.tl li i{font-style:normal;font-size:.78em;opacity:.62;padding-top:.15em}
+.tl li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl{animation:linerIn .5s ease-out both}
 /* phones: the record view is laid out for a title of up to three lines. The record's size leaves room for all three,
    so a long title never pushes Play off the screen and the record stays the same size from one to the next; a shorter
    title just leaves more air above Play. The artist and the facts each keep to one line. */
@@ -481,17 +522,14 @@ html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:2
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap) - var(--info) - var(--bot) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
 @media(max-height:500px){html.phone .open{--O:calc(100svh - 72px)}}
 html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + var(--top));padding-bottom:calc(env(safe-area-inset-bottom) + var(--bot))}
-html.phone{--info:calc(var(--tl)*3.36 + 26px + var(--fm) + 36px + var(--pp) + var(--pb))}
+html.phone{--info:calc(var(--tl)*3.36 + 26px + var(--fm)*.5 + 24px + var(--pp) + var(--pb))}
 html.phone .o-page{align-items:stretch}
 /* the record and a details block of fixed height, centered together: the record and Play sit in the same place for every title */
 html.phone .o-grid{gap:var(--gap);justify-content:center}
 html.phone .o-info{flex:none;min-height:var(--info)}
 html.phone .o-info h2{font-size:var(--tl);line-height:1.12;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;text-wrap:balance}
 html.phone .o-info .by{font-size:17px;line-height:24px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html.phone .facts{flex-wrap:nowrap;margin-top:var(--fm);overflow:hidden}
-html.phone .facts dd{flex:0 1 auto;min-width:0;display:block;line-height:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html.phone .facts dd:has(.meta){flex-shrink:1}
-html.phone .facts .meta{display:block;overflow:hidden;text-overflow:ellipsis;line-height:34px}
+html.phone .facts{margin-top:calc(var(--fm)*.5)}
 html.phone .play{padding-top:var(--pp)}
 html.phone .play .btn{height:var(--pb)}
 html.phone .sw{width:var(--pb);height:var(--pb);flex:none}
@@ -933,6 +971,46 @@ html.phone .sx{height:44px}
 .qnone:has(ul) .qh{padding:6px 8px 8px}
 /* phones show the laptop's crate, set lower so the pile behind clears the bar; the dial's fade takes the records that fall forward */
 html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
+/* the filter you're in, from a record's details: a pill in the middle of the top bar; tap it for the whole crate */
+.chip,html.phone .chip{display:inline-flex!important;position:absolute;top:0;left:50%;translate:-50% 0;height:44px;max-width:min(360px,calc(100vw - 236px));box-sizing:border-box;padding:0 12px 0 16px;gap:8px;font-size:15px;background:var(--glass);color:#fff;border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,border-color .2s}
+.chip[hidden],.find:has(.q:focus-within) .chip,.find:has(.q.has) .chip{display:none!important}
+.chip:hover{background:var(--glass);border-color:#ffffff40}
+.chip svg{color:#a5a5aa;width:12px;height:12px}
+.chip:hover svg{color:#fff}
+.chip:not([hidden]){animation:trayIn .3s cubic-bezier(.22,1,.36,1)}
+@media(prefers-reduced-motion:reduce){.chip:not([hidden]){animation:none}}
+/* Play: a slimmer button */
+.play .btn,html.phone .play .btn{height:44px;padding:0 22px 0 18px;font-size:15px;gap:8px}
+/* on a phone too: a compact button that hugs its label, not a bar across the screen */
+html.phone{--pb:44px}
+html.phone .play>.btn,html.phone .pair{width:auto}
+html.phone .pair .btn{flex:none}
+html.phone .play .btn{height:var(--pb);font-size:15px;padding:0 22px 0 18px}
+/* the filter pill: its name opens a menu of the others of that kind; the × clears it */
+.chip,html.phone .chip{padding:0;gap:0;cursor:default}
+.chip .cn,.chip .cx{all:unset;cursor:pointer;height:100%;display:inline-flex;align-items:center;min-width:0}
+.chip .cn{padding:0 2px 0 16px;flex:0 1 auto}
+.chip>b{padding-left:16px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .cn b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .cx{flex:none;padding:0 14px 0 8px}
+.chip .cx:hover svg{color:#fff}
+.chip .cn:focus-visible,.chip .cx:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:99px}
+.chip:hover svg{color:#a5a5aa}
+.cmenu{position:absolute;z-index:5;top:54px;left:50%;translate:-50% 0;width:280px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:6px;border-radius:18px;background:#1e1e20;border:1px solid var(--line);box-shadow:0 30px 60px -20px #000,0 8px 20px -8px #000a;pointer-events:auto;animation:trayIn .3s cubic-bezier(.22,1,.36,1)}
+.cmenu[hidden]{display:none}
+.cmenu .ch{margin:0;padding:10px 12px 8px;font-size:11px;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
+.cmenu ul{list-style:none;margin:0;padding:4px 0 0;-webkit-mask:linear-gradient(transparent,#000 14px);mask:linear-gradient(transparent,#000 14px);max-height:min(52vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.cmenu ul::-webkit-scrollbar{display:none}
+.cmenu li button{all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:40px;padding:0 12px;border-radius:10px;display:flex;align-items:center;gap:10px;font-size:15px;color:#d6d6d8}
+.cmenu li button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmenu li button:hover{background:#ffffff0f;color:#fff}
+.cmenu li button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.cmenu li button[aria-current]{background:#fff;color:#111;font-weight:500}
+.cmenu li button[aria-current]::after{content:"";flex:none;width:10px;height:5px;border:solid #111;border-width:0 0 1.75px 1.75px;rotate:-45deg;translate:0 -2px}
+html.phone .cmenu{width:auto;left:12px;right:12px;translate:none;max-width:none}
+html.phone .cmenu ul{max-height:min(60svh,480px)}
+.find:has(.q:focus-within) .cmenu{display:none}
+@media(prefers-reduced-motion:reduce){.cmenu{animation:none}}
 /* About: the mark opens a page about the crate over a blurred crate; the close button, Esc or a tap anywhere but the words puts it away */
 .about{position:fixed;inset:0;width:auto;height:auto;max-width:none;max-height:none;margin:0;padding:0;border:0;background:rgba(18,18,18,0);color:var(--fg);overflow:hidden auto;overscroll-behavior:contain;transition:background-color .2s}
 .about::backdrop{background:none;-webkit-backdrop-filter:blur(28px) saturate(1.1);backdrop-filter:blur(28px) saturate(1.1);opacity:0;transition:opacity .2s}
@@ -997,7 +1075,8 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   </section>
   <p class="sr" id="pos" aria-live="polite"></p>
   <div class="find">
-    <button type="button" class="chip" id="chip" hidden></button>
+    <div class="chip" id="chip" hidden></div>
+    <div class="cmenu" id="cmenu" hidden></div>
     <span class="sp"></span>
     <a class="logo" href="#about" aria-label="About Crate Dig" aria-haspopup="dialog"><svg aria-hidden="true"><use href="#mark"/></svg></a>
     <button type="button" class="btn ed" id="editB" aria-pressed="false" hidden>Edit</button>
@@ -1224,6 +1303,8 @@ const byName=(a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||yr
 const fold=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/×/g,'x').replace(/[’'.]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const letter=r=>{const c=fold(name(r))[0]||'';return /[a-z]/.test(c)?c.toUpperCase():'#'};
 // A filter narrows the crate to one artist, label, year or format (from a record's details) or to a search; null is the whole crate
+// a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
+const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
 const FIELD={artist:r=>r.artist,label:r=>r.label,year:r=>r.year,format:r=>r.format},KIND={artist:'Artist',label:'Label',year:'Year',format:'Format'};
 const same=(a,b)=>!!a&&fold(a)===fold(b);
 const matchQ=(r,v)=>{const h=fold([r.artist,r.sortAs,r.title,r.label,r.year,r.format].join(' '));return fold(v).split(' ').filter(Boolean).every(t=>h.includes(t))};
@@ -1380,7 +1461,7 @@ function go(i,now){
   if(now){cur=i;aim=pos=i;vel=0;place(true);render()}
   else{aim=i;kick();if(i===cur)return;cur=i;place()}
   if(open.hidden)setHash();
-  say();
+  say();clearTimeout(go.t);go.t=setTimeout(preLiner,350);
 }
 // the record on top, for screen readers (after what changed, when a filter did)
 function say(pre){const r=order[cur];$('#pos').textContent=`${pre?pre+' ':''}${r.title}, ${r.artist}${r.year?', '+r.year:''}. ${cur+1} of ${order.length}`;markAZ()}
@@ -1432,12 +1513,43 @@ qf.addEventListener('submit',e=>{e.preventDefault();clearTimeout(qT);if(search()
 $('#qx').onclick=()=>{q.value='';search();q.focus()};
 // the filter you're in, from a record's details: click it to see the whole crate again
 const X_ICON='<svg width="14" height="14" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
-function showChip(){
-  const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;if(!f)return;
-  chip.innerHTML=`<span class="k">${KIND[f.k]}</span><b>${f.v}</b><span class="n">${order.length}</span>${X_ICON}`;
-  chip.setAttribute('aria-label',`${KIND[f.k]} ${f.v}, ${order.length} records. Show the whole crate`);
+// tap its name for a menu of the others of that kind (years, labels, artists); the × shows the whole crate again
+const escC=s=>String(s).replace(/[&<>"]/g,c=>`&#${c.charCodeAt(0)};`);
+const KINDS={year:'Year',label:'Label',artist:'Artist'};
+const asRead=(k,v)=>k==='label'?labelName(v):v;
+// every year, label or artist in the crate, once each as it reads: years oldest first, names A to Z without "The"
+function choices(k){
+  const m=new Map();
+  for(const r of RECORDS){const v=FIELD[k](r);if(!v||(k==='artist'&&/^various/i.test(v)))continue;const s=String(asRead(k,v)),key=fold(s);if(!m.has(key))m.set(key,{v,s})}
+  const az=x=>x.s.replace(/^the\s+/i,'');
+  return[...m.values()].sort((a,b)=>k==='year'?a.v-b.v:az(a).localeCompare(az(b)));
 }
-chip.onclick=()=>{arrange(null);say('The whole crate.');crate.focus({preventScroll:true})};
+function showChip(){
+  const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;menuOff();if(!f)return;
+  const v=asRead(f.k,f.v),pick=KINDS[f.k];
+  chip.innerHTML=(pick?`<button type="button" class="cn" aria-expanded="false" aria-controls="cmenu" aria-label="${pick}: ${escC(v)}. Choose another"><b>${escC(v)}</b></button>`:`<b>${escC(v)}</b>`)
+    +`<button type="button" class="cx" aria-label="Show the whole crate">${X_ICON}</button>`;
+}
+function menuOff(){const cmenu=$('#cmenu');if(cmenu.hidden)return;cmenu.hidden=true;$('.cn',chip)?.setAttribute('aria-expanded','false')}
+function menuOn(){
+  const cmenu=$('#cmenu'),f=filt;if(!f||!KINDS[f.k])return;
+  const list=choices(f.k);
+  cmenu.innerHTML=`<p class="ch">${KINDS[f.k]}</p><ul>${list.map((c,i)=>`<li><button type="button" data-i="${i}"${same(String(c.v),String(f.v))?' aria-current="true"':''}><span>${escC(c.s)}</span></button></li>`).join('')}</ul>`;
+  cmenu.list=list;cmenu.k=f.k;cmenu.hidden=false;$('.cn',chip).setAttribute('aria-expanded','true');
+  const on=$('[aria-current]',cmenu);if(on){const ul=$('ul',cmenu);ul.scrollTop=on.offsetTop-ul.clientHeight/2+on.offsetHeight/2;on.focus({preventScroll:true})}
+}
+chip.addEventListener('click',e=>{
+  if(e.target.closest('.cx')){menuOff();arrange(null);say('The whole crate.');crate.focus({preventScroll:true});return}
+  if(e.target.closest('.cn'))$('#cmenu').hidden?menuOn():menuOff();
+});
+$('#cmenu').addEventListener('click',e=>{const cmenu=$('#cmenu'),b=e.target.closest('[data-i]');if(!b)return;const c=cmenu.list[+b.dataset.i];
+  menuOff();if(!same(String(c.v),String(filt?.v)))arrange({k:cmenu.k,v:c.v});$('.cn',chip)?.focus({preventScroll:true})});
+$('#cmenu').addEventListener('keydown',e=>{const cmenu=$('#cmenu');
+  if(e.key==='Escape'){e.preventDefault();menuOff();$('.cn',chip)?.focus();return}
+  if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;e.preventDefault();
+  const bs=$$('button',cmenu),i=bs.indexOf(document.activeElement);bs[Math.max(0,Math.min(bs.length-1,i+(e.key==='ArrowDown'?1:-1)))]?.focus();
+});
+addEventListener('pointerdown',e=>{if(!$('#cmenu').hidden&&!e.target.closest('#cmenu,#chip'))menuOff()});
 
 // Pull a record out: big sleeve to turn over (drag, click, arrow keys), details and a Spotify link beside it
 // resting angle of a pulled-out sleeve: barely turned, unless you turn it
@@ -1554,14 +1666,101 @@ const shEnd=()=>{
 $('#oinfo').addEventListener('pointerup',shEnd);$('#oinfo').addEventListener('pointercancel',shEnd);
 $('#oinfo').addEventListener('click',e=>{if(performance.now()-shBlock<400&&e.target.closest('#playM')){e.preventDefault();e.stopImmediatePropagation()}},true);
 $('#oinfo').addEventListener('focusout',e=>{if(playMenu()&&!e.relatedTarget?.closest?.('.play')&&e.relatedTarget)togglePlay(false)});
-// a detail other records share is a button that fills the crate with all of them
-const metaHTML=(r,k)=>{const v=FIELD[k](r),n=v?RECORDS.filter(x=>same(FIELD[k](x),v)).length:0;return n>1?`<button type="button" class="meta" data-f="${k}">${v}<span class="sr">, show all ${n}</span></button>`:v};
+// a detail other records share is a button that fills the crate with all of them (the artist, year and label)
+const metaHTML=(r,k)=>{const v=FIELD[k](r),n=v?RECORDS.filter(x=>same(FIELD[k](x),v)).length:0,s=k==='label'?labelName(v):v;return n>1?`<button type="button" class="meta" data-f="${k}">${s}<span class="sr">, show all ${n}</span></button>`:s};
+// other records in the crate by the same artist: a few covers that open them, or nothing when there are none
+function nearby(r){
+  if(/^various/i.test(r.artist))return''; // compilations aren't one artist
+  for(const[k,head]of[['artist',()=>'More from '+r.artist]]){
+    const v=FIELD[k](r);if(!v)continue;
+    const more=order.filter(x=>x!==r&&same(FIELD[k](x),v)).slice(0,4);
+    if(more.length)return`<div class="near"><p class="ohd">${esc(head())}</p><div class="thumbs">${more.map(x=>`<button type="button" class="nb" data-slug="${x.slug}" aria-label="${x.title} by ${x.artist}">${x.front?`<img alt="" src="${img(x.thumb||x.front)}" decoding="async" draggable="false">`:`<i style="background:${spineBg(x)}"></i>`}</button>`).join('')}</div></div>`;
+  }
+  return'';
+}
 function info(r){
+  // year, then label, quiet and gray; each fills the crate with the rest from that year or label, when there are any
+  const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${metaHTML(r,k)}</span>`).join('');
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
-      <dl class="facts">${[['Released','year'],['Label','label'],['Format','format']].filter(([,k])=>FIELD[k](r)).map(([t,k])=>`<div><dt>${t}</dt><dd>${metaHTML(r,k)}</dd></div>`).join('')}</dl>
-    ${playHTML(r)}${ownHTML(r)}`;
+      ${facts?`<p class="facts">${facts}</p>`:''}
+    ${playHTML(r)}<div class="ab" id="oabout" hidden></div>${nearby(r)}${ownHTML(r)}`;
+  liner(r);
+}
+// liner notes come from /api/liner: a few lines from Wikipedia for every record, and for a record with no back cover
+// on file, its track list, set on the plain jacket where the back would be
+const LINER=new Map();
+const linerQ=r=>{const q=new URLSearchParams({artist:r.artist,title:r.title});
+  if(r.src==='d')q.set('d',r.id);else if(r.src==='a')q.set('a',r.id);else{const mb=r.src==='m'?r.id:r.release;if(mb)q.set('mb',mb)}
+  if(r.group)q.set('g',r.group);return q};
+const LDONE=new Map(); // answers already in, drawn at once
+// which records have an About, remembered from earlier visits, so a record that has none never shows it loading
+const HAS=(()=>{try{return JSON.parse(localStorage.getItem('crate:about'))||{}}catch{return{}}})();
+function fetchLiner(r){
+  let p=LINER.get(r.slug);
+  if(!p){p=fetch('/api/liner?'+linerQ(r)).then(x=>x.ok?x.json():null).catch(()=>null).then(l=>{
+    LDONE.set(r.slug,l);
+    if(l){HAS[r.slug]=l.about?1:0;try{localStorage.setItem('crate:about',JSON.stringify(HAS))}catch{}}
+    return l});LINER.set(r.slug,p)}
+  return p;
+}
+// the record in front of you fetches its liner notes while you look at it, so they're usually in before you open it
+const preLiner=()=>{const r=order[cur];if(r&&open.hidden)fetchLiner(r)};
+function liner(r){
+  const p=fetchLiner(r);
+  const show=(l,late)=>{
+    if(order[cur]!==r||open.hidden)return;
+    const ab=$('#oabout');
+    // arriving late, About opens its room on a spring and the words fade in after, so what's below glides down
+    const was=ab.hidden?0:ab.offsetHeight;
+    if(l?.about){ab.hidden=false;ab.className='ab in'+(late?' late':'');ab.innerHTML=`<p class="ohd">About</p><p class="blurb"></p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;fitAbout(ab.children[1],l.about.text);
+      if(late)room(ab,was,ab.offsetHeight)}
+    else if(!ab.hidden){ab.className='ab gone';room(ab,was,0).then(()=>{if(ab.classList.contains('gone'))ab.hidden=true})}
+    if(!r.back)requestAnimationFrame(()=>tracks(r,l?.sides||[]));
+  };
+  if(LDONE.has(r.slug)){show(LDONE.get(r.slug));return}
+  // still on its way: About holds its place with quiet lines only when it's known to be coming; otherwise it fades in if it
+  // arrives. The track list simply fades in when it's ready
+  if(HAS[r.slug]){const ab=$('#oabout');ab.hidden=false;ab.className='ab wait';ab.innerHTML='<p class="ohd">About</p><div class="sk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'}
+  p.then(l=>show(l,true));
+}
+// a block's height (and the gap above it) eased from one size to another; 0 means it isn't there
+function room(el,from,to){
+  if(reduce||from===to)return Promise.resolve();
+  const gap=parseFloat(getComputedStyle(el).marginTop)||0,k=h=>({height:h+'px',marginTop:(h?gap:0)+'px',overflow:'hidden'});
+  return el.animate([k(from),k(to)],{duration:560,easing:'cubic-bezier(.22,1,.36,1)'}).finished.catch(()=>{});
+}
+// About ends where a sentence ends: as many whole sentences as fit three lines, else the first one up to a comma or dash,
+// else up to a word, never mid-word
+function fitAbout(el,text){
+  const max=parseFloat(getComputedStyle(el).lineHeight)*3+2,fits=s=>{el.textContent=s;return el.scrollHeight<=max};
+  const sents=typeof Intl.Segmenter==='function'?[...new Intl.Segmenter('en',{granularity:'sentence'}).segment(text)].map(s=>s.segment):text.split(/(?<=[.!?])\s+/);
+  let out='';
+  for(const s of sents){const t=(out+' '+s).trim();if(fits(t))out=t;else break}
+  if(!out){
+    const first=sents[0].trim();
+    for(const m of first.matchAll(/[,;:–—](?=\s)/g)){const t=first.slice(0,m.index)+'…';if(fits(t))out=t;else break}
+    if(!out){const w=first.split(' ');let n=w.length;while(n>1&&!fits(w.slice(0,n).join(' ')+'…'))n--;out=w.slice(0,n).join(' ')+'…'}
+  }
+  el.textContent=out;
+}
+// WCAG contrast: white type on the jacket when it passes 4.5:1, else near black
+const lumOf=hex=>{const m=/^#([0-9a-f]{6})$/i.exec(hex||'');if(!m)return 0;const n=parseInt(m[1],16);
+  return[n>>16,n>>8&255,n&255].map(c=>{c/=255;return c<=.03928?c/12.92:((c+.055)/1.055)**2.4}).reduce((s,c,i)=>s+c*[.2126,.7152,.0722][i],0)};
+const tlInk=hex=>{const L=lumOf(hex);return(1.05)/(L+.05)>=4.5?'#fff':'#111'};
+// the track list on the back of the sleeve: small numbers in the margin, restarting each side, a little space between sides.
+// The type steps down until the whole list fits the square, so a long record never scrolls or gets cut
+function tracks(r,sides){
+  const bk=$('#sleeve .bk');if(!bk||order[cur]!==r)return;
+  if(!sides.length){bk.querySelector('.tl')?.remove();return}
+  const n=sides.reduce((a,s)=>a+s.tracks.length,0);
+  const rows=sides.map(s=>`<ol>${s.tracks.map((t,j)=>`<li><i>${s.side?s.side+(j+1):j+1}</i><span>${esc(t)}</span></li>`).join('')}</ol>`).join('');
+  bk.querySelector('.tl')?.remove();
+  bk.insertAdjacentHTML('beforeend',`<div class="tl${n>16?' two':''}" style="color:${tlInk(spineBg(r))}" role="group" aria-label="Songs">${rows}</div>`);
+  const tl=bk.lastElementChild;let k=1;
+  while((tl.scrollHeight>tl.clientHeight+1||tl.scrollWidth>tl.clientWidth+1)&&k>.5){k-=.04;tl.style.setProperty('--k',k.toFixed(2))}
 }
 $('#oinfo').addEventListener('click',e=>{
+  const nb=e.target.closest('.nb');if(nb){const i=order.findIndex(x=>x.slug===nb.dataset.slug);if(i>=0&&!busy){open.scrollTo({top:0,behavior:reduce?'auto':'smooth'});swap(i-cur)}return}
   const b=e.target.closest('.meta');if(!b||busy)return;
   const f={k:b.dataset.f,v:FIELD[b.dataset.f](order[cur])};
   if(!(filt&&filt.k===f.k&&same(filt.v,f.v)))arrange(f); // the crate changes behind the record, then the record goes home into it
