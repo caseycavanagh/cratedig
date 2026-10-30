@@ -692,13 +692,13 @@ html.phone.deck .crate{perspective:calc(var(--S)*2.9);perspective-origin:50% cal
 html.phone.deck .kd::before{display:none}
 /* swapping records: the details, Play and all, leave and arrive together */
 .open.in.swapping .o-info,html.phone .open.in.swapping .o-info{opacity:1;transform:none;transition:none}
-.open.in .o-info>*{transition:transform .5s var(--flip),opacity .3s}
-.open.in.swapping .o-info>*{opacity:0;transform:translateY(-12px);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .12s}
+.open.in :is(.o-info>:where(:not(.o-head)),.o-head>*){transition:transform .5s var(--flip),opacity .3s}
+.open.in.swapping :is(.o-info>:where(:not(.o-head)),.o-head>*){opacity:0;transform:translateY(-12px);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .12s}
 /* phones: the words just cross-fade between records, and arrive with a short rise, no overshoot */
 html.phone .o-info{transform:translateY(10px)}
 html.phone .open.in .o-info{transform:none;transition:transform .45s cubic-bezier(.22,1,.36,1) .08s,opacity .3s .08s}
-html.phone .open.in .o-info>*{transition:opacity .22s}
-html.phone .open.in.swapping .o-info>*{transform:none;transition:opacity .1s}
+html.phone .open.in :is(.o-info>:where(:not(.o-head)),.o-head>*){transition:opacity .22s}
+html.phone .open.in.swapping :is(.o-info>:where(:not(.o-head)),.o-head>*){transform:none;transition:opacity .1s}
 /* arriving: the crate rises first, then the dial and the bar settle in under it */
 body.ready .find,body.ready .kd{animation:barIn .7s cubic-bezier(.22,1,.36,1) .32s backwards}
 @keyframes barIn{from{opacity:0;translate:0 18px}}
