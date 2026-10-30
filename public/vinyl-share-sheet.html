@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Share</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
+:root{--sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;--bg:#121212;--fg:#fff;--m:#8e8e93;--t2:#a5a5aa;--line:rgba(255,255,255,.13);--soft:#232325;--soft2:#303033;--glass:rgba(30,30,32,.72);--ring:#ffffff3d;--pick:#fff;--flip:cubic-bezier(.22,1,.36,1)}
+*,*::before,*::after{box-sizing:border-box}*{margin:0}
+html{background:#0b0b0c;color-scheme:dark}
+body{font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--fg);background:#0b0b0c;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+.wrap{max-width:1400px;margin:0 auto;padding:56px 28px 96px}
+@media(max-width:680px){.wrap{padding:40px 16px 80px}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:28px}
+.top h1{font-size:17px;font-weight:500}.top p{color:var(--m);margin-top:4px;max-width:680px;font-size:15px}
+.tools{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.picks{font:12px var(--mono);color:var(--m)}
+.pill{all:unset;cursor:pointer;height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;font-size:13px;transition:transform .5s var(--flip),border-color .2s}
+.pill:hover{border-color:var(--m)}.pill:active{transform:scale(.98);transition-duration:.08s}.pill:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+#tt{font:12px var(--mono);color:var(--m);user-select:all}
+.grp{font-size:17px;font-weight:500;margin:52px 0 4px}.grp:first-of-type{margin-top:0}
+.grp+p{font-size:15px;color:var(--m);margin-bottom:18px;max-width:720px}
+.sheet{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+.st{position:relative;border-radius:18px;background:#161617;padding:46px 18px 18px;min-width:0}
+@media(max-width:680px){.st{padding:46px 10px 14px}}
+.st .id{position:absolute;top:14px;left:18px;right:48px;font:500 11px var(--mono);color:var(--m);text-transform:uppercase;letter-spacing:.04em}.st .id b{color:var(--fg);font-weight:500;margin-right:8px}
+.st .use{display:block;margin:14px 4px 2px;font-size:14px;color:var(--m);line-height:1.5;max-width:600px}
+.star{all:unset;cursor:pointer;position:absolute;top:9px;right:10px;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;color:var(--m);font-size:15px;z-index:5;transition:transform .5s var(--flip)}
+.star:hover{background:var(--soft);color:var(--fg)}.star:active{transform:scale(.94);transition-duration:.08s}.star:focus-visible{outline:1px solid var(--ring)}
+.st.picked{box-shadow:inset 0 0 0 2px var(--pick)}.st.picked .star{color:var(--pick)}
+
+/* a sticker: a phone and a laptop side by side, each drawn at real size and scaled down */
+.pair{display:flex;gap:24px;align-items:flex-end;justify-content:flex-start;flex-wrap:wrap}
+.dev{flex:none;position:relative;overflow:hidden;border-radius:14px;outline:1px solid #2a2a2c;background:var(--bg)}
+.dev>.s{position:absolute;left:0;top:0;transform-origin:0 0;font-size:16px;line-height:1.55;color:var(--fg);font-family:var(--sans)}
+.ph{width:215px;height:464px;border-radius:22px}.ph>.s{width:390px;height:844px;transform:scale(.55)}
+.lp{width:640px;height:400px}.lp>.s{width:1280px;height:800px;transform:scale(.5)}
+.cap{position:absolute;left:8px;bottom:6px;font:10px var(--mono);color:#ffffff66;z-index:9}
+@media(max-width:720px){.lp{width:333px;height:208px}.lp>.s{transform:scale(.26)}}
+
+/* pieces of the crate, drawn the way the crate draws them */
+.ib{position:absolute;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--fg)}
+.ib svg{width:20px;height:20px}
+.logo{position:absolute;left:24px;top:20px;width:28px;height:28px}
+.cover{position:absolute;background:#333 center/cover;box-shadow:0 30px 60px -20px #000c}
+.stack{position:absolute;background:repeating-linear-gradient(#2c2c2e 0 2px,#1a1a1b 2px 4px);opacity:.8}
+.az{position:absolute;display:flex;gap:18px;font-size:22px;color:#ffffff55}.az b{color:#fff;font-weight:500;font-size:26px}
+.menu{position:absolute;padding:6px;border-radius:16px;background:var(--glass);border:1px solid var(--line);box-shadow:0 14px 40px #0008;min-width:186px;font-size:16px}
+.menu i{font-style:normal;display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border-radius:10px;color:var(--fg)}
+.menu i.on{background:#ffffff14}.menu i svg{width:16px;height:16px;color:var(--t2)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px 4px}
+.ttl{font-size:34px;font-weight:500;letter-spacing:-.01em;line-height:1.15}
+.art{font-size:20px;color:var(--t2)}
+.fx{font-size:16px;color:var(--m);margin-top:12px}
+.play{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px 0 16px;border-radius:999px;background:#fff;color:#111;font-size:17px;font-weight:500}
+.play svg{width:20px;height:20px}
+.cr{display:grid;place-items:center;border-radius:50%;border:1px solid var(--line);color:var(--fg);flex:none}
+.cr svg{width:20px;height:20px}
+.ql{display:inline-flex;align-items:center;gap:8px;color:var(--t2);font-size:16px}.ql svg{width:17px;height:17px}
+.tst{position:absolute;left:50%;translate:-50% 0;padding:10px 18px;border-radius:999px;background:#fff;color:#111;font-size:16px;white-space:nowrap}
+.pop{position:absolute;padding:14px;border-radius:16px;background:var(--glass);border:1px solid var(--line);box-shadow:0 14px 40px #0008;width:340px}
+.pop .u{font:14px var(--mono);color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:10px 12px;border-radius:10px;background:#0006}
+.pop .r{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:15px}
+.pop .r span{color:var(--m)}
+.pop .b{height:36px;padding:0 16px;border-radius:999px;background:#fff;color:#111;display:inline-flex;align-items:center;font-weight:500}
+.ios{position:absolute;left:8px;right:8px;bottom:8px;border-radius:26px;background:#2a2a2d;padding:16px 16px 22px}
+.ios .h{display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid #ffffff1a}
+.ios .h i{width:52px;height:52px;border-radius:8px;background:#444 center/cover;flex:none}
+.ios .h b{display:block;font-weight:500;font-size:15px}.ios .h span{font-size:13px;color:var(--m)}
+.ios .apps{display:flex;gap:18px;padding:18px 4px 10px}.ios .apps i{width:60px;height:60px;border-radius:15px;background:#3c3c40}
+.ios .row{height:48px;border-radius:12px;background:#3a3a3d;margin-top:10px;display:flex;align-items:center;padding:0 16px;font-size:16px}
+.dim{position:absolute;inset:0;background:#0009}
+.blur{position:absolute;inset:0;background:#121212e0;backdrop-filter:blur(20px)}
+
+/* link preview cards: 1200×630 drawn at a third */
+.card{flex:none;width:480px;height:252px;position:relative;overflow:hidden;border-radius:12px;outline:1px solid #2a2a2c;background:#121212}
+.card>.s{position:absolute;left:0;top:0;width:1200px;height:630px;transform:scale(.4);transform-origin:0 0;color:#ecebe8;font-family:var(--sans)}
+@media(max-width:680px){.card{width:330px;height:173px}.card>.s{transform:scale(.275)}}
+.cards{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.msg{width:480px;border-radius:18px;overflow:hidden;background:#262628}
+.msg .card{border-radius:0;outline:0}
+.msg .meta{padding:10px 14px 12px;font-size:13px;line-height:1.35}.msg .meta b{display:block;font-weight:500}.msg .meta span{color:var(--m)}
+@media(max-width:680px){.msg{width:330px}}
+.ft{position:absolute;font-family:var(--mono);font-size:30px;color:#8f8f93}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Share</h1><p>Where sharing lives, for the whole crate and for one record. On a phone the button opens the phone's own share sheet; on a laptop it copies the link. Star what you like, then copy your picks.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy picks</button><button class="pill" id="clear" type="button">Clear</button><span id="tt"></span></div>
+  </div>
+
+  <h2 class="grp">The whole crate</h2>
+  <p>The link is the crate's own address. In someone else's crate (made on the make page) it shares their crate, not yours.</p>
+  <div class="sheet" id="A"></div>
+
+  <h2 class="grp">One record</h2>
+  <p>Shown on a long title so crowding shows up. The link opens the crate with that record pulled out.</p>
+  <div class="sheet" id="B"></div>
+
+  <h2 class="grp">The mark</h2>
+  <p>What the button looks like, wherever it ends up.</p>
+  <div class="sheet" id="E"></div>
+
+  <h2 class="grp">On a laptop, after the click</h2>
+  <p>A phone always opens its own share sheet (first sticker, left). These are the laptop's answer to a click.</p>
+  <div class="sheet" id="C"></div>
+
+  <h2 class="grp">A record's link preview</h2>
+  <p>The card Messages, Slack or Discord shows for a record's link, with a short title and a long one. The crate keeps today's card.</p>
+  <div class="sheet" id="D"></div>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const P=d=>`<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="${d}"/></svg>`;
+const I={
+  share:P('M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z'),
+  link:P('M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z'),
+  search:P('M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z'),
+  x:P('M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z'),
+  crate:P('M208,72H48A16,16,0,0,0,32,88V200a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V88A16,16,0,0,0,208,72Zm0,128H48V88H208ZM48,48a8,8,0,0,1,8-8H200a8,8,0,0,1,0,16H56A8,8,0,0,1,48,48Z'),
+  grid:P('M104,40H56A16,16,0,0,0,40,56v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,104,40Zm0,64H56V56h48Zm96-64H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,64H152V56h48Zm-96,32H56a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,104,136Zm0,64H56V152h48Zm96-64H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,200,136Zm0,64H152V152h48Z'),
+  list:P('M80,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H88A8,8,0,0,1,80,64Zm136,56H88a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Zm0,64H88a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16ZM44,52A12,12,0,1,0,56,64,12,12,0,0,0,44,52Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,116Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,180Z'),
+  caret:P('M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'),
+  spot:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#111"/><path d="M6.5 9.3c3.7-1.1 7.8-.8 11 1M7 12.4c3-.9 6.4-.6 9 .9M7.6 15.3c2.4-.6 4.9-.4 7 .7" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
+};
+const LOGO='<svg class="logo" viewBox="0 0 28 28"><g fill="none" stroke="#fff" stroke-width="2"><circle cx="14" cy="14" r="12.5"/><circle cx="14" cy="14" r="8.5"/><circle cx="14" cy="14" r="4.5"/></g><circle cx="14" cy="14" r="1.6" fill="#fff"/></svg>';
+const COV=s=>`url(/vinyl/${s}-front.webp)`;
+const SHORT={slug:'allison-russell-the-returner',title:'The Returner',artist:'Allison Russell',fx:'2023, Fantasy'};
+const LONG={slug:'various-artists-amerikinda-20-years-of-dualtone',title:'Amerikinda: 20 Years of Dualtone',artist:'Various artists',fx:'2021, Dualtone'};
+
+// the crate screen. extra = html laid on top; topR = buttons in the top right
+function phoneCrate({topR=[],extra=''}={}){
+  const r=topR.map((h,i)=>h.replace('%R%',`${16+i*56}px`)).join('');
+  return `<div class="dev ph"><div class="s">${LOGO.replace('class="logo"','class="logo" style="left:24px;top:28px"')}
+    ${r}<div class="stack" style="left:40px;top:84px;width:310px;height:170px;clip-path:polygon(12% 0,88% 0,100% 100%,0 100%)"></div>
+    <div class="cover" style="left:18px;top:254px;width:354px;height:334px;background-image:${COV(SHORT.slug)}"></div>
+    <div class="az" style="left:186px;top:776px"><b>A</b><span>B</span><span>C</span><span>D</span><span>E</span></div>${extra}</div><span class="cap">phone</span></div>`;
+}
+function lapCrate({topR=[],extra=''}={}){
+  const r=topR.map((h,i)=>h.replace('%R%',`${24+i*60}px`)).join('');
+  return `<div class="dev lp"><div class="s">${LOGO.replace('class="logo"','class="logo" style="left:24px;top:22px"')}
+    ${r}<div class="stack" style="left:420px;top:0;width:480px;height:180px;clip-path:polygon(8% 0,92% 0,100% 100%,0 100%)"></div>
+    <div class="cover" style="left:400px;top:180px;width:480px;height:450px;background-image:${COV(SHORT.slug)}"></div>
+    <div class="az" style="left:620px;top:730px"><b>A</b><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span></div>${extra}</div><span class="cap">laptop</span></div>`;
+}
+const tb=(icon,on)=>`<span class="ib" style="right:%R%;top:${on==='ph'?16:12}px">${I[icon]}</span>`;
+
+// the open record
+function phoneRec(r,{corner='',under='',row='',extra=''}={}){
+  return `<div class="dev ph"><div class="s">
+    <span class="ib" style="right:14px;top:14px;width:44px;height:44px">${I.x}</span>${corner}
+    <div class="cover" style="left:24px;top:156px;width:342px;height:342px;background-image:${COV(r.slug)}"></div>
+    <div style="position:absolute;left:24px;right:24px;top:516px"><div class="ttl">${r.title}</div><div class="art">${r.artist}</div><div class="fx">${r.fx}</div>${under}</div>
+    <div style="position:absolute;left:24px;right:24px;bottom:64px;display:flex;gap:10px;align-items:center"><span class="play" style="height:52px;flex:1;justify-content:center">${I.spot}Play</span><span class="cr" style="width:52px;height:52px">${I.caret}</span>${row}</div>${extra}</div><span class="cap">phone</span></div>`;
+}
+function lapRec(r,{corner='',under='',row='',extra=''}={}){
+  return `<div class="dev lp"><div class="s">
+    <span class="ib" style="right:24px;top:12px">${I.x}</span>${corner}
+    <div class="cover" style="left:290px;top:150px;width:500px;height:500px;background-image:${COV(r.slug)}"></div>
+    <div style="position:absolute;left:836px;width:400px;top:${r===LONG?300:330}px"><div class="ttl" style="font-size:36px">${r.title}</div><div class="art">${r.artist}</div><div class="fx">${r.fx}</div>${under}
+      <div style="display:flex;gap:10px;align-items:center;margin-top:36px"><span class="play">${I.spot}Play</span>${row}</div></div>${extra}</div><span class="cap">laptop</span></div>`;
+}
+
+const ALL={};
+function sticker(box,id,name,body,use){
+  ALL[id]=name;
+  $('#'+box).insertAdjacentHTML('beforeend',`<div class="st" data-id="${id}"><span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id}: ${name}">★</button>${body}${use?`<span class="use">${use}</span>`:''}</div>`);
+}
+
+// A: the whole crate
+sticker('A','A1','A button in the top corner',
+  `<div class="pair">${phoneCrate({topR:[tb('share','ph'),tb('crate','ph'),tb('search','ph')].reverse()})}${lapCrate({topR:[tb('share'),tb('crate'),tb('search')].reverse()})}</div>`,
+  'Its own round button beside search and the layout button. Always one tap away, and the busiest corner gets one more thing.');
+sticker('A','A2','In the layout menu',
+  `<div class="pair">${phoneCrate({topR:[tb('crate','ph'),tb('search','ph')].reverse(),extra:`<div class="menu" style="right:16px;top:74px"><i class="on">${I.crate}Crate</i><i>${I.grid}Grid</i><i>${I.list}Table</i><hr><i>${I.share}Share crate</i></div>`})}${lapCrate({topR:[tb('crate'),tb('search')].reverse(),extra:`<div class="menu" style="right:24px;top:72px"><i class="on">${I.crate}Crate</i><i>${I.grid}Grid</i><i>${I.list}Table</i><hr><i>${I.share}Share crate</i></div>`})}</div>`,
+  'A last row under Crate, Grid and Table. Nothing new on screen; you find it when you open the menu.');
+sticker('A','A3','In About',
+  `<div class="pair">
+   <div class="dev ph"><div class="s"><div class="blur"></div><span class="ib" style="right:14px;top:14px;width:44px;height:44px">${I.x}</span>
+     <div style="position:absolute;left:24px;right:24px;top:276px">${LOGO.replace('class="logo"','style="width:64px;height:64px"')}<div style="font-size:58px;font-weight:500;letter-spacing:-.02em;line-height:1.1;margin-top:8px">Crate Dig</div>
+     <p style="font-size:19px;color:var(--t1,#d6d6d8);margin-top:12px">Every record Casey owns, in one crate. Flip through, pull one out, turn it over.</p>
+     <span class="play" style="margin-top:26px;background:none;color:#fff;border:1px solid var(--line);font-weight:400">${I.share}Share this crate</span>
+     <p style="font:13px var(--mono);color:var(--m);margin-top:30px">Covers from Apple Music and the Cover Art Archive</p></div></div><span class="cap">phone</span></div>
+   <div class="dev lp"><div class="s"><div class="blur"></div><span class="ib" style="right:24px;top:12px">${I.x}</span>
+     <div style="position:absolute;left:400px;width:520px;top:230px">${LOGO.replace('class="logo"','style="width:64px;height:64px"')}<div style="font-size:64px;font-weight:500;letter-spacing:-.02em;line-height:1.1;margin-top:8px">Crate Dig</div>
+     <p style="font-size:20px;color:#d6d6d8;margin-top:12px">Every record Casey owns, in one crate. Flip through, pull one out, turn it over.</p>
+     <span class="play" style="margin-top:26px;background:none;color:#fff;border:1px solid var(--line);font-weight:400">${I.share}Share this crate</span></div></div><span class="cap">laptop</span></div></div>`,
+  'Behind the logo, under the blurb. Quietest of the three; you have to know to open About.');
+sticker('A','A4','Top corner, phone only in the menu',
+  `<div class="pair">${phoneCrate({topR:[tb('crate','ph'),tb('search','ph')].reverse(),extra:`<div class="menu" style="right:16px;top:74px"><i class="on">${I.crate}Crate</i><i>${I.grid}Grid</i><i>${I.list}Table</i><hr><i>${I.share}Share crate</i></div>`})}${lapCrate({topR:[tb('share'),tb('crate'),tb('search')].reverse()})}</div>`,
+  'A mix: a laptop has room for the button, a phone keeps its corner to two.');
+
+// B: one record (long title)
+sticker('B','B1','A round button beside Play',
+  `<div class="pair">${phoneRec(LONG,{row:`<span class="cr" style="width:52px;height:52px">${I.share}</span>`})}${lapRec(LONG,{row:`<span class="cr" style="width:44px;height:44px">${I.share}</span>`})}</div>`,
+  'Sits with the other things you do to a record. On a phone the row becomes Play, the Play menu, and Share.');
+sticker('B','B2','Words under the facts',
+  `<div class="pair">${phoneRec(LONG,{under:`<div class="ql" style="margin-top:14px">${I.share}Share</div>`})}${lapRec(LONG,{under:`<div class="ql" style="margin-top:14px">${I.link}Copy link</div>`})}</div>`,
+  'A quiet gray line after the year and label: “Share” on a phone, “Copy link” on a laptop. Reads as a fact, not a button.');
+sticker('B','B3','In the corner, beside close',
+  `<div class="pair">${phoneRec(LONG,{corner:`<span class="ib" style="right:68px;top:14px;width:44px;height:44px">${I.share}</span>`})}${lapRec(LONG,{corner:`<span class="ib" style="right:84px;top:12px">${I.share}</span>`})}</div>`,
+  'Up with close, away from the record. Same place on every record, out of the way of Play.');
+sticker('B','B4','A labeled button beside Play',
+  `<div class="pair">${phoneRec(LONG,{row:`<span class="cr" style="width:52px;height:52px">${I.share}</span>`})}${lapRec(LONG,{row:`<span class="play" style="background:none;color:#fff;border:1px solid var(--line);font-weight:400">${I.link}Copy link</span>`})}</div>`,
+  'Like B1, but a laptop spells it out as a second button. A phone keeps the round icon.');
+
+// E: the mark
+const markRow=(a,b,c,d)=>`<div class="pair">${phoneRec(SHORT,{row:a})}${lapRec(SHORT,{row:b,corner:''})}</div>`;
+sticker('E','E1','Box and arrow everywhere',
+  markRow(`<span class="cr" style="width:52px;height:52px">${I.share}</span>`,`<span class="cr" style="width:44px;height:44px">${I.share}</span>`),
+  'The mark phones use for share, on both.');
+sticker('E','E2','Box and arrow on a phone, a link on a laptop',
+  markRow(`<span class="cr" style="width:52px;height:52px">${I.share}</span>`,`<span class="cr" style="width:44px;height:44px">${I.link}</span>`),
+  'Each shows what it does there: the share sheet on a phone, a copied link on a laptop.');
+sticker('E','E3','The word, no mark',
+  markRow(`<span class="play" style="height:52px;background:none;color:#fff;border:1px solid var(--line);font-weight:400;padding:0 18px">Share</span>`,`<span class="play" style="background:none;color:#fff;border:1px solid var(--line);font-weight:400">Share</span>`),
+  'Plain “Share” in a pill. Clearest, widest.');
+
+// C: laptop feedback
+const lc=(row,extra)=>lapRec(SHORT,{row,extra});
+const btn=`<span class="cr" style="width:44px;height:44px">${I.share}</span>`;
+sticker('C','C1','The button says “Copied”',
+  `<div class="pair">${phoneRec(SHORT,{row:`<span class="cr" style="width:52px;height:52px">${I.share}</span>`,extra:`<div class="dim"></div><div class="ios"><div class="h"><i style="background-image:${COV(SHORT.slug)}"></i><div><b>The Returner by Allison Russell</b><span>cratedig-demo.vercel.app</span></div></div><div class="apps"><i></i><i></i><i></i><i></i></div><div class="row">Copy</div><div class="row">Add to Reading List</div></div>`})}${lc(`<span class="play" style="background:none;color:#fff;border:1px solid var(--line);font-weight:400;padding:0 18px 0 14px">${I.link}Copied</span>`)}</div>`,
+  'The button grows into “Copied” for a moment, then shrinks back. Nothing else moves.');
+sticker('C','C2','A note at the bottom',
+  `<div class="pair">${lc(btn,`<span class="tst" style="bottom:28px">Link copied</span>`)}</div>`,
+  'The crate’s own toast, the one edits already use. Easy to miss when your eyes are on the button.');
+sticker('C','C3','A small panel with the link',
+  `<div class="pair">${lc(btn,`<div class="pop" style="left:836px;top:520px"><div class="u">cratedig-demo.vercel.app/?r=allison-russell-the-returner</div><div class="r"><span>Copied</span><span class="b">Done</span></div></div>`)}</div>`,
+  'Copies right away and shows the link it copied, so you can see it worked and what you’re sending.');
+
+// D: record link preview
+const host='<span class="ft" style="right:72px;bottom:56px">cratedig-demo.vercel.app</span>';
+const D1=r=>`<div class="s"><div style="position:absolute;left:0;top:0;width:630px;height:630px;background:${COV(r.slug)} center/cover"></div>
+  <div style="position:absolute;left:702px;right:64px;top:64px;bottom:56px;display:flex;flex-direction:column;justify-content:space-between">
+    ${LOGO.replace('class="logo"','style="width:48px;height:48px"')}
+    <div><div style="font-size:${r===LONG?56:70}px;font-weight:500;letter-spacing:-.03em;line-height:1.05;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${r.title}</div><div style="font-size:38px;color:#8f8f93;margin-top:14px">${r.artist}</div>
+    <div style="font:26px var(--mono);color:#8f8f93;margin-top:40px">${r.fx}</div></div></div></div>`;
+const D2=r=>`<div class="s"><div style="position:absolute;inset:-60px;background:${COV(r.slug)} center/cover;filter:blur(60px) brightness(.45)"></div>
+  <div style="position:absolute;left:300px;top:45px;width:540px;height:540px;background:${COV(r.slug)} center/cover;box-shadow:0 40px 80px -20px #000;transform:translateX(30px)"></div></div>`;
+const D3=r=>`<div class="s" style="padding:80px 88px;display:flex;flex-direction:column;justify-content:space-between">
+  <div style="width:150px;height:150px;background:${COV(r.slug)} center/cover;box-shadow:0 20px 40px -12px #000"></div>
+  <div><div style="font-size:${r===LONG?72:96}px;font-weight:500;letter-spacing:-.03em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</div><div style="font-size:48px;color:#8f8f93;margin-top:14px">${r.artist}</div>
+  <div style="display:flex;justify-content:space-between;margin-top:40px;font:28px var(--mono);color:#8f8f93"><span>In Casey’s crate</span><span>cratedig-demo.vercel.app</span></div></div></div>`;
+const D4=r=>`<div class="s"><div style="position:absolute;left:0;top:0;right:0;height:630px;display:flex;gap:28px;align-items:center;padding-left:72px">
+  <div style="width:486px;height:486px;flex:none;background:${COV(r.slug)} center/cover;box-shadow:0 30px 60px -20px #000"></div>
+  <div style="flex:none;width:44px;height:486px;background:repeating-linear-gradient(90deg,#2c2c2e 0 3px,#18181a 3px 7px)"></div>
+  <div style="min-width:0;flex:1;padding-right:72px"><div style="font-size:${r===LONG?52:64}px;font-weight:500;letter-spacing:-.03em;line-height:1.08;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${r.title}</div><div style="font-size:34px;color:#8f8f93;margin-top:12px">${r.artist}</div></div></div>${host}</div>`;
+const msg=(f,r)=>`<div class="msg"><div class="card">${f(r)}</div><div class="meta"><b>${r.title} by ${r.artist}</b><span>cratedig-demo.vercel.app</span></div></div>`;
+const cardPair=f=>`<div class="pair"><div class="cards">${msg(f,SHORT)}${msg(f,LONG)}</div></div>`;
+sticker('D','D1','Cover on the left, words on the right',cardPair(D1),'The cover fills the left half edge to edge. Title, artist, year and label on the right; a long title wraps to three lines.');
+sticker('D','D2','Just the cover',cardPair(D2),'The cover, big, over a blur of itself. The words come from the app showing the link, under the picture.');
+sticker('D','D3','The crate’s card, with the cover',cardPair(D3),'Today’s title card with the record in place of the mark. Matches the crate’s own preview; a long title cuts off.');
+sticker('D','D4','Pulled from the crate',cardPair(D4),'The cover with the crate’s other spines beside it, title after. Most like the crate itself.');
+
+// stars stay in this browser
+let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-share-picks')||'[]'))}catch(e){}
+const save=()=>{try{localStorage.setItem('vinyl-share-picks',JSON.stringify([...picks]))}catch(e){}};
+const text=()=>'Picks: '+([...picks].sort().map(id=>`${id} ${ALL[id]}`).join(', ')||'none');
+const show=()=>{$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)));$('#picks').textContent=picks.size?[...picks].sort().join(' '):''};
+$$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{const t=text();$('#tt').textContent=t;
+  const sel=()=>{const r=document.createRange();r.selectNodeContents($('#tt'));const s=getSelection();s.removeAllRanges();s.addRange(r)};
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy picks',1400)},sel)};
+$('#clear').onclick=()=>{picks.clear();save();show();$('#tt').textContent=''};
+show();
+</script>
+</body>
+</html>
