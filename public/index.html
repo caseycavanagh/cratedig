@@ -529,7 +529,13 @@ body.walling .find .chip{display:none}
 .tile .pl small{font-weight:400;opacity:.7;margin-top:2px}
 .tile .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,#000b);font-size:14px;line-height:1.2;opacity:0;transition:opacity .2s}
 .tile .cap b{display:block;font-weight:500}.tile .cap span{color:#c9c9cc}
-@media (hover:hover){.tile:hover .cap,.tile:focus-visible .cap{opacity:1}}
+/* the grid names a record only when you tab to it; under a pointer, its cover lifts a little instead */
+.tile:focus-visible .cap{opacity:1}
+@media (hover:hover){
+  .tiles .tile{transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1)}
+  .tiles .tile:hover{transform:translateY(-4px);box-shadow:0 14px 28px -12px #000d}
+  .tiles .tile:hover:active{transform:translateY(-4px) scale(.97)}
+}
 /* the canvas: every cover once, in staggered columns, on a board you drag around; its edges give a little and spring back */
 .cv{position:fixed;inset:0;z-index:3;overflow:hidden;background:var(--bg);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .cv[hidden]{display:none}
@@ -540,7 +546,7 @@ body.walling .find .chip{display:none}
 .board .tile img{-webkit-user-drag:none;pointer-events:none}
 .cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--line);color:#d6d6d8;font-size:14px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
 @media (min-width:700px){.wall{padding-left:28px;padding-right:28px}.wall .pills{margin:0 -28px 18px;padding:2px 28px 4px}.tiles{gap:8px}}
-@media(prefers-reduced-motion:reduce){.vw,.tile,.wall .pills button{transition:none}}
+@media(prefers-reduced-motion:reduce){.vw,.tile,.tiles .tile,.wall .pills button{transition:none}.tiles .tile:hover{transform:none}}
 /* the dial, in place of the A–Z rail: letters; slide up on it for every record, down for letters again */
 .az{display:none}
 .kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
