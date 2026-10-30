@@ -1785,7 +1785,11 @@ function tracks(r,sides){
   while((tl.scrollHeight>tl.clientHeight+1||tl.scrollWidth>tl.clientWidth+1)&&k>.5){k-=.04;tl.style.setProperty('--k',k.toFixed(2))}
 }
 $('#oinfo').addEventListener('click',e=>{
-  const nb=e.target.closest('.nb');if(nb){const i=order.findIndex(x=>x.slug===nb.dataset.slug);if(i>=0&&!busy){open.scrollTo({top:0,behavior:reduce?'auto':'smooth'});swap(i-cur)}return}
+  // a cover from More from isn't next to this one in the crate, so it doesn't slide in from the side: it grows out of its thumbnail,
+  // the arrows then step to its own neighbors, and Back returns to the record it came from
+  const nb=e.target.closest('.nb');if(nb){const i=order.findIndex(x=>x.slug===nb.dataset.slug);if(i>=0&&!busy){
+    const st=history.state||{};history.pushState({open:st.open||0,d:(st.d||0)+1},'','#record/'+order[i].slug);
+    hop(i,nb.getBoundingClientRect());open.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}return}
   const b=e.target.closest('.meta');if(!b||busy)return;
   const f={k:b.dataset.f,v:FIELD[b.dataset.f](order[cur])};
   if(!(filt&&filt.k===f.k&&same(filt.v,f.v)))arrange(f); // the crate changes behind the record, then the record goes home into it
@@ -1850,10 +1854,38 @@ function swap(dir,o=0){
   later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},T);
   later(()=>{lift.style.transition='';busy=false},T+60);
 }
+// a record that isn't a neighbor: the one open fades back where it is, and the new one grows out of the cover that was tapped
+// (from: its box on screen), or, going Back, rises in place
+function hop(j,from){
+  if(busy||j===cur)return;
+  timers.forEach(clearTimeout);timers=[];
+  $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));
+  crate.classList.add('still');go(j,true);$('.rc.cur',stack).classList.add('held');
+  const r=order[cur];
+  if(reduce){fill(r);setS();return}
+  busy=true;
+  const T=PHONE?480:620,ease='cubic-bezier(.22,1,.36,1)';
+  const ghost=lift.cloneNode(false),gs=sleeve.cloneNode(false);ghost.removeAttribute('id');gs.removeAttribute('id');gs.append(...sleeve.childNodes);ghost.append(gs);
+  ghost.className='lift ghost';stage.append(ghost);
+  open.classList.add('swapping','hush');open.style.setProperty('--dx','0px');root.classList.remove('sliding');
+  fill(r,true);later(()=>info(r),T*.3);
+  const sc=stage.getBoundingClientRect();
+  lift.className='lift';lift.style.transition='none';
+  lift.style.transform=from?`translate(${from.left+from.width/2-sc.left-sc.width/2}px,${from.top+from.height/2-sc.top-sc.height/2}px) scale(${from.width/sc.width})`:'scale(.94)';
+  lift.style.opacity=from?'.6':'0';
+  snapS(0,0);void lift.offsetWidth;
+  ghost.style.transition=`transform ${T*.6}ms ${ease},opacity 150ms`;ghost.style.transform='scale(.96)';ghost.style.opacity='0';
+  lift.style.transition=`transform ${T}ms ${ease},opacity ${T*.5}ms`;lift.style.transform='';lift.style.opacity='';
+  base=REST;ry=base;rx=TILT;setS();
+  later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},T);
+  later(()=>{lift.style.transition='';busy=false},T+60);
+}
 let quick=false; // set by a pull down: the details are already gone, so the record drops at once
 function closeRecord(fromPop){
   if(open.hidden)return;
-  if(!fromPop&&history.state?.open){history.back();return}
+  // back past the record and any covers opened from it, to the crate
+  const st=history.state,n=(st?.open?1:0)+(st?.d||0);
+  if(!fromPop&&n){closing=true;history.go(-n);return}
   history.replaceState(null,'','#'+order[cur].slug); // the record on top now, even after cycling
   timers.forEach(clearTimeout);timers=[];
   const done=()=>{open.hidden=true;lampOn();lamp.copy?.remove();lamp.copy=null;lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';$('#oinfo').innerHTML='';document.documentElement.style.overflow='';
@@ -1882,7 +1914,11 @@ function closeRecord(fromPop){
   else{later(()=>crate.classList.remove('lifted'),90);later(fly,60)} // the rest of the crate fades back in as the details finish tucking away, and the record flies home through it
   document.title='Crate Dig';
 }
-addEventListener('popstate',()=>{const m=location.hash.match(/^#record\/(.+)$/),j=m?order.findIndex(r=>r.slug===m[1]):-1;if(j>=0){go(j,true);openRecord(true)}else closeRecord(true)});
+let closing=false;
+addEventListener('popstate',()=>{const m=location.hash.match(/^#record\/(.+)$/),j=m?order.findIndex(r=>r.slug===m[1]):-1;
+  if(closing){closing=false;closeRecord(true);return}
+  if(j>=0&&!open.hidden){const h=()=>busy?setTimeout(h,100):hop(j);h();return} // Back and Forward among the covers opened from More from
+  if(j>=0){go(j,true);openRecord(true)}else closeRecord(true)});
 $('#close').onclick=()=>closeRecord();
 stage.addEventListener('pointerdown',e=>{if(busy||!e.isPrimary)return;const now=performance.now();sdrag={x:e.clientX,y:e.clientY,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,far:false,ax:null,ry:sv.ry,w:stage.offsetWidth};stage.setPointerCapture(e.pointerId);stage.classList.add('dragging')});
 // phones: sideways brings in the next record, down puts this one back, a tap turns it over
