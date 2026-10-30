@@ -1939,7 +1939,7 @@ function slide(e){
     lift.style.transform=`translateX(${s.dx.toFixed(1)}px) rotate(${(s.dx/s.w*3).toFixed(2)}deg)`;open.style.setProperty('--dx',s.dx.toFixed(1)+'px');
   }else{
     s.dy=dy>0?dy:dy*.2/(1-dy/200);const p=Math.max(0,Math.min(1,s.dy/(innerHeight*.45)));
-    lift.style.transform=`translate(${(dx*.3).toFixed(1)}px,${s.dy.toFixed(1)}px) scale(${(1-p*.3).toFixed(4)})`;setPull(p);
+    lift.style.transform=`translate(${(dx*.3).toFixed(1)}px,${s.dy.toFixed(1)}px)`;setPull(p); // it moves with the hand, the size it is
   }
 }
 function settle(s){
