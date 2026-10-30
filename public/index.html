@@ -1059,6 +1059,15 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
 .tsm i{font-style:normal;color:#fff}
 @keyframes tsmIn{from{opacity:0;scale:.96}}
 @media(prefers-reduced-motion:reduce){.tsm{animation:none}}
+/* phones: the record stays put while you scroll; the details rise over it out of a soft fade, and the record dims behind them.
+   --rise goes 0 to 1 over the first 120px of scrolling */
+@media(min-height:501px){
+  html.phone .stage{position:sticky;top:calc(env(safe-area-inset-top) + var(--top));opacity:calc(1 - var(--rise,0)*.8)}
+  html.phone .peek{filter:brightness(calc(1 - var(--rise,0)*.8))}
+  html.phone .o-page{overflow:clip} /* the fade's long tail never adds room to scroll into */
+  html.phone .o-info{z-index:2} /* over the record, which comes first; the close button stays on top */
+  html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-64px;bottom:-50vh;background:linear-gradient(transparent,var(--bg) 64px);opacity:calc(var(--rise,0)*3);pointer-events:none}
+}
 /* Safari on iPhone tints its toolbars from solid fixed strips at the very top and bottom of the screen
    (joshpuckett.me/seamless-mobile-safari). Without them the bottom bar falls back to its own lighter gray.
    Each strip shows 5px of the page color, the least Safari picks up; About sits in the top layer, so it carries its own. */
@@ -1564,6 +1573,8 @@ addEventListener('pointerdown',e=>{if(!$('#cmenu').hidden&&!e.target.closest('#c
 // resting angle of a pulled-out sleeve: barely turned, unless you turn it
 let REST,TILT;const restFor=()=>{REST=PHONE?0:-3;TILT=PHONE?0:-1};restFor(); // on a phone it faces you square
 const open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage'),lift=$('#lift');
+// phones: how far the details have risen over the record, for the record's dimming and the fade behind the words
+open.addEventListener('scroll',()=>{open.style.setProperty('--rise',PHONE?Math.min(1,open.scrollTop/120).toFixed(3):0)},{passive:true});
 let base=REST,ry=base,rx=TILT,sdrag=null,busy=false,timers=[],flyF=0;
 const later=(f,ms)=>timers.push(setTimeout(f,ms));
 // the sleeve turns on a spring too: ry/rx say where it's headed, sv where it is now
