@@ -2214,10 +2214,12 @@ addEventListener('resize',()=>{frontBox=null;deckS=0;tailS=0;if(nodes.length&&!r
 const PK_GRIP=6;
 // only the front record moves while it's pulled, so only it is redrawn
 const pkPaint=()=>{const n=nodes[cur];if(n&&!DECK)n.style.transform=tfOf(cur)};
-function pkTo(t){
-  pk.t=t;if(reduce){pk.y=t;pk.v=0;pkPaint();return}if(pk.f)return;let l=0;
-  const st=now=>{const dt=l?Math.min(.032,(now-l)/1000):1/60;l=now;pk.v+=(-700*(pk.y-pk.t)-2*Math.sqrt(700)*pk.v)*dt;pk.y+=pk.v*dt; // critically damped: it never overshoots
-    if(Math.abs(pk.y-pk.t)<.05&&Math.abs(pk.v)<.5){pk.y=pk.t;pk.v=0;pk.f=0;pkPaint();return}pkPaint();pk.f=requestAnimationFrame(st)};
+// the record eases toward where it should be, closing the same share of the gap each moment: steady at any frame rate, it never
+// overshoots or trembles under a still hand. Held, it keeps close to the hand (tau, seconds); let go, it settles more slowly.
+function pkTo(t,tau=.09){
+  pk.t=t;pk.tau=tau;if(reduce){pk.y=t;pkPaint();return}if(pk.f)return;let l=0;
+  const st=now=>{const dt=l?Math.min(.05,(now-l)/1000):1/60;l=now;pk.y+=(pk.t-pk.y)*(1-Math.exp(-dt/pk.tau));
+    if(Math.abs(pk.y-pk.t)<.2){pk.y=pk.t;pk.f=0;pkPaint();return}pkPaint();pk.f=requestAnimationFrame(st)};
   pk.f=requestAnimationFrame(st);
 }
 const pkDrop=()=>{cancelAnimationFrame(pk.f);pk.f=0;pk.y=pk.t=pk.v=0;crate.classList.remove('lifting');pkPaint()};
@@ -2227,7 +2229,7 @@ function pullTo(s,y){
   let d=Math.max(0,s.y-y);const C=PHONE?44:40,END=PHONE?120:110;
   if(!s.free&&d>=C){s.free=true;buzz()}else if(s.free&&d<C*.55)s.free=false; // changed your mind: it catches again
   if(d>END)d=END+10*(1-Math.exp(-(d-END)/40)); // as far as it goes: past the stop it only gives a hair
-  pkTo(s.free?PK_GRIP+(d-C*.4)*.92:PK_GRIP+10*(1-Math.exp(-d/22)));
+  pkTo(Math.round(s.free?PK_GRIP+(d-C*.4)*.92:PK_GRIP+10*(1-Math.exp(-d/22))),.04); // whole pixels: a still hand holds it still
 }
 function letGo(s){crate.classList.remove('lifting');if(s.free&&!busy&&open.hidden){buzz();openRecord(false,true)}else pkTo(0)}
 crate.addEventListener('pointerdown',e=>{if(PHONE)return;spr=null;drag={y:e.clientY,x:e.clientX,i:cur,rc:e.target.closest('.rc'),dv:e.target.closest('.dv'),vy:0,lt:performance.now(),ly:e.clientY,lip:onFront(e)};moved=false;crate.setPointerCapture(e.pointerId);crate.classList.add('dragging');if(drag.lip){crate.classList.add('lifting');pkTo(PK_GRIP)}});
