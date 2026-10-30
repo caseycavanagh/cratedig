@@ -2146,12 +2146,28 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   const auto=()=>innerWidth>=1200?6:innerWidth>=900?5:innerWidth>=600?4:3,CMIN=()=>innerWidth<600?1:2,CMAX=()=>innerWidth<600?6:10;
   let gc=null;try{gc=+localStorage.getItem('records-grid-cols')||null}catch{}
   const cols=()=>Math.max(CMIN(),Math.min(CMAX(),gc||auto()));
+  // how wide a tile is, so each cover can pick its size; told again whenever the columns change
+  let tileSize='33vw';
+  function sizeTiles(){const n=cols(),w=Math.ceil(((tiles.clientWidth||Math.min(innerWidth,1400))-(n-1)*8)/n);tileSize=w+'px';
+    for(const t of keep.values()){const i=t.firstElementChild;if(i?.srcset)i.sizes=tileSize}}
   const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
   const keep=new Map();
   // covers on the wall and the canvas are small copies, made one at a time as the page settles: 68 full-size covers
   // decoded at once is more memory than a phone keeps, and it starts dropping them
   const THUMB=new Map();let thumbQ=Promise.resolve();
+  // most covers already come in smaller sizes: Casey's as copies in vinyl/t/ made at build time, a visitor's from Apple or
+  // the Cover Art Archive, which serve the same cover at any of a few widths. A tile asks for the size nearest its own
+  function sized(src){
+    let m;
+    if((m=src.match(/^vinyl\/([^/]+-front)\.webp$/))){const t=w=>`vinyl/t/${m[1]}-${w}.webp`;return{src:t(360),srcset:`${t(360)} 360w,${t(720)} 720w,${src} 1200w`}}
+    if((m=src.match(/^(https:\/\/[^?]+\/)\d+x\d+bb\.(jpg|png)$/))){const t=w=>`${m[1]}${w}x${w}bb.jpg`;return{src:t(360),srcset:`${t(360)} 360w,${t(720)} 720w,${t(1200)} 1200w`}}
+    try{const u=new URL(src,location.href),p=u.searchParams.get('img');
+      if(u.pathname==='/api/musicbrainz'&&p&&/-1200(\.jpg)?$/.test(p)){u.searchParams.set('img',p.replace(/-1200(\.jpg)?$/,'-500$1'));return{src:u.href,srcset:`${u.href} 500w,${src} 1200w`}}}catch{}
+    return null;
+  }
+  // and when one doesn't, the browser makes its own small copy, one at a time
   function thumb(src){
+    const z=sized(src);if(z)return Promise.resolve(z.src);
     if(THUMB.has(src))return THUMB.get(src);
     const p=thumbQ=thumbQ.then(()=>new Promise(res=>{const i=new Image();i.decoding='async';i.onload=()=>{
       try{const n=Math.min(512,i.naturalWidth),c=document.createElement('canvas');c.width=c.height=n;c.getContext('2d').drawImage(i,0,0,n,n);
@@ -2163,9 +2179,15 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     let n=store.get(r.slug);if(n)return n;
     n=document.createElement('button');n.type='button';n.className='tile';n.dataset.slug=r.slug;
     const bg=r.spine||'#2c2c2e';
-    n.innerHTML=(r.front?`<img alt="" decoding="async" onload="this.classList.add('on')">`:`<span class="pl" style="background:${bg};color:${ink(bg)}">${r.title}<small>${r.artist}</small></span>`)+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
+    n.innerHTML=(r.front?`<img alt="" loading="lazy" decoding="async" width="360" height="360" onload="this.classList.add('on')">`:`<span class="pl" style="background:${bg};color:${ink(bg)}">${r.title}<small>${r.artist}</small></span>`)+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
     n.setAttribute('aria-label',`${r.title} by ${r.artist}`);store.set(r.slug,n);
-    if(r.front)thumb(img(r.front)).then(u=>{$('img',n).src=u});
+    if(r.front){
+      // the tile wears the record's spine color until its cover is in; covers off screen wait until you scroll near them
+      if(r.spine)n.style.background=r.spine;
+      const i=$('img',n),full=img(r.front),z=sized(full);
+      if(z){i.sizes=tileSize;i.srcset=z.srcset;i.src=z.src;i.onerror=()=>{i.onerror=null;i.removeAttribute('srcset');i.src=full}}
+      else thumb(full).then(u=>{i.src=u});
+    }
     return n;
   }
   const SETS=()=>{
@@ -2184,7 +2206,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     if(view!=='wall')return drawPills();
     const before=new Map();
     if(animate&&!reduce)for(const [k,n] of keep)if(n.isConnected)before.set(k,n.getBoundingClientRect());
-    tiles.style.setProperty('--cols',cols());
+    tiles.style.setProperty('--cols',cols());sizeTiles();
     const f=document.createDocumentFragment();
     order.forEach(r=>f.append(tileFor(r)));
     tiles.replaceChildren(f);drawPills();
@@ -2232,7 +2254,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     const before=new Map();for(const [k,t] of keep)if(t.isConnected)before.set(k,t.getBoundingClientRect());
     const a=document.elementsFromPoint(ax,ay).find(e=>e.classList?.contains('tile'))||null,a0=a&&before.get(a.dataset.slug);
     for(const t of keep.values())t.getAnimations().forEach(x=>x.cancel());
-    gc=n;try{localStorage.setItem('records-grid-cols',n)}catch{}tiles.style.setProperty('--cols',n);
+    gc=n;try{localStorage.setItem('records-grid-cols',n)}catch{}tiles.style.setProperty('--cols',n);sizeTiles();
     if(a){const a1=a.getBoundingClientRect();wall.scrollTop+=a1.top+a1.height*((ay-a0.top)/a0.height)-ay}
     if(reduce)return;navigator.vibrate?.(4);
     for(const [k,t] of keep){const p=before.get(k);if(!p||!t.isConnected)continue;const b=t.getBoundingClientRect();if(b.bottom<-200||b.top>innerHeight+200)continue;
@@ -2259,7 +2281,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     const rows=[...order].sort((a,b)=>{const x=key(a),y=key(b);return(typeof x==='number'?x-y:String(x).localeCompare(String(y),'en',{sensitivity:'base'}))*ts.d||byName(a,b)});
     $('thead',tbl).innerHTML=`<tr><th class="c0"><span class="sr">Cover</span></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button></th>`).join('')}</tr>`;
     tkeep.clear();
-    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<img alt="" decoding="async" data-src="${img(r.front)}">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
+    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
     for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
   tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable();return}
