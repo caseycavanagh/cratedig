@@ -580,10 +580,11 @@ body.walling .find .chip{display:none}
 .wall .pills small{font-size:13px;opacity:.55}
 .wall .in{max-width:1400px;margin:0 auto}
 .tiles{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px}
-.tiles .gh{grid-column:1/-1;margin:0;padding:22px 0 4px;font:500 15px/1 var(--sans);color:var(--t1);display:flex;align-items:center;gap:8px}
-.tiles .gh:first-child{padding-top:4px}
-.tiles .gh.yr{font:400 14px/1 'Geist Mono',ui-monospace,monospace;color:var(--t2)}
-.tiles .gh i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
+.tiles{position:relative;margin-left:34px}
+.gms p{position:absolute;right:calc(100% + 8px);margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:500 14px/1 var(--sans);color:var(--t1);pointer-events:none}
+.gms .yr{font:400 11px/1 'Geist Mono',ui-monospace,monospace;letter-spacing:-.03em;color:var(--t2)}
+.gms i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
+@media (min-width:700px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:15px}.gms .yr{font-size:13px}}
 .tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
@@ -754,6 +755,7 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .tbl table{width:100%;max-width:1400px;margin:0 auto;border-collapse:collapse;font-size:15px;table-layout:auto}
 .tbl thead th{position:sticky;top:-8px;z-index:1;background:var(--bg);text-align:left;font-weight:400;padding:10px 12px 8px;border-bottom:1px solid var(--line)}
 .tbl th button{all:unset;cursor:pointer;color:var(--m);font-size:13px;display:inline-flex;gap:4px;align-items:center}
+.tbl th>span{color:var(--m);font-size:13px;font-weight:400} /* format doesn't sort */
 .tbl th button:hover,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{color:#fff}
 .tbl th button:focus-visible{outline:1px solid var(--ring);outline-offset:2px;border-radius:4px}
 .tbl th i{font-style:normal;font-size:12px;width:10px}
@@ -947,8 +949,8 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:var(--sel);color:#fff;border:0}
 .find .vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
 .fb.sb[hidden]{display:none}
-.fb.sb.on,.find:has(.q:focus-within) .fb.sb.on{background:#fff;color:#111;border-color:#fff} /* sorted some other way than artist, A to Z */
-.fb.sb.on[aria-expanded=true]{background:#e6e6e6}
+.fb.lb.sb.on,html.phone .fb.lb.sb.on,.find:has(.q:focus-within) .fb.lb.sb.on{background:#fff;color:#111;border-color:#fff} /* sorted some other way than artist, A to Z */
+.fb.lb.sb.on[aria-expanded=true]{background:#e6e6e6}
 /* a name for each icon button, after a short rest on it with a mouse */
 .tt{position:fixed;z-index:30;left:0;top:0;padding:6px 10px;border-radius:10px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);font:400 13px/1.2 var(--sans);color:var(--t1);white-space:nowrap;pointer-events:none;opacity:0;translate:0 -2px;transition:opacity .1s,translate 0s .1s}
 .tt.on{opacity:1;translate:0;transition:opacity .15s,translate .35s cubic-bezier(.22,1,.36,1)}
@@ -2648,20 +2650,26 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     if(animate&&!reduce)for(const [k,n] of keep)if(n.isConnected)before.set(k,n.getBoundingClientRect());
     tiles.style.setProperty('--cols',cols());sizeTiles();
     const f=document.createDocumentFragment();
-    // a small heading over each turn of the sort: a letter, a decade, or a color
-    let g0=null;
-    order.forEach(r=>{let g=group(r);if(SORT.k==='year')g=g==='—'?g:g.slice(0,3)+'0';
-      if(g!==g0){g0=g;const h=document.createElement('p');h.className='gh';h.setAttribute('aria-hidden','true');
-        if(SORT.k==='color')h.innerHTML=`<i style="background:${hueInk(+g)}"></i>${HUES[+g]}`;else h.textContent=SORT.k==='year'?(g==='—'?'No date':g+'s'):g;
-        if(SORT.k==='year')h.classList.add('yr');f.append(h)}
-      f.append(tileFor(r))});
-    tiles.replaceChildren(f);drawPills();
+    order.forEach(r=>f.append(tileFor(r)));
+    tiles.replaceChildren(f,marks);placeMarks();drawPills();
     if(!before.size)return;
     // covers glide from where they were; new ones grow in
     for(const r of order){const n=keep.get(r.slug),a=before.get(r.slug),b=n.getBoundingClientRect();
       if(a)n.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width})`,transformOrigin:'0 0'},{transform:'none',transformOrigin:'0 0'}],{duration:480,easing:'cubic-bezier(.22,1,.36,1)'});
       else n.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'})}
   }
+  // the turns of the sort sit in the margin beside the rows, off the grid, so the covers stay one even wall:
+  // a letter, a decade, or a dot of the color, level with the row where it starts
+  const marks=document.createElement('div');marks.className='gms';marks.setAttribute('aria-hidden','true');
+  function placeMarks(){
+    if(view!=='wall')return;
+    const n=cols(),rows=new Map();let g0=null;
+    order.forEach((r,i)=>{let g=group(r);if(SORT.k==='year')g=g==='—'?g:g.slice(0,3)+'0';if(g===g0)return;g0=g;
+      const row=Math.floor(i/n);if(!rows.has(row))rows.set(row,[]);rows.get(row).push(g)});
+    const ts=tiles.querySelectorAll('.tile');
+    marks.innerHTML=[...rows].map(([row,gs])=>`<p style="top:${ts[row*n]?.offsetTop||0}px">${gs.map(g=>SORT.k==='color'?`<i style="background:${hueInk(+g)}"></i>`:`<span${SORT.k==='year'?' class="yr"':''}>${SORT.k==='year'?(g==='—'?'No date':'’'+g.slice(2)+'s'):g}</span>`).join('')}</p>`).join('');
+  }
+  new ResizeObserver(()=>placeMarks()).observe(tiles);
   function setView(v,focus,stay){
     if(v==='canvas')v='wall';
     view=v;document.body.classList.toggle('under',(v==='wall'?wall:v==='table'?tbl:null)?.scrollTop>2);wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
@@ -2721,21 +2729,20 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   // ---- the table: every record in the crate (as narrowed) as a row; the headers sort it
   const tbl=$('#tbl'),tkeep=new Map();
   const COLS=[['title','Title',r=>r.title],['artist','Artist',r=>name(r)],['year','Year',r=>+r.year||9999],['label','Label',r=>r.label||'~'],['format','Format',r=>r.format||'~']];
-  let ts={k:'artist',d:1};try{ts=JSON.parse(localStorage.getItem('records-table-sort'))||ts}catch{}
+  // the table shares the crate's sort: its headers set it, and the sort button shows it (sorted by color, no header is lit)
   function drawTable(){
-    const c=COLS.find(x=>x[0]===ts.k)||COLS[1],key=c[2];
-    const rows=[...order].sort((a,b)=>{const x=key(a),y=key(b);return(typeof x==='number'?x-y:String(x).localeCompare(String(y),'en',{sensitivity:'base'}))*ts.d||byName(a,b)});
-    $('thead',tbl).innerHTML=`<tr><th class="c0"><span class="sr">Cover</span></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button></th>`).join('')}</tr>`;
+    const rows=order,ts=SORT;
+    $('thead',tbl).innerHTML=`<tr><th class="c0"><span class="sr">Cover</span></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}">${SORTS[k]?`<button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`:`<span>${l}</span>`}</th>`).join('')}</tr>`;
     tkeep.clear();
     $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
     for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
   // on a phone the sort is one quiet line, "Sorted by Artist ↑"; it opens a small menu like the view menu
   const narrow=matchMedia('(max-width:700px)'),tsm=document.createElement('div');tsm.className='tsm';tsm.setAttribute('role','menu');tsm.hidden=true;document.body.append(tsm);
-  const sortBy=k=>{ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable();window.settle?.()};
+  const sortBy=k=>window.setSort(k);
   const tsmOff=()=>{if(tsm.hidden)return;tsm.hidden=true;$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.setAttribute('aria-expanded','false')};
   function tsmOn(h){
-    tsm.innerHTML=COLS.slice(0,3).map(([k,l])=>`<button type="button" role="menuitemradio" aria-checked="${ts.k===k}" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`).join('');
+    const ts=SORT;tsm.innerHTML=COLS.slice(0,3).map(([k,l])=>`<button type="button" role="menuitemradio" aria-checked="${ts.k===k}" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`).join('');
     const r=h.getBoundingClientRect();tsm.style.left=r.left+'px';tsm.style.top=r.bottom+8+'px';tsm.hidden=false;h.setAttribute('aria-expanded','true');$('button[aria-checked=true]',tsm).focus({preventScroll:true});
   }
   tsm.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tsmOff();sortBy(b.dataset.k)});
@@ -3050,13 +3057,13 @@ build();at=cur;
   drawSort();
   const sorts=on=>{so.hidden=!on;sb.setAttribute('aria-expanded',on);if(on){views(false);tray(false);const r=sb.getBoundingClientRect();so.style.right=Math.max(14,innerWidth-r.right)+'px'}};
   sb.onclick=()=>sorts(so.hidden);
-  so.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
-    SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
-    drawSort();so.querySelector(`[data-k=${k}]`).focus({focusVisible:false});
-    arrange(filt,null);$('#wall').scrollTop=0}); // a new sort starts from its front: the oldest record, the first letter, the reds
+  // one way to sort, for the menu and the table's headers: the lit one again flips it
+  window.setSort=k=>{SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
+    drawSort();arrange(filt,null);$('#wall').scrollTop=0}; // a new sort starts from its front: the oldest record, the first letter, the reds
+  so.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setSort(b.dataset.k);so.querySelector(`[data-k=${b.dataset.k}]`).focus({focusVisible:false})});
   so.addEventListener('keydown',e=>{if(e.key==='Escape'){sorts(false);sb.focus({focusVisible:false})}});
   addEventListener('pointerdown',e=>{if(!so.hidden&&!so.contains(e.target)&&!sb.contains(e.target))sorts(false)});
-  const lmark=()=>{const b=$('[data-v][aria-pressed=true]',vwEl)||$('[data-v]',vwEl);sb.hidden=b.dataset.v==='table';if(sb.hidden)sorts(false);lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
+  const lmark=()=>{const b=$('[data-v][aria-pressed=true]',vwEl)||$('[data-v]',vwEl);lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
   new MutationObserver(lmark).observe(vwEl,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});lmark();
   pills.className='tray';pills.hidden=true;find.prepend(pills);
   vwEl.classList.add('tray');find.prepend(vwEl,so);
@@ -3078,7 +3085,7 @@ build();at=cur;
     if(reduce||!document.body.classList.contains('ready'))return;
     const E={duration:460,easing:'cubic-bezier(.22,1,.36,1)'},rise=[{opacity:.3,translate:'0 10px'},{opacity:1,translate:'0 0'}];
     if(!$('#tbl').hidden)$('#tbl tbody').animate(rise,E);
-    else if(!$('#wall').hidden)$$('#tiles .gh').forEach(h=>h.animate([{opacity:0},{opacity:1}],{duration:300,delay:140,fill:'backwards'}));
+    else if(!$('#wall').hidden)$('#tiles .gms')?.animate([{opacity:0},{opacity:1}],{duration:300,delay:200,fill:'backwards'});
     else{crate.animate(rise,E);$('#kd .kd-c')?.animate([{opacity:0},{opacity:1}],{duration:320,easing:'ease-out'})}
   };
   const arrange3=arrange;arrange=function(f,...a){const was=filt,n=arrange3.call(this,f,...a);if(n&&f?.k!=='q'&&was?.k!=='q')settle();return n};
