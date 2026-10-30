@@ -462,7 +462,7 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:#1e1e20}
 .ab.in>*{animation:linerIn .35s ease-out both}
 .ab.gone{opacity:0;transition:opacity .15s}
 @keyframes linerIn{from{opacity:0}}
-@media(prefers-reduced-motion:no-preference){.ab .sk i,.tl.wait li>*{animation:linerWait 1.4s ease-in-out infinite alternate}}
+@media(prefers-reduced-motion:no-preference){.ab .sk i{animation:linerWait 1.4s ease-in-out infinite alternate}}
 @keyframes linerWait{to{opacity:.45}}
 .o-info .ab a{display:inline-block;margin-top:6px;font-size:14px;color:var(--m);text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em}
 .o-info .ab a:hover{color:var(--fg)}
@@ -489,10 +489,7 @@ html.phone .nb{flex-basis:72px;width:72px;height:72px}
 .tl li{display:grid;grid-template-columns:2.15em minmax(0,1fr)}
 .tl li i{font-style:normal;font-size:.78em;opacity:.62;padding-top:.15em}
 .tl li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tl:not(.wait){animation:linerIn .35s ease-out both}
-.tl.wait li{height:1.5em;align-items:center}
-.tl.wait li>*{display:block;height:.62em;border-radius:.2em;background:currentColor;opacity:.12}
-.tl.wait li i{width:1.2em}.tl.wait li span{width:58%}.tl.wait li:nth-child(3n) span{width:72%}.tl.wait li:nth-child(4n) span{width:44%}
+.tl{animation:linerIn .5s ease-out both}
 /* phones: the record view is laid out for a title of up to three lines. The record's size leaves room for all three,
    so a long title never pushes Play off the screen and the record stays the same size from one to the next; a shorter
    title just leaves more air above Play. The artist and the facts each keep to one line. */
@@ -1342,7 +1339,7 @@ function go(i,now){
   if(now){cur=i;aim=pos=i;vel=0;place(true);render()}
   else{aim=i;kick();if(i===cur)return;cur=i;place()}
   if(open.hidden)setHash();
-  say();
+  say();clearTimeout(go.t);go.t=setTimeout(preLiner,350);
 }
 // the record on top, for screen readers (after what changed, when a filter did)
 function say(pre){const r=order[cur];$('#pos').textContent=`${pre?pre+' ':''}${r.title}, ${r.artist}${r.year?', '+r.year:''}. ${cur+1} of ${order.length}`;markAZ()}
@@ -1533,7 +1530,7 @@ function info(r){
   const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${k==='label'?labelName(r.label):FIELD[k](r)}</span>`).join('');
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
       ${facts?`<p class="facts">${facts}</p>`:''}
-    ${playHTML(r)}<div class="ab" id="oabout"></div>${nearby(r)}${ownHTML(r)}`;
+    ${playHTML(r)}<div class="ab" id="oabout" hidden></div>${nearby(r)}${ownHTML(r)}`;
   liner(r);
 }
 // liner notes come from /api/liner: a few lines from Wikipedia for every record, and for a record with no back cover
@@ -1542,21 +1539,32 @@ const LINER=new Map();
 const linerQ=r=>{const q=new URLSearchParams({artist:r.artist,title:r.title});
   if(r.src==='d')q.set('d',r.id);else if(r.src==='a')q.set('a',r.id);else{const mb=r.src==='m'?r.id:r.release;if(mb)q.set('mb',mb)}
   if(r.group)q.set('g',r.group);return q};
-const LDONE=new Map(); // answers already in, drawn at once with no placeholder
-function liner(r){
+const LDONE=new Map(); // answers already in, drawn at once
+// which records have an About, remembered from earlier visits, so a record that has none never shows it loading
+const HAS=(()=>{try{return JSON.parse(localStorage.getItem('crate:about'))||{}}catch{return{}}})();
+function fetchLiner(r){
   let p=LINER.get(r.slug);
-  if(!p){p=fetch('/api/liner?'+linerQ(r)).then(x=>x.ok?x.json():null).catch(()=>null).then(l=>(LDONE.set(r.slug,l),l));LINER.set(r.slug,p)}
+  if(!p){p=fetch('/api/liner?'+linerQ(r)).then(x=>x.ok?x.json():null).catch(()=>null).then(l=>{
+    LDONE.set(r.slug,l);
+    if(l){HAS[r.slug]=l.about?1:0;try{localStorage.setItem('crate:about',JSON.stringify(HAS))}catch{}}
+    return l});LINER.set(r.slug,p)}
+  return p;
+}
+// the record in front of you fetches its liner notes while you look at it, so they're usually in before you open it
+const preLiner=()=>{const r=order[cur];if(r&&open.hidden)fetchLiner(r)};
+function liner(r){
+  const p=fetchLiner(r);
   const show=l=>{
     if(order[cur]!==r||open.hidden)return;
     const ab=$('#oabout');
-    if(ab&&l?.about){ab.className='ab in';ab.innerHTML=`<p class="ohd">About</p><p class="about"></p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;fitAbout(ab.children[1],l.about.text)}
-    else if(ab){ab.className='ab gone';setTimeout(()=>{if(ab.classList.contains('gone'))ab.hidden=true},200)}
+    if(ab&&l?.about){ab.hidden=false;ab.className='ab in';ab.innerHTML=`<p class="ohd">About</p><p class="about"></p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;fitAbout(ab.children[1],l.about.text)}
+    else if(ab&&!ab.hidden){ab.className='ab gone';setTimeout(()=>{if(ab.classList.contains('gone'))ab.hidden=true},200)}
     if(!r.back)requestAnimationFrame(()=>tracks(r,l?.sides||[]));
   };
   if(LDONE.has(r.slug)){show(LDONE.get(r.slug));return}
-  // still on its way: the About block holds its place with quiet lines, and a sleeve with no back shows faint ones too
-  $('#oabout').className='ab wait';$('#oabout').innerHTML='<p class="ohd">About</p><div class="sk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>';
-  if(!r.back)requestAnimationFrame(()=>tracks(r,null));
+  // still on its way: About holds its place with quiet lines only when it's known to be coming; otherwise it fades in if it
+  // arrives. The track list simply fades in when it's ready
+  if(HAS[r.slug]){const ab=$('#oabout');ab.hidden=false;ab.className='ab wait';ab.innerHTML='<p class="ohd">About</p><div class="sk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'}
   p.then(show);
 }
 // About ends where a sentence ends: as many whole sentences as fit three lines, else the first one up to a comma or dash,
@@ -1581,7 +1589,6 @@ const tlInk=hex=>{const L=lumOf(hex);return(1.05)/(L+.05)>=4.5?'#fff':'#111'};
 // The type steps down until the whole list fits the square, so a long record never scrolls or gets cut
 function tracks(r,sides){
   const bk=$('#sleeve .bk');if(!bk||order[cur]!==r)return;
-  if(!sides){bk.querySelector('.tl')?.remove();bk.insertAdjacentHTML('beforeend',`<div class="tl wait" style="color:${tlInk(spineBg(r))}" aria-hidden="true"><ol>${'<li><i></i><span></span></li>'.repeat(6)}</ol></div>`);return}
   if(!sides.length){bk.querySelector('.tl')?.remove();return}
   const n=sides.reduce((a,s)=>a+s.tracks.length,0);
   const rows=sides.map(s=>`<ol>${s.tracks.map((t,j)=>`<li><i>${s.side?s.side+(j+1):j+1}</i><span>${esc(t)}</span></li>`).join('')}</ol>`).join('');
