@@ -38,6 +38,45 @@ const MARK = [
   "M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z",
 ];
 
+const fonts = () => [
+  { name: "Instrument Sans", data: regular, weight: 400 as const, style: "normal" as const },
+  { name: "Instrument Sans", data: medium, weight: 500 as const, style: "normal" as const },
+  ...(mono ? [{ name: "Paper Mono", data: mono, weight: 400 as const, style: "normal" as const }] : []),
+];
+
+const mark = (size: number) => (
+  <svg width={size} height={size} viewBox="0 0 350 350">
+    {MARK.map((d, i) => <path key={i} fill="#ecebe8" fillRule="evenodd" d={d} />)}
+  </svg>
+);
+
+// a shared record: the cover inset on the left with a little room around it and corners rounded like the crate's (--rec, about 1.1%), the mark top right,
+// title, artist, then year and label settled at the bottom. A long title steps down a size and stops at three lines
+export function recordCard({ title, artist, facts, cover }: { title: string; artist: string; facts: string; cover: string | null }) {
+  const size = title.length > 44 ? 46 : title.length > 22 ? 54 : 66;
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", background: "#121212", color: "#ecebe8", fontFamily: "Instrument Sans", padding: 56 }}>
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={cover} width={518} height={518} alt="" style={{ borderRadius: 6, boxShadow: "0 30px 60px -20px #000" }} />
+        ) : (
+          <div style={{ width: 518, height: 518, borderRadius: 6, background: "#232325", display: "flex", alignItems: "center", justifyContent: "center" }}>{mark(120)}</div>
+        )}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", marginLeft: 66, paddingBottom: 4 }}>
+          {mark(44)}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ fontSize: size, fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1.06, lineClamp: 3, display: "block" }}>{title}</div>
+            <div style={{ fontSize: 34, color: "#8f8f93", marginTop: 12, lineClamp: 2, display: "block" }}>{artist}</div>
+            {facts ? <div style={{ fontFamily: MONO, fontSize: 24, color: "#8f8f93", marginTop: 30 }}>{facts}</div> : null}
+          </div>
+        </div>
+      </div>
+    ),
+    { width: 1200, height: 630, headers: { "Cache-Control": CACHE }, fonts: fonts() },
+  );
+}
+
 // title big, sub under it in gray, a small mono line along the bottom with the domain the card was asked for
 export function titleCard({ title, sub, foot, host }: { title: string; sub: string; foot: string; host: string }) {
   return new ImageResponse(

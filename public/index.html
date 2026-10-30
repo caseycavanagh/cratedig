@@ -23,6 +23,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Crate Dig: every record Casey owns, flipped through like a crate">
 <meta name="twitter:card" content="summary_large_image">
+<script>(function(){var u=new URL(location.href),r=u.searchParams.get('r');if(r){u.searchParams.delete('r');u.hash='record/'+r;history.replaceState(null,'',u)}})()</script>
 <script>var PHONE_Q='(max-width:700px),(pointer:coarse) and (max-height:500px)';document.documentElement.dataset.theme='dark';document.documentElement.classList.toggle('phone',matchMedia(PHONE_Q).matches)</script>
 <style>
 @font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
@@ -3036,6 +3037,83 @@ build();at=cur;
   // the keyboard: keep the bar and the list just above it
   const vv=window.visualViewport;
   if(vv){const fit=()=>{const kb=Math.max(0,innerHeight-vv.height-vv.offsetTop);root.style.setProperty('--kb',kb.toFixed(0)+'px')};vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit)}
+})();
+</script>
+<style>
+/* sharing: the crate from the top corner, the layout menu and About; a record from beside its close. A phone opens its own
+   share sheet; a laptop copies the link, and the button says so for a moment with a check */
+.shb{all:unset;pointer-events:auto;cursor:pointer;flex:none;order:1;box-sizing:border-box;height:44px;min-width:44px;padding:0 11px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:#fff;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s var(--spring),background-color .2s}
+.shb svg{width:20px;height:20px;flex:none;display:block}
+.shb .w{max-width:0;overflow:hidden;white-space:nowrap;opacity:0;font-size:15px;transition:max-width .35s var(--spring),margin .35s var(--spring),opacity .15s}
+.shb.ok .w{max-width:90px;margin:0 3px 0 7px;opacity:1;transition:max-width .35s var(--spring),margin .35s var(--spring),opacity .2s .08s}
+.shb:hover{background:var(--soft3)}
+.shb:active{transform:scale(.96)}
+.shb:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.find:has(.q:focus-within) .shb,html.phone body.searching .shb{display:none}
+#shareR{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 10px);right:calc(max(14px,env(safe-area-inset-right)) + 52px);opacity:0;transition:opacity .3s,transform .3s var(--spring),background-color .2s}
+.open.in #shareR{opacity:1}
+html.pulldown .open.in #shareR{opacity:calc(1 - var(--pull,0)*3);transition:none}
+.find .vw hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
+.find .vw button[data-share] svg{width:20px;height:20px;padding:1px;box-sizing:border-box}
+.ab-sh{margin-top:24px;height:40px;padding:0 18px 0 14px;font-size:15px;gap:8px}
+.ab-sh svg{width:18px;height:18px;flex:none}
+html.phone .ab-sh{margin-top:20px}
+@media(prefers-reduced-motion:reduce){.shb .w,.shb.ok .w{transition:opacity .15s}}
+</style>
+<script>
+(()=>{
+  const P=d=>`<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="${d}"/></svg>`;
+  const SHARE=P('M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z'),
+    LINK=P('M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z'),
+    CHECK=P('M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z');
+  // a phone hands the link to its own share sheet; anything with a pointer copies it
+  const sheet=()=>!!navigator.share&&matchMedia('(hover:none) and (pointer:coarse)').matches;
+  const mark=()=>sheet()?SHARE:LINK;
+  // the crate's address: someone else's crate keeps what's in its address, Casey's is the plain site
+  const crateURL=()=>{const u=new URL(location.href);u.hash='';u.searchParams.delete('edit');return u.href};
+  // a record of Casey's goes as ?r=, which the server reads for its own link preview; a visitor's crate keeps its address and names the record after #
+  const recURL=r=>{const u=new URL(crateURL());if(visiting)u.hash='record/'+r.slug;else u.searchParams.set('r',r.slug);return u.href};
+  const copy=t=>(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{
+    const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;opacity:0';document.body.append(a);a.select();
+    const ok=document.execCommand('copy');a.remove();if(!ok)throw 0});
+  // b: the button; what: {title,url}; done(b,ok): how the button says so
+  function share(b,what,done){
+    if(sheet()){navigator.share(what).catch(()=>{});return}
+    copy(what.url).then(()=>done(b,true),()=>toast('Couldn’t copy the link'));
+  }
+  // an icon button grows into "Copied" with a check, then goes back
+  const flash=(b,dur=1600)=>{clearTimeout(b.t);b.querySelector('svg').outerHTML=CHECK;b.classList.add('ok');
+    b.t=setTimeout(()=>{b.classList.remove('ok');b.querySelector('svg').outerHTML=mark()},dur)};
+  const iconBtn=(id,label)=>{const b=document.createElement('button');b.type='button';b.className='shb';b.id=id;b.setAttribute('aria-label',label);
+    b.innerHTML=mark()+'<span class="w" aria-hidden="true">Copied</span>';return b};
+  const crate=()=>({title:'Crate Dig',url:crateURL()});
+
+  // the crate, in the top corner
+  const sc=iconBtn('shareC','Share this crate');$('#qf').before(sc);
+  sc.onclick=()=>share(sc,crate(),b=>flash(b));
+
+  // the crate, last in the layout menu
+  const vwEl=$('#views')||$('.vw');
+  const sm=document.createElement('button');sm.type='button';sm.dataset.share='';sm.innerHTML=mark()+'<span>Share crate</span>';
+  vwEl.append(document.createElement('hr'),sm);
+  sm.addEventListener('click',e=>{e.stopPropagation();const shut=()=>{if(!vwEl.hidden)$('.fb.lb')?.click()};
+    if(sheet()){shut();share(sm,crate());return}
+    share(sm,crate(),()=>{sm.innerHTML=CHECK+'<span>Copied</span>';setTimeout(shut,700);setTimeout(()=>{sm.innerHTML=mark()+'<span>Share crate</span>'},1000)})});
+
+  // the crate, in About
+  const sa=document.createElement('button');sa.type='button';sa.className='btn ab-sh';sa.innerHTML=mark()+'<span>Share this crate</span>';
+  $('#about .ab-body').after(sa);
+  sa.onclick=()=>share(sa,crate(),()=>{clearTimeout(sa.t);sa.innerHTML=CHECK+'<span>Copied</span>';sa.t=setTimeout(()=>{sa.innerHTML=mark()+'<span>Share this crate</span>'},1600)});
+
+  // a record, beside its close. It follows whatever sits left of close (search, when there is one) wherever that goes, 8px further left
+  const sr=iconBtn('shareR','Share this record'),cl=$('#close');cl.before(sr);
+  const place=()=>{const c=($('#oq')||cl).getBoundingClientRect();if(!c.width)return;sr.style.top=c.top+'px';sr.style.right=(innerWidth-c.left+8)+'px'};
+  sr.onclick=()=>{const r=order[cur];if(!r)return;share(sr,{title:`${r.title} by ${r.artist}`,url:recURL(r)},b=>flash(b))};
+  const o2=openRecord;openRecord=function(...a){const n=o2.apply(this,a);requestAnimationFrame(place);setTimeout(place,400);return n};
+  addEventListener('resize',()=>{if(!$('#open').hidden)place()});
+  // a phone and a laptop draw different marks; a window dragged between screens, or a tablet with a keyboard, can change which
+  matchMedia('(hover:none) and (pointer:coarse)').addEventListener?.('change',()=>{[sc,sr].forEach(b=>{if(!b.classList.contains('ok'))b.querySelector('svg').outerHTML=mark()});
+    sm.querySelector('svg').outerHTML=mark();sa.querySelector('svg').outerHTML=mark()});
 })();
 </script>
 <div class="sedge t" aria-hidden="true"></div><div class="sedge b" aria-hidden="true"></div>

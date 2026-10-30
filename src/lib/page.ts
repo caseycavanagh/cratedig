@@ -14,10 +14,20 @@ export function origin(req: Request) {
 
 export const CACHE = "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800";
 
-export async function page(file: string) {
+// tweak: a last say over the page for this request (a shared record names itself in its preview tags), or nothing
+export async function page(file: string, tweak?: (html: string, req: Request) => Promise<string | null>) {
   const src = await readFile(join(process.cwd(), "public", file), "utf8");
-  return (req: Request) => {
-    const html = src.replace(/(<meta property="og:(?:url|image)" content=")\//g, `$1${origin(req)}/`);
+  return async (req: Request) => {
+    const html = ((tweak && (await tweak(src, req))) || src).replace(/(<meta property="og:(?:url|image)" content=")\//g, `$1${origin(req)}/`);
     return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": CACHE } });
   };
+}
+
+// a page's preview tags, set to other words
+export function og(html: string, tags: Record<string, string>) {
+  const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  return Object.entries(tags).reduce(
+    (h, [k, v]) => h.replace(new RegExp(`(<meta (?:property|name)="${k}" content=")[^"]*"`), `$1${esc(v)}"`),
+    html,
+  );
 }
