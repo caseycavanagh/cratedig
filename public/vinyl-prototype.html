@@ -900,7 +900,8 @@ function playHTML(r){
   const go=([k,n],logo)=>`<a class="btn" href="${l[k]}" target="_blank" rel="noopener">${logo&&mark(k)||PLAY_ICON}Play<span class="sr"> on ${n}</span>${NEW_TAB}</a>`;
   // one service: Play goes straight there
   if(on.length===1)return`<div class="play">${go(on[0])}</div>`;
-  const mine=on.find(([k])=>k===picked());
+  // until a visitor picks, Spotify is the pick, so Play goes there and the caret beside it offers the rest
+  const mine=on.find(([k])=>k===picked())||on.find(([k])=>k==='spotify');
   const menu=`<div class="play-m" id="playM"><p class="pm-h">Play on</p>${on.map(([k,n])=>`<a href="${l[k]}" target="_blank" rel="noopener" data-k="${k}"${k===mine?.[0]?' aria-current="true"':''}>${mark(k)}<span>${n}</span>${NEW_TAB}</a>`).join('')}</div>`;
   // a remembered pick: Play wears its logo and goes there; the caret beside it switches
   if(mine)return`<div class="play"><div class="pair">${go(mine,true)}<button class="sw" id="playB" aria-expanded="false" aria-controls="playM" aria-label="Play somewhere else">${CARET}<span class="tip" aria-hidden="true">Play somewhere else</span></button></div>${menu}</div>`;
