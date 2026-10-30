@@ -836,7 +836,7 @@ html.phone.deck .dv{display:none}
 
 /* the mark: a record. Loading, it spins at 33⅓ and its grooves light from the label out as the covers come in */
 .loading{--p:0}
-.loading .mk{width:48px;height:48px;fill:#fff;animation:spin 1.8s linear infinite}
+.loading .mk{width:min(480px,60vw,60vh);height:min(480px,60vw,60vh);fill:#fff;animation:spin 1.8s linear infinite} /* 480 on a laptop, about 60% of a phone's width */
 .loading .mk path{transition:opacity .4s}
 @keyframes spin{to{rotate:360deg}}
 /* in the bar it sits between search and layout, and turns a little with the crate */
