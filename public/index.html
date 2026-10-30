@@ -973,7 +973,7 @@ html.phone .sx{height:44px}
 html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 /* the filter you're in, from a record's details: a pill in the middle of the top bar; tap it for the whole crate */
 .chip,html.phone .chip{display:inline-flex!important;position:absolute;top:0;left:50%;translate:-50% 0;height:44px;max-width:min(360px,calc(100vw - 236px));box-sizing:border-box;padding:0 12px 0 16px;gap:8px;font-size:15px;background:var(--glass);color:#fff;border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,border-color .2s}
-.chip[hidden],.find:has(.q:focus-within) .chip,.find:has(.q.has) .chip{display:none!important}
+.chip[hidden],html.phone .chip[hidden],.find:has(.q:focus-within) .chip,.find:has(.q.has) .chip{display:none!important}
 .chip:hover{background:var(--glass);border-color:#ffffff40}
 .chip svg{color:#a5a5aa;width:12px;height:12px}
 .chip:hover svg{color:#fff}
