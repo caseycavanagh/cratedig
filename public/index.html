@@ -413,6 +413,7 @@ html.phone .az button[aria-current=true]::before{display:none}
 .loading .bar i{display:block;height:100%;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;transition:transform .3s}
 .ready .loading{opacity:0}
 .crate{opacity:0;transform:translateY(24px)}
+body:not(.ready) .crate,body:not(.ready) .cv,body:not(.ready) .tbl{pointer-events:none} /* nothing answers the pointer until the crate is in */
 .ready .crate{opacity:1;transform:none;transition:opacity .5s .15s,transform 1s var(--flip) .15s}
 @media(prefers-reduced-motion:reduce){.ready .crate{transition:opacity .3s}}
 /* ===== After Cosmos =====
@@ -1654,14 +1655,14 @@ function aimNudge(){
   for(const m of nudges.keys())if(m!==n)nudgeTo(m,0);
   if(!n||PHONE)return;
   let t=0;
-  if(ptr&&!reduce&&!raf&&!moved&&open.hidden){const b=frontBox||=n.firstElementChild.getBoundingClientRect();if(ptr.x>=b.left&&ptr.x<=b.right&&ptr.y>=b.top&&ptr.y<=b.bottom)t=Math.max(-1,Math.min(1,((ptr.x-b.left)/b.width-.5)*2))}
+  if(ptr&&!reduce&&!raf&&!moved&&open.hidden&&document.body.classList.contains('ready')){const b=frontBox||=n.firstElementChild.getBoundingClientRect();if(ptr.x>=b.left&&ptr.x<=b.right&&ptr.y>=b.top&&ptr.y<=b.bottom)t=Math.max(-1,Math.min(1,((ptr.x-b.left)/b.width-.5)*2))}
   nudgeTo(n,Math.round(t*100)/100);
 }
 // the name of the front record, beside it, while a resting pointer is on it
 var hvI=-1,hvT=0,hvGo=0,onHv=false;const hv=$('#hv');
 function hvOff(){clearTimeout(hvT);clearTimeout(hvGo);hvT=0;onHv=false;hvI=-1;document.getElementById('hv')?.classList.remove('on')}
 function hoverPeek(){
-  const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.elementFromPoint(ptr.x,ptr.y),onTab=el?.closest?.('.dv');
+  const el=ptr&&!PHONE&&!raf&&!drag&&!moved&&open.hidden&&document.body.classList.contains('ready')&&document.elementFromPoint(ptr.x,ptr.y),onTab=el?.closest?.('.dv');
   if(onTab)return hvOff();
   let i=el?nodes.indexOf(el.closest?.('.rc')):-1;if(i!==cur)i=-1; // the records behind it stay unnamed
   if(i<0){if(hv.classList.contains('on')&&!onHv){clearTimeout(hvGo);hvGo=setTimeout(hvOff,500)}else if(!onHv)hvOff();return} // a moment's grace, on the way over to the name
