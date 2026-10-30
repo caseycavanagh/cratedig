@@ -1514,11 +1514,12 @@ const shEnd=()=>{
 $('#oinfo').addEventListener('pointerup',shEnd);$('#oinfo').addEventListener('pointercancel',shEnd);
 $('#oinfo').addEventListener('click',e=>{if(performance.now()-shBlock<400&&e.target.closest('#playM')){e.preventDefault();e.stopImmediatePropagation()}},true);
 $('#oinfo').addEventListener('focusout',e=>{if(playMenu()&&!e.relatedTarget?.closest?.('.play')&&e.relatedTarget)togglePlay(false)});
-// a detail other records share is a button that fills the crate with all of them (the artist, and the Also heading)
+// a detail other records share is a button that fills the crate with all of them (the artist, year and label, and the Also heading)
 const metaHTML=(r,k)=>{const v=FIELD[k](r),n=v?RECORDS.filter(x=>same(FIELD[k](x),v)).length:0,s=k==='label'?labelName(v):v;return n>1?`<button type="button" class="meta" data-f="${k}">${s}<span class="sr">, show all ${n}</span></button>`:s};
-// other records in the crate that share the artist, else the label, else the year: a few covers that open them
+// other records in the crate by the same artist: a few covers that open them, or nothing when there are none
 function nearby(r){
-  for(const[k,head]of[['artist',()=>'Also by '+r.artist],['label',()=>'Also on '+labelName(r.label)],['year',()=>'Also from '+r.year]]){
+  if(/^various/i.test(r.artist))return''; // compilations aren't one artist
+  for(const[k,head]of[['artist',()=>'Also by '+r.artist]]){
     const v=FIELD[k](r);if(!v)continue;
     const more=order.filter(x=>x!==r&&same(FIELD[k](x),v)).slice(0,4);
     if(more.length)return`<div class="near"><button type="button" class="meta ohd" data-f="${k}">${head()}<span aria-hidden="true"> →</span><span class="sr">, show them all in the crate</span></button><div class="thumbs">${more.map(x=>`<button type="button" class="nb" data-slug="${x.slug}" aria-label="${x.title} by ${x.artist}">${x.front?`<img alt="" src="${img(x.thumb||x.front)}" decoding="async" draggable="false">`:`<i style="background:${spineBg(x)}"></i>`}</button>`).join('')}</div></div>`;
@@ -1526,8 +1527,8 @@ function nearby(r){
   return'';
 }
 function info(r){
-  // plain facts: the way into the rest of the crate is the Also heading below, so they aren't links twice
-  const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${k==='label'?labelName(r.label):FIELD[k](r)}</span>`).join('');
+  // the year and label fill the crate with the rest from that year or label, when there are any
+  const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${metaHTML(r,k)}</span>`).join('');
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
       ${facts?`<p class="facts">${facts}</p>`:''}
     ${playHTML(r)}<div class="ab" id="oabout" hidden></div>${nearby(r)}${ownHTML(r)}`;
