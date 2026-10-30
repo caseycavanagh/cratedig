@@ -12,7 +12,7 @@
 <style>
 @font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
 @font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
-@font-face{font-family:'Original Surfer';src:url('/fonts/original-surfer.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans-bold.woff2') format('woff2');font-weight:700;font-display:swap}
 :root{--bg:#f4f2ee;--fg:#1a1a1a;--m:#666;--line:#cfccc6;--soft:#ebe8e2;--sheet:#fbfaf7;--accent:#661864;--mono:'Paper Mono',ui-monospace,monospace;--flip:cubic-bezier(.25,1.2,.4,1);--R:min(62vh,46vw);--R:min(62svh,46vw);--S:calc(var(--R)*.965)}
 html[data-theme=dark]{--bg:#121212;--fg:#ecebe8;--m:#8f8f93;--line:#3a3a3d;--soft:#1c1c1e;--sheet:#1e1e20;--accent:#ca72c7}
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
@@ -915,15 +915,15 @@ html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 .about::backdrop{background:none;-webkit-backdrop-filter:blur(28px) saturate(1.1);backdrop-filter:blur(28px) saturate(1.1);opacity:0;transition:opacity .2s}
 .about.in{background:rgba(18,18,18,.55);transition-duration:.35s}
 .about.in::backdrop{opacity:1;transition-duration:.35s}
-/* the words and the close button fade; the mark flies in from the top bar instead (see aboutOpen) */
-.about .ab-x,.ab-in>:not(.ab-mk){opacity:0;transition:opacity .2s}
-.about.in .ab-x,.about.in .ab-in>:not(.ab-mk){opacity:1;transition:opacity .35s .1s}
+/* everything on it fades in together */
+.about .ab-x,.ab-in>*{opacity:0;transition:opacity .2s}
+.about.in .ab-x,.about.in .ab-in>*{opacity:1;transition:opacity .35s .1s}
 .about .ab-x{position:fixed;z-index:1;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px;color:#fff;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 .about .ab-x:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .ab-in{min-height:100%;box-sizing:border-box;display:grid;place-content:center;justify-items:start;gap:28px;padding:96px max(24px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
 .ab-in>*{margin:0;width:fit-content}
 .ab-mk{width:88px;height:88px;fill:#fff;margin-bottom:8px}
-.ab-name{margin-top:-14px!important;font:400 48px/1.1 'Original Surfer','Instrument Sans',sans-serif;color:#fff}
+.ab-name{margin-top:-8px!important;font:700 88px/.95 'Instrument Sans',sans-serif;letter-spacing:-.045em;color:#fff}
 .ab-in h2{max-width:16ch;font-size:68px;font-weight:500;letter-spacing:-.035em;line-height:1.02;text-wrap:balance}
 .ab-body{max-width:34ch;font-size:22px;line-height:1.4;color:#d6d6d8}
 .ab-cr{margin-top:20px;font:400 12px/1.6 'Paper Mono',ui-monospace,monospace;color:var(--m)}
@@ -932,12 +932,11 @@ html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 .ab-cr a:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:2px}
 html.phone .ab-in{gap:20px;padding:88px max(24px,env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
 html.phone .ab-mk{width:64px;height:64px;margin-bottom:4px}
-html.phone .ab-name{margin-top:-10px!important;font-size:36px}
+html.phone .ab-name{margin-top:-6px!important;font-size:56px}
 html.phone .ab-in h2{font-size:38px}
 html.phone .ab-body{font-size:18px}
 html.phone .ab-cr{margin-top:12px}
 @media(max-width:700px){.ab-in h2{font-size:44px}}
-@media(prefers-reduced-motion:reduce){.ab-mk{opacity:0;transition:opacity .2s}.about.in .ab-mk{opacity:1;transition-duration:.35s}}
 </style>
 </head>
 <body>
@@ -1728,30 +1727,16 @@ hv.addEventListener('pointerleave',e=>{onHv=false;if(crate.contains(e.relatedTar
 hv.addEventListener('click',()=>{const i=hvI;if(i<0||!open.hidden)return;hvOff();if(i!==cur)go(i);openRecord(false)});
 // the mark opens the about page; the close button, Esc or a tap anywhere but the words puts it away
 const about=$('#about');$('#abY').textContent=new Date().getFullYear();
-const mk=$('.ab-mk'),lgA=$('.logo'),lgS=$('.logo svg');let spin=0,spinV=0,spinOn=false,spinF=0,flight=null,aboutRest=()=>{};
-// the top bar's mark as it sits now: its center, size and turn (the crate turns it as it flips; hover tilts it)
-const markAt=el=>{const r=el.getBoundingClientRect(),cs=getComputedStyle(el),m=new DOMMatrix(cs.transform);
-  return {x:r.left+r.width/2,y:r.top+r.height/2,w:parseFloat(cs.width),a:(parseFloat(cs.rotate)||0)+Math.atan2(m.b,m.a)*180/Math.PI}};
-// the mark comes with the page: the top bar's mark flies down and grows into the big one, and flies back on close
-function abFly(back){
-  const f=markAt(lgS),t=markAt(mk),sc=f.w/t.w,from={translate:`${f.x-t.x}px ${f.y-t.y}px`,scale:sc,rotate:f.a+'deg'};
-  let to={translate:'0px 0px',scale:1,rotate:spin+'deg'};
-  if(back){from.rotate=(f.a+360*Math.round((spin-f.a)/360))+'deg';to={...to,rotate:spin+'deg'}}
-  flight?.cancel();
-  return flight=mk.animate(back?[to,from]:[from,to],{duration:back?380:620,easing:back?'cubic-bezier(.4,0,.2,1)':'cubic-bezier(.22,1,.36,1)',fill:back?'forwards':'none'});
-}
-function aboutOpen(){if(about.open)return;about.showModal();document.documentElement.style.overflow='hidden';
-  if(!reduce){spin=parseFloat(getComputedStyle(lgS).rotate)||0;aboutRest(spin);mk.style.rotate=spin+'deg';lgA.style.visibility='hidden';abFly(false)}
+const mk=$('.ab-mk');let spin=0,spinV=0,spinOn=false,spinF=0;
+function aboutOpen(){if(about.open)return;about.showModal();document.documentElement.style.overflow='hidden';spin=0;mk.style.rotate='';
   requestAnimationFrame(()=>about.classList.add('in'))}
 function aboutClose(){if(!about.open||about.closing)return;about.classList.remove('in');about.closing=true;
   spinOn=false;spinV=0;cancelAnimationFrame(spinF);spinF=0;
-  let ended=false;const done=()=>{if(ended)return;ended=true;flight?.cancel();flight=null;lgA.style.visibility='';about.close();about.closing=false;document.activeElement?.blur();if(open.hidden)document.documentElement.style.overflow=''};
-  if(reduce){setTimeout(done,200);return}
-  abFly(true).finished.then(done,done);setTimeout(done,500)} // the timer is a backstop if the animation never settles
+  setTimeout(()=>{about.close();about.closing=false;document.activeElement?.blur();if(open.hidden)document.documentElement.style.overflow=''},reduce?0:200)}
 $('.logo').addEventListener('click',e=>{e.preventDefault();aboutOpen()});
 $('#abX').onclick=aboutClose;
-// hovering the big mark spins it like a record at 33⅓ rpm; moving off lets it coast back round to upright (where it came in)
-{let t0=0,rest=0,co=null;
+// hovering the big mark spins it like a record at 33⅓ rpm; moving off lets it coast one more turn back to upright
+{let t0=0,co=null;const rest=0;
   const h=u=>[2*u**3-3*u**2+1,u**3-2*u**2+u,-2*u**3+3*u**2],dh=u=>[6*u*u-6*u,3*u*u-4*u+1,-6*u*u+6*u];
   const step=now=>{const dt=Math.min(.05,(now-t0)/1000);t0=now;
     if(spinOn){spinV+=(200-spinV)*(1-Math.exp(-dt*3));spin+=spinV*dt}
@@ -1759,12 +1744,12 @@ $('#abX').onclick=aboutClose;
       spin=a*co.a+b*co.T*co.v+c*co.to;spinV=(da*co.a+db*co.T*co.v+dc*co.to)/co.T;if(u>=1){spin=co.to;spinV=0;co=null}}
     mk.style.rotate=(spin%360).toFixed(2)+'deg';spinF=spinOn||co?requestAnimationFrame(step):0};
   const go=o=>{if(about.closing||reduce)return;spinOn=o;co=null;
-    if(!o){const v=Math.max(0,spinV),n=Math.round((spin-rest)/360),to=v<30?rest+360*n:rest+360*Math.ceil((spin+v*.25-rest)/360),d=Math.abs(to-spin);
-      if(d<.5&&v<1){spin=to;spinV=0}else co={a:spin,v,to,t:0,T:Math.min(1.6,Math.max(.5,v>1?1.5*d/v:.5))}}
+    if(!o&&(spinV>1||Math.abs(spin-rest)%360>.5)){ // about one more turn, slowing all the way, landing upright
+      const v=Math.max(0,spinV),to=rest+360*Math.ceil((spin+240-rest)/360),d=to-spin;
+      co={a:spin,v,to,t:0,T:Math.min(4,Math.max(1.4,v>1?1.5*d/v:1.4))}} // 1.5·d/v keeps it slowing from the first frame
     if(!spinF){t0=performance.now();spinF=requestAnimationFrame(step)}};
   about.addEventListener('close',()=>{co=null});
-  aboutRest=a=>{rest=a};
-  mk.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&flight?.playState!=='running')go(true)});mk.addEventListener('pointerleave',()=>go(false))}
+  mk.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')go(true)});mk.addEventListener('pointerleave',()=>go(false))}
 about.addEventListener('cancel',e=>{e.preventDefault();aboutClose()});
 about.addEventListener('click',e=>{if(!e.target.closest('.ab-in>*,a,button'))aboutClose()});
 crate.addEventListener('pointerdown',hvOff);crate.addEventListener('wheel',hvOff,{passive:true});
