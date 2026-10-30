@@ -976,19 +976,19 @@ html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 @media(prefers-reduced-motion:reduce){.chip:not([hidden]){animation:none}}
 /* Play: a slimmer button */
 .play .btn,html.phone .play .btn{height:44px;padding:0 22px 0 18px;font-size:15px;gap:8px}
-html.phone .play .btn{height:var(--pb);font-size:16px}
-html.phone{--pb:46px}
-@media(max-height:700px){html.phone{--pb:44px}}
+/* on a phone too: a compact button that hugs its label, not a bar across the screen */
+html.phone{--pb:44px}
+html.phone .play>.btn,html.phone .pair{width:auto}
+html.phone .pair .btn{flex:none}
+html.phone .play .btn{height:var(--pb);font-size:15px;padding:0 22px 0 18px}
 /* the filter pill: its name opens a menu of the others of that kind; the × clears it */
 .chip,html.phone .chip{padding:0;gap:0;cursor:default}
 .chip .cn,.chip .cx{all:unset;cursor:pointer;height:100%;display:inline-flex;align-items:center;min-width:0}
-.chip .cn{gap:7px;padding:0 4px 0 16px;flex:0 1 auto}
+.chip .cn{padding:0 2px 0 16px;flex:0 1 auto}
 .chip>b{padding-left:16px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip .cn b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip .cx{flex:none;padding:0 14px 0 8px}
-.chip .chv{width:12px;height:12px;flex:none;color:#a5a5aa;transition:transform .3s cubic-bezier(.22,1,.36,1)}
-.chip .cn[aria-expanded=true] .chv{transform:rotate(180deg)}
-.chip .cn:hover .chv,.chip .cx:hover svg{color:#fff}
+.chip .cx:hover svg{color:#fff}
 .chip .cn:focus-visible,.chip .cx:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:99px}
 .chip:hover svg{color:#a5a5aa}
 .cmenu{position:absolute;z-index:5;top:54px;left:50%;translate:-50% 0;width:280px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:6px;border-radius:18px;background:#1e1e20;border:1px solid var(--line);box-shadow:0 30px 60px -20px #000,0 8px 20px -8px #000a;pointer-events:auto;animation:trayIn .3s cubic-bezier(.22,1,.36,1)}
@@ -1005,7 +1005,7 @@ html.phone{--pb:46px}
 html.phone .cmenu{width:auto;left:12px;right:12px;translate:none;max-width:none}
 html.phone .cmenu ul{max-height:min(60svh,480px)}
 .find:has(.q:focus-within) .cmenu{display:none}
-@media(prefers-reduced-motion:reduce){.cmenu{animation:none}.chip .chv{transition:none}}
+@media(prefers-reduced-motion:reduce){.cmenu{animation:none}}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
 .find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
 .kd::before,.kd::before{top:-80px;background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%)}
@@ -1475,7 +1475,6 @@ $('#qx').onclick=()=>{q.value='';search();q.focus()};
 // the filter you're in, from a record's details: click it to see the whole crate again
 const X_ICON='<svg width="14" height="14" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
 // tap its name for a menu of the others of that kind (years, labels, artists); the × shows the whole crate again
-const CHEV='<svg class="chv" width="12" height="12" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
 const escC=s=>String(s).replace(/[&<>"]/g,c=>`&#${c.charCodeAt(0)};`);
 const KINDS={year:'Year',label:'Label',artist:'Artist'};
 const asRead=(k,v)=>k==='label'?labelName(v):v;
@@ -1489,7 +1488,7 @@ function choices(k){
 function showChip(){
   const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;menuOff();if(!f)return;
   const v=asRead(f.k,f.v),pick=KINDS[f.k];
-  chip.innerHTML=(pick?`<button type="button" class="cn" aria-expanded="false" aria-controls="cmenu" aria-label="${pick}: ${escC(v)}. Choose another"><b>${escC(v)}</b>${CHEV}</button>`:`<b>${escC(v)}</b>`)
+  chip.innerHTML=(pick?`<button type="button" class="cn" aria-expanded="false" aria-controls="cmenu" aria-label="${pick}: ${escC(v)}. Choose another"><b>${escC(v)}</b></button>`:`<b>${escC(v)}</b>`)
     +`<button type="button" class="cx" aria-label="Show the whole crate">${X_ICON}</button>`;
 }
 function menuOff(){const cmenu=$('#cmenu');if(cmenu.hidden)return;cmenu.hidden=true;$('.cn',chip)?.setAttribute('aria-expanded','false')}
