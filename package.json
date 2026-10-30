@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "vinyl-covers": "node scripts/vinyl-covers.mjs"
+    "vinyl-covers": "node scripts/vinyl-covers.mjs",
+    "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
     "next": "16.4.3",
