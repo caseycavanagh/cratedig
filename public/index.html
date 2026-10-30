@@ -1066,7 +1066,7 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   html.phone .peek{filter:brightness(calc(1 - var(--rise,0)*.8))}
   html.phone .o-page{overflow:clip} /* the fade's long tail never adds room to scroll into */
   html.phone .o-info{z-index:2} /* over the record, which comes first; the close button stays on top */
-  html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-64px;bottom:-50vh;background:linear-gradient(#12121200,var(--bg) 64px);opacity:calc(var(--rise,0)*3);pointer-events:none}
+  html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-64px;bottom:-50vh;background:linear-gradient(transparent,var(--bg) 64px);opacity:calc(var(--rise,0)*3);pointer-events:none}
 }
 /* Safari on iPhone tints its toolbars from solid fixed strips at the very top and bottom of the screen
    (joshpuckett.me/seamless-mobile-safari). Without them the bottom bar falls back to its own lighter gray.
