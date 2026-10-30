@@ -86,6 +86,10 @@ html.phone.deck .tail{display:none}
 .art{position:absolute;inset:0;width:100%;height:100%;display:block}
 .art.plain{background-image:var(--ring);background-size:100% 100%}
 img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none}
+/* a cover still on its way shows the jacket's color, then fades in over it */
+.rc .face:has(>img.art){background:var(--sp,#2c2c2e)}
+.rc img.art{transition:opacity .5s ease-out}
+.rc img.art:not(.on){opacity:0}
 .cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
 .cover-type b{display:block;font:500 6cqw 'Instrument Sans',sans-serif}
 .cover-type i{display:block;font:400 4.4cqw var(--mono);font-style:normal;opacity:.85;margin-top:1.2cqw}
@@ -526,7 +530,7 @@ body.walling .find .chip{display:none}
 .tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#1f1f21;display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
 .tile img.on{opacity:1}
 .tile .pl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:15px;line-height:1.15}
 .tile .pl small{font-weight:400;opacity:.7;margin-top:2px}
@@ -549,7 +553,7 @@ body.walling .find .chip{display:none}
 .board .tile img{-webkit-user-drag:none;pointer-events:none}
 .cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--line);color:#d6d6d8;font-size:14px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
 @media (min-width:700px){.wall{padding-left:28px;padding-right:28px}.wall .pills{margin:0 -28px 18px;padding:2px 28px 4px}.tiles{gap:8px}}
-@media(prefers-reduced-motion:reduce){.vw,.tile,.tiles .tile,.wall .pills button{transition:none}.tiles .tile:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.vw,.tile,.tiles .tile,.wall .pills button,.tile img,.rc img.art,.pic img{transition:none}.tiles .tile:hover{transform:none}}
 /* the dial, in place of the A–Z rail: letters; slide up on it for every record, down for letters again */
 .az{display:none}
 .kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
@@ -663,7 +667,7 @@ html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:
 .sl ul{list-style:none;margin:0;padding:0}
 .sl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border-radius:16px}
 .sl button:active{background:#ffffff14}
-.sl img,.sl .sw{width:46px;height:46px;border-radius:3px;object-fit:cover;flex:none;background:#2c2c2e}
+.sl .sw,.sl .pic{width:46px;height:46px;border-radius:3px;flex:none;background:#2c2c2e}
 .sl b{display:block;font-weight:500;font-size:16px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span span{display:block;color:var(--m);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span{min-width:0}
@@ -697,7 +701,11 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .tbl td.c-title{color:#fff;max-width:340px}
 .tbl td.c-title b{font-weight:500}
 .tbl .c0{width:48px;padding-right:4px}
-.tbl .c0 img,.tbl .c0 .sw{display:block;width:44px;height:44px;border-radius:3px;object-fit:cover;background:#2c2c2e}
+.tbl .c0 .sw,.tbl .c0 .pic{display:block;width:44px;height:44px;border-radius:3px;background:#2c2c2e}
+.pic{position:relative;overflow:hidden}
+/* table and search covers: the record's color first, then the cover fades in over it */
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
+.pic img.on{opacity:1}
 .tbl .held{opacity:0}
 .tbl .m{display:none}
 @media (max-width:700px){
@@ -751,11 +759,10 @@ html.phone .find .q:focus-within{border-color:rgba(255,255,255,.2)}
 html.phone .qn{display:none}
 html.phone .find .q.has input{padding-right:48px}
 html.phone .sx{padding:0 2px}
-.sl img{background:#2c2c2e}
 .sl img:not([src]){visibility:visible}
 /* every record has the same barely-there corner: 1px */
 .face>*,.face::after,.sleeve .sh,.rc .fr{border-radius:1px}
-.face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.tbl .c0 img,.tbl .c0 .sw,.hit img,.hit .ph{border-radius:1px}
+.face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.sl .pic,.tbl .c0 .sw,.tbl .c0 .pic,.hit img,.hit .ph{border-radius:1px}
 /* phones: the flipped records lying toward you fade out softly instead of ending in hard edges */
 html.phone.deck .crate{-webkit-mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8));mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8))}
 /* phone search: the results card hugs what's in it, and stops above the keyboard */
@@ -777,7 +784,7 @@ html.phone .sl{bottom:auto;max-height:calc(100svh - env(safe-area-inset-top) - 9
   .tbl td{display:block;padding:0;border:0;max-width:none}
   .tbl td.c-artist,.tbl td.c-label,.tbl td.c-format{display:none}
   .tbl .c0{width:auto;padding:0}
-  .tbl .c0 img,.tbl .c0 .sw{width:52px;height:52px}
+  .tbl .c0 .sw,.tbl .c0 .pic{width:52px;height:52px}
   .tbl td.c-title b,.tbl .m{max-width:none}
   .tbl td.c-title b{font-size:16px;line-height:1.3}
   .tbl td.c-year{font-size:14px}
@@ -1113,7 +1120,14 @@ const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f; // covers Casey uploads come 
 // a lazy image waits in data-src until its record comes near the front (see place)
 const BAKED=new Map(); // cover → the same cover with its paper and wear baked in (see "bake")
 const baked=u=>BAKED.get(new URL(u,location.href).href)||u;
-const imgHTML=(f,lazy)=>`<img class="art" ${lazy?'data-src':'src'}="${lazy?img(f):baked(img(f))}" alt="" decoding="sync" draggable="false">`;
+const imgHTML=(f,lazy)=>`<img class="art" ${lazy?'data-src':'src'}="${lazy?img(f):baked(img(f))}" alt="" decoding="sync" draggable="false" onload="fadeIn(this)">`;
+// a cover fades in once it's decoded and a frame has passed, so the fade always plays, even for one already in the cache.
+// Before the crate first shows, covers are simply there: it waits for them behind the loading screen
+function fadeIn(i){
+  if(i.classList.contains('on'))return;
+  if(!document.body.classList.contains('ready')){i.classList.add('on');return}
+  i.decode().catch(()=>{}).then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.add('on'))));
+}
 const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
 const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
@@ -1693,7 +1707,7 @@ crate.addEventListener('pointerdown',hvOff);crate.addEventListener('wheel',hvOff
 
 // Paper and wear by year (see "Each jacket's paper" in the styles). A record without a year is plain matte and unworn.
 function dress(el,r){
-  const y=+r.year||0;
+  const y=+r.year||0;el.style.setProperty('--sp',spineBg(r));
   el.dataset.paper=!y||y>=1970&&y<2010?'matte':y<1970?'gloss':'uncoated';
   if(y&&y<1980)el.dataset.wear='2';else if(y&&y<2000)el.dataset.wear='1';else delete el.dataset.wear;
 }
@@ -2179,7 +2193,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     let n=store.get(r.slug);if(n)return n;
     n=document.createElement('button');n.type='button';n.className='tile';n.dataset.slug=r.slug;
     const bg=r.spine||'#2c2c2e';
-    n.innerHTML=(r.front?`<img alt="" loading="lazy" decoding="async" width="360" height="360" onload="this.classList.add('on')">`:`<span class="pl" style="background:${bg};color:${ink(bg)}">${r.title}<small>${r.artist}</small></span>`)+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
+    n.innerHTML=(r.front?`<img alt="" loading="lazy" decoding="async" width="360" height="360" onload="fadeIn(this)">`:`<span class="pl" style="background:${bg};color:${ink(bg)}">${r.title}<small>${r.artist}</small></span>`)+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
     n.setAttribute('aria-label',`${r.title} by ${r.artist}`);store.set(r.slug,n);
     if(r.front){
       // the tile wears the record's spine color until its cover is in; covers off screen wait until you scroll near them
@@ -2247,7 +2261,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held,.tbl .held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
 
 
-  // ---- the grid: pinch it (or ctrl-scroll, or + and −) and the columns change; the covers glide to their new places and
+  // ---- the grid: pinch it (or ⌘- or ctrl-scroll, or + and −) and the columns change; the covers glide to their new places and
   // the cover under your fingers stays put
   function regrid(n,ax,ay){
     n=Math.max(CMIN(),Math.min(CMAX(),n));if(n===cols())return;
@@ -2265,7 +2279,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   wall.addEventListener('touchmove',e=>{if(!gp||e.touches.length<2)return;e.preventDefault();const [a,b]=e.touches,d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
     regrid(Math.round(gp.c0*gp.d0/d),(a.clientX+b.clientX)/2,(a.clientY+b.clientY)/2)},{passive:false});
   wall.addEventListener('touchend',e=>{if(e.touches.length<2)gp=null});
-  let gacc=0;wall.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();gacc+=e.deltaY;if(Math.abs(gacc)>40){regrid(cols()+Math.sign(gacc),e.clientX,e.clientY);gacc=0}},{passive:false});
+  let gacc=0;wall.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();gacc+=e.deltaY;if(Math.abs(gacc)>40){regrid(cols()+Math.sign(gacc),e.clientX,e.clientY);gacc=0}},{passive:false});
   let gg=null;
   wall.addEventListener('gesturestart',e=>{e.preventDefault();gg={c0:cols()}});
   wall.addEventListener('gesturechange',e=>{e.preventDefault();if(gg&&!gp)regrid(Math.round(gg.c0/e.scale),e.clientX,e.clientY)});
@@ -2281,7 +2295,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     const rows=[...order].sort((a,b)=>{const x=key(a),y=key(b);return(typeof x==='number'?x-y:String(x).localeCompare(String(y),'en',{sensitivity:'base'}))*ts.d||byName(a,b)});
     $('thead',tbl).innerHTML=`<tr><th class="c0"><span class="sr">Cover</span></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button></th>`).join('')}</tr>`;
     tkeep.clear();
-    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
+    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
     for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
   tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable();return}
@@ -2584,7 +2598,7 @@ build();at=cur;
   const sl=document.createElement('div');sl.className='sl';sl.id='sl';sl.setAttribute('role','listbox');sl.setAttribute('aria-label','Records');document.body.append(sl);
   const sx=document.createElement('button');sx.type='button';sx.className='sx';sx.textContent='Cancel';qf.parentNode.insertBefore(sx,qf.nextSibling.nextSibling);
   const on=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
-  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<img data-src="${img(r.front)}" alt="" decoding="async">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
+  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
   function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
     if(!rs.length){sl.innerHTML='<p class="none">Not in the crate</p>';return}
     if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;return}
