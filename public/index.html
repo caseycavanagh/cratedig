@@ -869,17 +869,34 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 /* an open record closes from where the view button sits: top right, the same 44px circle, so the mark keeps the top left */
 #close,html.phone #close{left:auto;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;font-size:18px;border:1px solid var(--line);box-sizing:border-box}
 /* a record's name over its mark on the dial, after a short rest; it leaves on a quick fade */
+.kd-t{transition:height .45s cubic-bezier(.22,1,.36,1),width .45s cubic-bezier(.22,1,.36,1),margin .45s cubic-bezier(.22,1,.36,1),translate .45s cubic-bezier(.22,1,.36,1),background-color .2s}
+.kd-t.kd-hv{height:17px;width:2px;margin-left:-1px;translate:0 -3px;background:#fff}
 .kd-tip{position:fixed;z-index:12;left:0;top:0;transform:translate(-50%,-100%);max-width:240px;padding:8px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);font-size:13px;line-height:1.3;text-align:center;pointer-events:none;opacity:0;translate:0 4px;transition:opacity .12s,translate 0s .12s}
 .kd-tip.on{opacity:1;translate:0;transition:opacity .2s,translate .45s cubic-bezier(.22,1,.36,1)}
 .kd-tip b,.kd-tip span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kd-tip b{font-weight:500;color:#fff}
 .kd-tip span{color:var(--m)}
 @media(hover:none){.kd-tip{display:none}}
-@media(prefers-reduced-motion:reduce){.kd-tip,.kd-tip.on{translate:none}}
+@media(prefers-reduced-motion:reduce){.kd-tip,.kd-tip.on{translate:none}.kd-t{transition:background-color .2s}}
 /* a phone, searching: the list takes over, so Cancel stands in for the view button */
 html.phone body.searching .fb.lb{display:none}
 html.phone .sx{height:44px}
 @media(prefers-reduced-motion:reduce){.find .vw:not([hidden]){animation:none}}
+/* search, quieter: a soft border for focus, a readable count, a small plain clear */
+.find .q:has(input:focus-visible),html.phone .find .q:has(input:focus-visible){outline:none}
+.find .q:focus-within,html.phone .find .q:focus-within{border-color:#ffffff38}
+.find .q .qn{right:42px;font:400 15px/1 'Instrument Sans',sans-serif;font-variant-numeric:tabular-nums;color:#8e8e93}
+.find .q .qx{right:9px;width:26px;height:26px;background:none;color:#8e8e93}
+.find .q .qx:hover{background:#ffffff14;color:#fff}
+.find .q .qx svg{width:12px;height:12px}
+.find .q .qx:focus-visible{outline:2px solid #fff;outline-offset:0}
+.find .q.has input,html.phone .find .q.has input{padding-right:40px}
+.find .q.has:has(.qn:not(:empty)) input{padding-right:68px}
+.qnone,html.phone .qnone{left:auto;right:0;translate:none;width:100%;box-sizing:border-box;border-radius:18px;padding:12px 16px;font-size:14px}
+.sl .none{margin:0;padding:14px 18px;line-height:1.4;color:#8e8e93}
+.qnone:has(ul){padding:6px;width:max(100%,340px)}
+.qnone .qh{padding:0;margin:0;font:inherit;line-height:1.4;color:#8e8e93}
+.qnone:has(ul) .qh{padding:6px 8px 8px}
 </style>
 </head>
 <body>
@@ -2347,7 +2364,7 @@ const W=36,WR=12,H0=58,H1=78,lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a,b)=>Math.max(a,M
 const buzz=ms=>{try{navigator.vibrate?.(ms)}catch{}};
 let AZ=[],FIRST={},CNT={},X=[],LT=[],TH=[],at=-1;
 const has=L=>FIRST[L]!=null,slot=i=>AZ.indexOf(letter(order[i]));
-const S={l:{x:0,v:0,t:0},r:{x:0,v:0,t:0},z:{x:0,v:0,t:0}},K={l:[260,33],r:[260,33],z:[320,37]};
+const S={l:{x:0,v:0,t:0},r:{x:0,v:0,t:0},z:{x:0,v:0,t:0}},K={l:[260,33],r:[260,33],z:[520,46]};
 let raf=0,drag=null,user=false,lastL=-1,lastR=-1,acc=0;
 const mode=()=>S.z.x>=.5?'r':'l',lMax=()=>(AZ.length-1)*W,rMax=()=>X[X.length-1]||0;
 const nearL=px=>{const n=AZ.length,k=clamp(Math.round(px/W),0,n-1);if(has(AZ[k]))return k;for(let s=1;s<n;s++){if(k+s<n&&has(AZ[k+s]))return k+s;if(k-s>=0&&has(AZ[k-s]))return k-s}return k};
@@ -2420,7 +2437,7 @@ function rest(m){const o=S[m];o.x=o.t=m==='r'?(X[cur]||0):Math.max(0,slot(cur))*
 function sync(){if(cur===at||!order.length)return;at=cur;if(drag||(raf&&user)){label();return}
   S.l.t=Math.max(0,slot(cur))*W;S.r.t=X[cur];lastL=Math.round(S.l.t/W);lastR=cur;if(reduce){S.l.x=S.l.t;S.r.x=S.r.t}kick();label()}
 // start (or turn to) an axis: going sideways settles the depth where it is; going up or down leaves the strip where it is
-function axis(d,e,a){d.axis=a;d.v=a==='v';d.ax=e.clientX;d.ay=e.clientY;d.lx=e.clientX;d.z0=S.z.x;
+function axis(d,e,a){d.axis=a;d.v=a==='v'&&!d.done;d.ax=e.clientX;d.ay=e.clientY;d.lx=e.clientX;d.z0=S.z.x;
   if(a==='v'){d.vy=[[e.timeStamp,e.clientY]];const o=S[d.m];o.t=d.m==='l'?nearL(o.x)*W:X[nearR(clamp(o.x,0,rMax()))];o.v=0;rest(d.m==='l'?'r':'l')}
   else{S.z.t=S.z.x>=.5?1:0;S.z.v=0;d.h=[[e.timeStamp,S[d.m].x]]}}
 function setDepth(m){const t=m==='r'?1:0;if(S.z.t===t)return;S.z.t=t;rest(m);buzz(10);kick();setTimeout(label,0)}
@@ -2435,9 +2452,9 @@ dl.addEventListener('pointermove',e=>{if(!drag)return;const d=drag;
   else{const sx=e.clientX-d.sx,sy=d.sy-e.clientY; // the last stretch of the path decides a turn
     if(Math.hypot(sx,sy)>22){d.sx=e.clientX;d.sy=e.clientY;
       if(d.axis==='h'&&Math.abs(sy)>1.6*Math.abs(sx))axis(d,e,'v');else if(d.axis==='v'&&Math.abs(sx)>1.6*Math.abs(sy))axis(d,e,'h')}}
-  if(d.axis==='v'){S.z.x=S.z.t=clamp(d.z0+(d.ay-e.clientY)/70,0,1);S.z.v=0;
-    d.vy.push([e.timeStamp,e.clientY]);while(d.vy.length>2&&e.timeStamp-d.vy[0][0]>90)d.vy.shift();
-    const m=mode();if(m!==d.m){d.m=m;rest(m);S.l.v=S.r.v=0;buzz(10);label()}}
+  // up or down commits once, and the dial changes depth in one move on its own spring, not frame by frame under the finger
+  if(d.axis==='v'){const dy=d.ay-e.clientY;
+    if(!d.done&&Math.abs(dy)>18){d.done=true;d.v=false;const m=dy>0?'r':'l';if(m!==d.m){d.m=m;setDepth(m);S.l.v=S.r.v=0}}}
   else if(d.axis==='h'){const dx=e.clientX-d.lx,o=S[d.m];
     o.x=o.t=soft(o.x-dx,0,d.m==='l'?lMax():rMax());
     d.h.push([e.timeStamp,o.x]);while(d.h.length>2&&e.timeStamp-d.h[0][0]>90)d.h.shift()}
@@ -2450,6 +2467,7 @@ const up=e=>{if(!drag)return;const d=drag;drag=null;const m=d.m,o=S[m];
     if(m==='r'){if(t&&t.classList.contains('kd-l')&&has(AZ[+t.dataset.k]))o.t=X[FIRST[AZ[+t.dataset.k]]];
       else{const b=dl.getBoundingClientRect();o.t=X[nearR(clamp(o.x+e.clientX-(b.left+b.width/2),0,rMax()))]}
       buzz(4);kick();return}}
+  if(d.axis==='v'&&d.done){o.t=m==='l'?nearL(o.x)*W:X[nearR(clamp(o.x,0,rMax()))];o.v=0;kick();return}
   if(d.axis==='v'){const [ty,y0]=d.vy[0],vy=(y0-e.clientY)/Math.max(16,e.timeStamp-ty),t=vy>.35?1:vy<-.35?0:S.z.x>=.5?1:0;
     S.z.v=0;o.t=m==='l'?nearL(o.x)*W:X[nearR(clamp(o.x,0,rMax()))];o.v=0;
     if((t===1)!==(m==='r'))setDepth(t?'r':'l');else S.z.t=t;kick();return}
@@ -2459,17 +2477,17 @@ const up=e=>{if(!drag)return;const d=drag;drag=null;const m=d.m,o=S[m];
   kick()};
 dl.addEventListener('pointerup',up);dl.addEventListener('pointercancel',up);
 dl.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();acc+=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(Math.abs(acc)>30){step(Math.sign(acc));acc=0}},{passive:false});
-// rest the mouse on a record's mark and its name comes up above it; once one is up, the next shows straight away
+// the mark under the mouse rises at once; rest on it a good while and its record's name comes up above it
 const tip=document.createElement('div');tip.className='kd-tip';tip.setAttribute('aria-hidden','true');tip.append(document.createElement('b'),document.createElement('span'));document.body.append(tip);
 let tipT=0,tipI=-1;
-const tipOff=()=>{clearTimeout(tipT);tipI=-1;tip.classList.remove('on')};
+const tipOff=()=>{clearTimeout(tipT);TH[tipI]?.classList.remove('kd-hv');tipI=-1;tip.classList.remove('on')};
 dl.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||mode()!=='r'||!open.hidden){tipOff();return}
   let b=-1,bd=7;TH.forEach((s,i)=>{if(s.style.visibility==='hidden')return;const r=s.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-e.clientX);if(d<bd){bd=d;b=i}});
   if(b<0){tipOff();return}if(b===tipI)return;
-  const was=tip.classList.contains('on');tipI=b;clearTimeout(tipT);
+  clearTimeout(tipT);tip.classList.remove('on');TH[tipI]?.classList.remove('kd-hv');tipI=b;TH[b].classList.add('kd-hv');
   const show=()=>{const r=order[b],s=TH[b].getBoundingClientRect();tip.firstChild.textContent=r.title;tip.lastChild.textContent=r.artist;
     tip.style.left=(s.left+s.width/2)+'px';tip.style.top=(s.top-10)+'px';tip.classList.add('on')};
-  if(was)show();else tipT=setTimeout(show,450)});
+  tipT=setTimeout(show,1400)});
 dl.addEventListener('pointerleave',tipOff);dl.addEventListener('pointerdown',tipOff);dl.addEventListener('wheel',tipOff,{passive:true});
 function step(dir){user=true;const m=mode(),o=S[m];
   if(m==='l'){let k=Math.round(o.t/W)+dir;while(k>=0&&k<AZ.length&&!has(AZ[k]))k+=dir;if(k<0||k>=AZ.length)return;o.t=k*W}
