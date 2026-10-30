@@ -1053,6 +1053,7 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   .tbl th button:active{transform:none;opacity:.7}
 }
 .tsm{position:fixed;z-index:6;width:188px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);transform-origin:0 0;animation:tsmIn .35s cubic-bezier(.22,1,.36,1)}
+.tsm[hidden]{display:none}
 .tsm button{all:unset;box-sizing:border-box;height:42px;padding:0 12px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;font-size:15px;color:var(--t1);cursor:pointer}
 .tsm button[aria-checked=true]{background:var(--sel);color:#fff}
 .tsm button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
@@ -2627,8 +2628,8 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   }
   tsm.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tsmOff();sortBy(b.dataset.k)});
   addEventListener('pointerdown',e=>{if(!tsm.hidden&&!tsm.contains(e.target)&&!e.target.closest('.tbl th button'))tsmOff()},true);
-  addEventListener('keydown',e=>{if(e.key==='Escape'&&!tsm.hidden){tsmOff();$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.focus()}});
-  tbl.addEventListener('scroll',tsmOff,{passive:true});
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&!tsm.hidden){tsmOff();$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.focus({focusVisible:false})}});
+  tbl.addEventListener('scroll',tsmOff,{passive:true});narrow.addEventListener('change',tsmOff);addEventListener('resize',tsmOff);
   for(const s of [wall,tbl])s.addEventListener('scroll',()=>document.body.classList.toggle('under',s.scrollTop>2),{passive:true});
   tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){if(narrow.matches){tsm.hidden?tsmOn(h):tsmOff();return}sortBy(h.dataset.k);return}
     const tr=e.target.closest('tbody tr');if(tr)pull(tr.dataset.slug)});
