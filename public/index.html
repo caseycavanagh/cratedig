@@ -442,17 +442,42 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:#1e1e20}
 /* the way back is a circle */
 #close,html.phone #close{width:52px;height:52px;padding:0;justify-content:center;font-size:20px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 #close .cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
-/* a record's details: big white title, the facts as quiet pills */
+/* a record's details: big white title, then the year and label as one quiet line */
 .o-info h2{font-size:34px;letter-spacing:-.02em;line-height:1.08}
 .o-info .by{font-size:20px}
 .o-info .by .meta{text-decoration:none}.o-info .by .meta:hover{color:var(--fg)}
-.facts,html.phone .facts{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px;margin-top:22px;font:400 14px/1 'Instrument Sans',sans-serif}
-.facts div,html.phone .facts div{display:contents}
-.facts dt{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%)}
-.facts dd{display:inline-flex;align-items:center;height:36px;padding:0 15px;border-radius:99px;border:1px solid var(--line);color:#d6d6d8}
-.facts dd:has(.meta){padding:0}
-.facts .meta{height:100%;padding:0 15px;display:inline-flex;align-items:center;border-radius:99px;text-decoration:none}
-.facts .meta:hover{background:var(--soft)}
+.facts,html.phone .facts{display:flex;margin-top:10px;font:400 15px/24px 'Instrument Sans',sans-serif;gap:0;color:#d6d6d8;white-space:nowrap;min-width:0}
+.facts span{flex:none}
+.facts span+span{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.facts span+span::before{content:'·';color:var(--m);padding:0 .55em}
+.facts .meta{display:inline}
+/* below Play: a few lines about the record, then covers of others that share its artist, label or year */
+.o-info .ab,.o-info .near{margin-top:28px}
+.o-info .ohd{margin:0 0 8px;font-size:11px;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
+.o-info .about{margin:0;font-size:15px;line-height:1.5;color:#d6d6d8;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.o-info .ab a{display:inline-block;margin-top:6px;font-size:14px;color:var(--m);text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em}
+.o-info .ab a:hover{color:var(--fg)}
+.thumbs{display:flex;gap:10px}
+.nb{all:unset;cursor:pointer;flex:0 0 76px;width:76px;height:76px;border-radius:1px;overflow:hidden;box-shadow:0 6px 14px -8px #000c}
+.nb img,.nb i{display:block;width:100%;height:100%;object-fit:cover}
+.nb:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.nb:active{transform:scale(.97)}
+/* like the grid: under a pointer, a cover lifts a little */
+@media (hover:hover){
+  .nb{transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1)}
+  .nb:hover{transform:translateY(-4px);box-shadow:0 14px 28px -12px #000d}
+  .nb:hover:active{transform:translateY(-4px) scale(.97)}
+}
+@media(prefers-reduced-motion:reduce){.nb,.nb:hover{transition:none;transform:none}}
+html.phone .thumbs{gap:12px}
+html.phone .nb{flex-basis:72px;width:72px;height:72px}
+/* the track list on the back of a sleeve with no back cover, sized to the sleeve (cqw) and stepped down by --k to fit */
+.tl{position:absolute;inset:7.4cqw;--k:1;font:400 calc(var(--k)*3.05cqw)/1.5 'Instrument Sans',sans-serif;overflow:hidden}
+.tl.two{columns:2;column-gap:5.6cqw}
+.tl ol{margin:0 0 .95em;padding:0;list-style:none;break-inside:avoid} /* a side stays in one column */
+.tl li{display:grid;grid-template-columns:2.15em minmax(0,1fr)}
+.tl li i{font-style:normal;font-size:.78em;opacity:.62;padding-top:.15em}
+.tl li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* phones: the record view is laid out for a title of up to three lines. The record's size leaves room for all three,
    so a long title never pushes Play off the screen and the record stays the same size from one to the next; a shorter
    title just leaves more air above Play. The artist and the facts each keep to one line. */
@@ -461,17 +486,14 @@ html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:2
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap) - var(--info) - var(--bot) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
 @media(max-height:500px){html.phone .open{--O:calc(100svh - 72px)}}
 html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + var(--top));padding-bottom:calc(env(safe-area-inset-bottom) + var(--bot))}
-html.phone{--info:calc(var(--tl)*3.36 + 26px + var(--fm) + 36px + var(--pp) + var(--pb))}
+html.phone{--info:calc(var(--tl)*3.36 + 26px + var(--fm)*.5 + 24px + var(--pp) + var(--pb))}
 html.phone .o-page{align-items:stretch}
 /* the record and a details block of fixed height, centered together: the record and Play sit in the same place for every title */
 html.phone .o-grid{gap:var(--gap);justify-content:center}
 html.phone .o-info{flex:none;min-height:var(--info)}
 html.phone .o-info h2{font-size:var(--tl);line-height:1.12;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;text-wrap:balance}
 html.phone .o-info .by{font-size:17px;line-height:24px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html.phone .facts{flex-wrap:nowrap;margin-top:var(--fm);overflow:hidden}
-html.phone .facts dd{flex:0 1 auto;min-width:0;display:block;line-height:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html.phone .facts dd:has(.meta){flex-shrink:1}
-html.phone .facts .meta{display:block;overflow:hidden;text-overflow:ellipsis;line-height:34px}
+html.phone .facts{margin-top:calc(var(--fm)*.5)}
 html.phone .play{padding-top:var(--pp)}
 html.phone .play .btn{height:var(--pb)}
 html.phone .sw{width:var(--pb);height:var(--pb);flex:none}
@@ -1465,13 +1487,58 @@ $('#oinfo').addEventListener('pointerup',shEnd);$('#oinfo').addEventListener('po
 $('#oinfo').addEventListener('click',e=>{if(performance.now()-shBlock<400&&e.target.closest('#playM')){e.preventDefault();e.stopImmediatePropagation()}},true);
 $('#oinfo').addEventListener('focusout',e=>{if(playMenu()&&!e.relatedTarget?.closest?.('.play')&&e.relatedTarget)togglePlay(false)});
 // a detail other records share is a button that fills the crate with all of them
-const metaHTML=(r,k)=>{const v=FIELD[k](r),n=v?RECORDS.filter(x=>same(FIELD[k](x),v)).length:0;return n>1?`<button type="button" class="meta" data-f="${k}">${v}<span class="sr">, show all ${n}</span></button>`:v};
+// a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
+const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
+const metaHTML=(r,k)=>{const v=FIELD[k](r),n=v?RECORDS.filter(x=>same(FIELD[k](x),v)).length:0,s=k==='label'?labelName(v):v;return n>1?`<button type="button" class="meta" data-f="${k}">${s}<span class="sr">, show all ${n}</span></button>`:s};
+// other records in the crate that share the artist, else the label, else the year: a few covers that open them
+function nearby(r){
+  for(const[k,head]of[['artist',()=>'Also by '+r.artist],['label',()=>'Also on '+labelName(r.label)],['year',()=>'Also from '+r.year]]){
+    const v=FIELD[k](r);if(!v)continue;
+    const more=order.filter(x=>x!==r&&same(FIELD[k](x),v)).slice(0,4);
+    if(more.length)return`<div class="near"><p class="ohd">${head()}</p><div class="thumbs">${more.map(x=>`<button type="button" class="nb" data-slug="${x.slug}" aria-label="${x.title} by ${x.artist}">${x.front?`<img alt="" src="${img(x.thumb||x.front)}" decoding="async" draggable="false">`:`<i style="background:${spineBg(x)}"></i>`}</button>`).join('')}</div></div>`;
+  }
+  return'';
+}
 function info(r){
+  const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${metaHTML(r,k)}</span>`).join('');
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
-      <dl class="facts">${[['Released','year'],['Label','label'],['Format','format']].filter(([,k])=>FIELD[k](r)).map(([t,k])=>`<div><dt>${t}</dt><dd>${metaHTML(r,k)}</dd></div>`).join('')}</dl>
-    ${playHTML(r)}${ownHTML(r)}`;
+      ${facts?`<p class="facts">${facts}</p>`:''}
+    ${playHTML(r)}<div class="ab" id="oabout" hidden></div>${nearby(r)}${ownHTML(r)}`;
+  liner(r);
+}
+// liner notes come from /api/liner: a few lines from Wikipedia for every record, and for a record with no back cover
+// on file, its track list, set on the plain jacket where the back would be
+const LINER=new Map();
+const linerQ=r=>{const q=new URLSearchParams({artist:r.artist,title:r.title});
+  if(r.src==='d')q.set('d',r.id);else if(r.src==='a')q.set('a',r.id);else{const mb=r.src==='m'?r.id:r.release;if(mb)q.set('mb',mb)}
+  if(r.group)q.set('g',r.group);return q};
+function liner(r){
+  let p=LINER.get(r.slug);
+  if(!p){p=fetch('/api/liner?'+linerQ(r)).then(x=>x.ok?x.json():null).catch(()=>null);LINER.set(r.slug,p)}
+  p.then(l=>{
+    if(!l||order[cur]!==r||open.hidden)return;
+    const ab=$('#oabout');
+    if(ab&&l.about){ab.innerHTML=`<p class="ohd">About</p><p class="about">${esc(l.about.text)}</p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;ab.hidden=false}
+    if(!r.back&&l.sides?.length)requestAnimationFrame(()=>tracks(r,l.sides));
+  });
+}
+// WCAG contrast: white type on the jacket when it passes 4.5:1, else near black
+const lumOf=hex=>{const m=/^#([0-9a-f]{6})$/i.exec(hex||'');if(!m)return 0;const n=parseInt(m[1],16);
+  return[n>>16,n>>8&255,n&255].map(c=>{c/=255;return c<=.03928?c/12.92:((c+.055)/1.055)**2.4}).reduce((s,c,i)=>s+c*[.2126,.7152,.0722][i],0)};
+const tlInk=hex=>{const L=lumOf(hex);return(1.05)/(L+.05)>=4.5?'#fff':'#111'};
+// the track list on the back of the sleeve: small numbers in the margin, restarting each side, a little space between sides.
+// The type steps down until the whole list fits the square, so a long record never scrolls or gets cut
+function tracks(r,sides){
+  const bk=$('#sleeve .bk');if(!bk||order[cur]!==r)return;
+  const n=sides.reduce((a,s)=>a+s.tracks.length,0);
+  const rows=sides.map(s=>`<ol>${s.tracks.map((t,j)=>`<li><i>${s.side?s.side+(j+1):j+1}</i><span>${esc(t)}</span></li>`).join('')}</ol>`).join('');
+  bk.querySelector('.tl')?.remove();
+  bk.insertAdjacentHTML('beforeend',`<div class="tl${n>16?' two':''}" style="color:${tlInk(spineBg(r))}" role="group" aria-label="Songs">${rows}</div>`);
+  const tl=bk.lastElementChild;let k=1;
+  while((tl.scrollHeight>tl.clientHeight+1||tl.scrollWidth>tl.clientWidth+1)&&k>.5){k-=.04;tl.style.setProperty('--k',k.toFixed(2))}
 }
 $('#oinfo').addEventListener('click',e=>{
+  const nb=e.target.closest('.nb');if(nb){const i=order.findIndex(x=>x.slug===nb.dataset.slug);if(i>=0&&!busy){open.scrollTo({top:0,behavior:reduce?'auto':'smooth'});swap(i-cur)}return}
   const b=e.target.closest('.meta');if(!b||busy)return;
   const f={k:b.dataset.f,v:FIELD[b.dataset.f](order[cur])};
   if(!(filt&&filt.k===f.k&&same(filt.v,f.v)))arrange(f); // the crate changes behind the record, then the record goes home into it
