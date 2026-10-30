@@ -2964,42 +2964,42 @@ const arrange1=arrange;arrange=function(...a){const n=arrange1.apply(this,a);if(
 build();at=cur;
 })();
 
-// First-time hints: the first time you meet them, the crate, the dial and a pulled-out record each do their own gesture once, by
-// themselves, and settle back. The front record tips toward you, the dial rises to its records and drops back, the sleeve turns to
-// its back and returns. No words, one hint a visit, each once ever, and only while the mouse is still (open the page with ?hints to
-// see them again). A touch, a key or a scroll calls a hint off; moving the mouse puts one back and waits for it to be still again.
+// First-time hints, on your first visit only: the front record tips toward you and settles back, then the dial rises to its records
+// and drops back, and the first record you pull out turns to its back and returns. No words, and each waits for the mouse to be
+// still. After that first visit, never again (open the page with ?hints to be a first-time visitor once more). A touch, a key or a
+// scroll calls off what's waiting; moving the mouse puts back a hint mid-play and waits for it to be still again.
 (()=>{
-const KS=['crate','dial','turn'],KEY=k=>'records-hint-'+k,STILL=1500;
-// ?hints clears them once, and leaves the address, so a reload doesn't clear them again
-if(/[?&]hints(&|=|$)/.test(location.search)){try{KS.forEach(k=>localStorage.removeItem(KEY(k)))}catch{}
+const KEY='records-hinted',STILL=1500;
+// ?hints makes this a first visit again, once, and leaves the address, so a reload doesn't
+if(/[?&]hints(&|=|$)/.test(location.search)){try{localStorage.removeItem(KEY)}catch{}
   const u=new URL(location.href);u.searchParams.delete('hints');history.replaceState(history.state,'',u.pathname+u.search+u.hash)}
-const seen=k=>{try{return!!localStorage.getItem(KEY(k))}catch{return true}}; // no storage, no hints: none beats one every visit
-const saw=k=>{try{localStorage.setItem(KEY(k),'1')}catch{}};
-let wT=0,bT=0,next=null,undo=null,played=false,moved=-1e9;
+let first=false;try{first=!localStorage.getItem(KEY);localStorage.setItem(KEY,'1')}catch{} // no storage, no hints: none beats some every visit
+if(!first)return;
+let wT=0,bT=0,next=null,undo=null,moved=-1e9;const did=new Set();
 // a hint waits its beat, then for the mouse to have been still a while
 const wait=(f,ms)=>{next=f;clearTimeout(wT);wT=setTimeout(()=>{const s=performance.now()-moved;if(s<STILL){wait(f,STILL-s);return}next=null;f()},ms)};
 const stop=e=>{clearTimeout(wT);clearTimeout(bT);next=null;if(undo){const u=undo;undo=null;u(e)}};
-// any touch, key or scroll ends this visit's hint, putting back what's mid-play before the gesture itself gets the event
+// any touch, key or scroll calls off what's waiting, putting back what's mid-play before the gesture itself gets the event
 addEventListener('pointerdown',stop,{capture:true});addEventListener('keydown',stop,{capture:true});addEventListener('wheel',stop,{capture:true,passive:true});
 addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||!e.movementX&&!e.movementY)return;moved=performance.now();
   if(undo){const u=undo;undo=null;clearTimeout(bT);u(e)}else if(next)wait(next,STILL)},{passive:true});
 // only on a still page: not mid-search, in a dialog, editing, or another view
-const calm=()=>!played&&!reduce&&!document.hidden&&!editing&&!document.querySelector('dialog[open]')&&!document.activeElement?.closest?.('input,textarea')&&!window.dialBusy?.();
+const calm=()=>!reduce&&!document.hidden&&!editing&&!document.querySelector('dialog[open]')&&!document.activeElement?.closest?.('input,textarea')&&!window.dialBusy?.();
 const inCrate=()=>calm()&&open.hidden&&document.body.classList.contains('ready')&&!document.body.classList.contains('walling');
-const play=(k,go,back,hold,keep)=>{played=true;saw(k);go();
-  const done=()=>{undo=null;back()};undo=e=>{if(!keep?.(e))back()};bT=setTimeout(done,hold)};
+const play=(k,go,back,hold,keep,then)=>{did.add(k);go();
+  undo=e=>{if(!keep?.(e))back()};bT=setTimeout(()=>{undo=null;back();then?.()},hold)};
 function tip(){
-  if(seen('crate')||!inCrate()||raf||cur>=order.length-1)return false;
-  const i=cur;play('crate',()=>{aim=i+.42;kick()},()=>{aim=i;kick()},650);return true;
+  if(did.has('crate')||!inCrate()||raf||cur>=order.length-1)return false;
+  const i=cur;play('crate',()=>{aim=i+.42;kick()},()=>{aim=i;kick()},650,null,()=>wait(rise,2200));return true;
 }
 function rise(){
-  if(seen('dial')||!inCrate()||window.dialBusy?.())return false;
+  if(did.has('dial')||!inCrate()||window.dialBusy?.())return false;
   play('dial',()=>window.dialHint(true),()=>window.dialHint(false),1500,e=>e?.target?.closest?.('#kd')); // a hand on the dial keeps it where the hint left it
   return true;
 }
 // called from openRecord: once the record has settled, the sleeve turns to its back and returns
 window.hintTurn=()=>{
-  if(played||seen('turn'))return;
+  if(did.has('turn'))return;
   wait(()=>{
     if(open.hidden||busy||!calm())return;
     const b=base;play('turn',()=>{ry=b+180;rx=TILT;setS()},()=>{ry=b;rx=TILT;setS()},1700,e=>e?.target?.closest?.('#lift')); // a hand on the sleeve takes it from wherever it's turned to
