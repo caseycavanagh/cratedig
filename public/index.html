@@ -582,7 +582,7 @@ body.walling .find .chip{display:none}
 .wall .pills small{font-size:13px;opacity:.55}
 .wall .in{max-width:1400px;margin:0 auto}
 .tiles{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px}
-.tiles{position:relative;margin-left:34px}
+.tiles{position:relative;margin:0 34px} /* the group labels sit in the left margin; the same space on the right keeps the covers centered */
 .gms p{position:absolute;right:calc(100% + 8px);margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:500 14px/1 var(--sans);color:var(--t1);pointer-events:none}
 .gms .yr{font:400 11px/1 'Geist Mono',ui-monospace,monospace;letter-spacing:-.03em;color:var(--t2)}
 .gms i{width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
@@ -614,6 +614,7 @@ body.walling .find .chip{display:none}
 .cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--line);color:var(--t1);font-size:14px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
 @media (min-width:700px){.wall{padding-left:28px;padding-right:28px}.wall .pills{margin:0 -28px 18px;padding:2px 28px 4px}.tiles{gap:8px}}
 @media(prefers-reduced-motion:reduce){.vw,.tile,.tiles .tile,.wall .pills button,.tile img,.rc img.art,.pic img{transition:none}.tiles .tile:hover{transform:none}}
+@media (max-width:699px){.wall,.tbl{scrollbar-width:none}.wall::-webkit-scrollbar,.tbl::-webkit-scrollbar{display:none;width:0;height:0}} /* on a phone the grid and the table scroll without a bar */
 /* the dial, in place of the A–Z rail: letters; slide up on it for every record, down for letters again */
 .az{display:none}
 .kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
