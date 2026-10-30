@@ -466,9 +466,13 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:#1e1e20}
 .o-info .by{font-size:20px}
 .o-info .by .meta{text-decoration:none}.o-info .by .meta:hover{color:var(--fg)}
 .facts,html.phone .facts{display:flex;margin-top:10px;font:400 15px/24px 'Instrument Sans',sans-serif;gap:0;color:#d6d6d8;white-space:nowrap;min-width:0}
+/* year, label: one gray line, a comma between; a long label trails off */
+.facts,html.phone .facts{color:var(--m)}
 .facts span{flex:none}
 .facts span+span{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.facts span+span::before{content:'·';color:var(--m);padding:0 .55em}
+.facts span+span::before{content:',\00a0'}
+.facts .meta{text-decoration:none;transition:color .15s}
+.facts .meta:hover{color:var(--fg)}
 .facts .meta{display:inline}
 /* below Play: a few lines about the record, then covers of others that share its artist, label or year */
 .o-info .ab,.o-info .near{margin-top:28px}
@@ -1640,7 +1644,7 @@ function nearby(r){
   return'';
 }
 function info(r){
-  // the year and label fill the crate with the rest from that year or label, when there are any
+  // year, then label, quiet and gray; each fills the crate with the rest from that year or label, when there are any
   const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${metaHTML(r,k)}</span>`).join('');
   $('#oinfo').innerHTML=`<h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
       ${facts?`<p class="facts">${facts}</p>`:''}
