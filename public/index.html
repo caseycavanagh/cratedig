@@ -560,7 +560,8 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd::before{content:'';position:absolute;left:calc(50% - 50vw);width:100vw;top:-24px;bottom:calc(-82px - env(safe-area-inset-bottom));background:linear-gradient(#12121200,#121212e0 34%,#121212f2);pointer-events:none}
 .kd-d{position:absolute;left:0;right:0;bottom:0;height:var(--kh,58px);cursor:grab;touch-action:none;outline:0;pointer-events:auto;user-select:none;-webkit-user-select:none}
 .kd-d:active{cursor:grabbing}
-.kd-d:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:14px}
+.kd-d:focus-visible{outline:none}
+.kd-d.kf:focus-visible{outline:1px solid #ffffff3d;outline-offset:-1px;border-radius:14px} /* a quiet ring, only when Tab brought you here */
 .kd-c{position:absolute;inset:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
 .kd-c>*{position:absolute;left:50%;bottom:0;will-change:transform}
 .kd-l{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font:500 18px/24px 'Instrument Sans',sans-serif;color:#6c6c71;transform-origin:50% 70%}
@@ -909,6 +910,31 @@ html.phone .sx{height:44px}
 .qnone:has(ul) .qh{padding:6px 8px 8px}
 /* phones show the laptop's crate, set lower so the pile behind clears the bar; the dial's fade takes the records that fall forward */
 html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
+/* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
+.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
+.kd::before,.kd::before{top:-80px;background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%)}
+html.phone body.searching .find::before{display:none}
+.find::before{transition:opacity .3s}
+body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
+/* the grid and the table run up under the bar instead of stopping at a hard line */
+.wall,.tbl{top:0;padding-top:calc(env(safe-area-inset-top) + 72px)}
+.tbl thead th,.tbl thead{position:static}
+@media (max-width:700px){
+  .tbl thead tr{padding:4px 18px 10px;background:none}
+  .tbl thead th[aria-sort=none]{display:none}
+  .tbl th button,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{height:auto;padding:6px 0;border:0;border-radius:0;background:none;font-size:14px;color:#fff;gap:6px}
+  .tbl th button::before{content:'Sorted by';color:#8e8e93}
+  .tbl th button::after{content:'';width:7px;height:7px;margin:-4px 0 0 2px;border:solid #8e8e93;border-width:0 1.5px 1.5px 0;rotate:45deg}
+  .tbl th button[aria-expanded=true]::after{rotate:225deg;margin-top:4px}
+  .tbl th button:active{transform:none;opacity:.7}
+}
+.tsm{position:fixed;z-index:6;width:188px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 14px 40px #0008;transform-origin:0 0;animation:tsmIn .35s cubic-bezier(.22,1,.36,1)}
+.tsm button{all:unset;box-sizing:border-box;height:42px;padding:0 12px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;font-size:15px;color:#c7c7cc;cursor:pointer}
+.tsm button[aria-checked=true]{background:#ffffff1f;color:#fff}
+.tsm button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.tsm i{font-style:normal;color:#fff}
+@keyframes tsmIn{from{opacity:0;scale:.96}}
+@media(prefers-reduced-motion:reduce){.tsm{animation:none}}
 </style>
 </head>
 <body>
@@ -2196,7 +2222,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   }
   function setView(v,focus,stay){
     if(v==='canvas')v='wall';
-    view=v;wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
+    view=v;document.body.classList.toggle('under',(v==='wall'?wall:v==='table'?tbl:null)?.scrollTop>2);wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
     vw.forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
     try{localStorage.setItem('records-view',v)}catch{}
     if(v==='wall'){draw(false);if(focus)wall.focus({preventScroll:true})}
@@ -2262,7 +2288,20 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<img alt="" decoding="async" data-src="${img(r.front)}">`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
     for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
-  tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){const k=h.dataset.k;ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable();return}
+  // on a phone the sort is one quiet line, "Sorted by Artist ↑"; it opens a small menu like the view menu
+  const narrow=matchMedia('(max-width:700px)'),tsm=document.createElement('div');tsm.className='tsm';tsm.setAttribute('role','menu');tsm.hidden=true;document.body.append(tsm);
+  const sortBy=k=>{ts=ts.k===k?{k,d:-ts.d}:{k,d:1};try{localStorage.setItem('records-table-sort',JSON.stringify(ts))}catch{}drawTable()};
+  const tsmOff=()=>{if(tsm.hidden)return;tsm.hidden=true;$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.setAttribute('aria-expanded','false')};
+  function tsmOn(h){
+    tsm.innerHTML=COLS.slice(0,3).map(([k,l])=>`<button type="button" role="menuitemradio" aria-checked="${ts.k===k}" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`).join('');
+    const r=h.getBoundingClientRect();tsm.style.left=r.left+'px';tsm.style.top=r.bottom+8+'px';tsm.hidden=false;h.setAttribute('aria-expanded','true');$('button[aria-checked=true]',tsm).focus({preventScroll:true});
+  }
+  tsm.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tsmOff();sortBy(b.dataset.k)});
+  addEventListener('pointerdown',e=>{if(!tsm.hidden&&!tsm.contains(e.target)&&!e.target.closest('.tbl th button'))tsmOff()},true);
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&!tsm.hidden){tsmOff();$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.focus()}});
+  tbl.addEventListener('scroll',tsmOff,{passive:true});
+  for(const s of [wall,tbl])s.addEventListener('scroll',()=>document.body.classList.toggle('under',s.scrollTop>2),{passive:true});
+  tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){if(narrow.matches){tsm.hidden?tsmOn(h):tsmOff();return}sortBy(h.dataset.k);return}
     const tr=e.target.closest('tbody tr');if(tr)pull(tr.dataset.slug)});
   tbl.addEventListener('keydown',e=>{const tr=e.target.closest?.('tbody tr');if(!tr)return;
     if(e.key==='Enter'||e.key===' '){e.preventDefault();pull(tr.dataset.slug)}
@@ -2495,6 +2534,9 @@ dl.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();acc+=Math
 // then follows the mouse from mark to mark until it leaves the dial
 const tip=document.createElement('div');tip.className='kd-tip';tip.setAttribute('aria-hidden','true');tip.append(document.createElement('b'),document.createElement('span'));document.body.append(tip);
 let tipT=0,tipI=-1;
+// the dial shows it has focus only when Tab brought you there, never after a click, a drag or the arrow keys
+let viaTab=false;addEventListener('keydown',e=>{if(e.key==='Tab')viaTab=true},true);addEventListener('pointerdown',()=>{viaTab=false},true);
+dl.addEventListener('focus',()=>dl.classList.toggle('kf',viaTab));dl.addEventListener('blur',()=>dl.classList.remove('kf'));
 let tipG=0;const tipOff=()=>{clearTimeout(tipT);clearTimeout(tipG);tipG=0;TH[tipI]?.classList.remove('kd-hv');tipI=-1;tip.classList.remove('on','glide')};
 dl.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||drag||mode()!=='r'||!open.hidden){tipOff();return}
   let b=-1,bd=7;TH.forEach((s,i)=>{if(s.style.visibility==='hidden')return;const r=s.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-e.clientX);if(d<bd){bd=d;b=i}});
