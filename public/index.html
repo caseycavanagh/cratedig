@@ -859,7 +859,7 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .fb.lb,.find:has(.q:focus-within) .fb.lb,html.phone .fb.lb{order:2;width:44px;height:44px;margin:0;padding:0;opacity:1;border-width:1px;color:#fff;overflow:visible}
 .fb.lb[aria-expanded=true]{background:#3a3a3d}
 .fb.lb:active{transform:scale(.96)}
-.find .vw,html.phone .find .vw{position:absolute;top:calc(100% + 8px);left:auto;right:max(14px,env(safe-area-inset-right));translate:none;margin:0;order:9;flex:none;width:188px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 14px 40px #0008;transform-origin:100% 0}
+.find .vw,html.phone .find .vw{position:absolute;top:calc(100% + 8px);left:auto;right:max(14px,env(safe-area-inset-right));translate:none;margin:0;order:9;flex:none;width:188px;padding:6px;display:grid;grid-template-columns:1fr;justify-content:stretch;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 14px 40px #0008;transform-origin:100% 0}
 .find .vw:not([hidden]){animation:menuIn .35s cubic-bezier(.22,1,.36,1)}
 @keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.98)}}
 .find .vw button,html.phone .find .vw button{width:100%;box-sizing:border-box;height:42px;padding:0 12px;border:0;border-radius:12px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:400;color:#d6d6d8}
