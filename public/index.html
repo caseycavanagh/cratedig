@@ -852,6 +852,34 @@ html.phone .dv{display:none}
 .own-f .row{display:flex;justify-content:flex-end;gap:8px}
 .own-f #ownFs{background:#fff;color:#111;border-color:#fff}
 @media(max-width:600px){.own-f fieldset{grid-template-columns:1fr}}
+/* the top bar: the mark top left; search and one view button top right. Search grows in place to the left of the view
+   button, which stays put; the view button drops a small menu of the three views */
+.find,html.phone .find{justify-content:flex-start;align-items:center;gap:8px;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left))}
+.logo,.find:has(.q:focus-within) .logo,.find:has(.q.has) .logo{order:0;margin:0 auto 0 0;opacity:1;pointer-events:auto}
+.find .q,html.phone .find .q{order:1;height:44px;min-width:44px;max-width:44px;flex:0 1 auto}
+.find .q:focus-within,.find .q.has,html.phone .find .q:focus-within,html.phone .find .q.has{max-width:300px;width:300px}
+html.phone .find .q:focus-within,html.phone .find .q.has{max-width:none;width:auto;flex:1 1 0}
+.find .q input,.find .q:focus-within input,.find .q.has input,html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .find .q.has input{padding:0 16px 0 40px;font-size:15px}
+html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .find .q.has input{font-size:16px}
+.find .q.has input,html.phone .find .q.has input{padding-right:40px}
+.find .qi,html.phone .find .qi{left:14px}
+.find .vw[hidden],html.phone .find .vw[hidden]{display:none}
+.find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{background:var(--glass);border-color:var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
+.fb.lb,.find:has(.q:focus-within) .fb.lb,html.phone .fb.lb{order:2;width:44px;height:44px;margin:0;padding:0;opacity:1;border-width:1px;color:#fff;overflow:visible}
+.fb.lb[aria-expanded=true]{background:#3a3a3d}
+.fb.lb:active{transform:scale(.96)}
+.find .vw,html.phone .find .vw{position:absolute;top:calc(100% + 8px);right:max(14px,env(safe-area-inset-right));order:9;flex:none;width:188px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 14px 40px #0008;transform-origin:100% 0}
+.find .vw:not([hidden]){animation:menuIn .35s cubic-bezier(.22,1,.36,1)}
+@keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+.find .vw button,html.phone .find .vw button{width:auto;height:42px;padding:0 12px;border:0;border-radius:12px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:400;color:#d6d6d8}
+.find .vw button:hover{background:#ffffff0d;color:#fff}
+.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:none;color:#fff;border:0}
+.find .vw button[aria-pressed=true]::after{content:'';margin-left:auto;width:6px;height:6px;border-radius:50%;background:#fff}
+.find .vw button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+/* a phone, searching: the list takes over, so Cancel stands in for the view button */
+html.phone body.searching .fb.lb{display:none}
+html.phone .sx{height:44px}
+@media(prefers-reduced-motion:reduce){.find .vw:not([hidden]){animation:none}}
 </style>
 </head>
 <body>
@@ -2460,7 +2488,7 @@ build();at=cur;
   const fb=document.createElement('button');fb.type='button';fb.className='fb';fb.setAttribute('aria-expanded','false');fb.setAttribute('aria-controls','pills');
   fb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sr">Filters</span>';
   qf.after(fb);
-  // layout works like filters: one button showing the current view; it opens the three as a row above the bar
+  // layout: one button showing the current view; it drops a small menu of the three
   const lb=document.createElement('button');lb.type='button';lb.className='fb lb';lb.setAttribute('aria-expanded','false');lb.setAttribute('aria-controls','views');
   fb.after(lb);
   const lmark=()=>{const b=$('[aria-pressed=true]',vwEl)||$('button',vwEl);lb.innerHTML=ICON[b.dataset.v];lb.setAttribute('aria-label',`Layout: ${b.textContent}`)};
