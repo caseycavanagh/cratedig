@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<title>Crate Dig: the icon everywhere</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+/* Sticker sheet for the record mark (vinyl/records-logo.svg) as the site's icon: browser tabs, the home screen,
+   link previews. Every icon is drawn live from the same paths scripts/icons.mjs uses. Picks stay in this browser. */
+@font-face{font-family:'Instrument Sans';src:url('/fonts/instrument-sans.woff2') format('woff2');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Paper Mono';src:url('/fonts/paper-mono.woff2') format('woff2');font-weight:100 800;font-display:swap}
+:root{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--ease:cubic-bezier(.22,1,.36,1)}
+*,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
+html{background:var(--bg);color-scheme:dark}
+body{font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.wrap{max-width:1400px;margin:0 auto;padding:40px 16px 80px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+h1{font-size:28px;font-weight:500;letter-spacing:-.01em}
+h2{font-size:18px;font-weight:500;margin:40px 0 4px}
+.sub{color:var(--m);margin-bottom:16px;max-width:640px}
+.top p{color:var(--m);margin-top:4px;max-width:600px}
+.tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.picks{color:var(--m);font-size:14px;margin-right:6px}
+.tool{height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--line);font-size:14px;transition:transform .3s var(--ease)}
+.tool:hover{background:var(--soft)}
+.tool:active{transform:scale(.99)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:16px}
+.st{position:relative;border-radius:20px;border:1px solid var(--line);overflow:hidden;background:#161616}
+.stage{position:relative;padding:64px 16px 20px;display:grid;gap:14px;background:var(--bg);border-bottom:1px solid var(--line);overflow:hidden}
+.meta{padding:14px 16px 16px;display:grid;gap:4px}
+.id{font-weight:500}.id b{font-weight:500;color:var(--m);margin-right:8px}
+.use{color:var(--m);font-size:14px}
+.star{position:absolute;top:10px;right:10px;z-index:2;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#d6d6d8;background:rgba(30,30,32,.8);font-size:17px;transition:transform .3s var(--ease)}
+.star:hover{color:#fff}
+.star:active{transform:scale(.96)}
+.st.picked{box-shadow:inset 0 0 0 2px #fff}.st.picked .star{color:#111;background:#fff}
+.lbl{font-family:'Paper Mono',ui-monospace,monospace;font-size:11px;color:var(--m);letter-spacing:.02em}
+svg.ic{display:block;flex:none}
+
+/* browser chrome: a tab strip in light and dark, the same in every card */
+.strip{display:flex;align-items:flex-end;gap:2px;height:40px;padding:0 8px;border-radius:10px;overflow:hidden}
+.strip.light{background:#dee1e6;color:#3c4043}.strip.dark{background:#202124;color:#e8eaed}
+.tab{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px 8px 0 0;font-size:12px;min-width:0;max-width:200px;flex:1 1 0}
+.tab span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.light .tab.on{background:#fff}.dark .tab.on{background:#35363a}
+.tab.pin{flex:none;padding:0 10px}
+/* actual pixels, blown up */
+.px{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.px figure{display:grid;gap:6px;justify-items:start}
+.px canvas{image-rendering:pixelated;image-rendering:crisp-edges;border-radius:4px}
+/* a search result row */
+.serp{display:flex;align-items:center;gap:12px;background:#fff;color:#202124;border-radius:10px;padding:12px 14px;font-family:Arial,system-ui,sans-serif}
+.serp .fav{width:28px;height:28px;border-radius:50%;background:#f1f3f4;display:grid;place-items:center;flex:none;border:1px solid #dadce0}
+.serp b{display:block;font-size:14px;font-weight:400}.serp small{color:#4d5156;font-size:12px}
+
+/* home screen: a phone and a desktop Favorites grid. Other apps are plain gray, never real logos */
+.homes{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.phone{width:204px;border-radius:30px;padding:30px 14px 22px;background:linear-gradient(#3b3d44,#24252a);display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px;flex:none}
+.app{display:grid;justify-items:center;gap:4px;font-size:9px;color:#fff;font-family:system-ui,sans-serif;min-width:0}
+.app i{display:block;width:40px;height:40px;border-radius:9px;background:#5a5c63;overflow:hidden}
+.app i svg,.fv i svg{width:100%;height:100%}
+.app span{max-width:48px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.favs{flex:1;min-width:150px;background:#2b2b2e;border-radius:14px;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,64px);gap:14px;justify-content:start}
+.fv{display:grid;justify-items:center;gap:6px;font-size:11px;color:#d6d6d8;font-family:system-ui,sans-serif}
+.fv i{display:block;width:64px;height:64px;border-radius:14px;background:#4a4a4f;overflow:hidden}
+.big{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.big i{display:block;width:120px;height:120px;border-radius:27px;overflow:hidden}
+.big i svg{width:100%;height:100%}
+
+/* link previews: iMessage on a phone, a Slack-style unfurl on desktop */
+.card{width:1200px;height:630px;position:relative;overflow:hidden;font-family:'Instrument Sans',sans-serif;background:#121212;color:#ecebe8;display:flex;flex-direction:column;justify-content:space-between;padding:96px;transform-origin:0 0}
+.card .t{font-size:100px;font-weight:500;letter-spacing:-.03em;line-height:1.05}
+.card .s{font-size:50px;color:#8f8f93;margin-top:18px;letter-spacing:-.01em}
+.card .f{display:flex;justify-content:space-between;margin-top:72px;font-family:'Paper Mono',monospace;font-size:30px;color:#8f8f93}
+.card .fan{position:absolute;right:-40px;top:70px;width:560px;height:430px}
+.card .fan img{position:absolute;width:330px;height:330px;object-fit:cover;border-radius:6px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.shot{position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.shot .card{z-index:-1}.shot{isolation:isolate}
+/* E: the covers card. Absolute boxes and plain transforms only, so each can be drawn the same way by next/og */
+.cv{position:absolute;background-size:cover;background-position:center;border-radius:4px}
+.e .t{font-size:110px}
+.e .txt{position:absolute;left:96px;bottom:96px;display:flex;flex-direction:column}
+.e .lg{position:absolute;left:96px;top:96px}
+.e .f2{font-family:'Paper Mono',monospace;font-size:28px;color:#8f8f93;margin-top:40px}
+.previews{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.imsg{width:240px;flex:none;border-radius:18px;overflow:hidden;background:#26252a}
+.imsg .shot{width:240px;height:126px}
+.imsg div.cap{padding:8px 12px 10px;font-family:system-ui,sans-serif}
+.imsg b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.imsg small{font-size:12px;color:#98989d}
+.slack{flex:1;min-width:220px;border-left:4px solid #3a3a3d;padding:2px 0 2px 12px;font-family:system-ui,sans-serif;font-size:13px;color:#d1d2d3;display:grid;gap:3px}
+.slack .site{display:flex;align-items:center;gap:6px;font-weight:700;color:#fff}
+.slack a{color:#1d9bd1;font-weight:700;text-decoration:none}
+.slack .shot{width:100%;max-width:360px;aspect-ratio:1200/630;border-radius:8px;margin-top:6px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <div><h1>The icon everywhere</h1><p>The record mark as Crate Dig's icon, set up the way caseycavanagh.com does it: tabs, bookmarks, search, the home screen and link previews. Star the ones you like, then copy your picks.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="tool" id="copy" type="button">Copy picks</button><button class="tool" id="clear" type="button">Clear</button></div>
+  </div>
+
+  <h2>A. How much of the record at 16 pixels</h2>
+  <p class="sub">Tabs, bookmarks and search results draw the icon at 16 or 32 pixels. Seven pieces with even gaps turn to gray mush at 16. The blown-up squares are the real pixels.</p>
+  <div class="grid" id="A"></div>
+
+  <h2>B. The tile in a tab</h2>
+  <p class="sub">caseycavanagh.com puts its mark on a rounded tile that flips with the browser: dark in a light browser, light in a dark one, so it always stands out. Shown with the pick from A as two rings.</p>
+  <div class="grid" id="B"></div>
+
+  <h2>C. Home screen</h2>
+  <p class="sub">What “Add to Home Screen” and Safari Favorites use: a 180 pixel square. The phone rounds the corners itself. Always dark, like the crate.</p>
+  <div class="grid" id="C"></div>
+
+  <h2>D. Link previews</h2>
+  <p class="sub">The 1200 × 630 card a shared link shows in Messages, Slack, Bluesky and the rest. Same type as caseycavanagh.com's card, dark like the crate.</p>
+  <div class="grid" id="D"></div>
+
+  <h2>E. The covers card, more love</h2>
+  <p class="sub">Six takes on D3. Each is shown as the crate's preview in Messages, the make page's (a longer title), and a Slack unfurl. Every one can be drawn from any crate's covers, so a visitor's crate could get its own.</p>
+  <div class="grid" id="E"></div>
+</main>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+// the record mark, from vinyl/records-logo.svg: outer ring, middle ring, inner ring (two halves each), label. 350 box, centered on 175
+const P=['M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z',
+'M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z',
+'M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z',
+'M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z',
+'M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z',
+'M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z',
+'M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z'];
+// which pieces, and the radius they reach, so a smaller set can be drawn bigger
+const RINGS={full:[[0,1,2,3,4,5,6],175],two:[[2,3,4,5,6],125],one:[[4,5,6],75]};
+const DARK={bg:'#121212',fg:'#ecebe8'},LIGHT={bg:'#ecebe8',fg:'#121212'};
+// one icon as SVG: rings, how much of the tile the record spans (fill), tile colors or none, corner radius (iOS rounds a square itself)
+function icon({rings='two',fill=.72,c=DARK,tile=true,rx=40,cx=90,cy=90}={}){
+  const [ids,R]=RINGS[rings],k=fill*90/R;
+  return `<svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">${tile?`<rect width="180" height="180" rx="${rx}" fill="${c.bg}"/>`:''}<g fill="${tile?c.fg:'currentColor'}" transform="translate(${cx} ${cy}) scale(${+k.toFixed(4)}) translate(-175 -175)">${ids.map(i=>`<path d="${P[i]}"${i==6?' fill-rule="evenodd"':''}/>`).join('')}</g></svg>`;
+}
+const sized=(svg,n)=>svg.replace('<svg class="ic"',`<svg class="ic" width="${n}" height="${n}"`);
+// draw an icon at its real pixel size into a canvas, then show it blown up
+function pixels(svg,n,zoom,c){
+  const cv=document.createElement('canvas');cv.width=n;cv.height=n;cv.style.width=cv.style.height=n*zoom+'px';
+  const im=new Image();im.onload=()=>{const x=cv.getContext('2d');x.fillStyle=c;x.fillRect(0,0,n,n);x.drawImage(im,0,0,n,n)};
+  im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sized(svg.replace('currentColor','#3c4043'),n));return cv;
+}
+const strip=(svg,mode,title='Crate Dig')=>`<div class="strip ${mode}"><div class="tab"><span class="ph" style="width:16px;height:16px;border-radius:50%;background:${mode=='light'?'#9aa0a6':'#5f6368'};flex:none"></span><span>Inbox</span></div><div class="tab on">${sized(svg,16)}<span>${title}</span></div><div class="tab pin">${sized(svg,16)}</div></div>`;
+const card=(id,n,use,body)=>`<article class="st" data-id="${id}"><div class="stage">${body}</div><button class="star" type="button" aria-pressed="false" aria-label="Pick ${id} ${n}">★</button><div class="meta"><span class="id"><b>${id}</b>${n}</span><p class="use">${use}</p></div></article>`;
+
+// A: how many rings at small sizes. Tile flips with the browser, as on caseycavanagh.com
+[['A1','The whole record','All three rings and the label, exactly the mark in the top bar. Faithful, but at 16 it reads as a gray dot.','full',.78],
+ ['A2','Two rings','Drop the outer ring and draw the rest bigger. Still a record with grooves at 16, and the split down the middle survives.','two',.78],
+ ['A3','One ring and the label','Just the inner ring and the label, drawn big. Clearest at 16, closer to a target than a record.','one',.74]].forEach(([id,n,use,rings,fill])=>{
+  const L=icon({rings,fill,c:DARK}),D=icon({rings,fill,c:LIGHT});
+  $('#A').insertAdjacentHTML('beforeend',card(id,n,use,`${strip(L,'light')}${strip(D,'dark')}<div class="serp"><span class="fav">${sized(L,18)}</span><span><b>Crate Dig</b><small>Every record Casey owns</small></span></div><div class="px" data-r="${rings}" data-f="${fill}"></div>`));
+  const px=$(`[data-id=${id}] .px`);
+  [[L,16,'#fff','16 in a light tab'],[D,16,'#35363a','16 in a dark tab'],[L,32,'#fff','32, a retina tab']].forEach(([s,sz,bg,t])=>{const f=document.createElement('figure');f.append(pixels(s,sz,sz==16?4:2,bg));f.insertAdjacentHTML('beforeend',`<figcaption class="lbl">${t}</figcaption>`);px.append(f)});
+});
+
+// B: the tile
+[['B1','Flips with the browser','What caseycavanagh.com does: a dark tile in a light browser, a light tile in a dark one. Always stands out from the tab.',[DARK,LIGHT],true],
+ ['B2','Always dark','The crate is always dark, so the tile is too. Quiet in a dark browser, where it nearly disappears into the tab strip.',[DARK,DARK],true],
+ ['B3','No tile','Just the record, dark in a light browser and light in a dark one. Bigger in the same 16 pixels, no frame around it.',[DARK,LIGHT],false]].forEach(([id,n,use,[l,d],tile])=>{
+  const ic=c=>tile?icon({rings:'two',fill:.78,c}):icon({rings:'two',fill:1,c,tile:false});
+  const sl=strip(ic(l),'light').replace(/currentColor/g,'#121212'),sd=strip(ic(d),'dark').replace(/currentColor/g,'#ecebe8');
+  $('#B').insertAdjacentHTML('beforeend',card(id,n,use,`${sl}${sd}`));
+});
+
+// C: home screen
+const grayApps=k=>Array.from({length:k},()=>`<div class="app"><i></i><span>App</span></div>`).join('');
+[['C1','Roomy, like caseycavanagh.com','The record spans about two thirds of the square, the same breathing room as the C on caseycavanagh.com.',{rings:'full',fill:.66}],
+ ['C2','Big record','The record fills most of the square. Reads from across the room, the grooves get more room.',{rings:'full',fill:.86}],
+ ['C3','Off the edge','The record is bigger than the square and runs off the right side, like one sliding out of its sleeve.',{rings:'full',fill:1.5,cx:130}]].forEach(([id,n,use,o])=>{
+  const s=icon({...o,c:DARK,rx:0});
+  const app=`<div class="app"><i>${s}</i><span>Crate Dig</span></div>`;
+  $('#C').insertAdjacentHTML('beforeend',card(id,n,use,`<div class="homes"><div class="phone">${grayApps(5)}${app}${grayApps(6)}</div><div class="favs"><div class="fv"><i></i>Mail</div><div class="fv"><i>${s}</i>Crate Dig</div><div class="fv"><i></i>News</div></div></div><div class="big"><i>${s}</i><span class="lbl">120, the size it's seen up close</span></div>`));
+});
+
+// D: link previews. The card is real HTML at 1200 × 630, scaled down into each preview
+const MARK=icon({rings:'full',fill:1,tile:false}).replace('currentColor','#ecebe8');
+const COVERS=['jason-isbell-southeastern','james-taylor-jt','gram-parsons-grievous-angel','hiss-golden-messenger-lateness-of-dancers','gregory-alan-isakov-appaloosa-bones'];
+const OG={
+  title:`<div class="card">${sized(MARK,64)}<div><div class="t">Crate Dig</div><div class="s">Every record Casey owns, flipped through like a crate</div><div class="f"><span>Casey Cavanagh</span><span>cratedig-dun.vercel.app</span></div></div></div>`,
+  mark:`<div class="card" style="flex-direction:row;align-items:center;justify-content:flex-start;gap:80px">${sized(MARK,360)}<div><div class="t">Crate Dig</div><div class="s" style="font-size:44px">Every record Casey owns,<br>flipped through like a crate</div><div class="f" style="margin-top:48px;gap:40px;justify-content:flex-start"><span>Casey Cavanagh</span></div></div></div>`,
+  covers:`<div class="card">${sized(MARK,64)}<div class="fan">${COVERS.map((c,i)=>`<img src="vinyl/${c}-front.webp" alt="" style="left:${i*52}px;top:${[40,20,0,20,40][i]}px;rotate:${(i-2)*4}deg;z-index:${i<3?i:5-i}">`).join('')}</div><div style="max-width:620px"><div class="t">Crate Dig</div><div class="s">Every record Casey owns, flipped through like a crate</div><div class="f"><span>Casey Cavanagh</span></div></div></div>`};
+const shot=(html,w)=>`<div class="shot" data-w="${w}">${html}</div>`;
+[['D1','Title card','The caseycavanagh.com card turned dark: the mark small at the top, the name big, a mono line along the bottom.','title'],
+ ['D2','The mark, big','The record large on the left, the words beside it. The mark does the talking in a small preview.','mark'],
+ ['D3','Some covers','The title card with a few records fanned out on the right, so the preview shows what’s inside.','covers']].forEach(([id,n,use,k])=>{
+  const lg=sized(icon({rings:'two',fill:.78,c:DARK}),16);
+  $('#D').insertAdjacentHTML('beforeend',card(id,n,use,`<div class="previews"><div class="imsg">${shot(OG[k],240)}<div class="cap"><b>Crate Dig</b><small>cratedig-dun.vercel.app</small></div></div><div class="slack"><span class="site">${lg}Crate Dig</span><a href="#" onclick="return false">Crate Dig</a><span>Every record Casey owns, flipped through like a crate.</span>${shot(OG[k],0)}</div></div>`));
+});
+// E: the covers card, six ways. T is the title and sub, so the make page's longer title can stand in
+const CV=['allison-russell-the-returner','gram-parsons-grievous-angel','bon-iver-for-emma-forever-ago','bruce-springsteen-nebraska','boygenius-boygenius','james-taylor-jt','crosby-stills-nash-crosby-stills-nash','billy-joel-piano-man','daughter-if-you-leave','jason-isbell-southeastern','bob-dylan-new-morning','creedence-clearwater-revival-green-river','hiss-golden-messenger-lateness-of-dancers'];
+const cv=(i,st)=>`<i class="cv" style="background-image:url(vinyl/${CV[i%CV.length]}-front.webp);${st}"></i>`;
+const SPINES=['#212122','#34869f','#8a7f81','#c9b48a','#5b3a2e','#e2dccf','#1f3b57','#a33a2b','#d8c27a','#3d4a3a','#7c6a9a','#efe7d6','#2b2b2b','#b8743c','#5e7f8c','#c7c2b8','#40303a','#9fb08a','#d9a441','#24313f','#6d2f2f','#e9e4da','#8c8c8c','#355e4f','#b5523b','#1c1c1c','#c4a77d','#4d6a8a','#a6a29a','#73503b'];
+const T={crate:['Crate Dig','Every record Casey owns, flipped through like a crate'],make:['Make your crate','Your records, flipped through like a crate']};
+const LG=sized(MARK,56);
+const E={
+  fan:([t,s])=>`<div class="card e">${[0,1,2,3,4].map(i=>cv(i,`width:400px;height:400px;left:${640+i*70}px;top:${150+[30,10,0,14,36][i]}px;rotate:${(i-2)*5}deg;box-shadow:0 30px 60px rgba(0,0,0,.6);z-index:${i}`)).join('')}<div class="lg">${LG}</div><div class="txt" style="max-width:560px"><div class="t">${t}</div><div class="s" style="font-size:40px">${s}</div></div></div>`,
+  crate:([t,s])=>`<div class="card e">${Array.from({length:9},(_,k)=>{const i=8-k,w=440-i*16,top=130-i*13+(i?0:0);return cv(i+1,`width:${w}px;height:${i?60:470}px;left:${700+(440-w)/2}px;top:${i?top-i*6:130}px;background-position:top;border-radius:4px 4px 0 0;filter:brightness(${1-i*.07});z-index:${9-i}`)}).join('')}<div class="lg">${LG}</div><div class="txt" style="max-width:540px"><div class="t">${t}</div><div class="s" style="font-size:40px">${s}</div></div></div>`,
+  wall:([t,s])=>`<div class="card e">${Array.from({length:12},(_,k)=>cv(k,`width:220px;height:220px;left:${600+(k%3)*224}px;top:${-90+Math.floor(k/3)*224+(k%3==1?-60:0)}px;border-radius:2px`)).join('')}<i style="position:absolute;left:560px;top:0;width:260px;height:630px;background:linear-gradient(90deg,#121212,rgba(18,18,18,0))"></i><div class="lg">${LG}</div><div class="txt" style="max-width:500px"><div class="t" style="font-size:92px">${t}</div><div class="s" style="font-size:40px">${s}</div></div></div>`,
+  peek:([t,s])=>`<div class="card e">${[0,1,2,3,4,5].map(i=>cv(i+2,`width:300px;height:300px;left:${-40+i*215}px;top:${400+[20,0,34,8,26,4][i]}px;rotate:${[-3,2,-1,3,-2,1][i]}deg;box-shadow:0 -10px 40px rgba(0,0,0,.6);z-index:${i%2}`)).join('')}<div style="position:absolute;left:96px;top:90px;display:flex;flex-direction:column"><div style="display:flex;align-items:center;gap:28px">${LG}<div class="t">${t}</div></div><div class="s" style="font-size:40px;margin-top:12px">${s}</div></div></div>`,
+  spines:([t,s])=>`<div class="card e">${SPINES.map((c,i)=>`<i style="position:absolute;top:0;bottom:0;left:${640+i*19}px;width:17px;background:${c};border-radius:2px"></i>`).join('')}<div class="lg">${LG}</div><div class="txt" style="max-width:500px"><div class="t" style="font-size:96px">${t}</div><div class="s" style="font-size:38px">${s}</div></div></div>`,
+  pulled:([t,s])=>`<div class="card e" style="align-items:center">${[0,1,3,4].map((i,k)=>cv(i+4,`width:250px;height:250px;left:${[110,330,620,840][k]}px;top:340px;filter:brightness(.55)`)).join('')}${cv(6,`width:340px;height:340px;left:430px;top:262px;box-shadow:0 30px 70px rgba(0,0,0,.7);z-index:2`)}<div style="position:absolute;left:0;right:0;top:56px;display:flex;flex-direction:column;align-items:center"><div class="t" style="font-size:96px">${t}</div><div class="s" style="font-size:36px;margin-top:6px">${s}</div></div></div>`};
+[['E1','Fan, bigger','D3 with the covers twice the size, fanning off the right edge, and the title bigger.','fan'],
+ ['E2','The crate','One cover facing you, the tops of the next few stacked behind it, the way the crate looks when it opens.','crate'],
+ ['E3','A wall of covers','Twelve covers tiled on the right, running off three edges and fading into the dark behind the words.','wall'],
+ ['E4','Peeking up','The name across the top; a row of covers along the bottom, tilted a little, as if standing in a crate.','peek'],
+ ['E5','Spines','No covers, just the spine colors of the records side by side. Calm, and reads at any size.','spines'],
+ ['E6','Pulled out','Centered: the name on top, one record pulled forward from a dimmed row, the way it looks when you open one.','pulled']].forEach(([id,n,use,k])=>{
+  const lg=sized(icon({rings:'two',fill:.78,c:DARK}),16);
+  $('#E').insertAdjacentHTML('beforeend',card(id,n,use,`<div class="previews"><div class="imsg">${shot(E[k](T.crate),240)}<div class="cap"><b>Crate Dig</b><small>cratedig-dun.vercel.app</small></div></div><div class="imsg">${shot(E[k](T.make),240)}<div class="cap"><b>Make your crate</b><small>cratedig-dun.vercel.app</small></div></div><div class="slack"><span class="site">${lg}Crate Dig</span><a href="#" onclick="return false">Crate Dig</a><span>Every record Casey Cavanagh owns, flipped through like a crate.</span>${shot(E[k](T.crate),0)}</div></div>`));
+});
+
+// scale each 1200 × 630 card to its box
+function fit(){$$('.shot').forEach(s=>{const w=s.clientWidth;s.style.height=w*630/1200+'px';$('.card',s).style.transform=`scale(${w/1200})`})}
+addEventListener('resize',fit);fit();
+
+// picks
+const KEY='records-icon-picks';let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem(KEY))||[])}catch{}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...picks]))}catch{}};
+const text=()=>'Picks: '+([...picks].sort().join(', ')||'none');
+function show(){$$('.st').forEach(s=>{const on=picks.has(s.dataset.id);s.classList.toggle('picked',on);$('.star',s).setAttribute('aria-pressed',on)});$('#picks').textContent=picks.size?[...picks].sort().join(', '):''}
+$$('.st').forEach(s=>{$('.star',s).onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{const t=text(),done=()=>{$('#copy').textContent='Copied';$('#picks').textContent=t;setTimeout(()=>{$('#copy').textContent='Copy picks';show()},1600)};
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(done,()=>{fallback(t);done()});else{fallback(t);done()}};
+function fallback(t){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.append(a);a.select();try{document.execCommand('copy')}catch{}a.remove()}
+$('#clear').onclick=()=>{picks.clear();save();show()};
+show();
+</script>
+</body>
+</html>
