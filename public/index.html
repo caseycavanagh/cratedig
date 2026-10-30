@@ -479,6 +479,8 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:#1e1e20}
 .ab .sk i{display:block;height:13px;border-radius:3px;background:rgba(255,255,255,.07)}
 .ab .sk i:nth-child(3){width:82%}.ab .sk i:nth-child(4){width:30%;margin-top:4px}
 .ab.in>*{animation:linerIn .35s ease-out both}
+.ab.late>*{animation:linerIn .5s .16s ease-out both}
+.ab.late>:nth-child(2){animation-delay:.22s}.ab.late>:nth-child(3){animation-delay:.28s}
 .ab.gone{opacity:0;transition:opacity .15s}
 @keyframes linerIn{from{opacity:0}}
 @media(prefers-reduced-motion:no-preference){.ab .sk i{animation:linerWait 1.4s ease-in-out infinite alternate}}
@@ -1668,18 +1670,27 @@ function fetchLiner(r){
 const preLiner=()=>{const r=order[cur];if(r&&open.hidden)fetchLiner(r)};
 function liner(r){
   const p=fetchLiner(r);
-  const show=l=>{
+  const show=(l,late)=>{
     if(order[cur]!==r||open.hidden)return;
     const ab=$('#oabout');
-    if(ab&&l?.about){ab.hidden=false;ab.className='ab in';ab.innerHTML=`<p class="ohd">About</p><p class="about"></p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;fitAbout(ab.children[1],l.about.text)}
-    else if(ab&&!ab.hidden){ab.className='ab gone';setTimeout(()=>{if(ab.classList.contains('gone'))ab.hidden=true},200)}
+    // arriving late, About opens its room on a spring and the words fade in after, so what's below glides down
+    const was=ab.hidden?0:ab.offsetHeight;
+    if(l?.about){ab.hidden=false;ab.className='ab in'+(late?' late':'');ab.innerHTML=`<p class="ohd">About</p><p class="about"></p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;fitAbout(ab.children[1],l.about.text);
+      if(late)room(ab,was,ab.offsetHeight)}
+    else if(!ab.hidden){ab.className='ab gone';room(ab,was,0).then(()=>{if(ab.classList.contains('gone'))ab.hidden=true})}
     if(!r.back)requestAnimationFrame(()=>tracks(r,l?.sides||[]));
   };
   if(LDONE.has(r.slug)){show(LDONE.get(r.slug));return}
   // still on its way: About holds its place with quiet lines only when it's known to be coming; otherwise it fades in if it
   // arrives. The track list simply fades in when it's ready
   if(HAS[r.slug]){const ab=$('#oabout');ab.hidden=false;ab.className='ab wait';ab.innerHTML='<p class="ohd">About</p><div class="sk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'}
-  p.then(show);
+  p.then(l=>show(l,true));
+}
+// a block's height (and the gap above it) eased from one size to another; 0 means it isn't there
+function room(el,from,to){
+  if(reduce||from===to)return Promise.resolve();
+  const gap=parseFloat(getComputedStyle(el).marginTop)||0,k=h=>({height:h+'px',marginTop:(h?gap:0)+'px',overflow:'hidden'});
+  return el.animate([k(from),k(to)],{duration:560,easing:'cubic-bezier(.22,1,.36,1)'}).finished.catch(()=>{});
 }
 // About ends where a sentence ends: as many whole sentences as fit three lines, else the first one up to a comma or dash,
 // else up to a word, never mid-word
