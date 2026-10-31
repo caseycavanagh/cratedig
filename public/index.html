@@ -124,7 +124,8 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .fin-mk{all:unset;cursor:pointer;display:grid;place-items:center;width:72px;height:72px;border-radius:50%;color:#fff;-webkit-tap-highlight-color:transparent}
 .fin-mk svg{width:56px;height:56px;fill:currentColor}
 .fin p{font-size:15px;line-height:1.35;font-weight:500;text-wrap:balance;overflow-wrap:anywhere}
-.fin .btn{margin-top:2px}
+.fin-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:2px}
+.fin-row svg{width:16px;height:16px;flex:none}
 html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;height:44px}
 
 .flips{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:-8px;font-size:14px}
@@ -1209,7 +1210,7 @@ html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3)}
   <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record, slash searches.">
     <div class="floor"></div>
     <div class="stack" id="stack"></div>
-    <div class="fin" id="fin" inert><button type="button" class="fin-mk" tabindex="-1" aria-hidden="true"><svg><use href="#mark"/></svg></button><p id="finP"></p><button type="button" class="btn" id="finB">Back to the front</button></div>
+    <div class="fin" id="fin" inert><button type="button" class="fin-mk" id="finM" aria-label="About Crate Dig" aria-haspopup="dialog"><svg aria-hidden="true"><use href="#mark"/></svg></button><p id="finP"></p><div class="fin-row" id="finR"><button type="button" class="btn" id="finB">Back to the front</button></div></div>
     <p class="dhint" aria-hidden="true">Pull down to flip through, tap to pull one out</p>
     <div class="veil" id="veil"></div>
   </section>
@@ -1639,7 +1640,8 @@ function jump(i){
   go(i);
 }
 // The end of the crate: flip the last record down and the whole crate lies flipped. Where it stood, the mark spins up like a record
-// and coasts to a stop, over a line naming whose records they were; the mark, or the button under it, riffles back to the front.
+// and coasts to a stop, over a line naming whose records they were. The mark opens About; under the line, a way back to the front
+// and a way to share the crate (added with the other share buttons, further down).
 // Only the whole crate has an end like this: a filter or a search stops at its last record, as before.
 const finEl=$('#fin');let crateBy='',finA=null;
 const ends=()=>!filt&&order.length>1;
@@ -1660,7 +1662,7 @@ function home(){
   go(0);if(f)crate.focus({preventScroll:true});
 }
 finEl.addEventListener('pointerdown',e=>{if(e.target.closest('button'))e.stopPropagation()}); // a press on a button stays with it, not the crate's drag
-finEl.addEventListener('click',e=>{if(e.target.closest('button'))home()});
+$('#finB').addEventListener('click',home);$('#finM').addEventListener('click',()=>aboutOpen());
 // The index: every letter; the ones with records in the crate (as filtered) jump to the first of them
 const az=$('#az');let azAt={},azCur;
 function renderAZ(){
@@ -3595,6 +3597,8 @@ html.phone .sh-row{display:none}
   // the crate, in About
   const sa=document.createElement('button');sa.type='button';sa.className='btn ab-sh';sa.innerHTML=I.share+'<span>Share this crate</span>';
   $('#about .ab-body').after(sa);wire(sa,crate);
+  // and at the end of the crate, beside the way back to the front
+  const sf=document.createElement('button');sf.type='button';sf.className='btn';sf.innerHTML=I.share+'<span>Share this crate</span>';$('#finR').append(sf);wire(sf,crate);
 
   // a record, beside its close. It follows whatever sits left of close (search, when there is one) wherever that goes, 8px further left
   const sr=iconBtn('shareR','Share this record'),cl=$('#close');cl.before(sr);wire(sr,rec);
