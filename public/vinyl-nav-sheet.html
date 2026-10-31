@@ -94,6 +94,46 @@ body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font
 .rnd{display:grid;place-items:center;border-radius:50%;color:#d6d6da}
 .rnd svg{width:calc(var(--u)*26);height:calc(var(--u)*26)}
 .tabs .hr{width:1px;height:calc(var(--u)*24);background:rgba(255,255,255,.14);flex:none}
+
+/* round four: live bars */
+.live{position:relative;overflow:hidden;background:#121212;border-radius:18px;box-shadow:0 0 0 1px #ffffff14;font-family:var(--sans);color:#fff;--H:62px;--g:12px;height:300px}
+.live.lap{--H:56px;border-radius:10px;height:260px}
+.live .bk{position:absolute;inset:0}
+.live .bk i{position:absolute;border-radius:4px}
+.live .bk::after{content:"";position:absolute;inset:0;background:linear-gradient(#12121200 0,#121212d9 55%,#121212f2 100%)}
+.live .dl2{position:absolute;left:0;right:0;bottom:126px;display:flex;justify-content:center;align-items:baseline;gap:24px;font-size:20px;font-weight:500;color:#5f5f64;white-space:nowrap;transition:opacity .25s}
+.live.lap .dl2{bottom:104px;gap:30px}
+.live .dl2.y{font-family:var(--mono);gap:22px}.live .dl2 .on{color:#fff;font-size:1.35em}
+.live .dl2 .sw{width:14px;height:14px;border-radius:50%;align-self:center}.live .dl2 .sw.on{width:20px;height:20px}
+.live .say{position:absolute;left:0;right:0;bottom:calc(30px + var(--H) + 10px);text-align:center;font-size:13px;color:#a5a5aa;opacity:0;transition:opacity .2s;pointer-events:none}
+.live.lap .say{bottom:calc(24px + var(--H) + 10px)}
+.live .say.v{opacity:1}
+.live.open .dl2{opacity:.25}
+.xbar{position:absolute;left:16px;right:16px;bottom:30px;display:flex;justify-content:center}
+.live.lap .xbar{bottom:24px}
+.xb{position:relative;height:var(--H);width:var(--H);border-radius:999px;overflow:hidden;flex:none;margin:0 calc(var(--g)/2);transition:width .5s cubic-bezier(.22,1,.36,1),margin .5s cubic-bezier(.22,1,.36,1),opacity .25s}
+.xb.gone{width:0!important;margin:0;opacity:0}
+.xb>button.xi{all:unset;cursor:pointer;position:absolute;left:0;top:0;width:var(--H);height:var(--H);display:grid;place-items:center;color:#a5a5aa;transition:opacity .2s,color .2s}
+.xb>button.xi.on{color:#fff}
+.xb>button.xi svg,.xo button svg{width:26px;height:26px;display:block}
+.xo input{outline:none}
+.xb>button.xi:focus-visible,.xo button:focus-visible{outline:1px solid #ffffff66;outline-offset:-4px;border-radius:999px}
+.xb .dot{position:absolute;left:50%;bottom:9px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#fff}
+.xb .xo{position:absolute;inset:0;display:flex;align-items:center;padding:0 6px;opacity:0;pointer-events:none;transition:opacity .2s}
+.xb.o .xo{opacity:1;pointer-events:auto;transition:opacity .3s .12s}
+.xb.o>button.xi{opacity:0;pointer-events:none}
+.xo button{all:unset;cursor:pointer;flex:1;height:calc(var(--H) - 12px);display:grid;place-items:center;color:#9a9aa0;border-radius:999px;position:relative;transition:color .2s}
+.xo button.on{color:#fff}
+.xo button .ar{position:absolute;right:2px;top:4px;font-size:11px;color:#fff}
+.xo .cw{width:22px;height:22px;border-radius:50%;background:conic-gradient(#e5534b,#e8a33d,#e5d64b,#5cb85c,#3d9ae8,#8b5cf6,#e5534b);opacity:.8}
+.xo button.on .cw{opacity:1}
+.xo .q{display:flex;align-items:center;gap:10px;width:100%;padding:0 12px 0 14px;color:#a5a5aa}
+.xo .q svg{width:20px;height:20px;flex:none}
+.xo input{all:unset;flex:1;min-width:0;font-size:16px;color:#fff}
+.xo input::placeholder{color:#8e8e93}
+@media (prefers-reduced-motion:reduce){.xb,.xb .xo,.xb.o .xo,.live .dl2{transition:none}}
+.lrow{display:grid;grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:14px;align-items:start}
+@media(max-width:800px){.lrow{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -107,6 +147,8 @@ body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font
     <div><b>The filter pill is a different kind of thing</b>It's a fact about what you're looking at, sitting in a row of actions, in a different shape, pushing them around.<i>C, D, F</i></div>
     <div><b>The bar is lopsided</b>A small mark alone on the left, a heavy cluster on the right, and nothing in the middle.<i>C, E, F</i></div>
   </div>
+  <h2 class="grp">Round four: three circles that open</h2><p>H4’s quiet sort, with search, sort and view as three circles at the bottom. Each one opens in place when tapped. These are live: tap them. The two stickers differ only in what the other circles do while one is open.</p>
+  <div class="sheet" id="I" style="margin-bottom:56px"></div>
   <h2 class="grp">Round three: G5, with the sort treated differently</h2><p>Same as G5 (layouts in the capsule, search in its own circle, filter at the top center). Only the sort changes.</p>
   <div class="sheet" id="H" style="margin-bottom:56px"></div>
   <h2 class="grp">Round two: a tab bar at the bottom</h2><p>A glass capsule at the bottom holds the three layouts as tabs, with search as its own circle beside it, after your reference. Indicators stay quiet like A: gray icons, the current one white. The filter moves to the top center; the top is otherwise just the mark. The dial sits above the bar. The sort is the open question, so each sticker puts it somewhere different.</p>
@@ -280,6 +322,59 @@ function sticker([id,name,use,bar,bottom,round2]){
 }
 D.forEach(sticker);G.slice().sort((a,b)=>a[0]<b[0]?-1:1).forEach(g=>sticker([...g,true]));H.forEach(g=>sticker([...g,true]));
 
+
+// round four: live bars. mode 1 = the others stay as circles; mode 2 = the open one takes the row
+(function(){
+const SI={artist:I.artist,title:'<svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans)">Aa</text></svg>',year:I.year,
+  label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',color:'<i class="cw"></i>'};
+const SL={artist:['Artist, A to Z','Artist, Z to A'],title:['Title, A to Z','Title, Z to A'],year:['Oldest first','Newest first'],label:['Label, A to Z','Label, Z to A'],color:['Reds first','Darks first']};
+const VI={crate:I.crate,wall:I.wall,table:I.table},VL={crate:'Crate',wall:'Grid',table:'Table'};
+function live(box,mode,lap){
+  const st={sort:'artist',d:0,view:'crate',open:null};
+  const el=document.createElement('div');el.className='live'+(lap?' lap':'');
+  const W=lap?1440:390;let bk='';
+  if(lap){for(let i=0;i<8;i++)bk+=`<i style="left:calc(4% + ${i}*11.6%);width:10.4%;top:${-20}px;aspect-ratio:1;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
+  else{for(let i=0;i<3;i++)bk+=`<i style="left:${24+i*118}px;width:110px;height:110px;top:20px;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
+  el.innerHTML=`<div class="bk">${bk}</div><div class="dl2"></div><div class="say"></div>
+   <div class="xbar">
+    <div class="xb glass" data-k="search"><button class="xi" type="button" aria-label="Search">${SRCH}</button><div class="xo"><label class="q">${SRCH}<input type="search" placeholder="Search" aria-label="Search the crate"></label></div></div>
+    <div class="xb glass" data-k="sort"><button class="xi" type="button" aria-label="Sort">${I.arrows}</button><div class="xo">${Object.keys(SI).map(k=>`<button type="button" data-s="${k}" aria-label="Sort by ${k}">${SI[k]}</button>`).join('')}</div></div>
+    <div class="xb glass" data-k="view"><button class="xi" type="button" aria-label="Layout"></button><div class="xo">${Object.keys(VI).map(k=>`<button type="button" data-v="${k}" aria-label="${VL[k]}">${VI[k]}</button>`).join('')}</div></div>
+   </div>`;
+  box.append(el);
+  const $x=k=>el.querySelector(`.xb[data-k=${k}]`),bar=el.querySelector('.xbar'),say=el.querySelector('.say'),dl=el.querySelector('.dl2');
+  const H=()=>lap?56:62,G=12;
+  const want={search:()=>lap?340:null,sort:()=>5*(lap?50:44)+12,view:()=>3*(lap?56:50)+12};
+  function draw(){
+    const avail=bar.clientWidth;
+    ['search','sort','view'].forEach(k=>{const b=$x(k),o=st.open===k;b.classList.toggle('o',o);b.classList.toggle('gone',mode===2&&st.open&&!o);
+      let w=H();if(o){w=mode===2?Math.min(avail,lap?440:avail):(want[k]()||avail-2*H()-3*G);if(mode===1)w=Math.min(w,avail-2*H()-3*G)}
+      b.style.width=w+'px'});
+    const sb=$x('sort').querySelector('.xi'),changed=st.sort!=='artist'||st.d;sb.classList.toggle('on',changed);sb.innerHTML=I.arrows+(changed?'<i class="dot"></i>':'');
+    $x('view').querySelector('.xi').innerHTML=VI[st.view];
+    $x('sort').querySelectorAll('[data-s]').forEach(b=>{const on=b.dataset.s===st.sort;b.classList.toggle('on',on);});
+    $x('view').querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===st.view));
+    say.textContent=st.open==='sort'?SL[st.sort][st.d]:st.open==='view'?VL[st.view]:'';say.classList.toggle('v',!!say.textContent);
+    el.classList.toggle('open',!!st.open);
+    const L=st.sort==='year'?(st.d?['2016','2015','2014','2013','2012','2011']:['1967','1968','1969','1970','1971','1972']):st.sort==='color'?null:(st.d?['Z','Y','W','V','T','S','R']:['A','B','C','D','E','F','G']);
+    dl.classList.toggle('y',st.sort==='year');
+    dl.innerHTML=L?L.map((l,i)=>`<span class="${i===(st.sort==='year'?2:0)?'on':''}">${l}</span>`).join(''):['#e5534b','#e8a33d','#e5d64b','#5cb85c','#3d9ae8','#8b5cf6'].map((c,i)=>`<span class="sw${i===0?' on':''}" style="background:${c}"></span>`).join('');
+  }
+  el.addEventListener('click',e=>{
+    const xi=e.target.closest('.xi');if(xi){st.open=xi.parentElement.dataset.k;draw();if(st.open==='search')setTimeout(()=>el.querySelector('input').focus(),200);return}
+    const sb=e.target.closest('[data-s]');if(sb){const k=sb.dataset.s;if(k===st.sort)st.d=st.d?0:1;else{st.sort=k;st.d=k==='year'?1:0}draw();return}
+    const vb=e.target.closest('[data-v]');if(vb){st.view=vb.dataset.v;draw();setTimeout(()=>{st.open=null;draw()},260);return}
+    if(!e.target.closest('.xb')){st.open=null;draw()}});
+  el.addEventListener('keydown',e=>{if(e.key==='Escape'&&st.open){const k=st.open;st.open=null;draw();$x(k).querySelector('.xi').focus({focusVisible:false})}});
+  addEventListener('resize',draw);requestAnimationFrame(draw);draw();
+}
+const L4=[
+ ['I1','Opens in place','The tapped circle grows into its options; the other two stay circles and slide aside. Tap another circle to switch, or tap anywhere else to close. Sort shows its five ways (artist, title, year, label, color) and a short line above says what’s picked, like “Newest first”; tap the lit one again to flip it. The dial follows the sort.',1],
+ ['I2','Takes the row','The tapped circle grows to fill the bar and the other two fold away until you close it, so there’s only one thing on the bar at a time and more room for each.',2]];
+L4.forEach(([id,name,use,mode])=>{ALL[id]=name;const st=document.createElement('div');st.className='st';st.dataset.id=id;
+  st.innerHTML=`<span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id} ${name}">★</button><div class="lrow"><div class="fr"><span class="k">Phone</span><div class="ph-live"></div></div><div class="fr"><span class="k">Laptop (bottom of the screen)</span><div class="lap-live"></div></div></div><span class="use">${use}</span>`;
+  $('#I').append(st);live(st.querySelector('.ph-live'),mode,false);live(st.querySelector('.lap-live'),mode,true)});
+})();
 let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-nav-picks')||'[]'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vinyl-nav-picks',JSON.stringify([...picks]))}catch(e){}};
 const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
