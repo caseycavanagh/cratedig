@@ -1092,7 +1092,7 @@ html.phone .ab-cr{margin-top:12px}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
 .find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
 .kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-82px - env(safe-area-inset-bottom));background:#121212;opacity:calc(var(--kz,0)*.94);-webkit-mask:linear-gradient(#0000,#000 50%);mask:linear-gradient(#0000,#000 50%);pointer-events:none} /* opened up to records, the dial darkens what's behind it */
-.kd::before,.kd::before{top:-80px;background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%)}
+.kd::before,.kd::before{top:-120px;background:#121212f5;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line */
 html.phone body.searching .find::before{display:none}
 .find::before{transition:opacity .3s}
 body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
