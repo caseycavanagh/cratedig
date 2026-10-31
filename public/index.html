@@ -1131,6 +1131,10 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   html.phone .o-info{z-index:2} /* over the record, which comes first; the close button stays on top */
   html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-64px;bottom:calc(-1*(env(safe-area-inset-bottom) + var(--bot)));background:linear-gradient(transparent,var(--bg) 64px);opacity:calc(var(--rise,0)*3);pointer-events:none}
 }
+/* details stacked under the record sit a little in from its edges */
+@media(max-width:1040px){.o-info{padding-inline:12px}}
+html.phone .o-info{padding-inline:12px}
+@media(max-height:500px){html.phone .o-info{padding-inline:0}}
 /* Safari on iPhone tints its toolbars from solid fixed strips at the very top and bottom of the screen
    (joshpuckett.me/seamless-mobile-safari). Without them the bottom bar falls back to its own lighter gray.
    Each strip shows 5px of the page color, the least Safari picks up; About sits in the top layer, so it carries its own. */
