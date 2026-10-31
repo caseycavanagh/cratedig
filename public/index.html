@@ -964,6 +964,9 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .find .vw button:hover{background:var(--hov);color:#fff}
 .find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:var(--sel);color:#fff;border:0}
 .find .vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.find .vw .vab{position:relative;margin-top:7px}
+.find .vw .vab::before{content:'';position:absolute;left:12px;right:12px;top:-4px;border-top:1px solid var(--line)}
+.find .vw .vab svg{width:18px;height:18px;fill:currentColor}
 .fb.sb[hidden]{display:none}
 .fb.lb.sb.on,html.phone .fb.lb.sb.on,.find:has(.q:focus-within) .fb.lb.sb.on{background:#fff;color:#111;border-color:#fff} /* sorted some other way than artist, A to Z */
 .fb.lb.sb.on[aria-expanded=true]{background:#e6e6e6}
@@ -1209,7 +1212,7 @@ html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3)}
     <div class="chip" id="chip" hidden></div>
     <div class="cmenu" id="cmenu" hidden></div>
     <span class="sp"></span>
-    <a class="logo" href="#about" aria-label="About Crate Dig" aria-haspopup="dialog"><svg aria-hidden="true"><use href="#mark"/></svg></a>
+    <a class="logo" href="./" aria-label="Back to the front"><svg aria-hidden="true"><use href="#mark"/></svg></a>
     <button type="button" class="btn ed" id="editB" aria-pressed="false" hidden>Edit</button>
     <form class="q" id="qf" role="search">
       <label class="qi" for="q"><svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg><span class="sr">Search the crate</span></label>
@@ -2195,7 +2198,7 @@ hv.addEventListener('pointerenter',()=>{clearTimeout(hvLeave);clearTimeout(hvGo)
 hv.addEventListener('pointerleave',e=>{onHv=false;if(crate.contains(e.relatedTarget))return;ptr=null;queueNudge()});
 // the name opens its record
 hv.addEventListener('click',()=>{const i=hvI;if(i<0||!open.hidden)return;hvOff();if(i!==cur)go(i);openRecord(false)});
-// the mark opens the about page; the close button, Esc or a tap anywhere but the words puts it away
+// About: the close button, Esc or a tap anywhere but the words puts it away
 const about=$('#about');$('#abY').textContent=new Date().getFullYear();
 const mk=$('.ab-mk');let spin=0,spinV=0,spinOn=false,spinF=0;
 function aboutOpen(){if(about.open)return;about.showModal();document.documentElement.style.overflow='hidden';spin=0;mk.style.rotate='';
@@ -2203,7 +2206,13 @@ function aboutOpen(){if(about.open)return;about.showModal();document.documentEle
 function aboutClose(){if(!about.open||about.closing)return;about.classList.remove('in');about.closing=true;
   spinOn=false;spinV=0;cancelAnimationFrame(spinF);spinF=0;
   setTimeout(()=>{about.close();about.closing=false;document.activeElement?.blur();if(open.hidden)document.documentElement.style.overflow=''},reduce?0:200)}
-$('.logo').addEventListener('click',e=>{e.preventDefault();aboutOpen()});
+// the mark takes you back to the front: search and filter off, the first record in front (the grid and the table back to the top).
+// The sort and the layout stay as you chose them
+$('.logo').addEventListener('click',e=>{e.preventDefault();if(!open.hidden)return;menuOff();
+  if(q.value){q.value='';qSync()}if(filt)arrange(null);q.blur();
+  if(document.body.classList.contains('walling'))go(0,true);else if(cur)jump(0);
+  for(const p of [$('#wall'),$('#tbl')])if(!p.hidden)p.scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+  e.currentTarget.blur()});
 $('#abX').onclick=aboutClose;
 // hovering the big mark spins it like a record at 33⅓ rpm; moving off lets it coast one more turn back to upright
 {let t0=0,co=null;const rest=0;
@@ -3253,6 +3262,11 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   fb.onclick=()=>tray(pills.hidden);
   lb.onclick=()=>views(vwEl.hidden);
   vwEl.addEventListener('click',e=>{if(e.target.closest('button[data-v]'))setTimeout(()=>views(false),120)});
+  // About, at the foot of the layout menu, now that the mark takes you back to the front
+  const ab=document.createElement('button');ab.type='button';ab.className='vab';ab.setAttribute('aria-haspopup','dialog');
+  ab.innerHTML='<svg aria-hidden="true"><use href="#mark"/></svg><span>About</span>';vwEl.append(ab);
+  ab.onclick=()=>{views(false);aboutOpen()};
+  $('.logo').addEventListener('click',()=>{views(false);tray(false);sorts(false)});
   pills.addEventListener('keydown',e=>{if(e.key==='Escape'){tray(false);fb.focus()}});
   vwEl.addEventListener('keydown',e=>{if(e.key==='Escape'){views(false);lb.focus()}});
   addEventListener('pointerdown',e=>{if(e.target.closest('.find'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
@@ -3340,6 +3354,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
     if(v&&all().some(r=>matchQ(r,v))){arrange({k:'q',v});leave(true)}else if(!v)leave()}},true);
   addEventListener('keydown',e=>{if(open1&&e.key==='Escape'&&e.target===q){e.stopImmediatePropagation();leave()}},true);
   sx.onclick=()=>leave();
+  $('.logo').addEventListener('click',()=>leave()); // the mark takes you back to the front: the list goes too
   // a laptop: a click anywhere else puts the list away and leaves the crate as you narrowed it
   addEventListener('pointerdown',e=>{if(open1&&(!ph()||seeking())&&!e.target.closest('.find,.sl'))leave(true)},true);
   // a record from the list opens straight from the whole crate
