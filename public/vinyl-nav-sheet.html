@@ -140,6 +140,22 @@ body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font
 @media (prefers-reduced-motion:reduce){.xb,.xb .xo,.xb.o .xo,.live .dl2{transition:none}}
 .lrow{display:grid;grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:14px;align-items:start}
 @media(max-width:800px){.lrow{grid-template-columns:minmax(0,1fr)}}
+
+/* round five: gestures */
+.k5 .xi,.k5 .xo{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.k5 .xi svg,.k5 .xo button>*{transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.k5 .xi:active svg,.k5 .xo button:active>*{transform:scale(.86)}
+.k5 .xb[data-k=dir] .xi svg{transition:rotate .4s cubic-bezier(.22,1,.36,1),transform .35s cubic-bezier(.22,1,.36,1)}
+.k5 .xb[data-k=dir][data-d="1"] .xi svg{rotate:180deg}
+.k5 .th{position:absolute;top:6px;bottom:6px;left:calc(6px + (100% - 12px) * var(--i,0) / var(--n,3));width:calc((100% - 12px) / var(--n,3));border-radius:999px;background:#ffffff1c;transition:left .45s cubic-bezier(.22,1,.36,1),background .2s;pointer-events:none}
+.k5 .xo.drag .th{background:#ffffff2a;transition:left .18s cubic-bezier(.22,1,.36,1)}
+.k5 .xo button{position:relative;z-index:1}
+.k5 .dz{flex:1;align-self:stretch;display:flex;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,#0000,#000 28%,#000 72%,#0000);mask:linear-gradient(90deg,#0000,#000 28%,#000 72%,#0000);touch-action:pan-x}
+.k5 .dz::-webkit-scrollbar{display:none}
+.k5 .dz::before,.k5 .dz::after{content:'';flex:none;width:50%}
+.k5 .dz button.dw{all:unset;flex:none;cursor:pointer;scroll-snap-align:center;padding:0 13px;height:100%;display:flex;align-items:center;gap:5px;font-size:16px;font-weight:500;color:#fff;white-space:nowrap}
+.k5 .dz .dw i{font-style:normal;font-size:13px;color:#a5a5aa;width:10px}
+@media (prefers-reduced-motion:reduce){.k5 .th,.k5 .xi svg,.k5 .xo button>*{transition:none}}
 </style>
 </head>
 <body>
@@ -153,6 +169,8 @@ body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font
     <div><b>The filter pill is a different kind of thing</b>It's a fact about what you're looking at, sitting in a row of actions, in a different shape, pushing them around.<i>C, D, F</i></div>
     <div><b>The bar is lopsided</b>A small mark alone on the left, a heavy cluster on the right, and nothing in the middle.<i>C, E, F</i></div>
   </div>
+  <h2 class="grp">Round five: gestures, not just taps</h2><p>Today’s bar (search, sort, a flip arrow, layout, and a × while one is open), with the scrubber’s care brought to it. All of them get a soft lit pill that slides to what’s picked and follows your finger when you drag along an open row. Each sticker then adds a different gesture. Live: try them with your thumb.</p>
+  <div class="sheet" id="K" style="margin-bottom:56px"></div>
   <h2 class="grp">Round four: three circles that open</h2><p>H4’s quiet sort, with search, sort and view as three circles at the bottom. Each one opens in place when tapped. These are live: tap them. J1–J3 are I2 with three ways to fold it back when you don’t pick anything; every one also closes on a tap anywhere else or Esc.</p>
   <div class="sheet" id="I" style="margin-bottom:56px"></div>
   <h2 class="grp">Round three: G5, with the sort treated differently</h2><p>Same as G5 (layouts in the capsule, search in its own circle, filter at the top center). Only the sort changes.</p>
@@ -390,6 +408,116 @@ const L4=[
 L4.forEach(([id,name,use,mode,close])=>{ALL[id]=name;const st=document.createElement('div');st.className='st';st.dataset.id=id;
   st.innerHTML=`<span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id} ${name}">★</button><div class="lrow"><div class="fr"><span class="k">Phone</span><div class="ph-live"></div></div><div class="fr"><span class="k">Laptop (bottom of the screen)</span><div class="lap-live"></div></div></div><span class="use">${use}</span>`;
   $('#I').append(st);live(st.querySelector('.ph-live'),mode,false,close);live(st.querySelector('.lap-live'),mode,true,close)});
+})();
+
+// round five: the same bar, with gestures. f.slide: press and slide to pick; f.swipe: swipe a circle to change it; f.dial: sort opens as a little scrubber
+(function(){
+const KS=['artist','title','year','label','color'],KV=['crate','wall','table'];
+const SI={artist:I.artist,title:'<svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans)">Aa</text></svg>',year:I.year,
+  label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',color:'<i class="cw"></i>'};
+const SL={artist:['Artist, A to Z','Artist, Z to A'],title:['Title, A to Z','Title, Z to A'],year:['Oldest first','Newest first'],label:['Label, A to Z','Label, Z to A'],color:['Reds first','Darks first']};
+const SW={artist:'Artist',title:'Title',year:'Year',label:'Label',color:'Color'};
+const VI={crate:I.crate,wall:I.wall,table:I.table},VL={crate:'Crate',wall:'Grid',table:'Table'};
+const XI='<svg viewBox="0 0 256 256"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
+const DIR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/></svg>';
+function live5(box,lap,f){
+  const st={sort:'artist',d:0,view:'crate',open:null};
+  const el=document.createElement('div');el.className='live k5'+(lap?' lap':'');
+  let bk='';
+  if(lap){for(let i=0;i<8;i++)bk+=`<i style="left:calc(4% + ${i}*11.6%);width:10.4%;top:-20px;aspect-ratio:1;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
+  else{for(let i=0;i<3;i++)bk+=`<i style="left:${24+i*118}px;width:110px;height:110px;top:20px;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
+  const sortRow=f.dial?`<div class="dz">${KS.map(k=>`<button type="button" class="dw" data-s="${k}">${SW[k]}<i></i></button>`).join('')}</div>`
+    :`<i class="th" style="--n:5"></i>${KS.map(k=>`<button type="button" data-s="${k}" aria-label="Sort by ${k}">${SI[k]}</button>`).join('')}`;
+  el.innerHTML=`<div class="bk">${bk}</div><div class="dl2"></div><div class="say"></div>
+   <div class="xbar">
+    <div class="xb glass" data-k="search"><button class="xi" type="button" aria-label="Search">${SRCH}</button><div class="xo"><label class="q">${SRCH}<input type="search" placeholder="Search" aria-label="Search the crate"></label></div></div>
+    <div class="xb glass" data-k="sort"><button class="xi" type="button" aria-label="Sort"></button><div class="xo">${sortRow}</div></div>
+    <div class="xb glass" data-k="dir"><button class="xi" type="button" aria-label="Flip the order">${DIR}</button></div>
+    <div class="xb glass" data-k="view"><button class="xi" type="button" aria-label="Layout"></button><div class="xo"><i class="th" style="--n:3"></i>${KV.map(k=>`<button type="button" data-v="${k}" aria-label="${VL[k]}">${VI[k]}</button>`).join('')}</div></div>
+    <div class="xb glass xx" data-k="x"><button class="xc" type="button" data-close aria-label="Close">${XI}</button></div>
+   </div>`;
+  box.append(el);
+  const $x=k=>el.querySelector(`.xb[data-k=${k}]`),bar=el.querySelector('.xbar'),say=el.querySelector('.say'),dl=el.querySelector('.dl2'),dz=el.querySelector('.dz');
+  const H=()=>lap?56:62,G=12;let flash=0,hov=null,skip=false;
+  const sortIcon=()=>f.swipe?SI[st.sort]:I.arrows;
+  function draw(){
+    const avail=bar.clientWidth;
+    ['search','sort','dir','view'].forEach(k=>{const b=$x(k),o=st.open===k;b.classList.toggle('o',o);b.classList.toggle('gone',!!st.open&&!o);
+      b.style.width=(o?Math.min(avail-H()-G,lap?440:avail):H())+'px'});
+    $x('x').classList.toggle('gone',!st.open);
+    const sb=$x('sort').querySelector('.xi');if(sb.dataset.k!==st.sort+f.swipe){sb.innerHTML=sortIcon();sb.dataset.k=st.sort+f.swipe}
+    sb.classList.toggle('on',st.sort!=='artist');
+    const db=$x('dir');db.dataset.d=st.d;db.querySelector('.xi').classList.toggle('on',!!st.d);
+    const vb=$x('view').querySelector('.xi');if(vb.dataset.k!==st.view){vb.innerHTML=VI[st.view];vb.dataset.k=st.view}
+    const si=hov&&hov.k==='sort'?hov.i:KS.indexOf(st.sort),vi=hov&&hov.k==='view'?hov.i:KV.indexOf(st.view);
+    $x('sort').querySelectorAll('[data-s]').forEach((b,i)=>b.classList.toggle('on',i===si));
+    $x('view').querySelectorAll('[data-v]').forEach((b,i)=>b.classList.toggle('on',i===vi));
+    const ts=$x('sort').querySelector('.th');if(ts)ts.style.setProperty('--i',si);$x('view').querySelector('.th').style.setProperty('--i',vi);
+    if(dz)dz.querySelectorAll('.dw').forEach(b=>b.querySelector('i').textContent=b.dataset.s===st.sort?(st.d?'↓':'↑'):'');
+    say.textContent=st.open==='sort'||(!st.open&&flash==='sort')?SL[st.sort][st.d]:st.open==='view'||(!st.open&&flash==='view')?VL[hov&&hov.k==='view'?KV[hov.i]:st.view]:'';
+    if(st.open==='sort'&&hov&&hov.k==='sort')say.textContent=SL[KS[hov.i]][KS[hov.i]===st.sort?st.d:(KS[hov.i]==='year'?1:0)];
+    say.classList.toggle('v',!!say.textContent);
+    el.classList.toggle('open',!!st.open);
+    const L=st.sort==='year'?(st.d?['2016','2015','2014','2013','2012','2011']:['1967','1968','1969','1970','1971','1972']):st.sort==='color'?null:(st.d?['Z','Y','W','V','T','S','R']:['A','B','C','D','E','F','G']);
+    dl.classList.toggle('y',st.sort==='year');
+    dl.innerHTML=L?L.map((l,i)=>`<span class="${i===(st.sort==='year'?2:0)?'on':''}">${l}</span>`).join(''):['#e5534b','#e8a33d','#e5d64b','#5cb85c','#3d9ae8','#8b5cf6'].map((c,i)=>`<span class="sw${i===0?' on':''}" style="background:${c}"></span>`).join('');
+  }
+  let ft;const flashSay=k=>{flash=k;clearTimeout(ft);ft=setTimeout(()=>{flash=0;draw()},1500);draw()};
+  const pick=(k,i)=>{if(k==='sort'){const n=KS[i];if(n===st.sort)st.d=st.d?0:1;else{st.sort=n;st.d=n==='year'?1:0}}else st.view=KV[i]};
+  const pickSlide=(k,i)=>{if(k==='sort'){const n=KS[i];if(n!==st.sort){st.sort=n;st.d=n==='year'?1:0}}else st.view=KV[i]};
+  const close=()=>{st.open=null;hov=null;draw();el.querySelector('input').blur()};
+  const openIt=k=>{st.open=k;draw();if(k==='search')setTimeout(()=>el.querySelector('input').focus(),200);if(k==='sort'&&dz)centre(false)};
+  const idxAt=(k,x)=>{const bs=[...$x(k).querySelectorAll(k==='sort'?'[data-s]':'[data-v]')];let best=null,bd=1e9;bs.forEach((b,i)=>{const r=b.getBoundingClientRect();if(!r.width)return;const d=Math.abs(x-(r.left+r.width/2));if(d<bd){bd=d;best=i}});return best};
+  const nudge=(k,dir)=>{const s=$x(k).querySelector('.xi svg,.xi .cw');s&&s.animate([{transform:`translateX(${dir*16}px)`,opacity:0},{transform:'none',opacity:1}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'})};
+  // one pointer at a time: what it does depends on where it went down, how far it went and how fast
+  let pr=null;
+  el.addEventListener('pointerdown',e=>{
+    if(e.target.closest('input,[data-close]'))return;
+    const xi=e.target.closest('.xi'),k=xi&&xi.parentElement.dataset.k,row=!xi&&e.target.closest('.xb.o[data-k=sort] .xo:not(:has(.dz)),.xb.o[data-k=view] .xo');
+    if(xi&&(k==='sort'||k==='view')&&(f.slide||f.swipe)&&st.open!==k){pr={k,x:e.clientX,y:e.clientY,t:performance.now(),from:'circle',moved:false};
+      if(f.slide){if(f.swipe)pr.hold=setTimeout(()=>{if(pr&&!pr.fast)openIt(k)},170);else openIt(k)}
+      el.setPointerCapture(e.pointerId);e.preventDefault()}
+    else if(row){const k2=row.closest('.xb').dataset.k;pr={k:k2,x:e.clientX,y:e.clientY,from:'row',moved:false};hov={k:k2,i:idxAt(k2,e.clientX)};row.classList.add('drag');draw();el.setPointerCapture(e.pointerId);e.preventDefault()}
+  });
+  el.addEventListener('pointermove',e=>{if(!pr)return;const dx=e.clientX-pr.x,dy=e.clientY-pr.y,d=Math.hypot(dx,dy);if(d>8)pr.moved=true;
+    if(pr.from==='circle'&&st.open!==pr.k){if(d>24)pr.fast=true;return} // not open yet: a swipe in the making
+    if(pr.moved||pr.from==='row'){const i=idxAt(pr.k,e.clientX);if(i!=null&&(!hov||hov.i!==i)){hov={k:pr.k,i};$x(pr.k).querySelector('.xo').classList.add('drag');draw()}}});
+  el.addEventListener('pointerup',e=>{if(!pr)return;const p=pr;pr=null;clearTimeout(p.hold);skip=true;setTimeout(()=>skip=false,60);el.querySelectorAll('.xo.drag').forEach(r=>r.classList.remove('drag'));
+    const dx=e.clientX-p.x,dy=e.clientY-p.y,h=hov;hov=null;
+    if(p.from==='row'){if(h){p.moved?pickSlide(p.k,h.i):pick(p.k,h.i)}draw();if(p.k==='view'||p.moved)setTimeout(close,260);return}
+    if(st.open===p.k){ // opened under the thumb: slid and let go picks it; a still press leaves it open
+      if(p.moved&&h){pickSlide(p.k,h.i);draw();setTimeout(()=>{close();flashSay(p.k)},240)}else draw();return}
+    if(Math.abs(dx)>24&&Math.abs(dx)>Math.abs(dy)){const L=p.k==='sort'?KS:KV,c=L.indexOf(p.k==='sort'?st.sort:st.view),n=(c+(dx<0?1:-1)+L.length)%L.length;
+      pickSlide(p.k,n);draw();nudge(p.k,dx<0?1:-1);flashSay(p.k);return}
+    if(p.k==='sort'&&Math.abs(dy)>24){st.d=st.d?0:1;draw();flashSay('sort');return}
+    openIt(p.k)});
+  el.addEventListener('pointercancel',()=>{if(pr)clearTimeout(pr.hold);pr=null;hov=null;draw()});
+  el.addEventListener('click',e=>{
+    if(e.target.closest('[data-close]')){close();return}
+    if(skip)return;
+    const xi=e.target.closest('.xi');if(xi){const k=xi.parentElement.dataset.k;
+      if(k==='dir'){st.d=st.d?0:1;draw();flashSay('sort');return}
+      openIt(k);return}
+    const dw=e.target.closest('.dw');if(dw){if(dw.dataset.s===st.sort){st.d=st.d?0:1;draw()}else centreOn(dw);return}
+    if(!e.target.closest('.xb'))close()});
+  // the sort as a scrubber: the word in the middle is the sort; it settles where you let go
+  function centreOn(b,smooth=true){dz.scrollTo({left:b.offsetLeft+b.offsetWidth/2-dz.clientWidth/2,behavior:smooth?'smooth':'instant'})}
+  function centre(smooth){requestAnimationFrame(()=>{const b=dz.querySelector(`[data-s=${st.sort}]`);centreOn(b,smooth);shade()})}
+  function shade(){const r=dz.getBoundingClientRect(),c=r.left+r.width/2;dz.querySelectorAll('.dw').forEach(b=>{const q=b.getBoundingClientRect(),d=Math.abs(q.left+q.width/2-c);b.style.opacity=Math.max(.35,1-d/110);b.style.transform=`scale(${Math.max(.88,1-d/900)})`})}
+  if(dz){let t;dz.addEventListener('scroll',()=>{shade();clearTimeout(t);t=setTimeout(()=>{if(st.open!=='sort')return;const r=dz.getBoundingClientRect(),c=r.left+r.width/2;let best=null,bd=1e9;
+    dz.querySelectorAll('.dw').forEach(b=>{const q=b.getBoundingClientRect(),d=Math.abs(q.left+q.width/2-c);if(d<bd){bd=d;best=b}});
+    if(best&&best.dataset.s!==st.sort){st.sort=best.dataset.s;st.d=st.sort==='year'?1:0;draw()}},90)},{passive:true})}
+  el.addEventListener('keydown',e=>{if(e.key==='Escape'&&st.open)close()});
+  addEventListener('resize',draw);requestAnimationFrame(draw);draw();
+}
+const L5=[
+ ['K1','Press and slide','Press the sort or layout circle and it opens under your thumb; slide along to the one you want and let go. One gesture instead of open, pick, close. A quick tap still just opens it. The lit pill follows your finger and the line above reads out what you’re on.',{slide:1}],
+ ['K2','Swipe the circles','Swipe sideways on the sort circle to step to the next sort (its icon slides in, so it shows which sort you’re on); swipe up or down on it to flip the order. Swipe the layout circle to step Crate, Grid, Table. Tap still opens the row. The line above says where you landed, then goes.',{swipe:1}],
+ ['K3','Both','K1 and K2 together: swipe a circle for a quick step, or press and slide to jump straight to one.',{slide:1,swipe:1}],
+ ['K4','Sort as a scrubber','The sort opens as a little scrubber of words, like the dial: flick it and it settles on the one in the middle, with momentum. Tap the middle word to flip it (the arrow beside it turns). Layout keeps the sliding pill.',{dial:1}]];
+L5.forEach(([id,name,use,f])=>{ALL[id]=name;const st=document.createElement('div');st.className='st';st.dataset.id=id;
+  st.innerHTML=`<span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id} ${name}">★</button><div class="lrow"><div class="fr"><span class="k">Phone</span><div class="ph-live"></div></div><div class="fr"><span class="k">Laptop (bottom of the screen)</span><div class="lap-live"></div></div></div><span class="use">${use}</span>`;
+  $('#K').append(st);live5(st.querySelector('.ph-live'),false,f);live5(st.querySelector('.lap-live'),true,f)});
 })();
 let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-nav-picks')||'[]'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vinyl-nav-picks',JSON.stringify([...picks]))}catch(e){}};
