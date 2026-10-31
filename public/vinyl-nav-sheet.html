@@ -216,12 +216,12 @@ function dial2(W,busy){const lap=W>500,L=busy?['2011','2012','2013','2014','2015
 // the top in round two: the mark, and the filter centered
 function top2(c,right='',mw){const t=c.busy?`<span class="tag" style="${at({left:'50%',transform:'translateX(-50%)',top:c.cy-17,height:34,padding:`0 ${u(14)}`,'font-size':u(14),'max-width':mw||(c.lap?360:210)})}"><span>${LONG}</span><i>×</i></span>`:'';return t+right}
 // the bar: tabs = [{icon, on, label, cls}], then the search circle
-function bar2(c,tabs,{tw,labels,sep}={}){const lap=c.lap,h=lap?60:62,b=lap?24:30;tw=lap?(tw||64):(labels?58:54);
-  const items=tabs.map(t=>t==='|'?`<i class="hr"></i>`:`<span class="tab${t.on?' on':''}${t.cls?' '+t.cls:''}" style="${at({width:t.w||tw,height:h,'font-size':u(11)})}">${t.i}${labels&&t.l?`<span>${t.l}</span>`:''}</span>`).join('');
-  return`<div class="grpR" style="${at({left:0,right:0,bottom:b,'justify-content':'center',gap:u(12)})}"><div class="tabs glass" style="${at({height:h,padding:`0 ${u(10)}`,gap:u(4)})}">${items}</div><span class="rnd glass" style="${at({width:h,height:h})}">${I.s}</span></div>`}
+function bar2(c,tabs,{tw,labels,sep,extra}={}){const lap=c.lap,h=lap?60:62,b=lap?24:30;tw=lap?(tw||64):(labels?58:54);
+  const items=tabs.map(t=>t==='|'?`<i style="${at({position:'relative',width:8,flex:'none'})}"></i>`:`<span class="tab${t.on?' on':''}${t.cls?' '+t.cls:''}" style="${at({width:t.w||tw,height:h,'font-size':u(11)})}">${t.i}${labels&&t.l?`<span>${t.l}</span>`:''}</span>`).join('');
+  return`<div class="grpR" style="${at({left:0,right:0,bottom:b,'justify-content':'center',gap:u(12)})}"><div class="tabs glass" style="${at({height:h,padding:`0 ${u(10)}`,gap:u(4)})}">${items}</div>${extra?`<span class="rnd glass${extra.on?' on':''}" style="${at({width:h,height:h,position:'relative',color:extra.on?'#fff':'#9a9aa0'})}">${extra.i}</span>`:''}<span class="rnd glass" style="${at({width:h,height:h})}">${I.s}</span></div>`}
 const LAY=(c,cls)=>[{i:I.crate,on:!c.busy,l:'Crate',cls:!c.busy&&cls},{i:I.wall,on:c.busy,l:'Grid',cls:c.busy&&cls},{i:I.table,l:'Table'}];
 const G=[
- ['G1','Sort as a fourth tab','The capsule holds Crate, Grid and Table, then a hairline and the sort, wearing what it sorts by. The current layout is white. A changed sort turns white with a small dot under it, like A. Tapping the sort opens its menu upward.',
+ ['G1','Sort as a fourth tab','The capsule holds Crate, Grid and Table, then a little extra space and the sort, wearing what it sorts by. The current layout is white. A changed sort turns white with a small dot under it, like A. Tapping the sort opens its menu upward.',
   c=>top2(c),
   c=>bar2(c,[...LAY(c),'|',{i:c.busy?I.year:I.artist,on:c.busy,cls:c.busy?'dot':''}])],
  ['G2','Tabs with words','The same four tabs, each with a small word under the icon: Crate, Grid, Table, and the sort’s own name (Artist, or Newest). Nothing needs opening to read where you are.',
@@ -230,6 +230,9 @@ const G=[
  ['G3','Sort up top, in words','The capsule is only the three layouts. The sort moves to the top right as words, across from the mark, with the filter between them. The top reads as “what you’re looking at”; the bottom is “how”.',
   c=>top2(c,`<span class="tx" style="${at({right:c.lap?56:20,top:c.cy-11,'font-size':u(15)})}"><b>${c.busy?'Newest first':'By artist'}</b>${CV}</span>`,c.lap?0:136),
   c=>bar2(c,LAY(c))],
+ ['G5','Sort in its own circle','The capsule is only the three layouts. The sort gets its own glass circle between the capsule and search, gray at rest and white when changed. Each object on the bar does one job.',
+  c=>top2(c),
+  c=>bar2(c,LAY(c),{extra:{i:c.busy?I.year:I.artist,on:c.busy}})],
  ['G4','A lit slot','Like G1, but the current layout sits in a faint lighter pill inside the capsule instead of only turning white. Easier to spot at a glance, a little less quiet.',
   c=>top2(c),
   c=>bar2(c,[...LAY(c,'slot'),'|',{i:c.busy?I.year:I.artist,on:c.busy,cls:c.busy?'dot':''}])],
@@ -250,7 +253,7 @@ function sticker([id,name,use,bar,bottom,round2]){
    </div><span class="use">${use}</span>`;
   $(round2?'#G':'#S').append(el);
 }
-D.forEach(sticker);G.forEach(g=>sticker([...g,true]));
+D.forEach(sticker);G.slice().sort((a,b)=>a[0]<b[0]?-1:1).forEach(g=>sticker([...g,true]));
 
 let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-nav-picks')||'[]'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vinyl-nav-picks',JSON.stringify([...picks]))}catch(e){}};
