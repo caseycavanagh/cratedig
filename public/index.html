@@ -1250,6 +1250,9 @@ html.phone .kd,html.phone body.filtering .kd,html.phone body.quiet .kd{bottom:ca
 body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .xb.o) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* the list rises from the field: above it, across the screen on a phone, centered over it on a laptop */
 html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
+body.walling .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
+.wall,.tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 120px)}
+@media (max-width:700px){.tbl thead{display:none}} /* the bar's sort button sorts the table too, so the table's own "Sorted by" line goes */
 html:not(.phone) .sl{top:auto;right:auto;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 10px);width:min(440px,calc(100vw - 28px))}
 html.phone .sx,html.phone body.searching .sx{display:none}
 .find .chip,html.phone .find .chip{position:absolute;top:0;left:50%;translate:-50% 0;margin:0;max-width:calc(100vw - 2*(max(14px,env(safe-area-inset-left)) + 56px))}
