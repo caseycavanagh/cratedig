@@ -56,6 +56,8 @@ button{font:inherit;color:inherit}
 /* the crate */
 .crate{position:relative;height:calc(var(--S)*1.95);margin-top:8px;perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% - var(--S)*1.13);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:none}
 .crate.dragging{cursor:grabbing}
+/* on a phone the records behind rise well above the crate's box; the space over them flips the crate too */
+html.phone .crate::before{content:'';position:absolute;left:0;right:0;bottom:100%;height:min(40vh,320px)}
 /* the front record is a handle: grab it and lift it out */
 .rc.cur{cursor:grab}.crate.lifting,.crate.lifting .rc{cursor:grabbing}
 /* hover nudges the front cover a few pixels toward the pointer's side: on the cover, so it never disturbs the crate's motion, and on its own spring in JS (see "nudge") */
