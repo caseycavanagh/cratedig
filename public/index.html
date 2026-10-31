@@ -2056,6 +2056,7 @@ function openRecord(deep,pulled){
   const r=order[cur];fill(r);
   timers.forEach(clearTimeout);timers=[];
   open.hidden=false;open.scrollTop=0;lampOn();
+  document.body.classList.add('reading'); // the grid or the list fades back behind it, however the record was opened (a row, search, a link)
   ptr=null;hvOff();if(!PHONE)aimNudge(); // the pointer is in the open view now; the crate waits for it to come back
   document.documentElement.style.overflow='hidden';
   if(PHONE)aimPeeks();
