@@ -1223,7 +1223,10 @@ html .dock .xb.o>.fb,html .dock .xb.o>.fb.lb,html .dock .xb.o>.fb.lb.sb.on{opaci
 .dock .xb>.vw button>:not(svg):not(.cw){display:none}
 .dock .xb>.vw svg{width:24px;height:24px;display:block}
 .dock .xb>.vw .cw{width:20px;height:20px;margin:0}
-.dock .xb>.vw .vab svg{width:22px;height:22px;fill:currentColor} /* About, the mark, last in the layout row */
+html .dock .xb>.fb.dr{color:var(--t2)}
+.dock .xb>.fb.dr svg{width:22px;height:22px;transition:rotate .35s cubic-bezier(.22,1,.36,1)}
+.dock .xb>.fb.dr[data-d="-1"] svg{rotate:180deg}
+@media(prefers-reduced-motion:reduce){.dock .xb>.fb.dr svg{transition:none}}
 .dock .xb>.q,html.phone .dock .xb>.q{all:unset;position:absolute;inset:-1px;display:flex;align-items:center;border-radius:999px}
 .dock .xb>.q .qi,html.phone .dock .xb>.q .qi{left:calc(var(--H)/2 - 12px);color:var(--t2);pointer-events:none}
 .dock .xb>.q .qi svg{width:24px;height:24px}
@@ -3328,10 +3331,6 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   fb.onclick=()=>tray(pills.hidden);
   lb.onclick=()=>views(vwEl.hidden);
   vwEl.addEventListener('click',e=>{if(e.target.closest('button[data-v]'))setTimeout(()=>views(false),120)});
-  // About, at the foot of the layout menu, now that the mark takes you back to the front
-  const ab=document.createElement('button');ab.type='button';ab.className='vab';ab.setAttribute('aria-label','About');ab.setAttribute('aria-haspopup','dialog');
-  ab.innerHTML='<svg aria-hidden="true"><use href="#mark"/></svg><span>About</span>';vwEl.append(ab);
-  ab.onclick=()=>{views(false);aboutOpen()};
   $('.logo').addEventListener('click',()=>{views(false);tray(false);sorts(false)});
   pills.addEventListener('keydown',e=>{if(e.key==='Escape'){tray(false);fb.focus()}});
   vwEl.addEventListener('keydown',e=>{if(e.key==='Escape'){views(false);lb.focus()}});
@@ -3658,23 +3657,27 @@ html.phone .sh-row{display:none}
   const page=$('.page'),qf=$('#qf'),sb=$('.fb.sb'),lb=$('.fb.lb:not(.sb)'),so=$('#sorts'),vw=$('#views'),body=document.body;
   const dock=document.createElement('div');dock.className='dock';dock.setAttribute('role','toolbar');dock.setAttribute('aria-label','Search, sort and layout');
   const cell=(k,...n)=>{const c=document.createElement('div');c.className='xb';c.dataset.k=k;c.append(...n);return c};
-  const cq=cell('q',qf),cs=cell('sort',sb,so),cv=cell('view',lb,vw);
+  // the way the sort runs gets its own circle beside it: one tap flips it
+  const dr=document.createElement('button');dr.type='button';dr.className='fb lb dr';
+  dr.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/></svg>';
+  const cq=cell('q',qf),cs=cell('sort',sb,so),cd=cell('dir',dr),cv=cell('view',lb,vw);
   const dx=document.createElement('button');dx.type='button';dx.className='xb dx gone';dx.setAttribute('aria-label','Close');
   dx.innerHTML='<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
-  dock.append(cq,cs,cv,dx);
+  dock.append(cq,cs,cd,cv,dx);
   const say=document.createElement('p');say.className='dsay';say.setAttribute('aria-hidden','true');
   $('.find').after(dock,say);
   const cells={q:cq,sort:cs,view:cv},open=()=>qf.matches(':focus-within')||qf.classList.contains('has')||body.classList.contains('searching')?'q':!so.hidden?'sort':!vw.hidden?'view':'';
   const word=()=>{const b=$('[aria-pressed=true]',so);if(!b)return'';const l=b.getAttribute('aria-label').replace(/^Sort by /,''),[k,d]=l.split(', ');
     return d?(/first$/.test(d)?d[0].toUpperCase()+d.slice(1):k[0].toUpperCase()+k.slice(1)+', '+d):k[0].toUpperCase()+k.slice(1)};
-  let was='';
+  let was='',flash=0;
   function draw(){
     so.style.right=''; // the old menu placed itself under its button; here it fills its circle
     const k=open(),gap=12,H=cq.offsetHeight||54,avail=dock.clientWidth-parseFloat(getComputedStyle(dock).paddingLeft)*2;
     for(const [n,c] of Object.entries(cells)){const o=n===k;c.classList.toggle('o',o);c.classList.toggle('gone',!!k&&!o);
       c.style.width=o?Math.min(avail-H-gap,document.documentElement.classList.contains('phone')?avail:440)+'px':''}
+    cd.classList.toggle('gone',!!k);dr.dataset.d=SORT.d;dr.setAttribute('aria-label',(word()||'Sort')+', tap to flip');
     dx.classList.toggle('gone',!k);
-    say.textContent=k==='sort'?word():k==='view'?($('[aria-pressed=true]',vw)?.textContent||''):'';say.classList.toggle('on',!!say.textContent);
+    say.textContent=k==='sort'||(!k&&flash)?word():k==='view'?($('[aria-pressed=true]',vw)?.textContent||''):'';say.classList.toggle('on',!!say.textContent);
     say.style.transform=k?`translateX(${-(H+gap)/2}px)`:''; // over the open capsule, not the capsule and × together
     if(k!==was){if(!k&&dock.contains(document.activeElement)&&document.activeElement!==qf.querySelector('input'))document.activeElement.blur?.();was=k}
   }
@@ -3693,6 +3696,7 @@ html.phone .sh-row{display:none}
     else if(k==='q'){if(qf.classList.contains('has'))$('#qx').click();if(body.classList.contains('searching'))$('.sx').click();qf.querySelector('input').blur()}
     draw();dx.blur()};
   dx.onclick=shut;
+  dr.onclick=()=>{setSort(SORT.k);clearTimeout(flash);flash=setTimeout(()=>{flash=0;draw()},1600);draw()}; // the line above says which way it now runs, then goes
   draw();
 })();
 </script>
