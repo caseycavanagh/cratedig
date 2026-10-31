@@ -127,7 +127,8 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 .caption span{color:var(--m);font-size:15px}
 
 /* a record lifted out of the crate */
-.open{--O:min(var(--R),calc(100vw - 680px));position:fixed;inset:0;z-index:10;overflow:hidden auto;overscroll-behavior:contain} /* a record sliding off to the side never brings in a scrollbar */
+.open{--O:min(var(--R),calc(100vw - 680px));position:fixed;inset:0;z-index:10;overflow:hidden auto;overscroll-behavior:none;scrollbar-width:none} /* a record sliding off to the side never brings in a scrollbar; the view never bounces past its top, and shows no scrollbar */
+.open::-webkit-scrollbar{display:none}
 .open[hidden]{display:none}
 .open:focus{outline:none}
 #close{position:fixed;top:24px;left:24px;z-index:3;opacity:0;transition:opacity .3s,transform .5s var(--flip)}
@@ -2090,6 +2091,9 @@ function coast(v){
   coastF=requestAnimationFrame(f);
 }
 open.addEventListener('pointerdown',()=>{cancelAnimationFrame(coastF);coastF=0},true);
+// at the top of the details, a finger pulling down doesn't drag the whole view down after it (older iOS ignores overscroll-behavior)
+{let ty=0;open.addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:true});
+  open.addEventListener('touchmove',e=>{const y=e.touches[0].clientY;if(open.scrollTop<=0&&y>ty&&e.cancelable&&!e.target.closest('#stage'))e.preventDefault();ty=y},{passive:false})}
 // not far enough: the view fades back in step with the record, then the pile hides again without a flash
 // (the pull is set on the open view's page and the crate alone, so each move restyles only them)
 const opage=$('.o-page'),veil=$('#veil'),setPull=p=>{opage.style.setProperty('--pull',p.toFixed(3));veil.style.opacity=(1-p).toFixed(3)};
