@@ -1196,6 +1196,10 @@ html.phone body.searching .page>:not(.find):not(.dock){opacity:.3}
 .crate.lifted~.find>.fb.lb{rotate:90deg;scale:.6}
 html:has(.crate.lifted) .find>.q,html:not(:has(.crate.lifted)) #oq{transition:none}
 html:has(.crate.lifted) .find>.q{scale:1}
+/* the mark stays put over an open record too, above it, where it takes you back to the front */
+html:has(.open:not([hidden])) .find{z-index:11}
+html:has(.open:not([hidden])) .find::before{display:none}
+html:has(.open:not([hidden])) .find>.logo{opacity:1;visibility:visible;scale:1;pointer-events:auto;transition:none}
 #oq,.open.in #oq{opacity:0;transition:none}
 html:has(.crate.lifted) #oq{opacity:1}
 #close{scale:.6;rotate:-90deg;transition:opacity .15s,scale .3s var(--spring),rotate .3s var(--spring)}
@@ -2321,11 +2325,14 @@ function aboutClose(){if(!about.open||about.closing)return;about.classList.remov
   setTimeout(()=>{about.close();about.closing=false;document.activeElement?.blur();if(open.hidden)document.documentElement.style.overflow=''},reduce?0:200)}
 // the mark takes you back to the front: search and filter off, the first record in front (the grid and the table back to the top).
 // The sort and the layout stay as you chose them
-$('.logo').addEventListener('click',e=>{e.preventDefault();if(!open.hidden)return;menuOff();
+// From an open record, the record goes back in first, then the crate flips to the front
+function front(){menuOff();
   if(q.value){q.value='';qSync()}if(filt)arrange(null);q.blur();
   if(document.body.classList.contains('walling'))go(0,true);else if(cur)jump(0);
-  for(const p of [$('#wall'),$('#tbl')])if(!p.hidden)p.scrollTo({top:0,behavior:reduce?'auto':'smooth'});
-  e.currentTarget.blur()});
+  for(const p of [$('#wall'),$('#tbl')])if(!p.hidden)p.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}
+$('.logo').addEventListener('click',e=>{e.preventDefault();e.currentTarget.blur();
+  if(open.hidden)return front();
+  const mo=new MutationObserver(()=>{if(open.hidden){mo.disconnect();front()}});mo.observe(open,{attributes:true,attributeFilter:['hidden']});closeRecord()});
 $('#abX').onclick=aboutClose;
 // hovering the big mark spins it like a record at 33⅓ rpm; moving off lets it coast one more turn back to upright
 {let t0=0,co=null;const rest=0;
