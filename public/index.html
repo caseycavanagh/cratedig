@@ -601,7 +601,7 @@ body.walling .find .chip{display:none}
 .gms i{width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
 @media (min-width:700px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:15px}.gms .yr{font-size:13px}.gms i{width:22px;height:22px}}
 /* on a phone the group labels start where the logo does, and the covers end where the buttons at the top do */
-@media (max-width:699px){.gms p{right:auto;left:-26px;width:22px;align-items:flex-start}.gms .yr{font-size:10px}}
+@media (max-width:699px){.tiles{margin:0}} /* on a phone the wall is centered with even margins, and the turns of the sort go unmarked */
 .tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
@@ -1186,7 +1186,7 @@ html:not(.phone) .sl b{font-size:15px}
 html:not(.phone) .sl button:hover{background:var(--hov)}
 html:not(.phone) .sl button.on{background:var(--sel)}
 body.searching .qnone{display:none}
-html.phone body.searching .page>:not(.find){opacity:.3}
+html.phone body.searching .page>:not(.find):not(.dock){opacity:.3}
 @media(prefers-reduced-motion:reduce){html:not(.phone) body.searching .sl:not(.idle){animation:none}}
 /* the bar hands over to an open record's buttons in place: search never moves or blinks (the two buttons swap in the same
    frame, on the same signal), the layout button turns into × and back, and the rest ease out and in around them */
@@ -1203,6 +1203,83 @@ html:has(.crate.lifted) .open:not([hidden]) #close{opacity:1;scale:1;rotate:0deg
 .find>.fb.lb{transition-delay:0s}
 html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3)}
 @media(prefers-reduced-motion:reduce){.find>*,.crate.lifted~.find>*,#close,html:has(.crate.lifted) .open:not([hidden]) #close{transition:opacity .15s;scale:none;rotate:none}.crate.lifted~.find>.fb.lb{scale:none;rotate:none}}
+/* the bottom bar: search, sort and layout as three glass circles. Tapping one opens it across the bar; the other two fold
+   away and a × takes their place. Up top, only the mark and the filter you're in, centered */
+.dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:6;left:0;right:0;bottom:var(--db);display:flex;justify-content:center;gap:12px;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s,bottom .25s cubic-bezier(.22,1,.36,1)}
+html.phone .dock{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
+body:not(.ready) .dock,.crate.lifted~.dock{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+body.ready .dock{animation:barIn .7s cubic-bezier(.22,1,.36,1) .32s backwards}
+body.seek .crate.lifted~.dock{opacity:1;visibility:visible;z-index:11;transition:none}
+html.phone body.searching .page>.dock:not(.find){opacity:1}
+html.phone body.searching .dock{bottom:calc(var(--kb,0px) + 10px + env(safe-area-inset-bottom))}
+.dock .xb{all:unset;pointer-events:auto;position:relative;flex:none;box-sizing:border-box;width:var(--H);height:var(--H);border-radius:999px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);transition:width .5s cubic-bezier(.22,1,.36,1),margin .5s cubic-bezier(.22,1,.36,1),opacity .2s,border-width 0s}
+.dock .xb.gone{width:0;margin:0 -6px;opacity:0;border-width:0;pointer-events:none;overflow:hidden;transition:width .5s cubic-bezier(.22,1,.36,1),margin .5s cubic-bezier(.22,1,.36,1),opacity .15s,border-width 0s .5s}
+.dock .xb:has(>.fb.sb[hidden]){display:none}
+html .dock .xb>.fb,html .dock .xb>.fb.lb,html .dock .xb>.fb.lb.sb.on{all:unset;position:absolute;left:-1px;top:-1px;width:var(--H);height:var(--H);display:grid;place-items:center;border-radius:50%;cursor:pointer;color:var(--t2);transition:opacity .2s,color .2s}
+html .dock .xb>.fb:hover,html .dock .xb>.fb.lb.sb.on{color:#fff}
+html .dock .xb.o>.fb,html .dock .xb.o>.fb.lb,html .dock .xb.o>.fb.lb.sb.on{opacity:0;pointer-events:none}
+.dock .xb>.fb:focus-visible,.dock .dx:focus-visible{outline:1px solid var(--ring);outline-offset:-4px}
+.dock .xb>.fb svg{width:24px;height:24px;display:block}
+.dock .xb.o>.fb{opacity:0;pointer-events:none}
+.dock .xb>.vw,html.phone .dock .xb>.vw{all:unset;position:absolute;inset:0;display:flex;align-items:center;justify-content:space-around;padding:0 6px;animation:dIn .3s .12s backwards}
+.dock .xb>.vw[hidden],html.phone .dock .xb>.vw[hidden]{display:none}
+@keyframes dIn{from{opacity:0}}
+.dock .xb>.vw button,html.phone .dock .xb>.vw button{all:unset;cursor:pointer;flex:1;height:calc(var(--H) - 12px);display:grid;place-items:center;border-radius:999px;color:var(--t3);background:none;transition:color .2s}
+.dock .xb>.vw button:hover,.dock .xb>.vw button[aria-pressed=true],html.phone .dock .xb>.vw button[aria-pressed=true]{color:#fff;background:none}
+.dock .xb>.vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.dock .xb>.vw button>:not(svg):not(.cw){display:none}
+.dock .xb>.vw svg{width:24px;height:24px;display:block}
+.dock .xb>.vw .cw{width:20px;height:20px;margin:0}
+/* the sort circle shows the sort it's on; press one and slide along its row to pick, a lit pill following the finger */
+.dock .xb>.fb .cw{width:22px;height:22px;margin:0}
+.dock .xb>.fb,.dock .xb>.vw{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.dock .xb>.fb>*,.dock .xb>.vw button>*{transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.dock .xb>.fb:active>*,.dock .xb>.vw button:active>*{transform:scale(.86)}
+.dock .th{position:absolute;top:6px;bottom:6px;left:calc(6px + (100% - 12px) * var(--i,0) / var(--n,3));width:calc((100% - 12px) / var(--n,3));border-radius:999px;background:#ffffff1a;opacity:0;pointer-events:none;transition:left .45s cubic-bezier(.22,1,.36,1),opacity .2s,background .2s}
+.dock .xb.o>.th{opacity:1;transition:left .45s cubic-bezier(.22,1,.36,1),opacity .3s .12s,background .2s}
+.dock .xb.drag>.th{background:#ffffff29;transition:left .18s cubic-bezier(.22,1,.36,1),background .2s}
+html .dock .xb.drag>.vw button[aria-pressed=true]{color:var(--t3)}
+html .dock .xb.drag>.vw button.hv{color:#fff}
+@media(prefers-reduced-motion:reduce){.dock .th,.dock .xb>.fb>*,.dock .xb>.vw button>*{transition:none}}
+html .dock .xb>.fb.dr{color:var(--t2)}
+.dock .xb>.fb.dr svg{width:22px;height:22px;transition:rotate .35s cubic-bezier(.22,1,.36,1)}
+.dock .xb>.fb.dr[data-d="-1"] svg{rotate:180deg}
+@media(prefers-reduced-motion:reduce){.dock .xb>.fb.dr svg{transition:none}}
+.dock .xb>.q,html.phone .dock .xb>.q{all:unset;position:absolute;inset:-1px;display:flex;align-items:center;border-radius:999px}
+.dock .xb>.q .qi,html.phone .dock .xb>.q .qi{left:calc(var(--H)/2 - 12px);color:var(--t2);pointer-events:none}
+.dock .xb>.q .qi svg{width:24px;height:24px}
+.dock .xb>.q input,html.phone .dock .xb>.q input,.dock .xb>.q.has input{all:unset;box-sizing:border-box;width:100%;height:100%;padding:0 18px 0 calc(var(--H)/2 + 22px);font-size:16px;color:#fff;cursor:text}
+
+.dock .xb:not(.o)>.q input{color:transparent;cursor:pointer;padding:0}
+.dock .xb:not(.o)>.q input::placeholder{color:transparent}
+.dock .xb>.q input::placeholder{color:var(--m)}
+.dock .xb>.q .qn{display:none}
+.dock .xb>.q .qx{right:12px;width:28px;height:28px;background:none;color:var(--m)}
+.dock .xb>.q .qx svg{width:12px;height:12px}
+.dock .xb>.q .qx{display:none} /* the round × beside the field clears and closes; one × is enough */
+.dock .xb>.q .qnone{bottom:calc(100% + 10px);top:auto;left:50%;right:auto;translate:-50% 0;width:min(380px,calc(100vw - 28px))}
+.dock .xb>.q:has(input:focus-visible){outline:none}
+.dock .dx{cursor:pointer;display:grid;place-items:center;color:var(--t1)}
+.dock .dx svg{width:18px;height:18px}
+.dock .xb.dx:hover{color:#fff}
+.dsay{position:fixed;z-index:6;left:0;right:0;bottom:calc(var(--db,18px) + var(--H,54px) + 10px);margin:0;text-align:center;font-size:13px;color:var(--t2);pointer-events:none;opacity:0;transition:opacity .15s}
+.dsay.on{opacity:1;transition:opacity .25s .1s}
+html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
+.dsay{--db:calc(env(safe-area-inset-bottom) + 18px)}
+.kd,body.filtering .kd,body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 34px)}
+html.phone .kd,html.phone body.filtering .kd,html.phone body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 34px)}
+body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .xb.o) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+/* the list rises from the field: above it, across the screen on a phone, centered over it on a laptop */
+html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
+body.walling .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
+.wall,.tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 120px)}
+@media (max-width:700px){.tbl thead{display:none}} /* the bar's sort button sorts the table too, so the table's own "Sorted by" line goes */
+html:not(.phone) .sl{top:auto;right:auto;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 10px);width:min(440px,calc(100vw - 28px))}
+html.phone .sx,html.phone body.searching .sx{display:none}
+.find .chip,html.phone .find .chip{position:absolute;top:0;left:50%;translate:-50% 0;margin:0;max-width:calc(100vw - 2*(max(14px,env(safe-area-inset-left)) + 56px))}
+.find>.sp{display:none!important}
+.find>.ed{margin-left:auto}
+@media(prefers-reduced-motion:reduce){.dock,.dock .xb,.dock .xb.gone,body.ready .dock{transition:opacity .15s;animation:none}.dock .xb>.vw{animation:none}}
 </style>
 </head>
 <body>
@@ -2844,6 +2921,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     order.forEach((r,i)=>{let g=group(r);if(SORT.k==='year')g=g==='—'?g:g.slice(0,3)+'0';if(g===g0)return;g0=g;
       const row=Math.floor(i/n);if(!rows.has(row))rows.set(row,[]);rows.get(row).push(g)});
     const ts=tiles.querySelectorAll('.tile');
+    if(innerWidth<700){marks.innerHTML='';return} // a phone has no margin to spare: just the wall, centered
     marks.innerHTML=[...rows].map(([row,gs])=>`<p style="top:${ts[row*n]?.offsetTop||0}px">${gs.map(g=>SORT.k==='color'?`<i style="background:${hueInk(+g)}"></i>`:`<span${SORT.k==='year'?' class="yr"':''}>${SORT.k==='year'?(g==='—'?'No date':'’'+g.slice(2)+'s'):g}</span>`).join('')}</p>`).join('');
   }
   new ResizeObserver(()=>placeMarks()).observe(tiles);
@@ -3299,14 +3377,10 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   fb.onclick=()=>tray(pills.hidden);
   lb.onclick=()=>views(vwEl.hidden);
   vwEl.addEventListener('click',e=>{if(e.target.closest('button[data-v]'))setTimeout(()=>views(false),120)});
-  // About, at the foot of the layout menu, now that the mark takes you back to the front
-  const ab=document.createElement('button');ab.type='button';ab.className='vab';ab.setAttribute('aria-label','About');ab.setAttribute('aria-haspopup','dialog');
-  ab.innerHTML='<svg aria-hidden="true"><use href="#mark"/></svg><span>About</span>';vwEl.append(ab);
-  ab.onclick=()=>{views(false);aboutOpen()};
   $('.logo').addEventListener('click',()=>{views(false);tray(false);sorts(false)});
   pills.addEventListener('keydown',e=>{if(e.key==='Escape'){tray(false);fb.focus()}});
   vwEl.addEventListener('keydown',e=>{if(e.key==='Escape'){views(false);lb.focus()}});
-  addEventListener('pointerdown',e=>{if(e.target.closest('.find'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
+  addEventListener('pointerdown',e=>{if(e.target.closest('.find,.dock'))return;if(!pills.hidden)tray(false);if(!vwEl.hidden)views(false)});
   const arrange2=arrange;arrange=function(...a){const n=arrange2.apply(this,a);mark();return n};
   mark();
   // a filter or a sort going on or coming off: the view settles into its new order. The grid's covers already glide;
@@ -3393,7 +3467,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   sx.onclick=()=>leave();
   $('.logo').addEventListener('click',()=>leave()); // the mark takes you back to the front: the list goes too
   // a laptop: a click anywhere else puts the list away and leaves the crate as you narrowed it
-  addEventListener('pointerdown',e=>{if(open1&&(!ph()||seeking())&&!e.target.closest('.find,.sl'))leave(true)},true);
+  addEventListener('pointerdown',e=>{if(open1&&(!ph()||seeking())&&!e.target.closest('.find,.dock,.sl'))leave(true)},true);
   // a record from the list opens straight from the whole crate
   sl.addEventListener('click',e=>{const b=e.target.closest('[data-slug]');if(!b)return;const r=RECORDS.find(x=>x.slug===b.dataset.slug);
     const im=b.querySelector('img,.sw');pickFrom=im?im.getBoundingClientRect():null;clearTimeout(pickT);pickT=setTimeout(()=>{pickFrom=null},900);
@@ -3472,5 +3546,80 @@ html.phone .ab-sh{margin-top:20px}
 })();
 </script>
 <div class="sedge t" aria-hidden="true"></div><div class="sedge b" aria-hidden="true"></div>
+<script>
+// The bottom bar: search, sort and layout leave the top bar for three circles at the bottom. Each opens across the bar
+// (search into its field, sort and layout into a row of their choices); the other two fold away and × closes it.
+// The menus and the field are the same ones as before, so what they do is unchanged; this only moves and watches them.
+(()=>{
+  const page=$('.page'),qf=$('#qf'),sb=$('.fb.sb'),lb=$('.fb.lb:not(.sb)'),so=$('#sorts'),vw=$('#views'),body=document.body;
+  const dock=document.createElement('div');dock.className='dock';dock.setAttribute('role','toolbar');dock.setAttribute('aria-label','Search, sort and layout');
+  const cell=(k,...n)=>{const c=document.createElement('div');c.className='xb';c.dataset.k=k;c.append(...n);return c};
+  // the way the sort runs gets its own circle beside it: one tap flips it
+  const dr=document.createElement('button');dr.type='button';dr.className='fb lb dr';
+  dr.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/></svg>';
+  const cq=cell('q',qf),cs=cell('sort',sb,so),cd=cell('dir',dr),cv=cell('view',lb,vw);
+  const th=n=>{const t=document.createElement('i');t.className='th';t.style.setProperty('--n',n);return t},ts=th(so.children.length||5),tv=th(3);cs.prepend(ts);cv.prepend(tv);
+  const dx=document.createElement('button');dx.type='button';dx.className='xb dx gone';dx.setAttribute('aria-label','Close');
+  dx.innerHTML='<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
+  dock.append(cq,cs,cd,cv,dx);
+  const say=document.createElement('p');say.className='dsay';say.setAttribute('aria-hidden','true');
+  $('.find').after(dock,say);
+  const cells={q:cq,sort:cs,view:cv},open=()=>qf.matches(':focus-within')||qf.classList.contains('has')||body.classList.contains('searching')?'q':!so.hidden?'sort':!vw.hidden?'view':'';
+  const word=()=>{const b=$('[aria-pressed=true]',so);if(!b)return'';const l=b.getAttribute('aria-label').replace(/^Sort by /,''),[k,d]=l.split(', ');
+    return d?(/first$/.test(d)?d[0].toUpperCase()+d.slice(1):k[0].toUpperCase()+k.slice(1)+', '+d):k[0].toUpperCase()+k.slice(1)};
+  let was='',flash=0,hov=null;
+  const rowOf=k=>[...(k==='sort'?so:vw).querySelectorAll(k==='sort'?'[data-k]':'[data-v]')];
+  const ahead=b=>{const k=b.dataset.k;if(k===SORT.k)return word();return k==='year'?'Oldest first':k==='color'?'Reds first':k[0].toUpperCase()+k.slice(1)+', A to Z'};
+  function draw(){
+    so.style.right=''; // the old menu placed itself under its button; here it fills its circle
+    const k=open(),gap=12,H=cq.offsetHeight||54,avail=dock.clientWidth-parseFloat(getComputedStyle(dock).paddingLeft)*2;
+    for(const [n,c] of Object.entries(cells)){const o=n===k;c.classList.toggle('o',o);c.classList.toggle('gone',!!k&&!o);
+      c.style.width=o?Math.min(avail-H-gap,document.documentElement.classList.contains('phone')?avail:440)+'px':''}
+    for(const [c,n] of [[cs,'sort'],[cv,'view']]){const r=rowOf(n),h=hov&&hov.k===n?hov.i:r.findIndex(b=>b.getAttribute('aria-pressed')==='true');
+      c.querySelector('.th').style.setProperty('--i',Math.max(0,h));c.classList.toggle('drag',!!(hov&&hov.k===n));r.forEach((b,i)=>b.classList.toggle('hv',!!(hov&&hov.k===n&&i===hov.i)))}
+    cd.classList.toggle('gone',!!k);dr.dataset.d=SORT.d;dr.setAttribute('aria-label',(word()||'Sort')+', tap to flip');
+    dx.classList.toggle('gone',!k);
+    say.textContent=hov?(hov.k==='sort'?ahead(rowOf('sort')[hov.i]):rowOf('view')[hov.i].textContent):k==='sort'||(!k&&flash==='sort')?word():k==='view'||(!k&&flash==='view')?($('[aria-pressed=true]',vw)?.textContent||''):'';say.classList.toggle('on',!!say.textContent);
+    say.style.transform=k?`translateX(${-(H+gap)/2}px)`:''; // over the open capsule, not the capsule and × together
+    if(k!==was){if(!k&&dock.contains(document.activeElement)&&document.activeElement!==qf.querySelector('input'))document.activeElement.blur?.();was=k}
+  }
+  new MutationObserver(draw).observe(so,{attributes:true,attributeFilter:['hidden','aria-pressed'],subtree:true,childList:true});
+  new MutationObserver(draw).observe(vw,{attributes:true,attributeFilter:['hidden','aria-pressed'],subtree:true});
+  new MutationObserver(draw).observe(qf,{attributes:true,attributeFilter:['class']});
+  new MutationObserver(draw).observe(body,{attributes:true,attributeFilter:['class']});
+  qf.addEventListener('focusin',draw);qf.addEventListener('focusout',()=>setTimeout(draw));addEventListener('resize',draw);
+  // a tap on the folded search opens it in place
+  cq.addEventListener('pointerdown',e=>{if(!cq.classList.contains('o')&&e.target!==qf.querySelector('input')){e.preventDefault();qf.querySelector('input').focus()}});
+  // the × acts on the press, before the taps-elsewhere-close handlers can fold the bar under the finger
+  let eat=0;dx.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();shut();eat=performance.now()});
+  addEventListener('click',e=>{if(performance.now()-eat<600){eat=0;e.preventDefault();e.stopPropagation()}},true); // the tap's own click lands on whatever now sits under it
+  const shut=()=>{const k=open();if(!k)return;
+    if(k==='sort')sb.click();else if(k==='view')lb.click();
+    else if(k==='q'){if(qf.classList.contains('has'))$('#qx').click();if(body.classList.contains('searching'))$('.sx').click();qf.querySelector('input').blur()}
+    draw();dx.blur()};
+  dx.onclick=shut;
+  // press the sort or layout circle and it opens under the thumb: slide along to one and let go to pick it and fold back.
+  // A still press just leaves it open. On an open row, dragging moves the lit pill the same way.
+  let pr=null;const at=(k,x)=>{let best=null,bd=1e9;rowOf(k).forEach((b,i)=>{const r=b.getBoundingClientRect();if(!r.width)return;const d=Math.abs(x-r.left-r.width/2);if(d<bd){bd=d;best=i}});return best};
+  let ft;const say2=()=>{clearTimeout(ft);ft=setTimeout(()=>{flash=0;draw()},1500)}; // the line above reads out the pick, then goes
+  dock.addEventListener('pointerdown',e=>{if(e.button)return;
+    const c=e.target.closest('.xb'),k=c&&(c===cs?'sort':c===cv?'view':null);if(!k)return;
+    const circle=!c.classList.contains('o');
+    if(circle){e.preventDefault();(k==='sort'?sb:lb).click()}
+    pr={k,x:e.clientX,y:e.clientY,moved:false,circle,id:e.pointerId}});
+  dock.addEventListener('pointermove',e=>{if(!pr||e.pointerId!==pr.id)return;
+    if(!pr.moved&&Math.hypot(e.clientX-pr.x,e.clientY-pr.y)>8){pr.moved=true;try{dock.setPointerCapture(e.pointerId)}catch{}}
+    if(!pr.moved)return;const i=at(pr.k,e.clientX);if(i!=null&&(!hov||hov.i!==i)){hov={k:pr.k,i};draw()}});
+  const lift=e=>{if(!pr||e.pointerId!==pr.id)return;const p=pr,h=hov;pr=null;hov=null;
+    if(p.moved&&h&&e.type==='pointerup'){const b=rowOf(p.k)[h.i];
+      if(p.k==='sort'){if(b.dataset.k!==SORT.k)setSort(b.dataset.k);sb.click()}else b.click();
+      flash=p.k;say2();eat=performance.now()}
+    else if(p.circle)eat=performance.now(); // the press opened it; its click mustn't close it again
+    draw()};
+  dock.addEventListener('pointerup',lift);dock.addEventListener('pointercancel',lift);
+  dr.onclick=()=>{setSort(SORT.k);flash='sort';say2();draw()}; // the line above says which way it now runs, then goes
+  draw();
+})();
+</script>
 </body>
 </html>

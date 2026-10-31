@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top bar rethink</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
+/* one column of stickers; each shows the laptop bar (top and bottom edges of the screen) and two phones, at real size where the page allows */
+:root{--bg:#0f0f10;--fg:#ececee;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#1b1b1d;--tile:#232325;--accent:#fff;--sans:system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'Geist Mono',ui-monospace,monospace;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}*{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:1500px;margin:0 auto;padding-block:56px 96px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+@media(max-width:680px){.wrap{padding-block:36px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:28px;font-size:15px}
+.top h1{font-size:17px;font-weight:600}.top p{color:var(--m);margin-top:4px;max-width:720px}
+.tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.picks{font:400 12px var(--mono);color:var(--m)}
+.pill{all:unset;cursor:pointer;height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--tile);display:inline-flex;align-items:center;font-size:13px;transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.pill:hover{border-color:var(--m)}.pill:active{transform:scale(.97)}.pill:focus-visible{outline:1px solid #ffffff66;outline-offset:2px}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:0 0 48px}
+.why div{background:var(--soft);border-radius:14px;padding:16px 18px;font-size:14px;color:var(--m);min-width:0}
+.why b{display:block;color:var(--fg);font-weight:600;font-size:15px;margin-bottom:4px}
+.why i{font-style:normal;font:400 12px var(--mono);color:#6c6c70;display:block;margin-top:8px}
+.grp{font-size:17px;font-weight:600;margin:0 0 4px}
+.grp+p{font-size:15px;color:var(--m);margin-bottom:18px;max-width:760px}
+.sheet{display:grid;gap:18px}
+.st{position:relative;border-radius:20px;background:var(--soft);padding:48px 20px 20px}
+@media(max-width:680px){.st{padding:48px 10px 14px;border-radius:16px}}
+.st .id{position:absolute;top:15px;left:20px;right:52px;font:500 12px var(--mono);color:var(--m)}.st .id b{color:var(--fg);font-weight:500;margin-right:8px}
+.star{all:unset;cursor:pointer;position:absolute;top:10px;right:12px;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;color:var(--m);font-size:16px;transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.star:hover{background:var(--tile);color:var(--fg)}.star:active{transform:scale(.94)}.star:focus-visible{outline:1px solid #ffffff66}
+.st.picked{box-shadow:inset 0 0 0 2px var(--accent)}.st.picked .star{color:var(--accent)}
+.use{display:block;margin:16px 4px 0;font-size:14px;color:var(--m);line-height:1.5;max-width:900px}
+.use b{color:var(--fg);font-weight:500}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,390px));gap:18px 14px;align-items:start}
+.row .lapc{grid-column:1/-1;width:min(100%,1440px)}
+@media(min-width:1100px){.row{grid-template-columns:repeat(2,minmax(0,390px)) minmax(0,1fr)}}
+@media(max-width:560px){.row{grid-template-columns:minmax(0,1fr)}}
+.fr{min-width:0;display:grid;gap:6px}.fr .k{display:block;font:400 11px var(--mono);color:var(--m);margin:0 0 0 2px}
+.lapc{display:grid;gap:14px}
+.cut{height:10px;background:repeating-linear-gradient(90deg,#ffffff14 0 6px,transparent 6px 12px) center/100% 1px no-repeat}
+.f{position:relative;overflow:hidden;background:#121212;border-radius:10px;box-shadow:0 0 0 1px #ffffff14;container-type:inline-size;color:#fff;font-family:var(--sans);max-width:100%}
+.f.lap{--u:calc(100cqw/1440)}.f.ph{--u:calc(100cqw/390)}
+.f.ph.t{border-radius:18px 18px 4px 4px}.f.ph.b{border-radius:4px 4px 18px 18px}
+.f.lap.t{border-radius:10px 10px 3px 3px}.f.lap.b{border-radius:3px 3px 10px 10px}
+.f>*{position:absolute}
+.u{font-size:calc(var(--u)*15)}
+.sp{height:calc(var(--u)*3);border-radius:1px}
+.fade{inset:0;background:linear-gradient(#121212 0,#121212f0 40%,#12121200 100%);pointer-events:none}
+.fadeb{inset:0;background:linear-gradient(#12121200 0,#121212e6 45%,#121212 100%)}
+.sb{display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.logo svg{display:block;width:100%;height:100%;color:#fff}
+.grpR{display:flex;align-items:center;flex-wrap:nowrap;white-space:nowrap}
+.ib{flex:none;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(30,30,32,.72);color:#fff}
+.ib svg,.ic svg{width:calc(var(--u)*20);height:calc(var(--u)*20);display:block}
+.ib.on{background:#fff;color:#111;border-color:#fff}
+.ic{flex:none;display:grid;place-items:center;color:#a5a5aa;position:relative}
+.ic.on{color:#fff}
+.ic.dot::after{content:"";position:absolute;left:50%;bottom:calc(var(--u)*5);width:calc(var(--u)*4);height:calc(var(--u)*4);margin-left:calc(var(--u)*-2);border-radius:50%;background:#fff}
+.fp{flex:none;display:inline-flex;align-items:center;gap:.55em;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(30,30,32,.72);color:#fff;white-space:nowrap;overflow:hidden}
+.fp span,.tx span{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.fp i,.tx i{font-style:normal;color:#8e8e93;flex:none}
+.tx{display:inline-flex;align-items:center;gap:.3em;white-space:nowrap;color:#a5a5aa;min-width:0}
+.tx b{color:#fff;font-weight:500}
+.tx .cv{width:.7em;height:.7em;flex:none;color:#6c6c70}
+.cap{display:flex;flex-direction:column;justify-content:center;white-space:nowrap;min-width:0}
+.cap b{font-weight:500;color:#fff;display:flex;gap:.4em;align-items:center;min-width:0}
+.cap b span{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cap b i{font-style:normal;color:#8e8e93;flex:none}
+.cap em{font-style:normal;color:#8e8e93;overflow:hidden;text-overflow:ellipsis}
+.cap.one em{display:none}
+.caps{display:flex;align-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(30,30,32,.72);white-space:nowrap}
+.caps .hr{width:1px;align-self:center;background:rgba(255,255,255,.14);flex:none}
+.caps .fp{border:0;background:none}
+.fld{display:flex;align-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(30,30,32,.8);color:#8e8e93;white-space:nowrap;overflow:hidden}
+.fld .q{display:flex;align-items:center;gap:.5em;min-width:0;flex:1}
+.fld .q svg{width:1.05em;height:1.05em;flex:none;color:#a5a5aa}
+.fld .hr{width:1px;align-self:stretch;margin:calc(var(--u)*9) 0;background:rgba(255,255,255,.14);flex:none}
+.fld kbd{font:400 .8em var(--mono);color:#6c6c70;border:1px solid rgba(255,255,255,.13);border-radius:.4em;padding:.05em .45em;flex:none}
+.tag{display:inline-flex;align-items:center;gap:.45em;border-radius:999px;background:#ffffff14;color:#fff;white-space:nowrap;overflow:hidden;flex:none}
+.tag span{overflow:hidden;text-overflow:ellipsis;min-width:0}.tag i{font-style:normal;color:#8e8e93;flex:none}
+.dl{display:flex;align-items:baseline;justify-content:center;font-weight:500;white-space:nowrap;color:#5f5f64}
+.dl .on{color:#fff;font-size:1.35em}
+.glass{background:rgba(44,44,48,.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 calc(var(--u)*10) calc(var(--u)*30) #0009}
+.tabs{display:flex;align-items:center;justify-content:space-around;border-radius:999px}
+.tab{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*3);color:#9a9aa0;position:relative;font-weight:500}
+.tab svg{width:calc(var(--u)*26);height:calc(var(--u)*26);display:block}
+.tab.on{color:#fff}
+.tab.dot::after{content:"";position:absolute;left:50%;bottom:calc(var(--u)*7);width:calc(var(--u)*4);height:calc(var(--u)*4);margin-left:calc(var(--u)*-2);border-radius:50%;background:#fff}
+.tab.slot::before{content:"";position:absolute;inset:calc(var(--u)*6) 0;border-radius:999px;background:#ffffff1f;z-index:-1}
+.tab.slot{z-index:0}
+.rnd{display:grid;place-items:center;border-radius:50%;color:#d6d6da}
+.rnd svg{width:calc(var(--u)*26);height:calc(var(--u)*26)}
+.tabs .hr{width:1px;height:calc(var(--u)*24);background:rgba(255,255,255,.14);flex:none}
+
+/* round four: live bars */
+.xb.xx{display:grid;place-items:center}
+.xb.xx .xc{all:unset;cursor:pointer;width:var(--H);height:var(--H);display:grid;place-items:center;color:#d6d6da}
+.xb.xx .xc svg{width:20px;height:20px}
+.xo .lead{flex:none!important;width:calc(var(--H) - 12px);color:#d6d6da!important}.xo .lead svg{width:18px!important;height:18px!important}
+.xo .lead::after{content:"";position:absolute;right:-3px;top:28%;bottom:28%;width:1px;background:transparent}
+
+.live{position:relative;overflow:hidden;background:#121212;border-radius:18px;box-shadow:0 0 0 1px #ffffff14;font-family:var(--sans);color:#fff;--H:62px;--g:12px;height:300px}
+.live.lap{--H:56px;border-radius:10px;height:260px}
+.live .bk{position:absolute;inset:0}
+.live .bk i{position:absolute;border-radius:4px}
+.live .bk::after{content:"";position:absolute;inset:0;background:linear-gradient(#12121200 0,#121212d9 55%,#121212f2 100%)}
+.live .dl2{position:absolute;left:0;right:0;bottom:126px;display:flex;justify-content:center;align-items:baseline;gap:24px;font-size:20px;font-weight:500;color:#5f5f64;white-space:nowrap;transition:opacity .25s}
+.live.lap .dl2{bottom:104px;gap:30px}
+.live .dl2.y{font-family:var(--mono);gap:22px}.live .dl2 .on{color:#fff;font-size:1.35em}
+.live .dl2 .sw{width:14px;height:14px;border-radius:50%;align-self:center}.live .dl2 .sw.on{width:20px;height:20px}
+.live .say{position:absolute;left:0;right:0;bottom:calc(30px + var(--H) + 10px);text-align:center;font-size:13px;color:#a5a5aa;opacity:0;transition:opacity .2s;pointer-events:none}
+.live.lap .say{bottom:calc(24px + var(--H) + 10px)}
+.live .say.v{opacity:1}
+.live.open .dl2{opacity:.25}
+.xbar{position:absolute;left:16px;right:16px;bottom:30px;display:flex;justify-content:center}
+.live.lap .xbar{bottom:24px}
+.xb{position:relative;height:var(--H);width:var(--H);border-radius:999px;overflow:hidden;flex:none;margin:0 calc(var(--g)/2);transition:width .5s cubic-bezier(.22,1,.36,1),margin .5s cubic-bezier(.22,1,.36,1),opacity .25s}
+.xb.gone{width:0!important;margin:0;opacity:0}
+.xb>button.xi{all:unset;cursor:pointer;position:absolute;left:0;top:0;width:var(--H);height:var(--H);display:grid;place-items:center;color:#a5a5aa;transition:opacity .2s,color .2s}
+.xb>button.xi.on{color:#fff}
+.xb>button.xi svg,.xo button svg{width:26px;height:26px;display:block}
+.xo input{outline:none}
+.xb>button.xi:focus-visible,.xo button:focus-visible{outline:1px solid #ffffff66;outline-offset:-4px;border-radius:999px}
+.xb .dot{position:absolute;left:50%;bottom:9px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#fff}
+.xb .xo{position:absolute;inset:0;display:flex;align-items:center;padding:0 6px;opacity:0;pointer-events:none;transition:opacity .2s}
+.xb.o .xo{opacity:1;pointer-events:auto;transition:opacity .3s .12s}
+.xb.o>button.xi{opacity:0;pointer-events:none}
+.xo button{all:unset;cursor:pointer;flex:1;height:calc(var(--H) - 12px);display:grid;place-items:center;color:#9a9aa0;border-radius:999px;position:relative;transition:color .2s}
+.xo button.on{color:#fff}
+.xo button .ar{position:absolute;right:2px;top:4px;font-size:11px;color:#fff}
+.xo .cw{width:22px;height:22px;border-radius:50%;background:conic-gradient(#e5534b,#e8a33d,#e5d64b,#5cb85c,#3d9ae8,#8b5cf6,#e5534b);opacity:.8}
+.xo button.on .cw{opacity:1}
+.xo .q{display:flex;align-items:center;gap:10px;width:100%;padding:0 12px 0 14px;color:#a5a5aa}
+.xo .q svg{width:20px;height:20px;flex:none}
+.xo input{all:unset;flex:1;min-width:0;font-size:16px;color:#fff}
+.xo input::placeholder{color:#8e8e93}
+@media (prefers-reduced-motion:reduce){.xb,.xb .xo,.xb.o .xo,.live .dl2{transition:none}}
+.lrow{display:grid;grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:14px;align-items:start}
+@media(max-width:800px){.lrow{grid-template-columns:minmax(0,1fr)}}
+
+/* round five: gestures */
+.k5 .xi,.k5 .xo{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.k5 .xi svg,.k5 .xo button>*{transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.k5 .xi:active svg,.k5 .xo button:active>*{transform:scale(.86)}
+.k5 .xb[data-k=dir] .xi svg{transition:rotate .4s cubic-bezier(.22,1,.36,1),transform .35s cubic-bezier(.22,1,.36,1)}
+.k5 .xb[data-k=dir][data-d="1"] .xi svg{rotate:180deg}
+.k5 .th{position:absolute;top:6px;bottom:6px;left:calc(6px + (100% - 12px) * var(--i,0) / var(--n,3));width:calc((100% - 12px) / var(--n,3));border-radius:999px;background:#ffffff1c;transition:left .45s cubic-bezier(.22,1,.36,1),background .2s;pointer-events:none}
+.k5 .xo.drag .th{background:#ffffff2a;transition:left .18s cubic-bezier(.22,1,.36,1)}
+.k5 .xo button{position:relative;z-index:1}
+.k5 .dz{flex:1;align-self:stretch;display:flex;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,#0000,#000 28%,#000 72%,#0000);mask:linear-gradient(90deg,#0000,#000 28%,#000 72%,#0000);touch-action:pan-x}
+.k5 .dz::-webkit-scrollbar{display:none}
+.k5 .dz::before,.k5 .dz::after{content:'';flex:none;width:50%}
+.k5 .dz button.dw{all:unset;flex:none;cursor:pointer;scroll-snap-align:center;padding:0 13px;height:100%;display:flex;align-items:center;gap:5px;font-size:16px;font-weight:500;color:#fff;white-space:nowrap}
+.k5 .dz .dw i{font-style:normal;font-size:13px;color:#a5a5aa;width:10px}
+@media (prefers-reduced-motion:reduce){.k5 .th,.k5 .xi svg,.k5 .xo button>*{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>The top bar, rethought</h1><p>Five guesses at what feels off, then six directions that each answer a different guess. Every sticker shows a laptop and a phone twice: at rest (crate, sorted by artist) and busy (grid, newest first, filtered to a long label). Share is left out everywhere, since it's moving off the bar. Star any you like, even partly.</p></div>
+    <div class="tools"><span class="picks" id="picks"></span><button class="pill" id="copy" type="button">Copy my picks</button><button class="pill" id="clear" type="button">Clear</button></div></div>
+  <div class="why">
+    <div><b>Every button weighs the same</b>Four or five identical outlined circles read as a toolbar. Search, the sort and the layout get equal billing though you reach for them very differently.<i>A, D, F</i></div>
+    <div><b>The lit sort is the loudest thing on screen</b>A solid white circle outshines the logo and the record. It says "you changed a setting" louder than anything else on the page.<i>A, B, C, D</i></div>
+    <div><b>Icons hide the state</b>A person, a calendar and a stack don't say "by artist", "newest first" or "crate". You have to open each one to learn where you are.<i>B, C, E</i></div>
+    <div><b>The filter pill is a different kind of thing</b>It's a fact about what you're looking at, sitting in a row of actions, in a different shape, pushing them around.<i>C, D, F</i></div>
+    <div><b>The bar is lopsided</b>A small mark alone on the left, a heavy cluster on the right, and nothing in the middle.<i>C, E, F</i></div>
+  </div>
+  <h2 class="grp">Round five: gestures, not just taps</h2><p>Today’s bar (search, sort, a flip arrow, layout, and a × while one is open), with the scrubber’s care brought to it. All of them get a soft lit pill that slides to what’s picked and follows your finger when you drag along an open row. Each sticker then adds a different gesture. Live: try them with your thumb.</p>
+  <div class="sheet" id="K" style="margin-bottom:56px"></div>
+  <h2 class="grp">Round four: three circles that open</h2><p>H4’s quiet sort, with search, sort and view as three circles at the bottom. Each one opens in place when tapped. These are live: tap them. J1–J3 are I2 with three ways to fold it back when you don’t pick anything; every one also closes on a tap anywhere else or Esc.</p>
+  <div class="sheet" id="I" style="margin-bottom:56px"></div>
+  <h2 class="grp">Round three: G5, with the sort treated differently</h2><p>Same as G5 (layouts in the capsule, search in its own circle, filter at the top center). Only the sort changes.</p>
+  <div class="sheet" id="H" style="margin-bottom:56px"></div>
+  <h2 class="grp">Round two: a tab bar at the bottom</h2><p>A glass capsule at the bottom holds the three layouts as tabs, with search as its own circle beside it, after your reference. Indicators stay quiet like A: gray icons, the current one white. The filter moves to the top center; the top is otherwise just the mark. The dial sits above the bar. The sort is the open question, so each sticker puts it somewhere different.</p>
+  <div class="sheet" id="G" style="margin-bottom:56px"></div>
+  <h2 class="grp">Round one</h2><p>T is today, for reference. Long label: “High Top Mountain Records”.</p>
+  <div class="sheet" id="S"></div>
+</div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const MARK='<svg viewBox="0 0 350 350" fill="currentColor" aria-hidden="true"><path d="M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z"/><path d="M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z"/><path d="M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z"/><path d="M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z"/><path d="M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z"/><path d="M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z"/><path d="M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z" fill-rule="evenodd"/></svg>';
+const SRCH='<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg>';
+const I={
+  crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
+  wall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
+  artist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"/></svg>',
+  year:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>',
+  view:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>',
+  s:SRCH};
+const CV='<svg class="cv" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5 6 7.5 9 4.5"/></svg>';
+const SPINES=["#212122","#34869f","#8a7f81","#1d1913","#685342","#232223","#ebe9dc","#564840","#3e5c45","#907f5d","#bda67c","#3f3027","#262429","#a18d33","#99835d","#89897f","#8e897f","#2f2a2d","#634b4f","#8c6467","#685935","#969696","#161516","#45422b","#876b5c","#56544c","#694838","#908180","#75736b","#343838","#d5c6b4","#c8b7a8","#6d7081","#6181a3","#af7f76","#937152"];
+const LONG='High Top Mountain Records';
+const u=n=>`calc(var(--u)*${n})`;
+const at=(o)=>Object.entries(o).map(([k,v])=>`${k}:${typeof v==='number'?u(v):v}`).join(';');
+
+// what sits behind the bar: crate spines at rest, a row of grid tiles when busy
+function behind(W,H,busy,y0){
+  let h='';
+  if(!busy){const w=W>500?720:330,x=(W-w)/2;for(let i=0;i<12;i++){const y=y0+i*7;if(y>H)break;h+=`<i class="sp" style="${at({left:x+(12-i)*2,width:w-(12-i)*4,top:y,background:SPINES[i*3%SPINES.length]})}"></i>`}}
+  else{const n=W>500?8:3,g=W>500?14:8,x0=W>500?56:24,tw=(W-x0*2-g*(n-1))/n;for(let i=0;i<n;i++)h+=`<i style="${at({left:x0+i*(tw+g),top:y0,width:tw,height:tw,background:SPINES[(i*5+3)%SPINES.length],'border-radius':u(4)})}"></i>`}
+  return h+`<i class="fade" style="${at({bottom:'auto',height:y0+30})}"></i>`;
+}
+function statusBar(){return`<div class="sb u" style="${at({left:34,right:30,top:16,height:22})}"><span>7:46</span><span style="font-size:${u(12)};letter-spacing:.1em">▮▮▮ ◠ ▭</span></div>`}
+function logo(W,cy){const s=W>500?32:28,x=W>500?56:22;return`<span class="logo" style="${at({left:x,top:cy-s/2,width:s,height:s})}">${MARK}</span>`}
+function dial(W,busy,H){const L=busy?['2011','2012','2013','2014','2015','2016']:['A','B','C','D','E','F','G'],g=W>500?(busy?34:30):(busy?22:24);
+  return`<i class="fadeb"></i><div class="dl" style="${at({left:0,right:0,bottom:W>500?26:40,gap:u(g),'font-size':u(W>500?20:20)})}">${L.map((l,i)=>`<span class="${(busy?i===2:i===0)?'on':''}">${l}</span>`).join('')}</div>`}
+
+// one frame: top crop and bottom crop of the same screen
+function frame(kind,top,bot,TH,BH){const lap=kind==='lap',W=lap?1440:390;
+  return`<div class="f ${kind} t" style="aspect-ratio:${W}/${TH}">${top}</div><div class="cut"></div><div class="f ${kind} b" style="aspect-ratio:${W}/${BH}">${bot}</div>`}
+
+// each direction draws its own bar; ctx = {W, cy (bar center), busy, lap}
+const D=[
+ ['T','Today','Outlined circles for search, the sort and the layout; a lit sort turns solid white; the filter is a pill in the same row.',
+  c=>{const s=44,r=c.lap?56:20;const items=[];
+   if(c.busy)items.push(`<span class="fp" style="${at({height:s,padding:`0 ${u(18)}`,'font-size':u(16),'max-width':c.lap?260:130})}"><span>${LONG}</span><i>×</i></span>`);
+   items.push(`<span class="ib" style="${at({width:s,height:s})}">${I.s}</span>`);
+   items.push(`<span class="ib${c.busy?' on':''}" style="${at({width:s,height:s})}">${c.busy?I.year:I.artist}</span>`);
+   items.push(`<span class="ib" style="${at({width:s,height:s})}">${c.busy?I.wall:I.crate}</span>`);
+   return`<div class="grpR" style="${at({right:r,top:c.cy-s/2,height:s,gap:u(c.lap?12:8)})}">${items.join('')}</div>`}],
+
+ ['A','Bare icons','Same buttons, no circles. Icons sit in a quiet gray and a changed sort turns white with a small dot under it. The filter becomes plain text with an ×, so it stops looking like a button.',
+  c=>{const s=44,r=c.lap?44:10;const items=[];
+   if(c.busy)items.push(`<span class="tx" style="${at({'font-size':u(15),'max-width':c.lap?260:118,'margin-right':u(6)})}"><span style="color:#d6d6da">${LONG}</span><i>×</i></span>`);
+   items.push(`<span class="ic" style="${at({width:s,height:s})}">${I.s}</span>`);
+   items.push(`<span class="ic${c.busy?' on dot':''}" style="${at({width:s,height:s})}">${c.busy?I.year:I.artist}</span>`);
+   items.push(`<span class="ic" style="${at({width:s,height:s})}">${c.busy?I.wall:I.crate}</span>`);
+   return`<div class="grpR" style="${at({right:r,top:c.cy-s/2,height:s,gap:u(c.lap?4:0)})}">${items.join('')}</div>`}],
+
+ ['B','Words','The layout and the sort say what they are, in words: <b>Crate</b> and <b>By artist</b>, or <b>Grid</b> and <b>Newest first</b>. Each word opens the same small menu as today. Search stays an icon. On a phone the filter drops to its own line under the mark.',
+  c=>{const fs=c.lap?15:15,s=44,r=c.lap?44:10;const items=[];
+   if(c.busy&&c.lap)items.push(`<span class="tx" style="${at({'font-size':u(fs),'max-width':240,'margin-right':u(14)})}"><span style="color:#fff">${LONG}</span><i>×</i></span>`);
+   items.push(`<span class="tx" style="${at({'font-size':u(fs),height:s,padding:`0 ${u(c.lap?10:6)}`})}"><b>${c.busy?'Grid':'Crate'}</b>${CV}</span>`);
+   items.push(`<span class="tx" style="${at({'font-size':u(fs),height:s,padding:`0 ${u(c.lap?10:6)}`})}"><b>${c.busy?'Newest first':'By artist'}</b>${CV}</span>`);
+   items.push(`<span class="ic" style="${at({width:s,height:s})}">${I.s}</span>`);
+   let h=`<div class="grpR" style="${at({right:r,top:c.cy-s/2,height:s,gap:u(c.lap?8:2)})}">${items.join('')}</div>`;
+   if(c.busy&&!c.lap)h+=`<span class="tx" style="${at({left:22,right:22,top:c.cy+30,'font-size':u(14)})}"><span style="color:#fff">${LONG}</span><i>×</i></span>`;
+   return h}],
+
+ ['C','Say it once, on the left','The mark carries a caption that says where you are: “Casey’s crate” at rest; the filter and the sort in two lines when busy (the × clears the filter). Only two buttons on the right: search, and one button that opens Layout and Sort together. Nothing ever lights up white.',
+  c=>{const s=44,r=c.lap?56:20,x=c.lap?100:62;
+   const cap=c.busy?`<div class="cap" style="${at({left:x,top:c.cy-22,height:44,'max-width':c.lap?420:196})}"><b style="font-size:${u(15)}"><span>${LONG}</span><i>×</i></b><em style="font-size:${u(13)}">Grid, newest first</em></div>`
+                  :`<div class="cap one" style="${at({left:x,top:c.cy-22,height:44})}"><b style="font-size:${u(15)}"><span>Casey’s crate</span></b></div>`;
+   return cap+`<div class="grpR" style="${at({right:r,top:c.cy-s/2,height:s,gap:u(c.lap?12:8)})}"><span class="ib" style="${at({width:s,height:s})}">${I.s}</span><span class="ib" style="${at({width:s,height:s})}">${I.view}</span></div>`}],
+
+ ['D','One capsule','Search, the sort and the layout join into a single object with hairlines between them, so they read as one control instead of a row of equals. A changed sort turns its icon white; no fill. The filter rides in the capsule’s front end.',
+  c=>{const s=44,r=c.lap?56:20,w=c.lap?50:44;const seg=[];
+   if(c.busy)seg.push(`<span class="fp" style="${at({height:s,padding:`0 ${u(8)} 0 ${u(18)}`,'font-size':u(15),'max-width':c.lap?250:118})}"><span>${LONG}</span><i>×</i></span>`,`<i class="hr" style="height:${u(18)}"></i>`);
+   seg.push(`<span class="ic" style="${at({width:w,height:s})}">${I.s}</span>`,`<i class="hr" style="height:${u(18)}"></i>`);
+   seg.push(`<span class="ic${c.busy?' on':''}" style="${at({width:w,height:s})}">${c.busy?I.year:I.artist}</span>`,`<i class="hr" style="height:${u(18)}"></i>`);
+   seg.push(`<span class="ic" style="${at({width:w,height:s})}">${c.busy?I.wall:I.crate}</span>`);
+   return`<div class="caps" style="${at({right:r,top:c.cy-s/2,height:s,padding:`0 ${u(4)}`})}">${seg.join('')}</div>`}],
+
+ ['E','Split by job','The top keeps only finding things: the mark, search (a field on a laptop) and the filter. How you look at the crate moves down beside the dial, as words, within a thumb’s reach on a phone.',
+  c=>{const s=44,r=c.lap?56:20;let h='';
+   const tag=`<span class="tag" style="${at({height:c.lap?34:36,padding:`0 ${u(14)}`,'font-size':u(14),'max-width':c.lap?260:200})}"><span>${LONG}</span><i>×</i></span>`;
+   if(c.lap)h+=`<div class="grpR" style="${at({right:r,top:c.cy-20,height:40,gap:u(10)})}">${c.busy?tag:''}<div class="fld" style="${at({position:'relative',width:250,height:40,padding:`0 ${u(14)}`,'font-size':u(15)})}"><span class="q">${SRCH}<span>Search</span></span><kbd>/</kbd></div></div>`;
+   else h+=`<div class="grpR" style="${at({right:r,top:c.cy-s/2,height:s,gap:u(8)})}">${c.busy?tag:''}<span class="ib" style="${at({width:s,height:s})}">${I.s}</span></div>`;
+   return h},
+  c=>{const fs=c.lap?14:14;const l=`<span class="tx" style="font-size:${u(fs)}"><b>${c.busy?'Grid':'Crate'}</b>${CV}</span>`,rr=`<span class="tx" style="font-size:${u(fs)}"><b>${c.busy?'Newest first':'By artist'}</b>${CV}</span>`;
+   return c.lap?`<div class="grpR" style="${at({left:56,bottom:30,gap:u(22)})}">${l}${rr}</div>`
+               :`<div class="grpR" style="${at({left:22,right:22,bottom:96,'justify-content':'space-between'})}">${l}${rr}</div>`}],
+
+ ['F','Search is the bar','A search field fills the space beside the mark, and the sort and layout tuck into its far end. The filter shows as a tag inside the field, like a search you’ve already typed. On a laptop the field sits centered.',
+  c=>{const h=c.lap?44:44,fs=c.lap?15:15;
+   const tag=c.busy?`<span class="tag" style="${at({height:30,padding:`0 ${u(12)}`,'font-size':u(14),'max-width':c.lap?240:108})}"><span>${LONG}</span><i>×</i></span>`:'';
+   const inner=`<span class="q" style="gap:${u(8)}">${SRCH}${tag}<span style="overflow:hidden;text-overflow:ellipsis">${c.busy&&!c.lap?'':'Search'}</span></span><i class="hr"></i><span class="ic${c.busy?' on':''}" style="${at({width:40,height:h})}">${c.busy?I.year:I.artist}</span><span class="ic" style="${at({width:40,height:h})}">${c.busy?I.wall:I.crate}</span>`;
+   const pos=c.lap?{left:(1440-560)/2,width:560}:{left:64,right:16};
+   return`<div class="fld" style="${at({...pos,top:c.cy-h/2,height:h,padding:`0 ${u(4)} 0 ${u(16)}`,'font-size':u(fs),gap:u(4)})}">${inner}</div>`}],
+];
+
+
+I.table='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>';
+// round two: what sits under the bottom bar (the front record, or grid tiles), and the dial above the bar
+function under(W,H,busy){const lap=W>500;let h='';
+  if(busy){const n=lap?8:3,g=lap?14:8,x0=lap?56:24,tw=(W-x0*2-g*(n-1))/n;for(let r=0;r<2;r++)for(let i=0;i<n;i++)h+=`<i style="${at({left:x0+i*(tw+g),top:-tw*.6+r*(tw+g),width:tw,height:tw,background:SPINES[(i*7+r*3+5)%SPINES.length],'border-radius':u(4)})}"></i>`}
+  return h+`<i style="${at({inset:0,background:'linear-gradient(#12121233 0,#121212d9 50%,#121212f2 100%)'})}"></i>`}
+function dial2(W,busy){const lap=W>500,L=busy?['2011','2012','2013','2014','2015','2016']:['A','B','C','D','E','F','G'],g=lap?(busy?34:30):(busy?22:24);
+  return`<div class="dl" style="${at({left:0,right:0,bottom:lap?100:126,gap:u(g),'font-size':u(20)})}">${L.map((l,i)=>`<span class="${(busy?i===2:i===0)?'on':''}">${l}</span>`).join('')}</div>`}
+// the top in round two: the mark, and the filter centered
+function top2(c,right='',mw){const t=c.busy?`<span class="tag" style="${at({left:'50%',transform:'translateX(-50%)',top:c.cy-17,height:34,padding:`0 ${u(14)}`,'font-size':u(14),'max-width':mw||(c.lap?360:210)})}"><span>${LONG}</span><i>×</i></span>`:'';return t+right}
+// the bar: tabs = [{icon, on, label, cls}], then the search circle
+function bar2(c,tabs,{tw,labels,sep,extra,left='',mid=''}={}){const lap=c.lap,h=lap?60:62,b=lap?24:30;tw=lap?(tw||64):(tw||(labels?58:54));
+  const items=tabs.map(t=>t==='|'?`<i style="${at({position:'relative',width:8,flex:'none'})}"></i>`:`<span class="tab${t.on?' on':''}${t.cls?' '+t.cls:''}" style="${at({width:t.w||tw,height:h,'font-size':u(11)})}">${t.i}${labels&&t.l?`<span>${t.l}</span>`:''}</span>`).join('');
+  return`<div class="grpR" style="${at({left:0,right:0,bottom:b,'justify-content':'center',gap:u(12)})}">${left}<div class="tabs glass" style="${at({height:h,padding:`0 ${u(10)}`,gap:u(4)})}">${items}</div>${extra?`<span class="rnd glass${extra.on?' on':''}" style="${at({width:h,height:h,position:'relative',color:extra.on?'#fff':'#9a9aa0'})}">${extra.i}</span>`:''}${mid}<span class="rnd glass" style="${at({width:h,height:h})}">${I.s}</span></div>`}
+const LAY=(c,cls)=>[{i:I.crate,on:!c.busy,l:'Crate',cls:!c.busy&&cls},{i:I.wall,on:c.busy,l:'Grid',cls:c.busy&&cls},{i:I.table,l:'Table'}];
+const G=[
+ ['G1','Sort as a fourth tab','The capsule holds Crate, Grid and Table, then a little extra space and the sort, wearing what it sorts by. The current layout is white. A changed sort turns white with a small dot under it, like A. Tapping the sort opens its menu upward.',
+  c=>top2(c),
+  c=>bar2(c,[...LAY(c),'|',{i:c.busy?I.year:I.artist,on:c.busy,cls:c.busy?'dot':''}])],
+ ['G2','Tabs with words','The same four tabs, each with a small word under the icon: Crate, Grid, Table, and the sort’s own name (Artist, or Newest). Nothing needs opening to read where you are.',
+  c=>top2(c),
+  c=>bar2(c,[...LAY(c),'|',{i:c.busy?I.year:I.artist,on:c.busy,l:c.busy?'Newest':'Artist'}],{labels:true,tw:c.lap?70:0})],
+ ['G3','Sort up top, in words','The capsule is only the three layouts. The sort moves to the top right as words, across from the mark, with the filter between them. The top reads as “what you’re looking at”; the bottom is “how”.',
+  c=>top2(c,`<span class="tx" style="${at({right:c.lap?56:20,top:c.cy-11,'font-size':u(15)})}"><b>${c.busy?'Newest first':'By artist'}</b>${CV}</span>`,c.lap?0:136),
+  c=>bar2(c,LAY(c))],
+ ['G5','Sort in its own circle','The capsule is only the three layouts. The sort gets its own glass circle between the capsule and search, gray at rest and white when changed. Each object on the bar does one job.',
+  c=>top2(c),
+  c=>bar2(c,LAY(c),{extra:{i:c.busy?I.year:I.artist,on:c.busy}})],
+ ['G4','A lit slot','Like G1, but the current layout sits in a faint lighter pill inside the capsule instead of only turning white. Easier to spot at a glance, a little less quiet.',
+  c=>top2(c),
+  c=>bar2(c,[...LAY(c,'slot'),'|',{i:c.busy?I.year:I.artist,on:c.busy,cls:c.busy?'dot':''}])],
+];
+
+// round three: G5 with the sort treated differently. h matches bar2's height.
+const BH2=c=>c.lap?60:62;
+I.arrows='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16M4.5 16.5 8 20l3.5-3.5M16 20V4M12.5 7.5 16 4l3.5 3.5"/></svg>';
+const circ=(c,inner,on,extra={})=>`<span class="rnd glass" style="${at({width:BH2(c),height:BH2(c),position:'relative',color:on?'#fff':'#9a9aa0',...extra})}">${inner}</span>`;
+const SW=c=>c.busy?'Newest first':'By artist';
+const H=[
+ ['H1','Sort in words','The sort becomes a glass pill that says what it is: “By artist” or “Newest first”. It reads as a setting rather than a second search button. Its width changes with the words.',
+  c=>top2(c),
+  c=>bar2(c,LAY(c),{tw:c.lap?0:48,mid:`<span class="glass" style="${at({position:'relative',height:BH2(c),padding:`0 ${u(c.lap?22:14)}`,'border-radius':'999px',display:'flex','align-items':'center',gap:u(6),'font-size':u(c.lap?15:14),'font-weight':500,color:c.busy?'#fff':'#d6d6da','white-space':'nowrap'})}">${SW(c)}${CV}</span>`})],
+ ['H2','A short word in the circle','The circle stays, but instead of an icon it holds a short word set in mono: A–Z by artist, NEW for newest first, OLD for oldest, COLOR for color. Gray when it’s the default, white when changed.',
+  c=>top2(c),
+  c=>bar2(c,LAY(c),{mid:circ(c,`<span style="font:500 ${u(c.busy?13:14)} var(--mono);letter-spacing:.02em">${c.busy?'NEW':'A–Z'}</span>`,c.busy)})],
+ ['H3','Sort on the left','Same circle, moved to the other side of the capsule so the bar is balanced: sort, layouts, search. The sort no longer sits beside search looking like its twin.',
+  c=>top2(c),
+  c=>bar2(c,LAY(c),{left:circ(c,c.busy?I.year:I.artist,c.busy)})],
+ ['H4','One sort icon','The circle always shows the same up-and-down arrows, so it reads as “sort” every time instead of a person or a calendar. A changed sort turns white with a dot. What it sorts by shows in its menu and in the dial.',
+  c=>top2(c),
+  c=>bar2(c,LAY(c),{mid:circ(c,`${I.arrows}${c.busy?`<i style="${at({position:'absolute',left:'50%',bottom:9,width:4,height:4,'margin-left':-2,'border-radius':'50%',background:'#fff'})}"></i>`:''}`,c.busy)})],
+ ['H5','Sort lives on the dial','No sort button. A small caption sits over the dial, “By artist” or “Newest first”, and tapping it opens the sort menu. The dial already changes with the sort, so the two stay together. The bar is just layouts and search.',
+  c=>top2(c),
+  c=>bar2(c,LAY(c))+`<div style="${at({left:0,right:0,bottom:c.lap?136:162,display:'flex','justify-content':'center'})}"><span class="tx" style="font-size:${u(13)}"><b style="color:${c.busy?'#fff':'#a5a5aa'};font-weight:500">${SW(c)}</b>${CV}</span></div>`],
+];
+const ALL={};
+function sticker([id,name,use,bar,bottom,round2]){
+  ALL[id]=name;
+  const make=(lap,busy)=>{const W=lap?1440:390,cy=lap?48:88,TH=lap?150:176,BH=round2?(lap?190:250):(lap?96:144),c={W,cy,busy,lap};
+    const top=behind(W,TH,busy,lap?104:144)+(lap?'':statusBar())+logo(W,cy)+bar(c);
+    const bot=round2?under(W,BH,busy)+dial2(W,busy)+bottom(c):dial(W,busy,BH)+(bottom?bottom(c):'');
+    return frame(lap?'lap':'ph',top,bot,TH,BH)};
+  const el=document.createElement('div');el.className='st';el.dataset.id=id;
+  el.innerHTML=`<span class="id"><b>${id}</b>${name}</span>${id==='T'?'':`<button class="star" type="button" aria-label="Pick ${id} ${name}">★</button>`}
+   <div class="row" aria-hidden="true">
+    <div class="lapc"><div class="fr"><span class="k">Laptop, at rest</span>${make(true,false)}</div><div class="fr"><span class="k">Laptop, busy</span>${make(true,true)}</div></div>
+    <div class="fr"><span class="k">Phone, at rest</span>${make(false,false)}</div>
+    <div class="fr"><span class="k">Phone, busy</span>${make(false,true)}</div>
+   </div><span class="use">${use}</span>`;
+  $(round2?(id[0]==='H'?'#H':'#G'):'#S').append(el);
+}
+D.forEach(sticker);G.slice().sort((a,b)=>a[0]<b[0]?-1:1).forEach(g=>sticker([...g,true]));H.forEach(g=>sticker([...g,true]));
+
+
+// round four: live bars. mode 1 = the others stay as circles; mode 2 = the open one takes the row
+(function(){
+const SI={artist:I.artist,title:'<svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans)">Aa</text></svg>',year:I.year,
+  label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',color:'<i class="cw"></i>'};
+const SL={artist:['Artist, A to Z','Artist, Z to A'],title:['Title, A to Z','Title, Z to A'],year:['Oldest first','Newest first'],label:['Label, A to Z','Label, Z to A'],color:['Reds first','Darks first']};
+const VI={crate:I.crate,wall:I.wall,table:I.table},VL={crate:'Crate',wall:'Grid',table:'Table'};
+function live(box,mode,lap,close=''){
+  const XI0='<svg viewBox="0 0 256 256"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>',XI=XI0,lead=i=>close==='lead'?`<button type="button" class="lead" data-close aria-label="Close">${XI}</button>`:'';
+  const st={sort:'artist',d:0,view:'crate',open:null};
+  const el=document.createElement('div');el.className='live'+(lap?' lap':'');
+  const W=lap?1440:390;let bk='';
+  if(lap){for(let i=0;i<8;i++)bk+=`<i style="left:calc(4% + ${i}*11.6%);width:10.4%;top:${-20}px;aspect-ratio:1;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
+  else{for(let i=0;i<3;i++)bk+=`<i style="left:${24+i*118}px;width:110px;height:110px;top:20px;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
+  el.innerHTML=`<div class="bk">${bk}</div><div class="dl2"></div><div class="say"></div>
+   <div class="xbar">
+    <div class="xb glass" data-k="search"><button class="xi" type="button" aria-label="Search">${SRCH}</button><div class="xo">${close==='lead'?lead(SRCH):''}<label class="q">${close==='lead'?'':SRCH}<input type="search" placeholder="Search" aria-label="Search the crate"></label></div></div>
+    <div class="xb glass" data-k="sort"><button class="xi" type="button" aria-label="Sort">${I.arrows}</button><div class="xo">${lead(I.arrows)}${Object.keys(SI).map(k=>`<button type="button" data-s="${k}" aria-label="Sort by ${k}">${SI[k]}</button>`).join('')}</div></div>
+    <div class="xb glass" data-k="view"><button class="xi" type="button" aria-label="Layout"></button><div class="xo"><span class="vlead" style="display:contents"></span>${Object.keys(VI).map(k=>`<button type="button" data-v="${k}" aria-label="${VL[k]}">${VI[k]}</button>`).join('')}</div></div>
+    ${close==='x'?`<div class="xb glass xx" data-k="x"><button class="xc" type="button" data-close aria-label="Close">${XI}</button></div>`:''}
+   </div>`;
+  box.append(el);
+  const $x=k=>el.querySelector(`.xb[data-k=${k}]`),bar=el.querySelector('.xbar'),say=el.querySelector('.say'),dl=el.querySelector('.dl2');
+  const H=()=>lap?56:62,G=12;
+  const want={search:()=>lap?340:null,sort:()=>5*(lap?50:44)+12,view:()=>3*(lap?56:50)+12};
+  function draw(){
+    const avail=bar.clientWidth;
+    ['search','sort','view'].forEach(k=>{const b=$x(k),o=st.open===k;b.classList.toggle('o',o);b.classList.toggle('gone',mode===2&&st.open&&!o);
+      let w=H();if(o){w=mode===2?Math.min(avail-(close==='x'?H()+G:0),lap?440:avail):(want[k]()||avail-2*H()-3*G);if(mode===1)w=Math.min(w,avail-2*H()-3*G)}
+      b.style.width=w+'px'});
+    const xx=el.querySelector('.xx');if(xx)xx.classList.toggle('gone',!st.open);
+    if(close==='lead')el.querySelector('.vlead').innerHTML=lead();
+    const sb=$x('sort').querySelector('.xi'),changed=st.sort!=='artist'||st.d;sb.classList.toggle('on',changed);sb.innerHTML=I.arrows+(changed?'<i class="dot"></i>':'');
+    $x('view').querySelector('.xi').innerHTML=VI[st.view];
+    $x('sort').querySelectorAll('[data-s]').forEach(b=>{const on=b.dataset.s===st.sort;b.classList.toggle('on',on);});
+    $x('view').querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===st.view));
+    say.textContent=st.open==='sort'?SL[st.sort][st.d]:st.open==='view'?VL[st.view]:'';say.classList.toggle('v',!!say.textContent);
+    el.classList.toggle('open',!!st.open);
+    const L=st.sort==='year'?(st.d?['2016','2015','2014','2013','2012','2011']:['1967','1968','1969','1970','1971','1972']):st.sort==='color'?null:(st.d?['Z','Y','W','V','T','S','R']:['A','B','C','D','E','F','G']);
+    dl.classList.toggle('y',st.sort==='year');
+    dl.innerHTML=L?L.map((l,i)=>`<span class="${i===(st.sort==='year'?2:0)?'on':''}">${l}</span>`).join(''):['#e5534b','#e8a33d','#e5d64b','#5cb85c','#3d9ae8','#8b5cf6'].map((c,i)=>`<span class="sw${i===0?' on':''}" style="background:${c}"></span>`).join('');
+  }
+  let idle;const poke=()=>{clearTimeout(idle);if(close==='idle'&&st.open)idle=setTimeout(()=>{const q=el.querySelector('input');if(st.open==='search'&&q.value)return;st.open=null;draw();q.blur()},4000)};
+  el.addEventListener('pointerdown',poke);el.addEventListener('keydown',poke);el.addEventListener('click',()=>setTimeout(poke));
+  el.addEventListener('click',e=>{
+    if(e.target.closest('[data-close]')){const k=st.open;st.open=null;draw();el.querySelector('input').blur();return}
+    const xi=e.target.closest('.xi');if(xi){st.open=xi.parentElement.dataset.k;draw();if(st.open==='search')setTimeout(()=>el.querySelector('input').focus(),200);return}
+    const sb=e.target.closest('[data-s]');if(sb){const k=sb.dataset.s;if(k===st.sort)st.d=st.d?0:1;else{st.sort=k;st.d=k==='year'?1:0}draw();return}
+    const vb=e.target.closest('[data-v]');if(vb){st.view=vb.dataset.v;draw();setTimeout(()=>{st.open=null;draw()},260);return}
+    if(!e.target.closest('.xb')){st.open=null;draw()}});
+  el.addEventListener('keydown',e=>{if(e.key==='Escape'&&st.open){const k=st.open;st.open=null;draw();$x(k).querySelector('.xi').focus({focusVisible:false})}});
+  addEventListener('resize',draw);requestAnimationFrame(draw);draw();
+}
+const L4=[
+ ['J1','I2, with a ×','While one is open, a small × circle takes the place of the other two. Tap it to fold back to three circles.',2,'x'],
+ ['J2','I2, × inside','The × sits inside the open capsule, at its front, so the bar stays one object. Tap it to fold back to three circles.',2,'lead'],
+ ['J3','I2, closes on its own','After four seconds without a tap it folds back by itself (search stays open while there’s text in it). A tap anywhere else or Esc closes it sooner.',2,'idle'],
+ ['I1','Opens in place','The tapped circle grows into its options; the other two stay circles and slide aside. Tap another circle to switch, or tap anywhere else to close. Sort shows its five ways (artist, title, year, label, color) and a short line above says what’s picked, like “Newest first”; tap the lit one again to flip it. The dial follows the sort.',1],
+ ['I2','Takes the row','The tapped circle grows to fill the bar and the other two fold away until you close it, so there’s only one thing on the bar at a time and more room for each.',2]];
+L4.forEach(([id,name,use,mode,close])=>{ALL[id]=name;const st=document.createElement('div');st.className='st';st.dataset.id=id;
+  st.innerHTML=`<span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id} ${name}">★</button><div class="lrow"><div class="fr"><span class="k">Phone</span><div class="ph-live"></div></div><div class="fr"><span class="k">Laptop (bottom of the screen)</span><div class="lap-live"></div></div></div><span class="use">${use}</span>`;
+  $('#I').append(st);live(st.querySelector('.ph-live'),mode,false,close);live(st.querySelector('.lap-live'),mode,true,close)});
+})();
+
+// round five: the same bar, with gestures. f.slide: press and slide to pick; f.swipe: swipe a circle to change it; f.dial: sort opens as a little scrubber
+(function(){
+const KS=['artist','title','year','label','color'],KV=['crate','wall','table'];
+const SI={artist:I.artist,title:'<svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans)">Aa</text></svg>',year:I.year,
+  label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',color:'<i class="cw"></i>'};
+const SL={artist:['Artist, A to Z','Artist, Z to A'],title:['Title, A to Z','Title, Z to A'],year:['Oldest first','Newest first'],label:['Label, A to Z','Label, Z to A'],color:['Reds first','Darks first']};
+const SW={artist:'Artist',title:'Title',year:'Year',label:'Label',color:'Color'};
+const VI={crate:I.crate,wall:I.wall,table:I.table},VL={crate:'Crate',wall:'Grid',table:'Table'};
+const XI='<svg viewBox="0 0 256 256"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
+const DIR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/></svg>';
+function live5(box,lap,f){
+  const st={sort:'artist',d:0,view:'crate',open:null};
+  const el=document.createElement('div');el.className='live k5'+(lap?' lap':'');
+  let bk='';
+  if(lap){for(let i=0;i<8;i++)bk+=`<i style="left:calc(4% + ${i}*11.6%);width:10.4%;top:-20px;aspect-ratio:1;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
+  else{for(let i=0;i<3;i++)bk+=`<i style="left:${24+i*118}px;width:110px;height:110px;top:20px;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
+  const sortRow=f.dial?`<div class="dz">${KS.map(k=>`<button type="button" class="dw" data-s="${k}">${SW[k]}<i></i></button>`).join('')}</div>`
+    :`<i class="th" style="--n:5"></i>${KS.map(k=>`<button type="button" data-s="${k}" aria-label="Sort by ${k}">${SI[k]}</button>`).join('')}`;
+  el.innerHTML=`<div class="bk">${bk}</div><div class="dl2"></div><div class="say"></div>
+   <div class="xbar">
+    <div class="xb glass" data-k="search"><button class="xi" type="button" aria-label="Search">${SRCH}</button><div class="xo"><label class="q">${SRCH}<input type="search" placeholder="Search" aria-label="Search the crate"></label></div></div>
+    <div class="xb glass" data-k="sort"><button class="xi" type="button" aria-label="Sort"></button><div class="xo">${sortRow}</div></div>
+    <div class="xb glass" data-k="dir"><button class="xi" type="button" aria-label="Flip the order">${DIR}</button></div>
+    <div class="xb glass" data-k="view"><button class="xi" type="button" aria-label="Layout"></button><div class="xo"><i class="th" style="--n:3"></i>${KV.map(k=>`<button type="button" data-v="${k}" aria-label="${VL[k]}">${VI[k]}</button>`).join('')}</div></div>
+    <div class="xb glass xx" data-k="x"><button class="xc" type="button" data-close aria-label="Close">${XI}</button></div>
+   </div>`;
+  box.append(el);
+  const $x=k=>el.querySelector(`.xb[data-k=${k}]`),bar=el.querySelector('.xbar'),say=el.querySelector('.say'),dl=el.querySelector('.dl2'),dz=el.querySelector('.dz');
+  const H=()=>lap?56:62,G=12;let flash=0,hov=null,skip=false;
+  const sortIcon=()=>f.swipe?SI[st.sort]:I.arrows;
+  function draw(){
+    const avail=bar.clientWidth;
+    ['search','sort','dir','view'].forEach(k=>{const b=$x(k),o=st.open===k;b.classList.toggle('o',o);b.classList.toggle('gone',!!st.open&&!o);
+      b.style.width=(o?Math.min(avail-H()-G,lap?440:avail):H())+'px'});
+    $x('x').classList.toggle('gone',!st.open);
+    const sb=$x('sort').querySelector('.xi');if(sb.dataset.k!==st.sort+f.swipe){sb.innerHTML=sortIcon();sb.dataset.k=st.sort+f.swipe}
+    sb.classList.toggle('on',st.sort!=='artist');
+    const db=$x('dir');db.dataset.d=st.d;db.querySelector('.xi').classList.toggle('on',!!st.d);
+    const vb=$x('view').querySelector('.xi');if(vb.dataset.k!==st.view){vb.innerHTML=VI[st.view];vb.dataset.k=st.view}
+    const si=hov&&hov.k==='sort'?hov.i:KS.indexOf(st.sort),vi=hov&&hov.k==='view'?hov.i:KV.indexOf(st.view);
+    $x('sort').querySelectorAll('[data-s]').forEach((b,i)=>b.classList.toggle('on',i===si));
+    $x('view').querySelectorAll('[data-v]').forEach((b,i)=>b.classList.toggle('on',i===vi));
+    const ts=$x('sort').querySelector('.th');if(ts)ts.style.setProperty('--i',si);$x('view').querySelector('.th').style.setProperty('--i',vi);
+    if(dz)dz.querySelectorAll('.dw').forEach(b=>b.querySelector('i').textContent=b.dataset.s===st.sort?(st.d?'↓':'↑'):'');
+    say.textContent=st.open==='sort'||(!st.open&&flash==='sort')?SL[st.sort][st.d]:st.open==='view'||(!st.open&&flash==='view')?VL[hov&&hov.k==='view'?KV[hov.i]:st.view]:'';
+    if(st.open==='sort'&&hov&&hov.k==='sort')say.textContent=SL[KS[hov.i]][KS[hov.i]===st.sort?st.d:(KS[hov.i]==='year'?1:0)];
+    say.classList.toggle('v',!!say.textContent);
+    el.classList.toggle('open',!!st.open);
+    const L=st.sort==='year'?(st.d?['2016','2015','2014','2013','2012','2011']:['1967','1968','1969','1970','1971','1972']):st.sort==='color'?null:(st.d?['Z','Y','W','V','T','S','R']:['A','B','C','D','E','F','G']);
+    dl.classList.toggle('y',st.sort==='year');
+    dl.innerHTML=L?L.map((l,i)=>`<span class="${i===(st.sort==='year'?2:0)?'on':''}">${l}</span>`).join(''):['#e5534b','#e8a33d','#e5d64b','#5cb85c','#3d9ae8','#8b5cf6'].map((c,i)=>`<span class="sw${i===0?' on':''}" style="background:${c}"></span>`).join('');
+  }
+  let ft;const flashSay=k=>{flash=k;clearTimeout(ft);ft=setTimeout(()=>{flash=0;draw()},1500);draw()};
+  const pick=(k,i)=>{if(k==='sort'){const n=KS[i];if(n===st.sort)st.d=st.d?0:1;else{st.sort=n;st.d=n==='year'?1:0}}else st.view=KV[i]};
+  const pickSlide=(k,i)=>{if(k==='sort'){const n=KS[i];if(n!==st.sort){st.sort=n;st.d=n==='year'?1:0}}else st.view=KV[i]};
+  const close=()=>{st.open=null;hov=null;draw();el.querySelector('input').blur()};
+  const openIt=k=>{st.open=k;draw();if(k==='search')setTimeout(()=>el.querySelector('input').focus(),200);if(k==='sort'&&dz)centre(false)};
+  const idxAt=(k,x)=>{const bs=[...$x(k).querySelectorAll(k==='sort'?'[data-s]':'[data-v]')];let best=null,bd=1e9;bs.forEach((b,i)=>{const r=b.getBoundingClientRect();if(!r.width)return;const d=Math.abs(x-(r.left+r.width/2));if(d<bd){bd=d;best=i}});return best};
+  const nudge=(k,dir)=>{const s=$x(k).querySelector('.xi svg,.xi .cw');s&&s.animate([{transform:`translateX(${dir*16}px)`,opacity:0},{transform:'none',opacity:1}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'})};
+  // one pointer at a time: what it does depends on where it went down, how far it went and how fast
+  let pr=null;
+  el.addEventListener('pointerdown',e=>{
+    if(e.target.closest('input,[data-close]'))return;
+    const xi=e.target.closest('.xi'),k=xi&&xi.parentElement.dataset.k,row=!xi&&e.target.closest('.xb.o[data-k=sort] .xo:not(:has(.dz)),.xb.o[data-k=view] .xo');
+    if(xi&&(k==='sort'||k==='view')&&(f.slide||f.swipe)&&st.open!==k){pr={k,x:e.clientX,y:e.clientY,t:performance.now(),from:'circle',moved:false};
+      if(f.slide){if(f.swipe)pr.hold=setTimeout(()=>{if(pr&&!pr.fast)openIt(k)},170);else openIt(k)}
+      el.setPointerCapture(e.pointerId);e.preventDefault()}
+    else if(row){const k2=row.closest('.xb').dataset.k;pr={k:k2,x:e.clientX,y:e.clientY,from:'row',moved:false};hov={k:k2,i:idxAt(k2,e.clientX)};row.classList.add('drag');draw();el.setPointerCapture(e.pointerId);e.preventDefault()}
+  });
+  el.addEventListener('pointermove',e=>{if(!pr)return;const dx=e.clientX-pr.x,dy=e.clientY-pr.y,d=Math.hypot(dx,dy);if(d>8)pr.moved=true;
+    if(pr.from==='circle'&&st.open!==pr.k){if(d>24)pr.fast=true;return} // not open yet: a swipe in the making
+    if(pr.moved||pr.from==='row'){const i=idxAt(pr.k,e.clientX);if(i!=null&&(!hov||hov.i!==i)){hov={k:pr.k,i};$x(pr.k).querySelector('.xo').classList.add('drag');draw()}}});
+  el.addEventListener('pointerup',e=>{if(!pr)return;const p=pr;pr=null;clearTimeout(p.hold);skip=true;setTimeout(()=>skip=false,60);el.querySelectorAll('.xo.drag').forEach(r=>r.classList.remove('drag'));
+    const dx=e.clientX-p.x,dy=e.clientY-p.y,h=hov;hov=null;
+    if(p.from==='row'){if(h){p.moved?pickSlide(p.k,h.i):pick(p.k,h.i)}draw();if(p.k==='view'||p.moved)setTimeout(close,260);return}
+    if(st.open===p.k){ // opened under the thumb: slid and let go picks it; a still press leaves it open
+      if(p.moved&&h){pickSlide(p.k,h.i);draw();setTimeout(()=>{close();flashSay(p.k)},240)}else draw();return}
+    if(Math.abs(dx)>24&&Math.abs(dx)>Math.abs(dy)){const L=p.k==='sort'?KS:KV,c=L.indexOf(p.k==='sort'?st.sort:st.view),n=(c+(dx<0?1:-1)+L.length)%L.length;
+      pickSlide(p.k,n);draw();nudge(p.k,dx<0?1:-1);flashSay(p.k);return}
+    if(p.k==='sort'&&Math.abs(dy)>24){st.d=st.d?0:1;draw();flashSay('sort');return}
+    openIt(p.k)});
+  el.addEventListener('pointercancel',()=>{if(pr)clearTimeout(pr.hold);pr=null;hov=null;draw()});
+  el.addEventListener('click',e=>{
+    if(e.target.closest('[data-close]')){close();return}
+    if(skip)return;
+    const xi=e.target.closest('.xi');if(xi){const k=xi.parentElement.dataset.k;
+      if(k==='dir'){st.d=st.d?0:1;draw();flashSay('sort');return}
+      openIt(k);return}
+    const dw=e.target.closest('.dw');if(dw){if(dw.dataset.s===st.sort){st.d=st.d?0:1;draw()}else centreOn(dw);return}
+    if(!e.target.closest('.xb'))close()});
+  // the sort as a scrubber: the word in the middle is the sort; it settles where you let go
+  function centreOn(b,smooth=true){dz.scrollTo({left:b.offsetLeft+b.offsetWidth/2-dz.clientWidth/2,behavior:smooth?'smooth':'instant'})}
+  function centre(smooth){requestAnimationFrame(()=>{const b=dz.querySelector(`[data-s=${st.sort}]`);centreOn(b,smooth);shade()})}
+  function shade(){const r=dz.getBoundingClientRect(),c=r.left+r.width/2;dz.querySelectorAll('.dw').forEach(b=>{const q=b.getBoundingClientRect(),d=Math.abs(q.left+q.width/2-c);b.style.opacity=Math.max(.35,1-d/110);b.style.transform=`scale(${Math.max(.88,1-d/900)})`})}
+  if(dz){let t;dz.addEventListener('scroll',()=>{shade();clearTimeout(t);t=setTimeout(()=>{if(st.open!=='sort')return;const r=dz.getBoundingClientRect(),c=r.left+r.width/2;let best=null,bd=1e9;
+    dz.querySelectorAll('.dw').forEach(b=>{const q=b.getBoundingClientRect(),d=Math.abs(q.left+q.width/2-c);if(d<bd){bd=d;best=b}});
+    if(best&&best.dataset.s!==st.sort){st.sort=best.dataset.s;st.d=st.sort==='year'?1:0;draw()}},90)},{passive:true})}
+  el.addEventListener('keydown',e=>{if(e.key==='Escape'&&st.open)close()});
+  addEventListener('resize',draw);requestAnimationFrame(draw);draw();
+}
+const L5=[
+ ['K1','Press and slide','Press the sort or layout circle and it opens under your thumb; slide along to the one you want and let go. One gesture instead of open, pick, close. A quick tap still just opens it. The lit pill follows your finger and the line above reads out what you’re on.',{slide:1}],
+ ['K2','Swipe the circles','Swipe sideways on the sort circle to step to the next sort (its icon slides in, so it shows which sort you’re on); swipe up or down on it to flip the order. Swipe the layout circle to step Crate, Grid, Table. Tap still opens the row. The line above says where you landed, then goes.',{swipe:1}],
+ ['K3','Both','K1 and K2 together: swipe a circle for a quick step, or press and slide to jump straight to one.',{slide:1,swipe:1}],
+ ['K4','Sort as a scrubber','The sort opens as a little scrubber of words, like the dial: flick it and it settles on the one in the middle, with momentum. Tap the middle word to flip it (the arrow beside it turns). Layout keeps the sliding pill.',{dial:1}]];
+L5.forEach(([id,name,use,f])=>{ALL[id]=name;const st=document.createElement('div');st.className='st';st.dataset.id=id;
+  st.innerHTML=`<span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id} ${name}">★</button><div class="lrow"><div class="fr"><span class="k">Phone</span><div class="ph-live"></div></div><div class="fr"><span class="k">Laptop (bottom of the screen)</span><div class="lap-live"></div></div></div><span class="use">${use}</span>`;
+  $('#K').append(st);live5(st.querySelector('.ph-live'),false,f);live5(st.querySelector('.lap-live'),true,f)});
+})();
+let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-nav-picks')||'[]'))}catch(e){}
+const save=()=>{try{localStorage.setItem('vinyl-nav-picks',JSON.stringify([...picks]))}catch(e){}};
+const show=()=>{$('#picks').textContent=picks.size?[...picks].sort().join(' · '):'No picks yet';$$('.st').forEach(s=>s.classList.toggle('picked',picks.has(s.dataset.id)))};
+$$('.st').forEach(s=>{const b=$('.star',s);if(b)b.onclick=()=>{const id=s.dataset.id;picks.has(id)?picks.delete(id):picks.add(id);save();show()}});
+$('#copy').onclick=()=>{const t=[...picks].sort().map(id=>`${id} ${ALL[id]}`).join(', ')||'No picks yet';
+  const done=()=>{$('#copy').textContent='Copied';$('#picks').textContent=t;setTimeout(()=>$('#copy').textContent='Copy my picks',1200)};
+  const fall=()=>{const r=document.createRange();r.selectNodeContents($('#picks'));$('#picks').textContent=t;getSelection().removeAllRanges();getSelection().addRange(r)};
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(done,fall);else fall()};
+$('#clear').onclick=()=>{picks.clear();save();show()};
+show();
+</script>
+</body>
+</html>
