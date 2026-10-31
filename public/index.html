@@ -1712,7 +1712,9 @@ addEventListener('pointerdown',e=>{if(!$('#cmenu').hidden&&!e.target.closest('#c
 let REST,TILT;const restFor=()=>{REST=PHONE?0:-3;TILT=PHONE?0:-1};restFor(); // on a phone it faces you square
 const open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage'),lift=$('#lift');
 // phones: how far the details have risen over the record, for the record's dimming and the fade behind the words
-open.addEventListener('scroll',()=>{open.style.setProperty('--rise',PHONE?Math.min(1,open.scrollTop/120).toFixed(3):0)},{passive:true});
+open.addEventListener('scroll',()=>{open.style.setProperty('--rise',PHONE?Math.min(1,open.scrollTop/120).toFixed(3):0);
+  // past the top, iOS can still pull the whole view down a way (a fling, or a drag that turned around); the record stays where it is
+  const o=PHONE?Math.min(0,open.scrollTop):0;if(o||stage.style.translate)stage.style.translate=o?`0 ${o}px`:''},{passive:true});
 let base=REST,ry=base,rx=TILT,sdrag=null,busy=false,timers=[],flyF=0;
 const later=(f,ms)=>timers.push(setTimeout(f,ms));
 // the sleeve turns on a spring too: ry/rx say where it's headed, sv where it is now
