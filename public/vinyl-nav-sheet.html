@@ -96,6 +96,12 @@ body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font
 .tabs .hr{width:1px;height:calc(var(--u)*24);background:rgba(255,255,255,.14);flex:none}
 
 /* round four: live bars */
+.xb.xx{display:grid;place-items:center}
+.xb.xx .xc{all:unset;cursor:pointer;width:var(--H);height:var(--H);display:grid;place-items:center;color:#d6d6da}
+.xb.xx .xc svg{width:20px;height:20px}
+.xo .lead{flex:none!important;width:calc(var(--H) - 12px);color:#d6d6da!important}.xo .lead svg{width:18px!important;height:18px!important}
+.xo .lead::after{content:"";position:absolute;right:-3px;top:28%;bottom:28%;width:1px;background:transparent}
+
 .live{position:relative;overflow:hidden;background:#121212;border-radius:18px;box-shadow:0 0 0 1px #ffffff14;font-family:var(--sans);color:#fff;--H:62px;--g:12px;height:300px}
 .live.lap{--H:56px;border-radius:10px;height:260px}
 .live .bk{position:absolute;inset:0}
@@ -147,7 +153,7 @@ body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font
     <div><b>The filter pill is a different kind of thing</b>It's a fact about what you're looking at, sitting in a row of actions, in a different shape, pushing them around.<i>C, D, F</i></div>
     <div><b>The bar is lopsided</b>A small mark alone on the left, a heavy cluster on the right, and nothing in the middle.<i>C, E, F</i></div>
   </div>
-  <h2 class="grp">Round four: three circles that open</h2><p>H4’s quiet sort, with search, sort and view as three circles at the bottom. Each one opens in place when tapped. These are live: tap them. The two stickers differ only in what the other circles do while one is open.</p>
+  <h2 class="grp">Round four: three circles that open</h2><p>H4’s quiet sort, with search, sort and view as three circles at the bottom. Each one opens in place when tapped. These are live: tap them. J1–J3 are I2 with three ways to fold it back when you don’t pick anything; every one also closes on a tap anywhere else or Esc.</p>
   <div class="sheet" id="I" style="margin-bottom:56px"></div>
   <h2 class="grp">Round three: G5, with the sort treated differently</h2><p>Same as G5 (layouts in the capsule, search in its own circle, filter at the top center). Only the sort changes.</p>
   <div class="sheet" id="H" style="margin-bottom:56px"></div>
@@ -329,7 +335,8 @@ const SI={artist:I.artist,title:'<svg viewBox="0 0 24 24"><text x="12" y="17" te
   label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',color:'<i class="cw"></i>'};
 const SL={artist:['Artist, A to Z','Artist, Z to A'],title:['Title, A to Z','Title, Z to A'],year:['Oldest first','Newest first'],label:['Label, A to Z','Label, Z to A'],color:['Reds first','Darks first']};
 const VI={crate:I.crate,wall:I.wall,table:I.table},VL={crate:'Crate',wall:'Grid',table:'Table'};
-function live(box,mode,lap){
+function live(box,mode,lap,close=''){
+  const XI0='<svg viewBox="0 0 256 256"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>',XI=XI0,lead=i=>close==='lead'?`<button type="button" class="lead" data-close aria-label="Close">${XI}</button>`:'';
   const st={sort:'artist',d:0,view:'crate',open:null};
   const el=document.createElement('div');el.className='live'+(lap?' lap':'');
   const W=lap?1440:390;let bk='';
@@ -337,9 +344,10 @@ function live(box,mode,lap){
   else{for(let i=0;i<3;i++)bk+=`<i style="left:${24+i*118}px;width:110px;height:110px;top:20px;background:${SPINES[(i*7+5)%SPINES.length]}"></i>`}
   el.innerHTML=`<div class="bk">${bk}</div><div class="dl2"></div><div class="say"></div>
    <div class="xbar">
-    <div class="xb glass" data-k="search"><button class="xi" type="button" aria-label="Search">${SRCH}</button><div class="xo"><label class="q">${SRCH}<input type="search" placeholder="Search" aria-label="Search the crate"></label></div></div>
-    <div class="xb glass" data-k="sort"><button class="xi" type="button" aria-label="Sort">${I.arrows}</button><div class="xo">${Object.keys(SI).map(k=>`<button type="button" data-s="${k}" aria-label="Sort by ${k}">${SI[k]}</button>`).join('')}</div></div>
-    <div class="xb glass" data-k="view"><button class="xi" type="button" aria-label="Layout"></button><div class="xo">${Object.keys(VI).map(k=>`<button type="button" data-v="${k}" aria-label="${VL[k]}">${VI[k]}</button>`).join('')}</div></div>
+    <div class="xb glass" data-k="search"><button class="xi" type="button" aria-label="Search">${SRCH}</button><div class="xo">${close==='lead'?lead(SRCH):''}<label class="q">${close==='lead'?'':SRCH}<input type="search" placeholder="Search" aria-label="Search the crate"></label></div></div>
+    <div class="xb glass" data-k="sort"><button class="xi" type="button" aria-label="Sort">${I.arrows}</button><div class="xo">${lead(I.arrows)}${Object.keys(SI).map(k=>`<button type="button" data-s="${k}" aria-label="Sort by ${k}">${SI[k]}</button>`).join('')}</div></div>
+    <div class="xb glass" data-k="view"><button class="xi" type="button" aria-label="Layout"></button><div class="xo"><span class="vlead" style="display:contents"></span>${Object.keys(VI).map(k=>`<button type="button" data-v="${k}" aria-label="${VL[k]}">${VI[k]}</button>`).join('')}</div></div>
+    ${close==='x'?`<div class="xb glass xx" data-k="x"><button class="xc" type="button" data-close aria-label="Close">${XI}</button></div>`:''}
    </div>`;
   box.append(el);
   const $x=k=>el.querySelector(`.xb[data-k=${k}]`),bar=el.querySelector('.xbar'),say=el.querySelector('.say'),dl=el.querySelector('.dl2');
@@ -348,8 +356,10 @@ function live(box,mode,lap){
   function draw(){
     const avail=bar.clientWidth;
     ['search','sort','view'].forEach(k=>{const b=$x(k),o=st.open===k;b.classList.toggle('o',o);b.classList.toggle('gone',mode===2&&st.open&&!o);
-      let w=H();if(o){w=mode===2?Math.min(avail,lap?440:avail):(want[k]()||avail-2*H()-3*G);if(mode===1)w=Math.min(w,avail-2*H()-3*G)}
+      let w=H();if(o){w=mode===2?Math.min(avail-(close==='x'?H()+G:0),lap?440:avail):(want[k]()||avail-2*H()-3*G);if(mode===1)w=Math.min(w,avail-2*H()-3*G)}
       b.style.width=w+'px'});
+    const xx=el.querySelector('.xx');if(xx)xx.classList.toggle('gone',!st.open);
+    if(close==='lead')el.querySelector('.vlead').innerHTML=lead();
     const sb=$x('sort').querySelector('.xi'),changed=st.sort!=='artist'||st.d;sb.classList.toggle('on',changed);sb.innerHTML=I.arrows+(changed?'<i class="dot"></i>':'');
     $x('view').querySelector('.xi').innerHTML=VI[st.view];
     $x('sort').querySelectorAll('[data-s]').forEach(b=>{const on=b.dataset.s===st.sort;b.classList.toggle('on',on);});
@@ -360,7 +370,10 @@ function live(box,mode,lap){
     dl.classList.toggle('y',st.sort==='year');
     dl.innerHTML=L?L.map((l,i)=>`<span class="${i===(st.sort==='year'?2:0)?'on':''}">${l}</span>`).join(''):['#e5534b','#e8a33d','#e5d64b','#5cb85c','#3d9ae8','#8b5cf6'].map((c,i)=>`<span class="sw${i===0?' on':''}" style="background:${c}"></span>`).join('');
   }
+  let idle;const poke=()=>{clearTimeout(idle);if(close==='idle'&&st.open)idle=setTimeout(()=>{const q=el.querySelector('input');if(st.open==='search'&&q.value)return;st.open=null;draw();q.blur()},4000)};
+  el.addEventListener('pointerdown',poke);el.addEventListener('keydown',poke);el.addEventListener('click',()=>setTimeout(poke));
   el.addEventListener('click',e=>{
+    if(e.target.closest('[data-close]')){const k=st.open;st.open=null;draw();el.querySelector('input').blur();return}
     const xi=e.target.closest('.xi');if(xi){st.open=xi.parentElement.dataset.k;draw();if(st.open==='search')setTimeout(()=>el.querySelector('input').focus(),200);return}
     const sb=e.target.closest('[data-s]');if(sb){const k=sb.dataset.s;if(k===st.sort)st.d=st.d?0:1;else{st.sort=k;st.d=k==='year'?1:0}draw();return}
     const vb=e.target.closest('[data-v]');if(vb){st.view=vb.dataset.v;draw();setTimeout(()=>{st.open=null;draw()},260);return}
@@ -369,11 +382,14 @@ function live(box,mode,lap){
   addEventListener('resize',draw);requestAnimationFrame(draw);draw();
 }
 const L4=[
+ ['J1','I2, with a ×','While one is open, a small × circle takes the place of the other two. Tap it to fold back to three circles.',2,'x'],
+ ['J2','I2, × inside','The × sits inside the open capsule, at its front, so the bar stays one object. Tap it to fold back to three circles.',2,'lead'],
+ ['J3','I2, closes on its own','After four seconds without a tap it folds back by itself (search stays open while there’s text in it). A tap anywhere else or Esc closes it sooner.',2,'idle'],
  ['I1','Opens in place','The tapped circle grows into its options; the other two stay circles and slide aside. Tap another circle to switch, or tap anywhere else to close. Sort shows its five ways (artist, title, year, label, color) and a short line above says what’s picked, like “Newest first”; tap the lit one again to flip it. The dial follows the sort.',1],
  ['I2','Takes the row','The tapped circle grows to fill the bar and the other two fold away until you close it, so there’s only one thing on the bar at a time and more room for each.',2]];
-L4.forEach(([id,name,use,mode])=>{ALL[id]=name;const st=document.createElement('div');st.className='st';st.dataset.id=id;
+L4.forEach(([id,name,use,mode,close])=>{ALL[id]=name;const st=document.createElement('div');st.className='st';st.dataset.id=id;
   st.innerHTML=`<span class="id"><b>${id}</b>${name}</span><button class="star" type="button" aria-label="Pick ${id} ${name}">★</button><div class="lrow"><div class="fr"><span class="k">Phone</span><div class="ph-live"></div></div><div class="fr"><span class="k">Laptop (bottom of the screen)</span><div class="lap-live"></div></div></div><span class="use">${use}</span>`;
-  $('#I').append(st);live(st.querySelector('.ph-live'),mode,false);live(st.querySelector('.lap-live'),mode,true)});
+  $('#I').append(st);live(st.querySelector('.ph-live'),mode,false,close);live(st.querySelector('.lap-live'),mode,true,close)});
 })();
 let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-nav-picks')||'[]'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vinyl-nav-picks',JSON.stringify([...picks]))}catch(e){}};
