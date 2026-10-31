@@ -1229,14 +1229,14 @@ html .dock .xb.o>.fb,html .dock .xb.o>.fb.lb,html .dock .xb.o>.fb.lb.sb.on{opaci
 .dock .xb>.q .qi,html.phone .dock .xb>.q .qi{left:calc(var(--H)/2 - 12px);color:var(--t2);pointer-events:none}
 .dock .xb>.q .qi svg{width:24px;height:24px}
 .dock .xb>.q input,html.phone .dock .xb>.q input,.dock .xb>.q.has input{all:unset;box-sizing:border-box;width:100%;height:100%;padding:0 18px 0 calc(var(--H)/2 + 22px);font-size:16px;color:#fff;cursor:text}
-.dock .xb>.q.has input{padding-right:44px}
+
 .dock .xb:not(.o)>.q input{color:transparent;cursor:pointer;padding:0}
 .dock .xb:not(.o)>.q input::placeholder{color:transparent}
 .dock .xb>.q input::placeholder{color:var(--m)}
 .dock .xb>.q .qn{display:none}
 .dock .xb>.q .qx{right:12px;width:28px;height:28px;background:none;color:var(--m)}
 .dock .xb>.q .qx svg{width:12px;height:12px}
-.dock .xb:not(.o)>.q .qx{display:none}
+.dock .xb>.q .qx{display:none} /* the round × beside the field clears and closes; one × is enough */
 .dock .xb>.q .qnone{bottom:calc(100% + 10px);top:auto;left:50%;right:auto;translate:-50% 0;width:min(380px,calc(100vw - 28px))}
 .dock .xb>.q:has(input:focus-visible){outline:none}
 .dock .dx{cursor:pointer;display:grid;place-items:center;color:var(--t1)}
