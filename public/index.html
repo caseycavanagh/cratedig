@@ -1249,7 +1249,7 @@ html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 html.phone .kd,html.phone body.filtering .kd,html.phone body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 34px)}
 body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .xb.o) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* the list rises from the field: above it, across the screen on a phone, centered over it on a laptop */
-html.phone .sl{top:calc(env(safe-area-inset-top) + 64px);bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:none}
+html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
 html:not(.phone) .sl{top:auto;right:auto;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 10px);width:min(440px,calc(100vw - 28px))}
 html.phone .sx,html.phone body.searching .sx{display:none}
 .find .chip,html.phone .find .chip{position:absolute;top:0;left:50%;translate:-50% 0;margin:0;max-width:calc(100vw - 2*(max(14px,env(safe-area-inset-left)) + 56px))}
