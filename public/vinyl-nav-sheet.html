@@ -83,6 +83,17 @@ body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font
 .tag span{overflow:hidden;text-overflow:ellipsis;min-width:0}.tag i{font-style:normal;color:#8e8e93;flex:none}
 .dl{display:flex;align-items:baseline;justify-content:center;font-weight:500;white-space:nowrap;color:#5f5f64}
 .dl .on{color:#fff;font-size:1.35em}
+.glass{background:rgba(44,44,48,.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 calc(var(--u)*10) calc(var(--u)*30) #0009}
+.tabs{display:flex;align-items:center;justify-content:space-around;border-radius:999px}
+.tab{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*3);color:#9a9aa0;position:relative;font-weight:500}
+.tab svg{width:calc(var(--u)*26);height:calc(var(--u)*26);display:block}
+.tab.on{color:#fff}
+.tab.dot::after{content:"";position:absolute;left:50%;bottom:calc(var(--u)*7);width:calc(var(--u)*4);height:calc(var(--u)*4);margin-left:calc(var(--u)*-2);border-radius:50%;background:#fff}
+.tab.slot::before{content:"";position:absolute;inset:calc(var(--u)*6) 0;border-radius:999px;background:#ffffff1f;z-index:-1}
+.tab.slot{z-index:0}
+.rnd{display:grid;place-items:center;border-radius:50%;color:#d6d6da}
+.rnd svg{width:calc(var(--u)*26);height:calc(var(--u)*26)}
+.tabs .hr{width:1px;height:calc(var(--u)*24);background:rgba(255,255,255,.14);flex:none}
 </style>
 </head>
 <body>
@@ -96,7 +107,9 @@ body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);-webkit-font
     <div><b>The filter pill is a different kind of thing</b>It's a fact about what you're looking at, sitting in a row of actions, in a different shape, pushing them around.<i>C, D, F</i></div>
     <div><b>The bar is lopsided</b>A small mark alone on the left, a heavy cluster on the right, and nothing in the middle.<i>C, E, F</i></div>
   </div>
-  <h2 class="grp">Directions</h2><p>T is today, for reference. Long label: “High Top Mountain Records”.</p>
+  <h2 class="grp">Round two: a tab bar at the bottom</h2><p>A glass capsule at the bottom holds the three layouts as tabs, with search as its own circle beside it, after your reference. Indicators stay quiet like A: gray icons, the current one white. The filter moves to the top center; the top is otherwise just the mark. The dial sits above the bar. The sort is the open question, so each sticker puts it somewhere different.</p>
+  <div class="sheet" id="G" style="margin-bottom:56px"></div>
+  <h2 class="grp">Round one</h2><p>T is today, for reference. Long label: “High Top Mountain Records”.</p>
   <div class="sheet" id="S"></div>
 </div>
 <script>
@@ -129,7 +142,7 @@ function dial(W,busy,H){const L=busy?['2011','2012','2013','2014','2015','2016']
   return`<i class="fadeb"></i><div class="dl" style="${at({left:0,right:0,bottom:W>500?26:40,gap:u(g),'font-size':u(W>500?20:20)})}">${L.map((l,i)=>`<span class="${(busy?i===2:i===0)?'on':''}">${l}</span>`).join('')}</div>`}
 
 // one frame: top crop and bottom crop of the same screen
-function frame(kind,top,bot){const lap=kind==='lap',W=lap?1440:390,TH=lap?150:176,BH=lap?96:144;
+function frame(kind,top,bot,TH,BH){const lap=kind==='lap',W=lap?1440:390;
   return`<div class="f ${kind} t" style="aspect-ratio:${W}/${TH}">${top}</div><div class="cut"></div><div class="f ${kind} b" style="aspect-ratio:${W}/${BH}">${bot}</div>`}
 
 // each direction draws its own bar; ctx = {W, cy (bar center), busy, lap}
@@ -192,13 +205,42 @@ const D=[
    return`<div class="fld" style="${at({...pos,top:c.cy-h/2,height:h,padding:`0 ${u(4)} 0 ${u(16)}`,'font-size':u(fs),gap:u(4)})}">${inner}</div>`}],
 ];
 
+
+I.table='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>';
+// round two: what sits under the bottom bar (the front record, or grid tiles), and the dial above the bar
+function under(W,H,busy){const lap=W>500;let h='';
+  if(busy){const n=lap?8:3,g=lap?14:8,x0=lap?56:24,tw=(W-x0*2-g*(n-1))/n;for(let r=0;r<2;r++)for(let i=0;i<n;i++)h+=`<i style="${at({left:x0+i*(tw+g),top:-tw*.6+r*(tw+g),width:tw,height:tw,background:SPINES[(i*7+r*3+5)%SPINES.length],'border-radius':u(4)})}"></i>`}
+  return h+`<i style="${at({inset:0,background:'linear-gradient(#12121233 0,#121212d9 50%,#121212f2 100%)'})}"></i>`}
+function dial2(W,busy){const lap=W>500,L=busy?['2011','2012','2013','2014','2015','2016']:['A','B','C','D','E','F','G'],g=lap?(busy?34:30):(busy?22:24);
+  return`<div class="dl" style="${at({left:0,right:0,bottom:lap?100:126,gap:u(g),'font-size':u(20)})}">${L.map((l,i)=>`<span class="${(busy?i===2:i===0)?'on':''}">${l}</span>`).join('')}</div>`}
+// the top in round two: the mark, and the filter centered
+function top2(c,right='',mw){const t=c.busy?`<span class="tag" style="${at({left:'50%',transform:'translateX(-50%)',top:c.cy-17,height:34,padding:`0 ${u(14)}`,'font-size':u(14),'max-width':mw||(c.lap?360:210)})}"><span>${LONG}</span><i>×</i></span>`:'';return t+right}
+// the bar: tabs = [{icon, on, label, cls}], then the search circle
+function bar2(c,tabs,{tw,labels,sep}={}){const lap=c.lap,h=lap?60:62,b=lap?24:30;tw=lap?(tw||64):(labels?58:54);
+  const items=tabs.map(t=>t==='|'?`<i class="hr"></i>`:`<span class="tab${t.on?' on':''}${t.cls?' '+t.cls:''}" style="${at({width:t.w||tw,height:h,'font-size':u(11)})}">${t.i}${labels&&t.l?`<span>${t.l}</span>`:''}</span>`).join('');
+  return`<div class="grpR" style="${at({left:0,right:0,bottom:b,'justify-content':'center',gap:u(12)})}"><div class="tabs glass" style="${at({height:h,padding:`0 ${u(10)}`,gap:u(4)})}">${items}</div><span class="rnd glass" style="${at({width:h,height:h})}">${I.s}</span></div>`}
+const LAY=(c,cls)=>[{i:I.crate,on:!c.busy,l:'Crate',cls:!c.busy&&cls},{i:I.wall,on:c.busy,l:'Grid',cls:c.busy&&cls},{i:I.table,l:'Table'}];
+const G=[
+ ['G1','Sort as a fourth tab','The capsule holds Crate, Grid and Table, then a hairline and the sort, wearing what it sorts by. The current layout is white. A changed sort turns white with a small dot under it, like A. Tapping the sort opens its menu upward.',
+  c=>top2(c),
+  c=>bar2(c,[...LAY(c),'|',{i:c.busy?I.year:I.artist,on:c.busy,cls:c.busy?'dot':''}])],
+ ['G2','Tabs with words','The same four tabs, each with a small word under the icon: Crate, Grid, Table, and the sort’s own name (Artist, or Newest). Nothing needs opening to read where you are.',
+  c=>top2(c),
+  c=>bar2(c,[...LAY(c),'|',{i:c.busy?I.year:I.artist,on:c.busy,l:c.busy?'Newest':'Artist'}],{labels:true,tw:c.lap?70:66})],
+ ['G3','Sort up top, in words','The capsule is only the three layouts. The sort moves to the top right as words, across from the mark, with the filter between them. The top reads as “what you’re looking at”; the bottom is “how”.',
+  c=>top2(c,`<span class="tx" style="${at({right:c.lap?56:20,top:c.cy-11,'font-size':u(15)})}"><b>${c.busy?'Newest first':'By artist'}</b>${CV}</span>`,c.lap?0:136),
+  c=>bar2(c,LAY(c))],
+ ['G4','A lit slot','Like G1, but the current layout sits in a faint lighter pill inside the capsule instead of only turning white. Easier to spot at a glance, a little less quiet.',
+  c=>top2(c),
+  c=>bar2(c,[...LAY(c,'slot'),'|',{i:c.busy?I.year:I.artist,on:c.busy,cls:c.busy?'dot':''}])],
+];
 const ALL={};
-function sticker([id,name,use,bar,bottom]){
+function sticker([id,name,use,bar,bottom,round2]){
   ALL[id]=name;
-  const make=(lap,busy)=>{const W=lap?1440:390,cy=lap?48:88,TH=lap?150:176,BH=lap?96:144,c={W,cy,busy,lap};
+  const make=(lap,busy)=>{const W=lap?1440:390,cy=lap?48:88,TH=lap?150:176,BH=round2?(lap?190:250):(lap?96:144),c={W,cy,busy,lap};
     const top=behind(W,TH,busy,lap?104:144)+(lap?'':statusBar())+logo(W,cy)+bar(c);
-    const bot=dial(W,busy,BH)+(bottom?bottom(c):'');
-    return frame(lap?'lap':'ph',top,bot)};
+    const bot=round2?under(W,BH,busy)+dial2(W,busy)+bottom(c):dial(W,busy,BH)+(bottom?bottom(c):'');
+    return frame(lap?'lap':'ph',top,bot,TH,BH)};
   const el=document.createElement('div');el.className='st';el.dataset.id=id;
   el.innerHTML=`<span class="id"><b>${id}</b>${name}</span>${id==='T'?'':`<button class="star" type="button" aria-label="Pick ${id} ${name}">★</button>`}
    <div class="row" aria-hidden="true">
@@ -206,9 +248,9 @@ function sticker([id,name,use,bar,bottom]){
     <div class="fr"><span class="k">Phone, at rest</span>${make(false,false)}</div>
     <div class="fr"><span class="k">Phone, busy</span>${make(false,true)}</div>
    </div><span class="use">${use}</span>`;
-  $('#S').append(el);
+  $(round2?'#G':'#S').append(el);
 }
-D.forEach(sticker);
+D.forEach(sticker);G.forEach(g=>sticker([...g,true]));
 
 let picks=new Set();try{picks=new Set(JSON.parse(localStorage.getItem('vinyl-nav-picks')||'[]'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vinyl-nav-picks',JSON.stringify([...picks]))}catch(e){}};
