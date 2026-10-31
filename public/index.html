@@ -592,7 +592,8 @@ body.walling .find .chip{display:none}
 .gms i{width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
 @media (min-width:700px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:15px}.gms .yr{font-size:13px}.gms i{width:22px;height:22px}}
 /* on a phone the group labels start where the logo does, and the covers end where the buttons at the top do */
-@media (max-width:699px){.gms p{right:auto;left:-26px;width:22px;align-items:flex-start}.gms .yr{font-size:10px}}
+@media (max-width:699px){.tiles{margin:0}.gms p.on-tile{right:auto;width:auto;min-width:24px;height:24px;box-sizing:border-box;padding:0 7px;justify-content:center;align-items:center;border-radius:12px;background:#121212b8;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-size:13px;z-index:1}.gms p.on-tile i{width:12px;height:12px}.gms p.on-tile:has(i){padding:0;width:24px}.gms .yr{font-size:11px;color:var(--t1)}}
+/* on a phone the wall is centered with even margins; each turn of the sort is a small chip on the cover where it starts */
 .tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
@@ -2872,6 +2873,10 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     order.forEach((r,i)=>{let g=group(r);if(SORT.k==='year')g=g==='—'?g:g.slice(0,3)+'0';if(g===g0)return;g0=g;
       const row=Math.floor(i/n);if(!rows.has(row))rows.set(row,[]);rows.get(row).push(g)});
     const ts=tiles.querySelectorAll('.tile');
+    const one=g=>SORT.k==='color'?`<i style="background:${hueInk(+g)}"></i>`:`<span${SORT.k==='year'?' class="yr"':''}>${SORT.k==='year'?(g==='—'?'No date':'’'+g.slice(2)+'s'):g}</span>`;
+    if(innerWidth<700){ // a phone has no margin to spare: the turn sits on the cover where it starts, so the wall stays centered
+      let h0=null;const at=[];order.forEach((r,i)=>{let g=group(r);if(SORT.k==='year')g=g==='—'?g:g.slice(0,3)+'0';if(g!==h0){h0=g;at.push([i,g])}});
+      marks.innerHTML=at.map(([i,g])=>ts[i]?`<p class="on-tile" style="top:${ts[i].offsetTop+6}px;left:${ts[i].offsetLeft+6}px">${one(g)}</p>`:'').join('');return}
     marks.innerHTML=[...rows].map(([row,gs])=>`<p style="top:${ts[row*n]?.offsetTop||0}px">${gs.map(g=>SORT.k==='color'?`<i style="background:${hueInk(+g)}"></i>`:`<span${SORT.k==='year'?' class="yr"':''}>${SORT.k==='year'?(g==='—'?'No date':'’'+g.slice(2)+'s'):g}</span>`).join('')}</p>`).join('');
   }
   new ResizeObserver(()=>placeMarks()).observe(tiles);
