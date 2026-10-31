@@ -1123,7 +1123,7 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
 .tsm i{font-style:normal;color:#fff}
 @keyframes tsmIn{from{opacity:0;scale:.96}}
 @media(prefers-reduced-motion:reduce){.tsm{animation:none}}
-/* phones: the record stays put while you scroll; the details rise over it out of a soft fade, and the record dims behind them.
+/* phones: the record stays put while you scroll; the details rise over it out of a long, soft fade, and the record dims behind them.
    --rise goes 0 to 1 over the first 120px of scrolling */
 /* The record and the title-to-Play block are laid out once, from their reserved sizes (what a three-line title needs), so About,
    More from and the rest arriving below never move the record or Play. --slack is the spare height, split above and below */
@@ -1134,7 +1134,7 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   html.phone .stage{margin-top:var(--slack);position:sticky;top:calc(env(safe-area-inset-top) + var(--top) + var(--slack));opacity:calc(1 - var(--rise,0)*.8)}
   html.phone .peek{filter:brightness(calc(1 - var(--rise,0)*.8))}
   html.phone .o-info{z-index:2} /* over the record, which comes first; the close button stays on top */
-  html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-64px;bottom:calc(-1*(env(safe-area-inset-bottom) + var(--bot)));background:linear-gradient(transparent,var(--bg) 64px);opacity:calc(var(--rise,0)*3);pointer-events:none}
+  html.phone .o-info::before{content:'';position:absolute;z-index:-1;left:-24px;right:-24px;top:-150px;bottom:calc(-1*(env(safe-area-inset-bottom) + var(--bot)));background:linear-gradient(transparent,color-mix(in srgb,var(--bg) 20%,transparent) 40px,color-mix(in srgb,var(--bg) 55%,transparent) 80px,color-mix(in srgb,var(--bg) 85%,transparent) 115px,var(--bg) 150px);opacity:calc(var(--rise,0)*3);pointer-events:none}
 }
 /* details stacked under the record sit a little in from its edges */
 @media(max-width:1040px){.o-info{padding-inline:12px}}
