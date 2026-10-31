@@ -3263,7 +3263,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   lb.onclick=()=>views(vwEl.hidden);
   vwEl.addEventListener('click',e=>{if(e.target.closest('button[data-v]'))setTimeout(()=>views(false),120)});
   // About, at the foot of the layout menu, now that the mark takes you back to the front
-  const ab=document.createElement('button');ab.type='button';ab.className='vab';ab.setAttribute('aria-haspopup','dialog');
+  const ab=document.createElement('button');ab.type='button';ab.className='vab';ab.setAttribute('aria-label','About');ab.setAttribute('aria-haspopup','dialog');
   ab.innerHTML='<svg aria-hidden="true"><use href="#mark"/></svg><span>About</span>';vwEl.append(ab);
   ab.onclick=()=>{views(false);aboutOpen()};
   $('.logo').addEventListener('click',()=>{views(false);tray(false);sorts(false)});
