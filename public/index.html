@@ -294,7 +294,7 @@ html.pulldown .crate.lifted .rc:not(.cur) .face{opacity:1;transition:none}
 /* the pile comes back from under a veil in the page color: all at once, never cover through cover, and cheap to fade */
 .veil{display:none}
 html.pulldown .veil{display:block;position:absolute;inset:0;background:var(--bg);pointer-events:none;will-change:opacity}
-html.phone .play{margin-top:auto;padding-top:24px}
+html.phone .play{margin-top:0}
 html.phone .play>.btn,html.phone .pair{width:100%}
 html.phone .play .btn{box-sizing:border-box;height:52px;justify-content:center;font-size:16px;padding:0 20px}
 html.phone .pair{display:flex;gap:8px}
@@ -531,8 +531,8 @@ html.phone .nb{flex-basis:72px;width:72px;height:72px}
 .tl li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tl{animation:linerIn .5s ease-out both}
 /* phones: the record view is laid out for a title of up to three lines. The record's size leaves room for all three,
-   so a long title never pushes Play off the screen and the record stays the same size from one to the next; a shorter
-   title just leaves more air above Play. The artist and the facts each keep to one line. */
+   so a long title never pushes Play off the screen and the record stays the same size from one to the next. Play sits
+   right under the facts; a shorter title just leaves more air below. The artist and the facts each keep to one line. */
 html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:20px}
 @media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--pb:50px;--bot:14px}}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap) - var(--info) - var(--bot) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
@@ -540,7 +540,7 @@ html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap
 html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + var(--top));padding-bottom:calc(env(safe-area-inset-bottom) + var(--bot))}
 html.phone{--info:calc(var(--tl)*3.36 + 26px + var(--fm)*.5 + 24px + var(--pp) + var(--pb))}
 html.phone .o-page{align-items:stretch}
-/* the record and a details block of fixed height, centered together: the record and Play sit in the same place for every title */
+/* the record and a details block of fixed height, centered together: the record sits in the same place for every title */
 html.phone .o-grid{gap:var(--gap);justify-content:center}
 html.phone .o-info{flex:none;min-height:var(--info)}
 html.phone .o-info h2{font-size:var(--tl);line-height:1.12;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;text-wrap:balance}
@@ -1137,11 +1137,11 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
 /* phones: the record stays put while you scroll; the details rise over it out of a long, soft fade, and the record dims behind them.
    --rise goes 0 to 1 over the first 120px of scrolling */
 /* The record and the title-to-Play block are laid out once, from their reserved sizes (what a three-line title needs), so About,
-   More from and the rest arriving below never move the record or Play. --slack is the spare height, split above and below */
+   More from and the rest arriving below never move the record or Play. --slack is the spare height, split above and below. Play follows the facts, so About comes up right under it */
 .o-head{display:contents}
 @media(min-height:501px){
   html.phone .o-grid{justify-content:flex-start;--slack:max(0px,calc((100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--top) - var(--bot) - var(--O) - var(--gap) - var(--info))/2))}
-  html.phone .o-head{display:flex;flex-direction:column;min-height:var(--info)}
+  html.phone .o-head{display:flex;flex-direction:column}
   html.phone .stage{margin-top:var(--slack);position:sticky;top:calc(env(safe-area-inset-top) + var(--top) + var(--slack));opacity:calc(1 - var(--rise,0)*.8)}
   html.phone .peek{filter:brightness(calc(1 - var(--rise,0)*.8))}
   html.phone .o-info{z-index:2} /* over the record, which comes first; the close button stays on top */
