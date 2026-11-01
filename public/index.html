@@ -294,7 +294,7 @@ html.pulldown .crate.lifted .rc:not(.cur) .face{opacity:1;transition:none}
 /* the pile comes back from under a veil in the page color: all at once, never cover through cover, and cheap to fade */
 .veil{display:none}
 html.pulldown .veil{display:block;position:absolute;inset:0;background:var(--bg);pointer-events:none;will-change:opacity}
-html.phone .play{margin-top:auto;padding-top:24px}
+html.phone .play{margin-top:0}
 html.phone .play>.btn,html.phone .pair{width:100%}
 html.phone .play .btn{box-sizing:border-box;height:52px;justify-content:center;font-size:16px;padding:0 20px}
 html.phone .pair{display:flex;gap:8px}
@@ -531,8 +531,8 @@ html.phone .nb{flex-basis:72px;width:72px;height:72px}
 .tl li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tl{animation:linerIn .5s ease-out both}
 /* phones: the record view is laid out for a title of up to three lines. The record's size leaves room for all three,
-   so a long title never pushes Play off the screen and the record stays the same size from one to the next; a shorter
-   title just leaves more air above Play. The artist and the facts each keep to one line. */
+   so a long title never pushes Play off the screen and the record stays the same size from one to the next. Play sits
+   right under the facts; a shorter title just leaves more air below. The artist and the facts each keep to one line. */
 html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:20px}
 @media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--pb:50px;--bot:14px}}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap) - var(--info) - var(--bot) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
@@ -540,7 +540,7 @@ html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap
 html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + var(--top));padding-bottom:calc(env(safe-area-inset-bottom) + var(--bot))}
 html.phone{--info:calc(var(--tl)*3.36 + 26px + var(--fm)*.5 + 24px + var(--pp) + var(--pb))}
 html.phone .o-page{align-items:stretch}
-/* the record and a details block of fixed height, centered together: the record and Play sit in the same place for every title */
+/* the record and a details block of fixed height, centered together: the record sits in the same place for every title */
 html.phone .o-grid{gap:var(--gap);justify-content:center}
 html.phone .o-info{flex:none;min-height:var(--info)}
 html.phone .o-info h2{font-size:var(--tl);line-height:1.12;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;text-wrap:balance}
@@ -1107,9 +1107,9 @@ html.phone .ab-body{font-size:18px}
 html.phone .ab-cr{margin-top:12px}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
 .find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
-.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-82px - env(safe-area-inset-bottom));background:#121212;opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 50%);mask:linear-gradient(#0000,#000 50%);pointer-events:none}
+.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:#121212;opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 calc(50% - 92px));mask:linear-gradient(#0000,#000 calc(50% - 92px));pointer-events:none}
 .kd.kd-on::after{opacity:calc(var(--kz,0)*.94);transition:opacity .2s} /* open on records, the dial darkens what's behind it, but only while you're turning it */
-.kd::before,.kd::before{top:-120px;background:#121212f5;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line */
+.kd::before,.kd::before{top:-120px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:#121212f5;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line. It runs on past the bottom of the screen, so a swipe that stretches the page never shows what's under the bar */
 html.phone body.searching .find::before{display:none}
 .find::before{transition:opacity .3s}
 body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
@@ -1138,11 +1138,11 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
 /* phones: the record stays put while you scroll; the details rise over it out of a long, soft fade, and the record dims behind them.
    --rise goes 0 to 1 over the first 120px of scrolling */
 /* The record and the title-to-Play block are laid out once, from their reserved sizes (what a three-line title needs), so About,
-   More from and the rest arriving below never move the record or Play. --slack is the spare height, split above and below */
+   More from and the rest arriving below never move the record or Play. --slack is the spare height, split above and below. Play follows the facts, so About comes up right under it */
 .o-head{display:contents}
 @media(min-height:501px){
   html.phone .o-grid{justify-content:flex-start;--slack:max(0px,calc((100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--top) - var(--bot) - var(--O) - var(--gap) - var(--info))/2))}
-  html.phone .o-head{display:flex;flex-direction:column;min-height:var(--info)}
+  html.phone .o-head{display:flex;flex-direction:column}
   html.phone .stage{margin-top:var(--slack);position:sticky;top:calc(env(safe-area-inset-top) + var(--top) + var(--slack));opacity:calc(1 - var(--rise,0)*.8)}
   html.phone .peek{filter:brightness(calc(1 - var(--rise,0)*.8))}
   html.phone .o-info{z-index:2} /* over the record, which comes first; the close button stays on top */
@@ -1210,8 +1210,8 @@ html:has(.crate.lifted) .open:not([hidden]) #close{opacity:1;scale:1;rotate:0deg
 .find>.fb.lb{transition-delay:0s}
 html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3)}
 @media(prefers-reduced-motion:reduce){.find>*,.crate.lifted~.find>*,#close,html:has(.crate.lifted) .open:not([hidden]) #close{transition:opacity .15s;scale:none;rotate:none}.crate.lifted~.find>.fb.lb{scale:none;rotate:none}}
-/* the bottom bar: search, sort and layout as three glass circles. Tapping one opens it across the bar; the other two fold
-   away and a × takes their place. Up top, only the mark and the filter you're in, centered */
+/* the bottom bar: search, sort, order and layout as glass circles. Search opens across the bar; the others fold away and a ×
+   takes their place. Up top, only the mark and the filter you're in, centered */
 .dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:6;left:0;right:0;bottom:var(--db);display:flex;justify-content:center;gap:12px;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s,bottom .25s cubic-bezier(.22,1,.36,1)}
 html.phone .dock{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 body:not(.ready) .dock,.crate.lifted~.dock{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
@@ -1273,6 +1273,25 @@ html .dock .xb>.fb.dr{color:var(--t2)}
 .dsay.on{opacity:1;transition:opacity .25s .1s}
 html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 .dsay{--db:calc(env(safe-area-inset-bottom) + 18px)}
+/* sort, order and layout never change shape: a tap steps to the next one; a hold grows a stack of named choices out of the circle */
+.dock .xb{touch-action:none;-webkit-touch-callout:none}
+.dock .xb>.fb *{pointer-events:none}
+.dock .dic{grid-area:1/1;display:grid;place-items:center}
+.dock .xb.dpr>.fb>*{transform:scale(.86)}
+.dst{position:fixed;z-index:8;display:grid;gap:2px;padding:6px;min-width:188px;border-radius:26px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.dst .dhl{position:absolute;left:6px;right:6px;top:0;height:0;border-radius:999px;background:#ffffff24;opacity:0;pointer-events:none;transition:top .32s cubic-bezier(.22,1,.36,1),height .32s cubic-bezier(.22,1,.36,1),opacity .15s}
+.dsi{all:unset;position:relative;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px 10px 12px;border-radius:999px;color:var(--t2);font-size:15px;line-height:1.3;white-space:nowrap;transition:color .15s}
+.dsi.cur,.dsi.on{color:#fff}
+@media(hover:hover){.dsi:hover{color:#fff}}
+.dsi:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.dsg{display:grid;place-items:center;width:22px;height:22px;flex:none}
+.dsg svg{width:22px;height:22px;display:block}
+.dsg .cw{width:20px;height:20px;margin:0}
+.dsx{margin-left:auto;padding-left:12px;font-size:12px;color:var(--m)}
+.dsv{position:fixed;inset:0;z-index:5;background:#0008;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .14s,visibility 0s .14s}
+body.stacking .dsv{opacity:1;visibility:visible;transition:opacity .35s cubic-bezier(.22,1,.36,1)}
+body.stacking .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+@media(prefers-reduced-motion:reduce){.dst .dhl,.dsv,body.stacking .dsv{transition:opacity .15s}}
 .kd,body.filtering .kd,body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 34px)}
 html.phone .kd,html.phone body.filtering .kd,html.phone body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 34px)}
 body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .xb.o) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
@@ -3558,77 +3577,136 @@ html.phone .ab-sh{margin-top:20px}
 </script>
 <div class="sedge t" aria-hidden="true"></div><div class="sedge b" aria-hidden="true"></div>
 <script>
-// The bottom bar: search, sort and layout leave the top bar for three circles at the bottom. Each opens across the bar
-// (search into its field, sort and layout into a row of their choices); the other two fold away and × closes it.
-// The menus and the field are the same ones as before, so what they do is unchanged; this only moves and watches them.
+// The bottom bar: search, sort, the way the sort runs, and layout as four circles at the bottom.
+// Search opens across the bar (the others fold away and × closes it). The other three never change shape: a tap steps to
+// the next choice and the line above names it; press and hold (or press and slide up) and a stack of named choices grows
+// up out of the circle. Slide to one and let go to pick it. A still hold leaves the stack open for a tap.
 (()=>{
-  const page=$('.page'),qf=$('#qf'),sb=$('.fb.sb'),lb=$('.fb.lb:not(.sb)'),so=$('#sorts'),vw=$('#views'),body=document.body;
+  const qf=$('#qf'),sb=$('.fb.sb'),lb=$('.fb.lb:not(.sb)'),so=$('#sorts'),vw=$('#views'),body=document.body;
+  const RM=matchMedia('(prefers-reduced-motion: reduce)'),EASE='cubic-bezier(.22,1,.36,1)',OUT='cubic-bezier(.4,0,1,1)';
   const dock=document.createElement('div');dock.className='dock';dock.setAttribute('role','toolbar');dock.setAttribute('aria-label','Search, sort and layout');
   const cell=(k,...n)=>{const c=document.createElement('div');c.className='xb';c.dataset.k=k;c.append(...n);return c};
-  // the way the sort runs gets its own circle beside it: one tap flips it
-  const dr=document.createElement('button');dr.type='button';dr.className='fb lb dr';
-  dr.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/></svg>';
-  const cq=cell('q',qf),cs=cell('sort',sb,so),cd=cell('dir',dr),cv=cell('view',lb,vw);
-  const th=n=>{const t=document.createElement('i');t.className='th';t.style.setProperty('--n',n);return t},ts=th(so.children.length||5),tv=th(3);cs.prepend(ts);cv.prepend(tv);
+  const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/></svg>';
+  const dr=document.createElement('button');dr.type='button';dr.className='fb lb dr';dr.innerHTML=ARROW;
+  const cq=cell('q',qf),cs=cell('sort',sb),cd=cell('dir',dr),cv=cell('view',lb);
   const dx=document.createElement('button');dx.type='button';dx.className='xb dx gone';dx.setAttribute('aria-label','Close');
   dx.innerHTML='<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
   dock.append(cq,cs,cd,cv,dx);
   const say=document.createElement('p');say.className='dsay';say.setAttribute('aria-hidden','true');
-  $('.find').after(dock,say);
-  const cells={q:cq,sort:cs,view:cv},open=()=>qf.matches(':focus-within')||qf.classList.contains('has')||body.classList.contains('searching')?'q':!so.hidden?'sort':!vw.hidden?'view':'';
-  const word=()=>{const b=$('[aria-pressed=true]',so);if(!b)return'';const l=b.getAttribute('aria-label').replace(/^Sort by /,''),[k,d]=l.split(', ');
-    return d?(/first$/.test(d)?d[0].toUpperCase()+d.slice(1):k[0].toUpperCase()+k.slice(1)+', '+d):k[0].toUpperCase()+k.slice(1)};
-  let was='',flash=0,hov=null;
-  const rowOf=k=>[...(k==='sort'?so:vw).querySelectorAll(k==='sort'?'[data-k]':'[data-v]')];
-  const ahead=b=>{const k=b.dataset.k;if(k===SORT.k)return word();return k==='year'?'Oldest first':k==='color'?'Reds first':k[0].toUpperCase()+k.slice(1)+', A to Z'};
+  const veil=document.createElement('div');veil.className='dsv';
+  const st=document.createElement('div');st.className='dst';st.hidden=true;st.setAttribute('role','menu');
+  $('.find').after(dock,say,veil,st);
+  const open=()=>qf.matches(':focus-within')||qf.classList.contains('has')||body.classList.contains('searching')?'q':'';
+  const dirSay=(k,d)=>k==='color'?(d>0?'Reds first':'Darks first'):k==='year'?(d>0?'Oldest first':'Newest first'):d>0?'A to Z':'Z to A';
+  const word=()=>{const n=SORTS[SORT.k].l;return SORT.k==='year'||SORT.k==='color'?dirSay(SORT.k,SORT.d):`${n}, ${dirSay(SORT.k,SORT.d)}`};
+  let was='';
   function draw(){
-    so.style.right=''; // the old menu placed itself under its button; here it fills its circle
+    so.style.right='';
     const k=open(),gap=12,H=cq.offsetHeight||54,avail=dock.clientWidth-parseFloat(getComputedStyle(dock).paddingLeft)*2;
-    for(const [n,c] of Object.entries(cells)){const o=n===k;c.classList.toggle('o',o);c.classList.toggle('gone',!!k&&!o);
-      c.style.width=o?Math.min(avail-H-gap,document.documentElement.classList.contains('phone')?avail:440)+'px':''}
-    for(const [c,n] of [[cs,'sort'],[cv,'view']]){const r=rowOf(n),h=hov&&hov.k===n?hov.i:r.findIndex(b=>b.getAttribute('aria-pressed')==='true');
-      c.querySelector('.th').style.setProperty('--i',Math.max(0,h));c.classList.toggle('drag',!!(hov&&hov.k===n));r.forEach((b,i)=>b.classList.toggle('hv',!!(hov&&hov.k===n&&i===hov.i)))}
-    cd.classList.toggle('gone',!!k);dr.dataset.d=SORT.d;dr.setAttribute('aria-label',(word()||'Sort')+', tap to flip');
+    cq.classList.toggle('o',k==='q');cq.style.width=k?Math.min(avail-H-gap,document.documentElement.classList.contains('phone')?avail:440)+'px':'';
+    for(const c of [cs,cd,cv])c.classList.toggle('gone',!!k);
+    dr.dataset.d=SORT.d;dr.setAttribute('aria-label',`${word()}, tap to flip`);
     dx.classList.toggle('gone',!k);
-    say.textContent=hov?(hov.k==='sort'?ahead(rowOf('sort')[hov.i]):rowOf('view')[hov.i].textContent):k==='sort'||(!k&&flash==='sort')?word():k==='view'||(!k&&flash==='view')?($('[aria-pressed=true]',vw)?.textContent||''):'';say.classList.toggle('on',!!say.textContent);
-    say.style.transform=k?`translateX(${-(H+gap)/2}px)`:''; // over the open capsule, not the capsule and × together
+    if(k&&sk)shutStack();
     if(k!==was){if(!k&&dock.contains(document.activeElement)&&document.activeElement!==qf.querySelector('input'))document.activeElement.blur?.();was=k}
   }
-  new MutationObserver(draw).observe(so,{attributes:true,attributeFilter:['hidden','aria-pressed'],subtree:true,childList:true});
-  new MutationObserver(draw).observe(vw,{attributes:true,attributeFilter:['hidden','aria-pressed'],subtree:true});
   new MutationObserver(draw).observe(qf,{attributes:true,attributeFilter:['class']});
   new MutationObserver(draw).observe(body,{attributes:true,attributeFilter:['class']});
-  qf.addEventListener('focusin',draw);qf.addEventListener('focusout',()=>setTimeout(draw));addEventListener('resize',draw);
+  new MutationObserver(draw).observe(so,{childList:true}); // a new sort redraws the old menu; the arrow follows it
+  qf.addEventListener('focusin',draw);qf.addEventListener('focusout',()=>setTimeout(draw));addEventListener('resize',()=>{shutStack();draw()});
   // a tap on the folded search opens it in place
   cq.addEventListener('pointerdown',e=>{if(!cq.classList.contains('o')&&e.target!==qf.querySelector('input')){e.preventDefault();qf.querySelector('input').focus()}});
   // the × acts on the press, before the taps-elsewhere-close handlers can fold the bar under the finger
   let eat=0;dx.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();shut();eat=performance.now()});
-  addEventListener('click',e=>{if(performance.now()-eat<600){eat=0;e.preventDefault();e.stopPropagation()}},true); // the tap's own click lands on whatever now sits under it
-  const shut=()=>{const k=open();if(!k)return;
-    if(k==='sort')sb.click();else if(k==='view')lb.click();
-    else if(k==='q'){if(qf.classList.contains('has'))$('#qx').click();if(body.classList.contains('searching'))$('.sx').click();qf.querySelector('input').blur()}
-    draw();dx.blur()};
+  addEventListener('click',e=>{if(performance.now()-eat<600){eat=0;e.preventDefault();e.stopPropagation()}},true); // the gesture's own click lands on whatever now sits under it
+  const shut=()=>{if(open()!=='q')return;if(qf.classList.contains('has'))$('#qx').click();if(body.classList.contains('searching'))$('.sx').click();qf.querySelector('input').blur();draw();dx.blur()};
   dx.onclick=shut;
-  // press the sort or layout circle and it opens under the thumb: slide along to one and let go to pick it and fold back.
-  // A still press just leaves it open. On an open row, dragging moves the lit pill the same way.
-  let pr=null;const at=(k,x)=>{let best=null,bd=1e9;rowOf(k).forEach((b,i)=>{const r=b.getBoundingClientRect();if(!r.width)return;const d=Math.abs(x-r.left-r.width/2);if(d<bd){bd=d;best=i}});return best};
-  let ft;const say2=()=>{clearTimeout(ft);ft=setTimeout(()=>{flash=0;draw()},1500)}; // the line above reads out the pick, then goes
-  dock.addEventListener('pointerdown',e=>{if(e.button)return;
-    const c=e.target.closest('.xb'),k=c&&(c===cs?'sort':c===cv?'view':null);if(!k)return;
-    const circle=!c.classList.contains('o');
-    if(circle){e.preventDefault();(k==='sort'?sb:lb).click()}
-    pr={k,x:e.clientX,y:e.clientY,moved:false,circle,id:e.pointerId}});
-  dock.addEventListener('pointermove',e=>{if(!pr||e.pointerId!==pr.id)return;
-    if(!pr.moved&&Math.hypot(e.clientX-pr.x,e.clientY-pr.y)>8){pr.moved=true;try{dock.setPointerCapture(e.pointerId)}catch{}}
-    if(!pr.moved)return;const i=at(pr.k,e.clientX);if(i!=null&&(!hov||hov.i!==i)){hov={k:pr.k,i};draw()}});
-  const lift=e=>{if(!pr||e.pointerId!==pr.id)return;const p=pr,h=hov;pr=null;hov=null;
-    if(p.moved&&h&&e.type==='pointerup'){const b=rowOf(p.k)[h.i];
-      if(p.k==='sort'){if(b.dataset.k!==SORT.k)setSort(b.dataset.k);sb.click()}else b.click();
-      flash=p.k;say2();eat=performance.now()}
-    else if(p.circle)eat=performance.now(); // the press opened it; its click mustn't close it again
-    draw()};
-  dock.addEventListener('pointerup',lift);dock.addEventListener('pointercancel',lift);
-  dr.onclick=()=>{setSort(SORT.k);flash='sort';say2();draw()}; // the line above says which way it now runs, then goes
+
+  // the line above names what changed, crossfading when it changes again, then goes
+  let sayT;const tell=t=>{const on=say.classList.contains('on');say.textContent=t;say.classList.add('on');
+    if(on&&!RM.matches)say.animate([{opacity:0},{opacity:1}],{duration:220});
+    clearTimeout(sayT);sayT=setTimeout(()=>say.classList.remove('on'),1500)};
+  // the new icon slides in from the side it comes from while the old one slides out
+  const slide=(b,old,dir)=>{const nw=b.innerHTML;if(RM.matches||nw===old)return;
+    b.innerHTML=`<span class="dic">${old}</span><span class="dic">${nw}</span>`;const [o,n]=b.children;
+    o.animate([{transform:'none',opacity:1},{transform:`translateX(${-14*dir}px)`,opacity:0}],{duration:170,easing:OUT,fill:'forwards'});
+    n.animate([{transform:`translateX(${14*dir}px)`,opacity:0},{transform:'none',opacity:1}],{duration:420,easing:EASE}).onfinish=()=>{if(n.isConnected)b.innerHTML=nw}};
+
+  // what each circle holds
+  const views=()=>[...vw.querySelectorAll('[data-v]')];
+  const rows=k=>k==='sort'?[...so.querySelectorAll('[data-k]')].map(b=>({v:b.dataset.k,g:(b.querySelector('svg,.cw')||{}).outerHTML||'',n:b.querySelector('span')?.textContent||'',on:b.dataset.k===SORT.k,
+      x:b.dataset.k===SORT.k?`${SORT.d>0?'↑':'↓'} ${dirSay(SORT.k,SORT.d).replace(/ first$/,'')}`:''}))
+    :k==='view'?views().map(b=>({v:b.dataset.v,g:(b.querySelector('svg')||{}).outerHTML||'',n:b.querySelector('span')?.textContent||b.textContent,on:b.getAttribute('aria-pressed')==='true'}))
+    :[1,-1].map(d=>({v:String(d),g:d>0?ARROW:ARROW.replace('<svg ','<svg style="rotate:180deg" '),n:dirSay(SORT.k,d),on:SORT.d===d}));
+  const pick=(k,v)=>{
+    if(k==='sort'){const keys=Object.keys(SORTS),old=sb.innerHTML,from=keys.indexOf(SORT.k);setSort(v);slide(sb,old,keys.indexOf(v)>=from?1:-1);tell(word())}
+    else if(k==='view'){const vs=views(),i=vs.findIndex(b=>b.getAttribute('aria-pressed')==='true'),j=vs.findIndex(b=>b.dataset.v===v);if(j<0)return;
+      const old=lb.innerHTML;if(i!==j){vs[j].click();requestAnimationFrame(()=>slide(lb,old,j>i?1:-1))}tell(vs[j].querySelector('span')?.textContent||'')}
+    else{if(+v!==SORT.d)setSort(SORT.k);tell(word())}};
+  // a tap: the next choice
+  const step=k=>{
+    if(k==='sort'){const keys=Object.keys(SORTS),n=keys[(keys.indexOf(SORT.k)+1)%keys.length];pick('sort',n)}
+    else if(k==='view'){const vs=views(),i=vs.findIndex(b=>b.getAttribute('aria-pressed')==='true');pick('view',vs[(i+1)%vs.length].dataset.v)}
+    else pick('dir',String(-SORT.d))};
+  sb.onclick=()=>step('sort');lb.onclick=()=>step('view');dr.onclick=()=>step('dir');
+  sb.removeAttribute('aria-expanded');lb.removeAttribute('aria-expanded');
+
+  // the stack grows up out of its circle, rows a beat apart, nearest first; a lit pill glides under the thumb
+  let sk='',hi=null;
+  const cellOf=k=>k==='sort'?cs:k==='view'?cv:cd,btnOf=k=>k==='sort'?sb:k==='view'?lb:dr;
+  function openStack(k){
+    if(sk)shutStack(true);sk=k;hi=null;
+    st.innerHTML='<i class="dhl"></i>'+rows(k).map(r=>`<button type="button" class="dsi${r.on?' cur':''}" role="menuitemradio" aria-checked="${r.on}" data-v="${r.v}"><span class="dsg">${r.g}</span><span class="dsn">${r.n}</span>${r.x?`<span class="dsx">${r.x}</span>`:''}</button>`).join('');
+    st.setAttribute('aria-label',k==='sort'?'Sort':k==='view'?'Layout':'Order');
+    st.hidden=false;body.classList.add('stacking');
+    const c=cellOf(k).getBoundingClientRect(),W=st.offsetWidth,cx=c.left+c.width/2,L=Math.max(14,Math.min(innerWidth-W-14,cx-W/2));
+    st.style.left=L+'px';st.style.bottom=(innerHeight-c.top+12)+'px';st.style.transformOrigin=`${cx-L}px 100%`;
+    st.getAnimations().forEach(a=>a.cancel());
+    if(!RM.matches){st.animate([{transform:'translateY(10px) scale(.94)',opacity:0},{transform:'none',opacity:1}],{duration:420,easing:EASE});
+      const rs=[...st.querySelectorAll('.dsi')];rs.forEach((r,i)=>r.animate([{transform:'translateY(8px)',opacity:0},{transform:'none',opacity:1}],{duration:380,easing:EASE,delay:30+(rs.length-1-i)*22,fill:'backwards'}))}
+  }
+  function light(v){if(!sk||hi===v)return;hi=v;const hl=$('.dhl',st),m=v==null?null:st.querySelector(`.dsi[data-v="${v}"]`);
+    st.querySelectorAll('.dsi').forEach(b=>b.classList.toggle('on',b===m));
+    if(!m){hl.style.opacity=0;return}
+    if(hl.style.opacity!=='1'){hl.style.transition='none';hl.style.top=m.offsetTop+'px';hl.style.height=m.offsetHeight+'px';void hl.offsetWidth;hl.style.transition=''}
+    hl.style.top=m.offsetTop+'px';hl.style.height=m.offsetHeight+'px';hl.style.opacity=1}
+  function shutStack(now){if(!sk)return;sk='';hi=null;body.classList.remove('stacking');
+    if(now||RM.matches){st.hidden=true;return}
+    st.animate([{opacity:1},{opacity:0,transform:'translateY(4px) scale(.98)'}],{duration:140,easing:OUT}).onfinish=()=>{if(!sk)st.hidden=true}}
+  const choose=(v,kb)=>{const k=sk;if(!k)return;shutStack();pick(k,v);if(kb)btnOf(k).focus({focusVisible:false})};
+  st.addEventListener('click',e=>{const m=e.target.closest('.dsi');if(m)choose(m.dataset.v,!e.detail)});
+  st.addEventListener('keydown',e=>{const ms=[...st.querySelectorAll('.dsi')],i=ms.indexOf(document.activeElement);
+    if(e.key==='Escape'){e.preventDefault();const k=sk;shutStack();btnOf(k).focus({focusVisible:false})}
+    else if(e.key==='ArrowDown'){e.preventDefault();ms[(i+1)%ms.length].focus()}
+    else if(e.key==='ArrowUp'){e.preventDefault();ms[(i-1+ms.length)%ms.length].focus()}
+    else if(e.key==='Tab'){shutStack(true)}});
+  addEventListener('pointerdown',e=>{if(sk&&!e.target.closest('.dst,.dock'))shutStack()},true);
+  // from the keyboard, the up arrow on a circle opens its stack
+  dock.addEventListener('keydown',e=>{const k=[...[[sb,'sort'],[lb,'view'],[dr,'dir']]].find(([b])=>b===e.target)?.[1];
+    if(k&&e.key==='ArrowUp'){e.preventDefault();openStack(k);(st.querySelector('.dsi.cur')||st.querySelector('.dsi')).focus()}});
+
+  // press and hold, or press and slide up, to bring the stack up; slide to a row and let go to pick it
+  const HOLD=320;let pr=null,timer=0;
+  const keyOf=c=>c===cs?'sort':c===cv?'view':c===cd?'dir':null;
+  const grab=id=>{try{dock.setPointerCapture(id)}catch{}};
+  const lift=k=>{const c=cellOf(k);c.classList.add('dpr');return()=>c.classList.remove('dpr')};
+  let unpress=null;
+  dock.addEventListener('pointerdown',e=>{if(e.button)return;const c=e.target.closest('.xb'),k=c&&keyOf(c);if(!k)return;
+    e.preventDefault();const was=sk===k;if(sk&&!was)shutStack(true);
+    pr={k,x:e.clientX,y:e.clientY,moved:false,held:false,id:e.pointerId,was};unpress=lift(k);
+    if(!was)timer=setTimeout(()=>{if(!pr)return;pr.held=true;grab(pr.id);unpress?.();openStack(k)},HOLD)});
+  dock.addEventListener('pointermove',e=>{if(!pr||e.pointerId!==pr.id)return;const dy=e.clientY-pr.y;
+    if(!pr.moved&&Math.hypot(e.clientX-pr.x,dy)>8){pr.moved=true;grab(pr.id)}
+    if(!sk&&!pr.was&&dy<-14){clearTimeout(timer);pr.held=true;unpress?.();openStack(pr.k)}
+    else if(pr.moved&&!sk){clearTimeout(timer);unpress?.()}
+    if(sk&&pr.held){const el=document.elementFromPoint(e.clientX,e.clientY),m=el?.closest?.('.dsi');light(m&&st.contains(m)?m.dataset.v:null)}});
+  const up=e=>{if(!pr||e.pointerId!==pr.id)return;clearTimeout(timer);unpress?.();const p=pr;pr=null;
+    if(e.type!=='pointerup'){shutStack();return}
+    if(p.held){if(hi!=null)choose(hi);else if(p.moved)shutStack();eat=performance.now();return} // a still hold leaves it open; set after the pick, whose own click must go through
+    if(p.was){eat=performance.now();shutStack();return}
+    if(p.moved)eat=performance.now()}; // a plain tap goes on to the circle's click, which steps
+  dock.addEventListener('pointerup',up);dock.addEventListener('pointercancel',up);
+  dock.addEventListener('contextmenu',e=>{if(e.target.closest('.xb'))e.preventDefault()});
   draw();
 })();
 </script>
