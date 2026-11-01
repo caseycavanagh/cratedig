@@ -4,17 +4,25 @@
 //   ?d=<release id>                         Discogs, when DISCOGS_TOKEN is set
 //   ?a=<collection id>                      Apple Music
 //   &artist=…&title=…                       for finding the Wikipedia article when MusicBrainz has no link to it
-// Answers { sides: [{ side: "A", tracks: ["…"] }], about: { text, url } | null }. A side is "" when the
-// source doesn't say (a CD or digital release); the back then lists the songs without side breaks.
+// Answers { sides: [{ side: "A", tracks: ["…"] }], about: { text, url } | null, minutes, genres, credits }.
+// A side is "" when the source doesn't say (a CD or digital release); the back then lists the songs without
+// side breaks. About is written from the article (src/lib/about.ts); genres are MusicBrainz's, the album's or
+// else the artist's; credits (producer, studio, recorded, players, sleeve) come from the article's infobox
+// and Personnel list. Answers are kept in Upstash for a month, so each album is looked up and written once.
 
 import { connection, type NextRequest } from "next/server";
+import { kv } from "@/lib/kv";
+import { article as readArticle, makingText, plainAbout } from "@/lib/wiki";
+import { summarize } from "@/lib/about";
 
 const MB = "https://musicbrainz.org/ws/2/";
 const UA = "cratedig/1.0 (https://github.com/caseycavanagh/cratedig)";
 const MBID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 type Side = { side: string; tracks: string[] };
-type Liner = { sides: Side[]; about: { text: string; url: string } | null };
+type Credits = { producer: string[]; studio: string[]; recorded: string; players: [string, string][]; sleeve: [string, string][] };
+type Liner = { sides: Side[]; minutes: number; about: { text: string; url: string } | null; genres: string[]; credits: Credits | null };
+const VERSION = "v2";
 
 // answers, kept between requests
 const kept = new Map<string, Liner>();
@@ -47,42 +55,52 @@ function bySide(tracks: { pos: string; title: string; disc?: number }[]): Side[]
 
 async function fromMusicBrainz(id: string) {
   const r = await mb(`release/${id}?inc=recordings+release-groups`);
-  if (!r) return { sides: [], group: "" };
-  const tracks = (r.media ?? []).flatMap((m: { position?: number; tracks?: { number?: string; title: string }[] }) =>
-    (m.tracks ?? []).map((t) => ({ pos: t.number ?? "", title: t.title, disc: m.position })),
+  if (!r) return { sides: [], group: "", ms: 0 };
+  const tracks = (r.media ?? []).flatMap((m: { position?: number; tracks?: { number?: string; title: string; length?: number }[] }) =>
+    (m.tracks ?? []).map((t) => ({ pos: t.number ?? "", title: t.title, disc: m.position, ms: t.length ?? 0 })),
   );
-  return { sides: bySide(tracks), group: (r["release-group"]?.id as string) ?? "" };
+  return { sides: bySide(tracks), group: (r["release-group"]?.id as string) ?? "", ms: tracks.reduce((n: number, t: { ms: number }) => n + t.ms, 0) };
 }
 
+const clock = (d = "") => d.split(":").reduce((n, x) => n * 60 + (parseInt(x) || 0), 0) * 1000;
 async function fromDiscogs(id: string) {
-  if (!process.env.DISCOGS_TOKEN) return [];
+  if (!process.env.DISCOGS_TOKEN) return { sides: [], ms: 0 };
   const r = await get(`https://api.discogs.com/releases/${id}`, { Authorization: `Discogs token=${process.env.DISCOGS_TOKEN}` });
-  const list: { position?: string; title: string; type_?: string }[] = r?.tracklist ?? [];
-  return bySide(list.filter((t) => (t.type_ ?? "track") === "track").map((t) => ({ pos: t.position ?? "", title: t.title })));
+  const list: { position?: string; title: string; type_?: string; duration?: string }[] = (r?.tracklist ?? []).filter((t: { type_?: string }) => (t.type_ ?? "track") === "track");
+  return { sides: bySide(list.map((t) => ({ pos: t.position ?? "", title: t.title }))), ms: list.reduce((n, t) => n + clock(t.duration), 0) };
 }
 
 async function fromApple(id: string) {
   const r = await get(`https://itunes.apple.com/lookup?id=${id}&entity=song&limit=200`);
-  const list: { wrapperType: string; trackName: string; discNumber?: number; trackNumber?: number }[] = r?.results ?? [];
+  const list: { wrapperType: string; trackName: string; discNumber?: number; trackNumber?: number; trackTimeMillis?: number }[] = r?.results ?? [];
   const songs = list.filter((t) => t.wrapperType === "track").sort((a, b) => (a.discNumber ?? 1) - (b.discNumber ?? 1) || (a.trackNumber ?? 0) - (b.trackNumber ?? 0));
-  return bySide(songs.map((t) => ({ pos: "", title: t.trackName, disc: t.discNumber })));
+  return { sides: bySide(songs.map((t) => ({ pos: "", title: t.trackName, disc: t.discNumber }))), ms: songs.reduce((n, t) => n + (t.trackTimeMillis ?? 0), 0) };
 }
 
-// the album's English Wikipedia article: by MusicBrainz's link to it when there is one, else by a search
-async function article(group: string, artist: string, title: string) {
+// MusicBrainz's genres, most votes first: the album's, else the artist's
+const top = (gs: { name: string; count: number }[] = []) =>
+  gs.filter((g) => g.count > 0).sort((a, b) => b.count - a.count).slice(0, 3).map((g) => g.name[0].toUpperCase() + g.name.slice(1));
+
+// the album's English Wikipedia article: by MusicBrainz's link to it when there is one, else by a search.
+// The same MusicBrainz answer carries the album's genres.
+async function article(group: string, artist: string, title: string): Promise<{ name: string | null; genres: string[] }> {
+  let genres: string[] = [];
   if (MBID.test(group)) {
-    const g = await mb(`release-group/${group}?inc=url-rels`);
+    const g = await mb(`release-group/${group}?inc=url-rels+genres+artist-credits`);
+    genres = top(g?.genres);
+    const who = g?.["artist-credit"]?.[0]?.artist?.id as string | undefined;
+    if (!genres.length && who && MBID.test(who)) genres = top((await mb(`artist/${who}?inc=genres`))?.genres);
     const rels: { type: string; url?: { resource: string } }[] = g?.relations ?? [];
     const wiki = rels.find((x) => x.type === "wikipedia" && /\/\/en\.wikipedia\.org\/wiki\//.test(x.url?.resource ?? ""));
-    if (wiki) return decodeURIComponent(wiki.url!.resource.split("/wiki/")[1]);
+    if (wiki) return { name: decodeURIComponent(wiki.url!.resource.split("/wiki/")[1]), genres };
     const q = rels.find((x) => x.type === "wikidata")?.url?.resource.match(/Q\d+$/)?.[0];
     if (q) {
       const d = await get(`https://www.wikidata.org/wiki/Special:EntityData/${q}.json`);
       const t = d?.entities?.[q]?.sitelinks?.enwiki?.title;
-      if (t) return t as string;
+      if (t) return { name: t as string, genres };
     }
   }
-  if (!title) return null;
+  if (!title) return { name: null, genres };
   const s = await get(
     `https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=5&srsearch=${encodeURIComponent(`${title} ${artist} album`)}`,
   );
@@ -91,15 +109,16 @@ async function article(group: string, artist: string, title: string) {
   const hit = (s?.query?.search ?? []).find((h: { title: string; snippet: string }) =>
     fold(h.title.replace(/\s*\([^)]*\)$/, "")) === fold(title) && /album|record|LP/i.test(h.snippet),
   );
-  return (hit?.title as string) ?? null;
+  return { name: (hit?.title as string) ?? null, genres };
 }
 
-async function about(group: string, artist: string, title: string) {
-  const name = await article(group, artist, title).catch(() => null);
-  if (!name) return null;
-  const s = await get(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name.replace(/ /g, "_"))}`);
-  if (!s || s.type !== "standard" || !s.extract) return null;
-  return { text: s.extract as string, url: (s.content_urls?.desktop?.page as string) ?? `https://en.wikipedia.org/wiki/${encodeURIComponent(name)}` };
+async function notes(group: string, artist: string, title: string) {
+  const { name, genres } = await article(group, artist, title).catch(() => ({ name: null, genres: [] as string[] }));
+  const a = name ? await readArticle(name.replace(/_/g, " "), artist).catch(() => null) : null;
+  if (!a) return { about: null, genres, credits: null };
+  const text = (await summarize(makingText(a))) ?? plainAbout(a);
+  const { producer, studio, recorded, players, sleeve } = a;
+  return { about: text ? { text, url: a.url } : null, genres, credits: { producer, studio, recorded, players, sleeve } };
 }
 
 export async function GET(request: NextRequest) {
@@ -114,19 +133,22 @@ export async function GET(request: NextRequest) {
   if (mbid && !MBID.test(mbid)) return new Response(null, { status: 400 });
   if ((d && !/^\d+$/.test(d)) || (a && !/^\d+$/.test(a)) || (group && !MBID.test(group))) return new Response(null, { status: 400 });
 
-  const key = [mbid, d, a, group, artist, title].join("|");
+  const key = [VERSION, mbid, d, a, group, artist, title].join("|");
+  const store = kv();
   let liner = kept.get(key);
+  if (!liner && store) liner = await store([["GET", `crate:liner:${key}`]]).then((r) => (r[0] ? (JSON.parse(r[0] as string) as Liner) : undefined)).catch(() => undefined);
   if (!liner) {
-    let sides: Side[] = [];
-    if (d) sides = await fromDiscogs(d).catch(() => []);
-    if (!sides.length && mbid) {
-      const m = await fromMusicBrainz(mbid).catch(() => ({ sides: [], group: "" }));
-      sides = m.sides;
+    let t: { sides: Side[]; ms: number } = { sides: [], ms: 0 };
+    if (d) t = await fromDiscogs(d).catch(() => t);
+    if (!t.sides.length && mbid) {
+      const m = await fromMusicBrainz(mbid).catch(() => ({ sides: [], group: "", ms: 0 }));
+      t = m;
       group ||= m.group;
     }
-    if (!sides.length && a) sides = await fromApple(a).catch(() => []);
-    liner = { sides, about: await about(group, artist, title) };
-    kept.set(key, liner);
+    if (!t.sides.length && a) t = await fromApple(a).catch(() => t);
+    liner = { sides: t.sides, minutes: Math.round(t.ms / 60000), ...(await notes(group, artist, title)) };
+    if (store && (liner.sides.length || liner.about)) await store([["SET", `crate:liner:${key}`, JSON.stringify(liner), "EX", 2592000]]).catch(() => null);
   }
+  kept.set(key, liner);
   return Response.json(liner, { headers: { "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=2592000" } });
 }
