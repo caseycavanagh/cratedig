@@ -1294,6 +1294,8 @@ body.stacking .dsv{opacity:1;visibility:visible;transition:opacity .35s cubic-be
 body.stacking .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* an open record keeps the bar: search stays where it is, and × takes the place of sort, order and layout. Nothing at the top but the mark */
 html:has(.open:not([hidden])) .dock{z-index:11}
+/* on phones, anything below Play (About, More from) scrolls up clear of the bar: at the end of the page the last line sits above search and × */
+html.phone .o-info:has(>.o-head~:not([hidden])){padding-bottom:80px}
 #oq,#close,html:has(.crate.lifted) #oq,html:has(.crate.lifted) .open:not([hidden]) #close{display:none}
 .dock .px svg{width:20px;height:20px}
 /* the record's link sits in line with Play */
