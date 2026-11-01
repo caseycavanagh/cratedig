@@ -1275,6 +1275,9 @@ html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 .dsay{--db:calc(env(safe-area-inset-bottom) + 18px)}
 /* sort, order and layout never change shape: a tap steps to the next one; a hold grows a stack of named choices out of the circle */
 .dock .xb{touch-action:none;-webkit-touch-callout:none}
+/* while a circle is pressed or its stack is up, nothing on the page can be selected: iOS would otherwise select the page under a held, sliding finger and bring up its loupe */
+.dock,.dsv{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html.dpress,html.dpress *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important}
 .dock .xb>.fb *{pointer-events:none}
 .dock .dic{grid-area:1/1;display:grid;place-items:center}
 .dock .xb.dpr>.fb>*{transform:scale(.86)}
@@ -3699,6 +3702,7 @@ html.phone .ab-sh{margin-top:20px}
     if(hl.style.opacity!=='1'){hl.style.transition='none';hl.style.top=m.offsetTop+'px';hl.style.height=m.offsetHeight+'px';void hl.offsetWidth;hl.style.transition=''}
     hl.style.top=m.offsetTop+'px';hl.style.height=m.offsetHeight+'px';hl.style.opacity=1}
   function shutStack(now){if(!sk)return;sk='';hi=null;body.classList.remove('stacking');
+    if(!pr)document.documentElement.classList.remove('dpress');
     if(now||RM.matches){st.hidden=true;return}
     st.animate([{opacity:1},{opacity:0,transform:'translateY(4px) scale(.98)'}],{duration:140,easing:OUT}).onfinish=()=>{if(!sk)st.hidden=true}}
   const choose=(v,kb)=>{const k=sk;if(!k)return;shutStack();pick(k,v);if(kb)btnOf(k).focus({focusVisible:false})};
@@ -3721,6 +3725,7 @@ html.phone .ab-sh{margin-top:20px}
   let unpress=null;
   dock.addEventListener('pointerdown',e=>{if(e.button)return;const c=e.target.closest('.xb'),k=c&&keyOf(c);if(!k)return;
     e.preventDefault();const was=sk===k;if(sk&&!was)shutStack(true);
+    document.documentElement.classList.add('dpress');getSelection()?.removeAllRanges();
     pr={k,x:e.clientX,y:e.clientY,moved:false,held:false,id:e.pointerId,was};unpress=lift(k);
     if(!was)timer=setTimeout(()=>{if(!pr)return;pr.held=true;grab(pr.id);unpress?.();openStack(k)},HOLD)});
   dock.addEventListener('pointermove',e=>{if(!pr||e.pointerId!==pr.id)return;const dy=e.clientY-pr.y;
@@ -3729,11 +3734,16 @@ html.phone .ab-sh{margin-top:20px}
     else if(pr.moved&&!sk){clearTimeout(timer);unpress?.()}
     if(sk&&pr.held){const el=document.elementFromPoint(e.clientX,e.clientY),m=el?.closest?.('.dsi');light(m&&st.contains(m)?m.dataset.v:null)}});
   const up=e=>{if(!pr||e.pointerId!==pr.id)return;clearTimeout(timer);unpress?.();const p=pr;pr=null;
+    setTimeout(unselect,0);
     if(e.type!=='pointerup'){shutStack();return}
     if(p.held){if(hi!=null)choose(hi);else if(p.moved)shutStack();eat=performance.now();return} // a still hold leaves it open; set after the pick, whose own click must go through
     if(p.was){eat=performance.now();shutStack();return}
     if(p.moved)eat=performance.now()}; // a plain tap goes on to the circle's click, which steps
   dock.addEventListener('pointerup',up);dock.addEventListener('pointercancel',up);
+  // iOS: a held finger that slides would start a text selection (blue tint, handles, loupe); none starts while a circle is pressed
+  const unselect=()=>{if(!pr&&!sk)document.documentElement.classList.remove('dpress')};
+  document.addEventListener('selectstart',e=>{if(pr||sk)e.preventDefault()});
+  document.addEventListener('touchmove',e=>{if(pr)e.preventDefault()},{passive:false});
   dock.addEventListener('contextmenu',e=>{if(e.target.closest('.xb'))e.preventDefault()});
   draw();
 })();
