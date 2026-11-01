@@ -75,7 +75,7 @@ html.phone .crate::before{content:'';position:absolute;left:0;right:0;bottom:100
 .tail{position:absolute;left:calc(var(--S)*-8/15);top:0;width:calc(var(--S)*16/15);transform-origin:50% 0;background-repeat:no-repeat;mask-repeat:no-repeat;pointer-events:none;transition:opacity .4s}
 .crate.still .tail{transition:none}
 html.phone.deck .tail{display:none}
-.floor{transition:opacity .4s}
+.floor{transition:opacity .4s;opacity:calc(1 - var(--fin,0))} /* gone at the end of the crate: with no record standing on it, its clipped top edge shows as a line */
 .rc.held{visibility:hidden}
 .rc.gone{display:none} /* out of sight: no layer at all */
 /* a flipped record sits in the shadow of the one it fell onto, darkest where they touch */
@@ -1740,7 +1740,7 @@ function setFin(f){
   else if(finEl.contains(document.activeElement))crate.focus({preventScroll:true});
 }
 // it comes up as the last record falls, and goes as it stands back up
-function finFade(){const t=Math.max(0,Math.min(1,(pos-(order.length-1))*2-1));if(t===finFade.t)return;finFade.t=t;finEl.style.opacity=t;finEl.style.transform=t<1?`translateY(${((1-t)*8).toFixed(1)}px)`:''}
+function finFade(){const t=Math.max(0,Math.min(1,(pos-(order.length-1))*2-1));if(t===finFade.t)return;finFade.t=t;finEl.style.opacity=t;finEl.parentNode.style.setProperty('--fin',t);finEl.style.transform=t<1?`translateY(${((1-t)*8).toFixed(1)}px)`:''}
 // back to the front: the first few records still standing up as it lands, the way a letter jumps
 function home(){
   if(!fin)return;const f=finEl.contains(document.activeElement);
