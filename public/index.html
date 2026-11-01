@@ -2232,7 +2232,7 @@ function slide(e){
   const s=sdrag,dx=e.clientX-s.x,dy=e.clientY-s.y,now=performance.now(),dt=Math.max(8,now-s.lt);
   s.vx=.5*s.vx+.5*(e.clientX-s.lx)/dt;s.vy=.5*s.vy+.5*(e.clientY-s.ly)/dt;s.lt=now;s.lx=e.clientX;s.ly=e.clientY;
   if(!s.ax){if(Math.hypot(dx,dy)<8)return;s.far=true;s.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';
-    if(s.ax==='y'&&(dy<0||open.scrollTop>0)&&open.scrollHeight>open.clientHeight){s.ax='s';s.st=open.scrollTop+dy;return} // up, or back down once scrolled: the details move and the record stays
+    if(s.ax==='y'&&(dy<0||open.scrollTop>0)){s.ax='s';s.st=open.scrollTop+dy;return} // up, or back down once scrolled: the details move and the record stays (with nothing to scroll, up does nothing: it never starts the pull back into the crate, which would bring the crate up behind the page)
     lift.style.transition='none';cancelAnimationFrame(unpullF);unpullF=0;root.classList.add(s.ax==='x'?'sliding':'pulldown')}
   if(s.ax==='s'){open.scrollTop=s.st-dy;return}
   if(s.ax==='x'){
