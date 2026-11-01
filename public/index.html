@@ -1214,7 +1214,7 @@ html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3)}
    takes their place. Up top, only the mark and the filter you're in, centered */
 .dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:6;left:0;right:0;bottom:var(--db);display:flex;justify-content:center;gap:12px;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s,bottom .25s cubic-bezier(.22,1,.36,1)}
 html.phone .dock{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
-body:not(.ready) .dock,.crate.lifted~.dock{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+body:not(.ready) .dock{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 body.ready .dock{animation:barIn .7s cubic-bezier(.22,1,.36,1) .32s backwards}
 body.seek .crate.lifted~.dock{opacity:1;visibility:visible;z-index:11;transition:none}
 html.phone body.searching .page>.dock:not(.find){opacity:1}
@@ -1292,13 +1292,29 @@ html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 .dsv{position:fixed;inset:0;z-index:5;background:#0008;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .14s,visibility 0s .14s}
 body.stacking .dsv{opacity:1;visibility:visible;transition:opacity .35s cubic-bezier(.22,1,.36,1)}
 body.stacking .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+/* an open record keeps the bar: search stays where it is, and × takes the place of sort, order and layout. Nothing at the top but the mark */
+html:has(.open:not([hidden])) .dock{z-index:11}
+#oq,#close,html:has(.crate.lifted) #oq,html:has(.crate.lifted) .open:not([hidden]) #close{display:none}
+.dock .px svg{width:20px;height:20px}
+/* the record's link sits in line with Play */
+.play:has(#shareR){display:flex;align-items:center;gap:8px}
+#oinfo #shareR{position:static;opacity:1;flex:none;width:44px;height:44px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line);transition:transform .3s var(--spring),background-color .2s}
+html.phone #oinfo #shareR{width:var(--pb,52px);height:var(--pb,52px)}
+#oinfo #shareR:hover{background:var(--soft)}
+/* over a record the bar's fade stays low, under Play */
+html:has(.open:not([hidden])) body .dock::before{height:calc(env(safe-area-inset-bottom) + 92px)}
+/* where the caret waits tucked behind Play, the link sits right after Play and steps aside as the caret slides out */
+@media(hover:hover){
+  html:not(.phone) .play:has(#shareR) .pair{margin-right:-66px;transition:margin .12s}
+  html:not(.phone) .play:has(#shareR) .pair:is(:hover,:focus-within),html:not(.phone) .play:has(#shareR) .pair:has(.sw[aria-expanded=true]){margin-right:0;transition:margin .55s var(--flip)}
+}
 @media(prefers-reduced-motion:reduce){.dst .dhl,.dsv,body.stacking .dsv{transition:opacity .15s}}
 .kd,body.filtering .kd,body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 34px)}
 html.phone .kd,html.phone body.filtering .kd,html.phone body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 34px)}
 body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .xb.o) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* the list rises from the field: above it, across the screen on a phone, centered over it on a laptop */
 html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
-body.walling .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
+body.walling .dock::before,html:has(.open:not([hidden])) .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
 .wall,.tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 120px)}
 @media (max-width:700px){.tbl thead{display:none}} /* the bar's sort button sorts the table too, so the table's own "Sorted by" line goes */
 html:not(.phone) .sl{top:auto;right:auto;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 10px);width:min(440px,calc(100vw - 28px))}
@@ -3570,10 +3586,12 @@ html.phone .ab-sh{margin-top:20px}
   const sf=document.createElement('button');sf.type='button';sf.className='btn';sf.innerHTML=I.share+'<span>Share this crate</span>';$('#finR').append(sf);wire(sf,crate);
 
   // a record, beside its close. It follows whatever sits left of close (search, when there is one) wherever that goes, 8px further left
-  const sr=iconBtn('shareR','Copy link to this record'),cl=$('#close');cl.before(sr);wire(sr,rec);
-  const place=()=>{const c=($('#oq')||cl).getBoundingClientRect();if(!c.width)return;sr.style.top=c.top+'px';sr.style.right=(innerWidth-c.left+8)+'px'};
-  const o2=openRecord;openRecord=function(...a){const n=o2.apply(this,a);requestAnimationFrame(place);setTimeout(place,400);return n};
-  addEventListener('resize',()=>{if(!$('#open').hidden)place()});
+  // a record, in line with its Play. The details are drawn again for each record, so it takes its seat each time
+  const sr=iconBtn('shareR','Copy link to this record'),info=$('#oinfo');wire(sr,rec);
+  const seat=()=>{if(!info.firstElementChild)return;let row=$('.play',info);
+    if(!row){row=document.createElement('div');row.className='play';const f=$('.facts',info)||$('.by',info);f?f.after(row):info.append(row)}
+    if(sr.parentNode!==row)row.append(sr)};
+  new MutationObserver(seat).observe(info,{childList:true});seat();
 })();
 </script>
 <div class="sedge t" aria-hidden="true"></div><div class="sedge b" aria-hidden="true"></div>
@@ -3592,7 +3610,10 @@ html.phone .ab-sh{margin-top:20px}
   const cq=cell('q',qf),cs=cell('sort',sb),cd=cell('dir',dr),cv=cell('view',lb);
   const dx=document.createElement('button');dx.type='button';dx.className='xb dx gone';dx.setAttribute('aria-label','Close');
   dx.innerHTML='<svg viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
-  dock.append(cq,cs,cd,cv,dx);
+  // over an open record, × puts it back, where sort, order and layout sit in the crate
+  const px=document.createElement('button');px.type='button';px.className='xb dx px gone';px.setAttribute('aria-label','Put it back');px.innerHTML=dx.innerHTML;
+  px.onclick=()=>$('#close').click();
+  dock.append(cq,cs,cd,cv,px,dx);
   const say=document.createElement('p');say.className='dsay';say.setAttribute('aria-hidden','true');
   const veil=document.createElement('div');veil.className='dsv';
   const st=document.createElement('div');st.className='dst';st.hidden=true;st.setAttribute('role','menu');
@@ -3605,7 +3626,7 @@ html.phone .ab-sh{margin-top:20px}
     so.style.right='';
     const k=open(),gap=12,H=cq.offsetHeight||54,avail=dock.clientWidth-parseFloat(getComputedStyle(dock).paddingLeft)*2;
     cq.classList.toggle('o',k==='q');cq.style.width=k?Math.min(avail-H-gap,document.documentElement.classList.contains('phone')?avail:440)+'px':'';
-    for(const c of [cs,cd,cv])c.classList.toggle('gone',!!k);
+    const r=lifted();for(const c of [cs,cd,cv])c.classList.toggle('gone',!!k||r);px.classList.toggle('gone',!r||!!k);
     dr.dataset.d=SORT.d;dr.setAttribute('aria-label',`${word()}, tap to flip`);
     dx.classList.toggle('gone',!k);
     if(k&&sk)shutStack();
@@ -3613,10 +3634,14 @@ html.phone .ab-sh{margin-top:20px}
   }
   new MutationObserver(draw).observe(qf,{attributes:true,attributeFilter:['class']});
   new MutationObserver(draw).observe(body,{attributes:true,attributeFilter:['class']});
-  new MutationObserver(draw).observe(so,{childList:true}); // a new sort redraws the old menu; the arrow follows it
+  new MutationObserver(draw).observe(so,{childList:true});
+  const crate=$('#crate'),lifted=()=>crate.classList.contains('lifted');
+  new MutationObserver(draw).observe(crate,{attributes:true,attributeFilter:['class']}); // a new sort redraws the old menu; the arrow follows it
   qf.addEventListener('focusin',draw);qf.addEventListener('focusout',()=>setTimeout(draw));addEventListener('resize',()=>{shutStack();draw()});
   // a tap on the folded search opens it in place
-  cq.addEventListener('pointerdown',e=>{if(!cq.classList.contains('o')&&e.target!==qf.querySelector('input')){e.preventDefault();qf.querySelector('input').focus()}});
+  // over an open record it searches the way the record's own search did, the record waiting behind the list
+  cq.addEventListener('pointerdown',e=>{if(cq.classList.contains('o'))return;if(lifted()){e.preventDefault();seek()}else if(e.target!==qf.querySelector('input')){e.preventDefault();qf.querySelector('input').focus()}});
+  qf.addEventListener('focusin',()=>{if(lifted()&&!body.classList.contains('seek'))seek()});
   // the × acts on the press, before the taps-elsewhere-close handlers can fold the bar under the finger
   let eat=0;dx.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();shut();eat=performance.now()});
   addEventListener('click',e=>{if(performance.now()-eat<600){eat=0;e.preventDefault();e.stopPropagation()}},true); // the gesture's own click lands on whatever now sits under it
