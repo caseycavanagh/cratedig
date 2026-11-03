@@ -159,11 +159,8 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
   html:not(.phone) .o-info{max-height:var(--O);overflow:hidden auto;overscroll-behavior:contain;scrollbar-width:none}
   html:not(.phone) .o-info::-webkit-scrollbar{display:none}
   html:not(.phone) .o-name{display:block;position:sticky;top:0;z-index:2;background:var(--bg);padding-bottom:12px;margin-bottom:-12px}
-  html:not(.phone) .o-name::after,html:not(.phone) .o-name::before{content:'';position:absolute;left:0;right:0;top:100%;pointer-events:none;opacity:0;transition:opacity .2s}
-  /* what scrolls under the name blurs away into it: a strong blur close to the name, a light one below, each fading out */
-  html:not(.phone) .o-name::before{height:24px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
-  html:not(.phone) .o-name::after{height:48px;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);background:linear-gradient(color-mix(in srgb,var(--bg) 40%,transparent),transparent);-webkit-mask-image:linear-gradient(#000 30%,transparent);mask-image:linear-gradient(#000 30%,transparent)}
-  html:not(.phone) .o-info.scrolled .o-name::before,
+  /* what scrolls under the name fades into it. A plain gradient: Safari draws a fading backdrop blur as a hard-edged band */
+  html:not(.phone) .o-name::after{content:'';position:absolute;left:0;right:0;top:100%;height:44px;background:linear-gradient(var(--bg),color-mix(in srgb,var(--bg) 85%,transparent) 25%,color-mix(in srgb,var(--bg) 40%,transparent) 65%,transparent);pointer-events:none;opacity:0;transition:opacity .2s}
   html:not(.phone) .o-info.scrolled .o-name::after{opacity:1}
   /* × waits at the top left, just above the record, rather than in the bottom bar */
   html:not(.phone) .dock .px{display:none}
@@ -2201,7 +2198,8 @@ function openRecord(deep,pulled){
 const aimPeeks=()=>{const b=stage.getBoundingClientRect();open.style.setProperty('--py',b.top+b.height/2+'px');open.style.setProperty('--dx','0px')};
 // a details column taller than the record scrolls; it knows when it's scrolled and when there's more below, for its fades
 {const oi=$('#oinfo');let last='';
-  const fit=()=>{oi.classList.toggle('scrolled',oi.scrollTop>2);oi.classList.toggle('more',oi.scrollHeight-oi.clientHeight-oi.scrollTop>2)};
+  const fit=()=>{oi.classList.toggle('scrolled',oi.scrollTop>2);// "more" from where the last block ends, not scrollHeight, which also counts the closed Play menu hanging below Play
+    const last=oi.lastElementChild;oi.classList.toggle('more',!!last&&last.getBoundingClientRect().bottom-oi.getBoundingClientRect().bottom>4)};
   oi.addEventListener('scroll',fit,{passive:true});addEventListener('resize',fit);
   new MutationObserver(()=>{const id=$('#oTitle',oi);if(id&&id.textContent!==last){last=id.textContent;oi.scrollTop=0}requestAnimationFrame(fit)}).observe(oi,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
   new ResizeObserver(fit).observe(oi)}
