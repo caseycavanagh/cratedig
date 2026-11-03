@@ -17,7 +17,7 @@ Casey's record crate: every record Casey owns, flipped through like a crate. It 
 
 ## Settings
 
-Env vars (never print them): CRATE_KEY, KV_REST_API_URL and KV_REST_API_TOKEN (the same Upstash database as caseycavanagh.com's likes), SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET (Play links for visitor crates), DISCOGS_TOKEN (optional).
+Env vars (never print them): CRATE_KEY, KV_REST_API_URL and KV_REST_API_TOKEN (the same Upstash database as caseycavanagh.com's likes), SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET (Play links for visitor crates), DISCOGS_TOKEN (optional), ANTHROPIC_API_KEY (writes each record's About from its Wikipedia article in `src/lib/about.ts`; without it the page shows the article's Background paragraph).
 
 ## Design
 

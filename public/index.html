@@ -147,8 +147,29 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
 #close{position:fixed;top:24px;left:24px;z-index:3;opacity:0;transition:opacity .3s,transform .5s var(--flip)}
 .open.in #close{opacity:1}
 .o-page{min-height:100%;display:grid;place-items:center;padding:80px 24px}
-/* the record dead center; the details hang off its right side */
+/* the record and its details; on a laptop the pair is centered (below), on narrower screens the details go under the record */
 .o-grid{position:relative;display:flex;align-items:center;justify-content:center}
+/* on a laptop the record and its details are centered as a pair: the record sits left of center by half the details' share */
+.open{--IW:360px}
+@media(min-width:1041px){html:not(.phone) .o-grid{translate:calc(-1*(48px + var(--IW))/2) 0}}
+/* the details never reach past the record's top or bottom: when they're taller, the name stays put at the record's top and
+   the rest scrolls under it, fading where it's cut off */
+.o-name{display:contents}
+@media(min-width:1041px){
+  html:not(.phone) .o-info{max-height:var(--O);overflow:hidden auto;overscroll-behavior:contain;scrollbar-width:none}
+  html:not(.phone) .o-info::-webkit-scrollbar{display:none}
+  html:not(.phone) .o-name{display:block;position:sticky;top:0;z-index:2;background:var(--bg);padding-bottom:12px;margin-bottom:-12px}
+  html:not(.phone) .o-name::after,html:not(.phone) .o-name::before{content:'';position:absolute;left:0;right:0;top:100%;pointer-events:none;opacity:0;transition:opacity .2s}
+  /* what scrolls under the name blurs away into it: a strong blur close to the name, a light one below, each fading out */
+  html:not(.phone) .o-name::before{height:24px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
+  html:not(.phone) .o-name::after{height:48px;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);background:linear-gradient(color-mix(in srgb,var(--bg) 40%,transparent),transparent);-webkit-mask-image:linear-gradient(#000 30%,transparent);mask-image:linear-gradient(#000 30%,transparent)}
+  html:not(.phone) .o-info.scrolled .o-name::before,
+  html:not(.phone) .o-info.scrolled .o-name::after{opacity:1}
+  /* × waits at the top left, just above the record, rather than in the bottom bar */
+  html:not(.phone) .dock .px{display:none}
+  html:not(.phone):has(.crate.lifted) .open:not([hidden]) #close{display:inline-flex;left:var(--edge);right:auto;top:max(64px,calc(50vh - var(--O)/2 - 60px))}
+  html:not(.phone) .o-info.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 64px),transparent);mask-image:linear-gradient(#000 calc(100% - 64px),transparent)}
+}
 .stage{position:relative;z-index:2;flex:none;width:var(--O);height:var(--O);perspective:2600px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .stage.dragging{cursor:grabbing}
 .stage:focus-visible{outline:none}
@@ -190,7 +211,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .open.in:not(.swapping):not(.hush) .peek.prev.on:hover~.phint.prev,.open.in:not(.swapping):not(.hush) .peek.next.on:hover~.phint.next{opacity:1;transform:none;transition:opacity .25s .05s,transform .5s var(--flip) .05s}
 @media(hover:none){.phint{display:none}}
 /* the details start tucked under the record and slide out to the right */
-.o-info{position:absolute;left:calc(100% + 48px);top:50%;translate:0 -50%;z-index:1;flex:none;width:min(340px,calc((100vw - var(--O))/2 - 80px));opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
+.o-info{position:absolute;left:calc(100% + 48px);top:50%;translate:0 -50%;z-index:1;flex:none;width:var(--IW);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
 .open.in.swapping .o-info{opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .1s}
 @media(max-width:1040px){
@@ -492,7 +513,18 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:var(--sheet)}
 .facts .meta:hover{color:var(--fg)}
 .facts .meta{display:inline}
 /* below Play: a few lines about the record, then covers of others that share its artist, label or year */
-.o-info .ab,.o-info .near{margin-top:28px}
+.o-info .ab,.o-info .near,.o-info .dets{margin-top:28px}
+/* who made it: labels on the left, names on the right, each role quiet beside its name */
+.dets dl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:7px 16px;margin:0;font-size:14px;line-height:1.45}
+.dets dt{color:var(--m)}
+.dets dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.dets dd span{display:block}
+.dets dd i{font-style:normal;color:var(--m)}
+.dets .meta{display:inline}
+html.phone .dets dl{grid-template-columns:84px minmax(0,1fr);font-size:13.5px}
+.near .why{margin:0 0 10px;font-size:14px;color:var(--m)}
+.near .why .meta{color:var(--fg);display:inline}
+.dets.in>*,.near.in>*{animation:linerIn .35s ease-out both}
 .o-info .ohd{margin:0 0 8px;font-size:13px;line-height:1.2;color:var(--m)}
 .o-info .blurb{margin:0;font-size:15px;line-height:1.5;color:var(--t1)}
 /* while About is on its way: its label and a few quiet lines in its place; then the text fades in, or the block fades away */
@@ -1162,9 +1194,9 @@ html.phone .o-info{padding-inline:12px}
   .sedge.b,.about::after{bottom:-7px}
   html:has(.play.on) .sedge{--edge:#0d0d0d} /* the Play menu dims the page behind it; the toolbars dim with it */
 }
-/* laptops: the controls line up with the record, not the screen's corners. The row runs from the left of an open
-   record's details' mirror to the right edge of its details, so the crate and an open record put them in the same place */
-:root{--OE:min(var(--R),calc(100vw - 680px));--edge:max(14px,calc(50vw - var(--OE)/2 - 48px - min(340px,calc((100vw - var(--OE))/2 - 80px))))}
+/* laptops: the controls line up with the record, not the screen's corners. The row runs from the left edge of an open
+   record to the right edge of its details, so the crate and an open record put them in the same place */
+:root{--OE:min(var(--R),calc(100vw - 680px));--edge:max(14px,calc(50vw - (var(--OE) + 48px + 360px)/2))}
 @media(max-width:1040px){:root{--edge:max(14px,calc(50vw - var(--R)/2))}}
 html:not(.phone) .find{padding:0 var(--edge)}
 html:not(.phone) .find .vw{right:var(--edge)}
@@ -1306,6 +1338,7 @@ html.phone .o-info:has(>.o-head~:not([hidden])){padding-bottom:80px}
 #oinfo #shareR{position:static;opacity:1;flex:none;width:44px;height:44px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line);transition:transform .3s var(--spring),background-color .2s}
 html.phone #oinfo #shareR{width:var(--pb,52px);height:var(--pb,52px)}
 #oinfo #shareR:hover{background:var(--soft)}
+#oinfo .o-end{margin-top:28px}
 /* over a record the bar's fade stays low, under Play */
 html:has(.open:not([hidden])) body .dock::before{height:calc(env(safe-area-inset-bottom) + 92px)}
 /* where the caret waits tucked behind Play, the link sits right after Play and steps aside as the caret slides out */
@@ -1593,8 +1626,11 @@ const group=r=>{const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r
 // A filter narrows the crate to one artist, label, year or format (from a record's details) or to a search; null is the whole crate
 // a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
 const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
-const FIELD={artist:r=>r.artist,label:r=>r.label,year:r=>r.year,format:r=>r.format},KIND={artist:'Artist',label:'Label',year:'Year',format:'Format'};
-const same=(a,b)=>!!a&&fold(a)===fold(b);
+// producers, players and genres come from each record's liner notes (CRED, filled as they arrive), and a record can have several
+const CRED={};
+const FIELD={artist:r=>r.artist,label:r=>r.label,year:r=>r.year,format:r=>r.format,producer:r=>CRED[r.slug]?.producer||[],player:r=>[...(CRED[r.slug]?.players||[]),r.artist],genre:r=>CRED[r.slug]?.genres||[]},
+  KIND={artist:'Artist',label:'Label',year:'Year',format:'Format',producer:'Producer',player:'Player',genre:'Genre'};
+const same=(a,b)=>Array.isArray(a)?a.some(x=>same(x,b)):!!a&&fold(a)===fold(b);
 const matchQ=(r,v)=>{const h=fold([r.artist,r.sortAs,r.title,r.label,r.year,r.format].join(' '));return fold(v).split(' ').filter(Boolean).every(t=>h.includes(t))};
 function matching(f){
   if(!f)return RECORDS;
@@ -1956,7 +1992,7 @@ function playHTML(r){
 const playMenu=()=>$('#oinfo .play.on');
 function togglePlay(show,focus){
   const w=$('#oinfo .play');if(!w||!$('#playB',w))return;
-  if(show&&!PHONE){const b=$('#playB',w).getBoundingClientRect();w.classList.toggle('up',b.bottom+$('#playM',w).offsetHeight+24>innerHeight)}
+  if(show&&!PHONE){const b=$('#playB',w).getBoundingClientRect();w.classList.toggle('up',b.bottom+$('#playM',w).offsetHeight+24>innerHeight);$('#playM',w).scrollIntoView({block:'nearest'})} // a details column that scrolls brings the whole menu into view
   w.classList.toggle('on',show);$('#playB',w).setAttribute('aria-expanded',show);
   if(show&&focus)$('#playM a',w).focus();
   if(!show&&focus)$('#playB',w).focus();
@@ -2002,12 +2038,37 @@ function nearby(r){
   }
   return'';
 }
+// a name in the details: a button that fills the crate with every record sharing it, when another record does
+const credHTML=(k,v)=>{const n=RECORDS.filter(x=>same(FIELD[k](x),v)).length;return n>1?`<button type="button" class="meta" data-f="${k}" data-v="${esc(v)}">${esc(v)}<span class="sr">, show all ${n}</span></button>`:esc(v)};
+// who made the record, from its liner notes: label on the left, names on the right, roles quiet beside them
+function detsHTML(r,l){
+  const c=l?.credits||{},rows=[];
+  if(c.producer?.length)rows.push(['Producer',c.producer.map(v=>`<span>${credHTML('producer',v)}</span>`).join('')]);
+  const rec=[c.recorded,...(c.studio||[])].filter(Boolean).join(', ');
+  if(rec)rows.push(['Recorded',esc(rec)]);
+  if(l?.minutes)rows.push(['Length',`${l.minutes} min`]);
+  if(l?.genres?.length)rows.push(['Genre',l.genres.map(v=>credHTML('genre',v)).join(', ')]);
+  if(c.players?.length)rows.push(['Players',c.players.map(([n,i])=>`<span>${credHTML('player',n)} <i>${esc(i)}</i></span>`).join('')]);
+  if(c.sleeve?.length)rows.push(['Sleeve',c.sleeve.map(([i,n])=>`<span><i>${esc(i)}</i> ${esc(n)}</span>`).join('')]);
+  return rows.length?`<dl>${rows.map(([t,v])=>`<dt>${t}</dt><dd>${v}</dd>`).join('')}</dl>`:'';
+}
+// other records in the crate made by the same producer or with the same player, as covers that open them
+function linkHTML(r){
+  for(const k of['producer','player'])for(const v of FIELD[k](r)){
+    if(same(v,r.artist))continue; // More from already has the artist's own records
+    const more=RECORDS.filter(x=>x!==r&&same(FIELD[k](x),v)&&!same(x.artist,r.artist)).slice(0,4);
+    if(!more.length)continue;
+    const why=k==='producer'?`Also produced by ${credHTML(k,v)}`:same(more[0].artist,v)?`${credHTML(k,v)} plays on this record`:`Also with ${credHTML(k,v)}`;
+    return`<p class="ohd">In your crate</p><p class="why">${why}</p><div class="thumbs">${more.map(x=>`<button type="button" class="nb" data-slug="${x.slug}" aria-label="${x.title} by ${x.artist}">${x.front?`<img alt="" src="${img(x.thumb||x.front)}" decoding="async" draggable="false">`:`<i style="background:${spineBg(x)}"></i>`}</button>`).join('')}</div>`;
+  }
+  return'';
+}
 function info(r){
   // year, then label, quiet and gray; each fills the crate with the rest from that year or label, when there are any
   const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${metaHTML(r,k)}</span>`).join('');
-  $('#oinfo').innerHTML=`<div class="o-head"><h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
+  $('#oinfo').innerHTML=`<div class="o-head"><div class="o-name"><h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p></div>
       ${facts?`<p class="facts">${facts}</p>`:''}
-    ${playHTML(r)}</div><div class="ab" id="oabout" hidden></div>${nearby(r)}${ownHTML(r)}`;
+    ${playHTML(r)}</div><div class="ab" id="oabout" hidden></div><div class="dets" id="odets" hidden></div><div class="near" id="olink" hidden></div>${nearby(r)}${ownHTML(r)}`;
   liner(r);
 }
 // liner notes come from /api/liner: a few lines from Wikipedia for every record, and for a record with no back cover
@@ -2023,22 +2084,50 @@ function fetchLiner(r){
   let p=LINER.get(r.slug);
   if(!p){p=fetch('/api/liner?'+linerQ(r)).then(x=>x.ok?x.json():null).catch(()=>null).then(l=>{
     LDONE.set(r.slug,l);
-    if(l){HAS[r.slug]=l.about?1:0;try{localStorage.setItem('crate:about',JSON.stringify(HAS))}catch{}}
+    if(l){HAS[r.slug]=l.about?1:0;credOf(r,l);try{localStorage.setItem('crate:about',JSON.stringify(HAS))}catch{}}
     return l});LINER.set(r.slug,p)}
   return p;
 }
+// a record's names, for links and filters, from its liner notes or from the ones already looked up for the crate
+const linerKey=r=>{const q=linerQ(r);return['v2',q.get('mb')||'',q.get('d')||'',q.get('a')||'',q.get('g')||'',(q.get('artist')||'').slice(0,200),(q.get('title')||'').slice(0,200)].join('|')};
+function credOf(r,l){CRED[r.slug]={producer:l.credits?.producer||[],players:(l.credits?.players||[]).map(p=>p[0]),genres:l.genres||[]}}
+// once the crate has settled: the names already known for every record, then, one at a time and unhurried, the liner
+// notes of records not looked up yet, so names shared across the crate link up everywhere
+let known=null;
+function knowCrate(){
+  if(known)return;
+  known=fetch('/api/liner/known',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keys:RECORDS.map(linerKey)})})
+    .then(x=>x.ok?x.json():{}).catch(()=>({})).then(m=>{
+      for(const r of RECORDS){const c=m[linerKey(r)];if(c&&!CRED[r.slug])CRED[r.slug]=c}
+      relink();setTimeout(relink,1200);
+      const todo=RECORDS.filter(r=>!CRED[r.slug]);
+      const step=()=>{const r=todo.shift();if(!r)return;if(document.hidden){setTimeout(()=>{todo.unshift(r);step()},5000);return}
+        fetchLiner(r).then(()=>{relink();setTimeout(step,2500)})};
+      setTimeout(step,2500);
+    });
+}
+// names just learned can link up on the open record: its details redrawn in place, In your crate fading in if it now has covers
+function relink(){
+  const r=order[cur];if(open.hidden||!r||!LDONE.has(r.slug))return;const l=LDONE.get(r.slug);
+  const d=$('#odets');if(d&&!d.hidden)d.innerHTML=detsHTML(r,l);
+  const k=$('#olink'),h=linkHTML(r);if(k&&h&&k.hidden){k.hidden=false;k.className='near in';k.innerHTML=h;room(k,0,k.offsetHeight)}
+}
 // the record in front of you fetches its liner notes while you look at it, so they're usually in before you open it
-const preLiner=()=>{const r=order[cur];if(r&&open.hidden)fetchLiner(r)};
+const preLiner=()=>{const r=order[cur];if(r&&open.hidden)fetchLiner(r);if(!known)setTimeout(knowCrate,4000)};
 function liner(r){
-  const p=fetchLiner(r);
+  const p=fetchLiner(r);knowCrate();
   const show=(l,late)=>{
     if(order[cur]!==r||open.hidden)return;
     const ab=$('#oabout');
     // arriving late, About opens its room on a spring and the words fade in after, so what's below glides down
     const was=ab.hidden?0:ab.offsetHeight;
-    if(l?.about){ab.hidden=false;ab.className='ab in'+(late?' late':'');ab.innerHTML=`<p class="ohd">About</p><p class="blurb"></p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;fitAbout(ab.children[1],l.about.text);
+    if(l?.about){ab.hidden=false;ab.className='ab in'+(late?' late':'');ab.innerHTML=`<p class="ohd">About</p><p class="blurb">${esc(l.about.text)}</p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;
       if(late)room(ab,was,ab.offsetHeight)}
     else if(!ab.hidden){ab.className='ab gone';room(ab,was,0).then(()=>{if(ab.classList.contains('gone'))ab.hidden=true})}
+    // then who made it, as labeled rows, and other records in the crate that share a producer or a player
+    for(const[id,html]of[['#odets',detsHTML(r,l)],['#olink',linkHTML(r)]]){
+      const el=$(id);if(!html){el.hidden=true;continue}
+      el.hidden=false;el.className=el.id==='odets'?'dets in':'near in';el.innerHTML=html;if(late)room(el,0,el.offsetHeight)}
     if(!r.back)requestAnimationFrame(()=>tracks(r,l?.sides||[]));
   };
   if(LDONE.has(r.slug)){show(LDONE.get(r.slug));return}
@@ -2052,20 +2141,6 @@ function room(el,from,to){
   if(reduce||from===to)return Promise.resolve();
   const gap=parseFloat(getComputedStyle(el).marginTop)||0,k=h=>({height:h+'px',marginTop:(h?gap:0)+'px',overflow:'hidden'});
   return el.animate([k(from),k(to)],{duration:560,easing:'cubic-bezier(.22,1,.36,1)'}).finished.catch(()=>{});
-}
-// About ends where a sentence ends: as many whole sentences as fit three lines, else the first one up to a comma or dash,
-// else up to a word, never mid-word
-function fitAbout(el,text){
-  const max=parseFloat(getComputedStyle(el).lineHeight)*3+2,fits=s=>{el.textContent=s;return el.scrollHeight<=max};
-  const sents=typeof Intl.Segmenter==='function'?[...new Intl.Segmenter('en',{granularity:'sentence'}).segment(text)].map(s=>s.segment):text.split(/(?<=[.!?])\s+/);
-  let out='';
-  for(const s of sents){const t=(out+' '+s).trim();if(fits(t))out=t;else break}
-  if(!out){
-    const first=sents[0].trim();
-    for(const m of first.matchAll(/[,;:–—](?=\s)/g)){const t=first.slice(0,m.index)+'…';if(fits(t))out=t;else break}
-    if(!out){const w=first.split(' ');let n=w.length;while(n>1&&!fits(w.slice(0,n).join(' ')+'…'))n--;out=w.slice(0,n).join(' ')+'…'}
-  }
-  el.textContent=out;
 }
 // WCAG contrast: white type on the jacket when it passes 4.5:1, else near black
 const lumOf=hex=>{const m=/^#([0-9a-f]{6})$/i.exec(hex||'');if(!m)return 0;const n=parseInt(m[1],16);
@@ -2090,7 +2165,7 @@ $('#oinfo').addEventListener('click',e=>{
     clearTimeout(addr.t);const st=history.state||{};history.pushState({open:st.open||0,d:(st.d||0)+1},'','#record/'+order[i].slug);
     hop(i,nb.getBoundingClientRect());open.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}return}
   const b=e.target.closest('.meta');if(!b||busy)return;
-  const f={k:b.dataset.f,v:FIELD[b.dataset.f](order[cur])};
+  const f={k:b.dataset.f,v:b.dataset.v??FIELD[b.dataset.f](order[cur])};
   if(!(filt&&filt.k===f.k&&same(filt.v,f.v)))arrange(f); // the crate changes behind the record, then the record goes home into it
   closeRecord();
 });
@@ -2124,6 +2199,12 @@ function openRecord(deep,pulled){
 }
 // on a phone the peeks line up with the record rather than the screen
 const aimPeeks=()=>{const b=stage.getBoundingClientRect();open.style.setProperty('--py',b.top+b.height/2+'px');open.style.setProperty('--dx','0px')};
+// a details column taller than the record scrolls; it knows when it's scrolled and when there's more below, for its fades
+{const oi=$('#oinfo');let last='';
+  const fit=()=>{oi.classList.toggle('scrolled',oi.scrollTop>2);oi.classList.toggle('more',oi.scrollHeight-oi.clientHeight-oi.scrollTop>2)};
+  oi.addEventListener('scroll',fit,{passive:true});addEventListener('resize',fit);
+  new MutationObserver(()=>{const id=$('#oTitle',oi);if(id&&id.textContent!==last){last=id.textContent;oi.scrollTop=0}requestAnimationFrame(fit)}).observe(oi,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
+  new ResizeObserver(fit).observe(oi)}
 // arrows in the open view: the record slides away and the next one comes in from the crate's side
 function swap(dir,o=0){
   const j=Math.max(0,Math.min(order.length-1,cur+dir));
@@ -3593,7 +3674,10 @@ html.phone .ab-sh{margin-top:20px}
   // a record, beside its close. It follows whatever sits left of close (search, when there is one) wherever that goes, 8px further left
   // a record, in line with its Play. The details are drawn again for each record, so it takes its seat each time
   const sr=iconBtn('shareR','Copy link to this record'),info=$('#oinfo');wire(sr,rec);
-  const seat=()=>{if(!info.firstElementChild)return;let row=$('.play',info);
+  // on a laptop it comes last, after everything about the record
+  const seat=()=>{if(!info.firstElementChild)return;
+    if(!PHONE){let end=$('.o-end',info);if(!end){end=document.createElement('div');end.className='o-end';info.append(end)}if(sr.parentNode!==end)end.append(sr);return}
+    let row=$('.play',info);
     if(!row){row=document.createElement('div');row.className='play';const f=$('.facts',info)||$('.by',info);f?f.after(row):info.append(row)}
     if(sr.parentNode!==row)row.append(sr)};
   new MutationObserver(seat).observe(info,{childList:true});seat();
