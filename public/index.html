@@ -147,8 +147,11 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
 #close{position:fixed;top:24px;left:24px;z-index:3;opacity:0;transition:opacity .3s,transform .5s var(--flip)}
 .open.in #close{opacity:1}
 .o-page{min-height:100%;display:grid;place-items:center;padding:80px 24px}
-/* the record dead center; the details hang off its right side */
+/* the record and its details; on a laptop the pair is centered (below), on narrower screens the details go under the record */
 .o-grid{position:relative;display:flex;align-items:center;justify-content:center}
+/* on a laptop the record and its details are centered as a pair: the record sits left of center by half the details' share */
+.open{--IW:360px}
+@media(min-width:1041px){html:not(.phone) .o-grid{translate:calc(-1*(48px + var(--IW))/2) 0}}
 .stage{position:relative;z-index:2;flex:none;width:var(--O);height:var(--O);perspective:2600px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .stage.dragging{cursor:grabbing}
 .stage:focus-visible{outline:none}
@@ -190,7 +193,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 .open.in:not(.swapping):not(.hush) .peek.prev.on:hover~.phint.prev,.open.in:not(.swapping):not(.hush) .peek.next.on:hover~.phint.next{opacity:1;transform:none;transition:opacity .25s .05s,transform .5s var(--flip) .05s}
 @media(hover:none){.phint{display:none}}
 /* the details start tucked under the record and slide out to the right */
-.o-info{position:absolute;left:calc(100% + 48px);top:50%;translate:0 -50%;z-index:1;flex:none;width:min(340px,calc((100vw - var(--O))/2 - 80px));opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
+.o-info{position:absolute;left:calc(100% + 48px);top:50%;translate:0 -50%;z-index:1;flex:none;width:var(--IW);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
 .open.in.swapping .o-info{opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .1s}
 @media(max-width:1040px){
@@ -1162,9 +1165,9 @@ html.phone .o-info{padding-inline:12px}
   .sedge.b,.about::after{bottom:-7px}
   html:has(.play.on) .sedge{--edge:#0d0d0d} /* the Play menu dims the page behind it; the toolbars dim with it */
 }
-/* laptops: the controls line up with the record, not the screen's corners. The row runs from the left of an open
-   record's details' mirror to the right edge of its details, so the crate and an open record put them in the same place */
-:root{--OE:min(var(--R),calc(100vw - 680px));--edge:max(14px,calc(50vw - var(--OE)/2 - 48px - min(340px,calc((100vw - var(--OE))/2 - 80px))))}
+/* laptops: the controls line up with the record, not the screen's corners. The row runs from the left edge of an open
+   record to the right edge of its details, so the crate and an open record put them in the same place */
+:root{--OE:min(var(--R),calc(100vw - 680px));--edge:max(14px,calc(50vw - (var(--OE) + 48px + 360px)/2))}
 @media(max-width:1040px){:root{--edge:max(14px,calc(50vw - var(--R)/2))}}
 html:not(.phone) .find{padding:0 var(--edge)}
 html:not(.phone) .find .vw{right:var(--edge)}
