@@ -152,6 +152,20 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
 /* on a laptop the record and its details are centered as a pair: the record sits left of center by half the details' share */
 .open{--IW:360px}
 @media(min-width:1041px){html:not(.phone) .o-grid{translate:calc(-1*(48px + var(--IW))/2) 0}}
+/* the details never reach past the record's top or bottom: when they're taller, the name stays put at the record's top and
+   the rest scrolls under it, fading where it's cut off */
+.o-name{display:contents}
+@media(min-width:1041px){
+  html:not(.phone) .o-info{max-height:var(--O);overflow:hidden auto;overscroll-behavior:contain;scrollbar-width:none}
+  html:not(.phone) .o-info::-webkit-scrollbar{display:none}
+  html:not(.phone) .o-name{display:block;position:sticky;top:0;z-index:2;background:var(--bg);padding-bottom:12px;margin-bottom:-12px}
+  html:not(.phone) .o-name::after{content:'';position:absolute;left:0;right:0;top:100%;height:32px;background:linear-gradient(var(--bg),transparent);opacity:0;transition:opacity .2s;pointer-events:none}
+  html:not(.phone) .o-info.scrolled .o-name::after{opacity:1}
+  /* × waits at the top left, just above the record, rather than in the bottom bar */
+  html:not(.phone) .dock .px{display:none}
+  html:not(.phone):has(.crate.lifted) .open:not([hidden]) #close{display:inline-flex;left:var(--edge);right:auto;top:max(64px,calc(50vh - var(--O)/2 - 60px))}
+  html:not(.phone) .o-info.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 64px),transparent);mask-image:linear-gradient(#000 calc(100% - 64px),transparent)}
+}
 .stage{position:relative;z-index:2;flex:none;width:var(--O);height:var(--O);perspective:2600px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .stage.dragging{cursor:grabbing}
 .stage:focus-visible{outline:none}
@@ -1320,6 +1334,7 @@ html.phone .o-info:has(>.o-head~:not([hidden])){padding-bottom:80px}
 #oinfo #shareR{position:static;opacity:1;flex:none;width:44px;height:44px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line);transition:transform .3s var(--spring),background-color .2s}
 html.phone #oinfo #shareR{width:var(--pb,52px);height:var(--pb,52px)}
 #oinfo #shareR:hover{background:var(--soft)}
+#oinfo .o-end{margin-top:28px}
 /* over a record the bar's fade stays low, under Play */
 html:has(.open:not([hidden])) body .dock::before{height:calc(env(safe-area-inset-bottom) + 92px)}
 /* where the caret waits tucked behind Play, the link sits right after Play and steps aside as the caret slides out */
@@ -1973,7 +1988,7 @@ function playHTML(r){
 const playMenu=()=>$('#oinfo .play.on');
 function togglePlay(show,focus){
   const w=$('#oinfo .play');if(!w||!$('#playB',w))return;
-  if(show&&!PHONE){const b=$('#playB',w).getBoundingClientRect();w.classList.toggle('up',b.bottom+$('#playM',w).offsetHeight+24>innerHeight)}
+  if(show&&!PHONE){const b=$('#playB',w).getBoundingClientRect();w.classList.toggle('up',b.bottom+$('#playM',w).offsetHeight+24>innerHeight);$('#playM',w).scrollIntoView({block:'nearest'})} // a details column that scrolls brings the whole menu into view
   w.classList.toggle('on',show);$('#playB',w).setAttribute('aria-expanded',show);
   if(show&&focus)$('#playM a',w).focus();
   if(!show&&focus)$('#playB',w).focus();
@@ -2047,7 +2062,7 @@ function linkHTML(r){
 function info(r){
   // year, then label, quiet and gray; each fills the crate with the rest from that year or label, when there are any
   const facts=['year','label'].filter(k=>FIELD[k](r)).map(k=>`<span>${metaHTML(r,k)}</span>`).join('');
-  $('#oinfo').innerHTML=`<div class="o-head"><h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p>
+  $('#oinfo').innerHTML=`<div class="o-head"><div class="o-name"><h2 id="oTitle">${r.title}</h2><p class="by">${metaHTML(r,'artist')}</p></div>
       ${facts?`<p class="facts">${facts}</p>`:''}
     ${playHTML(r)}</div><div class="ab" id="oabout" hidden></div><div class="dets" id="odets" hidden></div><div class="near" id="olink" hidden></div>${nearby(r)}${ownHTML(r)}`;
   liner(r);
@@ -2180,6 +2195,12 @@ function openRecord(deep,pulled){
 }
 // on a phone the peeks line up with the record rather than the screen
 const aimPeeks=()=>{const b=stage.getBoundingClientRect();open.style.setProperty('--py',b.top+b.height/2+'px');open.style.setProperty('--dx','0px')};
+// a details column taller than the record scrolls; it knows when it's scrolled and when there's more below, for its fades
+{const oi=$('#oinfo');let last='';
+  const fit=()=>{oi.classList.toggle('scrolled',oi.scrollTop>2);oi.classList.toggle('more',oi.scrollHeight-oi.clientHeight-oi.scrollTop>2)};
+  oi.addEventListener('scroll',fit,{passive:true});addEventListener('resize',fit);
+  new MutationObserver(()=>{const id=$('#oTitle',oi);if(id&&id.textContent!==last){last=id.textContent;oi.scrollTop=0}requestAnimationFrame(fit)}).observe(oi,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
+  new ResizeObserver(fit).observe(oi)}
 // arrows in the open view: the record slides away and the next one comes in from the crate's side
 function swap(dir,o=0){
   const j=Math.max(0,Math.min(order.length-1,cur+dir));
@@ -3649,7 +3670,10 @@ html.phone .ab-sh{margin-top:20px}
   // a record, beside its close. It follows whatever sits left of close (search, when there is one) wherever that goes, 8px further left
   // a record, in line with its Play. The details are drawn again for each record, so it takes its seat each time
   const sr=iconBtn('shareR','Copy link to this record'),info=$('#oinfo');wire(sr,rec);
-  const seat=()=>{if(!info.firstElementChild)return;let row=$('.play',info);
+  // on a laptop it comes last, after everything about the record
+  const seat=()=>{if(!info.firstElementChild)return;
+    if(!PHONE){let end=$('.o-end',info);if(!end){end=document.createElement('div');end.className='o-end';info.append(end)}if(sr.parentNode!==end)end.append(sr);return}
+    let row=$('.play',info);
     if(!row){row=document.createElement('div');row.className='play';const f=$('.facts',info)||$('.by',info);f?f.after(row):info.append(row)}
     if(sr.parentNode!==row)row.append(sr)};
   new MutationObserver(seat).observe(info,{childList:true});seat();
