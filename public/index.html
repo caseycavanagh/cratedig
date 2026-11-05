@@ -564,8 +564,9 @@ html.phone .nb{flex-basis:72px;width:72px;height:72px}
 /* phones: the record view is laid out for a title of up to three lines. The record's size leaves room for all three,
    so a long title never pushes Play off the screen and the record stays the same size from one to the next. Play sits
    right under the facts; a shorter title just leaves more air below. The artist and the facts each keep to one line. */
-html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:20px}
-@media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--pb:50px;--bot:14px}}
+/* --bot keeps Play clear of the bottom bar: the bar's 14px off the bottom, its 58px circles, and a gap */
+html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:calc(14px + 58px + 14px)}
+@media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--pb:50px;--bot:calc(14px + 58px + 10px)}}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap) - var(--info) - var(--bot) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
 @media(max-height:500px){html.phone .open{--O:calc(100svh - 72px)}}
 html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + var(--top));padding-bottom:calc(env(safe-area-inset-bottom) + var(--bot))}
@@ -1326,8 +1327,6 @@ body.stacking .dsv{opacity:1;visibility:visible;transition:opacity .35s cubic-be
 body.stacking .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* an open record keeps the bar: search stays where it is, and × takes the place of sort, order and layout. Nothing at the top but the mark */
 html:has(.open:not([hidden])) .dock{z-index:11}
-/* on phones, anything below Play (About, More from) scrolls up clear of the bar: at the end of the page the last line sits above search and × */
-html.phone .o-info:has(>.o-head~:not([hidden])){padding-bottom:80px}
 #oq,#close,html:has(.crate.lifted) #oq,html:has(.crate.lifted) .open:not([hidden]) #close{display:none}
 .dock .px svg{width:20px;height:20px}
 /* the record's link sits in line with Play */
