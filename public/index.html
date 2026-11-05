@@ -162,9 +162,11 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
   /* what scrolls under the name fades into it. A plain gradient: Safari draws a fading backdrop blur as a hard-edged band */
   html:not(.phone) .o-name::after{content:'';position:absolute;left:0;right:0;top:100%;height:44px;background:linear-gradient(var(--bg),color-mix(in srgb,var(--bg) 85%,transparent) 25%,color-mix(in srgb,var(--bg) 40%,transparent) 65%,transparent);pointer-events:none;opacity:0;transition:opacity .2s}
   html:not(.phone) .o-info.scrolled .o-name::after{opacity:1}
-  /* × waits at the top left, just above the record, rather than in the bottom bar */
+  /* × is a bare mark (no circle) in the top-right corner, mirroring the logo in the top-left, rather than in the bottom bar */
   html:not(.phone) .dock .px{display:none}
-  html:not(.phone):has(.crate.lifted) .open:not([hidden]) #close{display:inline-flex;left:var(--edge);right:auto;top:max(64px,calc(50vh - var(--O)/2 - 60px))}
+  html:not(.phone):has(.crate.lifted) .open:not([hidden]) #close{display:inline-flex;left:auto;right:calc(var(--edge) - 6px);top:calc(env(safe-area-inset-top) + 10px);width:44px;height:44px;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;color:var(--t1);transition:color .2s,opacity .3s .08s,scale .5s var(--spring) .08s,rotate .5s var(--spring) .08s}
+  html:not(.phone) .open #close:hover{color:var(--fg);background:none}
+  html:not(.phone) .open #close svg{width:20px;height:20px}
   html:not(.phone) .o-info.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 64px),transparent);mask-image:linear-gradient(#000 calc(100% - 64px),transparent)}
 }
 .stage{position:relative;z-index:2;flex:none;width:var(--O);height:var(--O);perspective:2600px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
@@ -1191,10 +1193,8 @@ html.phone .o-info{padding-inline:12px}
   .sedge.b,.about::after{bottom:-7px}
   html:has(.play.on) .sedge{--edge:#0d0d0d} /* the Play menu dims the page behind it; the toolbars dim with it */
 }
-/* laptops: the controls line up with the record, not the screen's corners. The row runs from the left edge of an open
-   record to the right edge of its details, so the crate and an open record put them in the same place */
-:root{--OE:min(var(--R),calc(100vw - 680px));--edge:max(14px,calc(50vw - (var(--OE) + 48px + 360px)/2))}
-@media(max-width:1040px){:root{--edge:max(14px,calc(50vw - var(--R)/2))}}
+/* laptops: the top row (the mark) sits in the screen's own corner gutter, in the crate and over an open record alike */
+:root{--edge:max(28px,env(safe-area-inset-left))}
 html:not(.phone) .find{padding:0 var(--edge)}
 html:not(.phone) .find .vw{right:var(--edge)}
 html:not(.phone) #close,html:not(.phone) .about .ab-x{right:var(--edge)}
@@ -1335,7 +1335,11 @@ html.phone .o-info:has(>.o-head~:not([hidden])){padding-bottom:80px}
 #oinfo #shareR{position:static;opacity:1;flex:none;width:44px;height:44px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line);transition:transform .3s var(--spring),background-color .2s}
 html.phone #oinfo #shareR{width:var(--pb,52px);height:var(--pb,52px)}
 #oinfo #shareR:hover{background:var(--soft)}
-#oinfo .o-end{margin-top:28px}
+/* on a laptop the link is a quiet mark at the end of the year and label line */
+html:not(.phone) #oinfo #shareR{width:28px;height:24px;margin-left:6px;border:0;background:none;color:var(--m);vertical-align:middle;flex:none}
+html:not(.phone) #oinfo #shareR:hover{color:var(--fg);background:none}
+html:not(.phone) #oinfo #shareR svg{width:16px;height:16px}
+html:not(.phone) #oinfo .by:has(#shareR){display:flex;align-items:center}
 /* over a record the bar's fade stays low, under Play */
 html:has(.open:not([hidden])) body .dock::before{height:calc(env(safe-area-inset-bottom) + 92px)}
 /* where the caret waits tucked behind Play, the link sits right after Play and steps aside as the caret slides out */
@@ -3672,9 +3676,9 @@ html.phone .ab-sh{margin-top:20px}
   // a record, beside its close. It follows whatever sits left of close (search, when there is one) wherever that goes, 8px further left
   // a record, in line with its Play. The details are drawn again for each record, so it takes its seat each time
   const sr=iconBtn('shareR','Copy link to this record'),info=$('#oinfo');wire(sr,rec);
-  // on a laptop it comes last, after everything about the record
+  // on a laptop it ends the year and label line
   const seat=()=>{if(!info.firstElementChild)return;
-    if(!PHONE){let end=$('.o-end',info);if(!end){end=document.createElement('div');end.className='o-end';info.append(end)}if(sr.parentNode!==end)end.append(sr);return}
+    if(!PHONE){const f=$('.facts',info)||$('.by',info);if(f&&sr.parentNode!==f)f.append(sr);return}
     let row=$('.play',info);
     if(!row){row=document.createElement('div');row.className='play';const f=$('.facts',info)||$('.by',info);f?f.after(row):info.append(row)}
     if(sr.parentNode!==row)row.append(sr)};
