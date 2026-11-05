@@ -3,18 +3,24 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   // the link preview card (src/lib/og.tsx) reads its fonts from disk, and the two pages below read their HTML
-  outputFileTracingIncludes: { "/og": ["./assets/fonts/*.ttf"], "/og/make": ["./assets/fonts/*.ttf"], "/og/p/[kind]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/og/r/[slug]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/home": ["./public/index.html", "./public/vinyl/covers.json"], "/make": ["./public/vinyl-make.html"] },
-  // the crate is a single static page (public/index.html); the address stays "/".
-  // It and the make page come through src/app/home and src/app/make, which add the domain to their link preview tags (src/lib/page.ts)
+  outputFileTracingIncludes: { "/og": ["./assets/fonts/*.ttf"], "/og/make": ["./assets/fonts/*.ttf"], "/og/landing": ["./assets/fonts/*.ttf"], "/og/p/[kind]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/og/r/[slug]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/home": ["./public/index.html", "./public/vinyl/covers.json"], "/make": ["./public/vinyl-make.html"], "/landing": ["./public/landing.html", "./public/index.html", "./public/vinyl/covers.json"] },
+  // "/" is the front door (public/landing.html); Casey's crate (public/index.html) is at /casey.
+  // They and the make page come through src/app/landing, src/app/home and src/app/make, which add the domain to their link preview tags (src/lib/page.ts)
   async rewrites() {
     return {
       beforeFiles: [
-        { source: "/", destination: "/home" },
+        { source: "/", destination: "/landing" },
+        { source: "/casey", destination: "/home" },
         { source: "/vinyl-make.html", destination: "/make" },
       ],
       afterFiles: [],
       fallback: [],
     };
+  },
+  // links to Casey's crate from when it lived at "/" (a shared record ?r=, ?edit, ?dv, ?hints) go to /casey, query and all.
+  // Old /#record/<slug> links never reach the server: public/landing.html forwards those itself.
+  async redirects() {
+    return ["r", "edit", "dv", "hints"].map((key) => ({ source: "/", has: [{ type: "query" as const, key }], destination: "/casey", permanent: false }));
   },
   // the self-hosted fonts never change under the same name, so browsers can keep them for a year
   async headers() {
