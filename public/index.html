@@ -89,11 +89,22 @@ html.phone.deck .tail{display:none}
 .rc .fr,.sleeve .fr{transform:translateZ(calc(var(--T)/2))}
 .rc .bk,.sleeve .bk{transform:rotateY(180deg) translateZ(calc(var(--T)/2))}
 .edge{position:absolute;top:0;left:calc(50% - var(--T)/2);width:var(--T);height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.edge::after{content:'';position:absolute;inset:0;background:var(--grain),linear-gradient(90deg,#0000003a,#ffffff30 40%,#ffffff12 60%,#00000040),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
+.edge::after{content:'';position:absolute;inset:0;background:var(--grain),linear-gradient(90deg,#0000001c,#ffffff26 40%,#ffffff10 60%,#00000020),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
 .rc .edge::before{content:'';position:absolute;inset:0;background:var(--shade,transparent)}
 /* edges darken by how far they turn from the light (plain layers, no filters: cheap to composite) */
-.edge.l{transform:rotateY(-90deg) translateZ(calc(var(--W)/2));--dk:#0000005e}
-.edge.r{transform:rotateY(90deg) translateZ(calc(var(--W)/2));--dk:#00000047}
+/* the spine sides stay close to the faces' own tone, so front, spine and back read as one piece of card when it turns edge-on */
+.edge.l{transform:rotateY(-90deg) translateZ(calc(var(--W)/2));--dk:#00000026}
+.edge.r{transform:rotateY(90deg) translateZ(calc(var(--W)/2));--dk:#0000001c}
+/* each edge shows the cover's own outermost strip, as if the print wrapped round the card (--c: the corner radius, as --rec) */
+.edge{--c:clamp(3px,calc(var(--W)*.011),7px);background-image:var(--fimg,none);background-size:var(--W) var(--W)}
+.edge.l,.edge.ctl{background-position:0 calc(-1*var(--c))}.edge.r,.edge.ctr{background-position:100% calc(-1*var(--c))}
+.edge.t{background-position:calc(-1*var(--c)) 0}.edge.b{background-position:calc(-1*var(--c)) 100%}.edge.cbl{background-position:0 100%}.edge.cbr{background-position:100% 100%}
+/* the rounded corners have a wall too: a short slant from where one edge stops to where the next starts, so no notch shows */
+.edge.ctl,.edge.ctr,.edge.cbl,.edge.cbr{top:calc(50% - var(--c)*.7071);height:calc(var(--c)*1.4142);--o:calc(var(--c)/2 - var(--W)/2)}
+.edge.ctl{transform:translate3d(var(--o),var(--o),0) rotateZ(45deg) rotateY(-90deg);--dk:#00000020}
+.edge.ctr{transform:translate3d(calc(-1*var(--o)),var(--o),0) rotateZ(-45deg) rotateY(90deg);--dk:#00000018}
+.edge.cbl{transform:translate3d(var(--o),calc(-1*var(--o)),0) rotateZ(-45deg) rotateY(-90deg);--dk:#00000030}
+.edge.cbr{transform:translate3d(calc(-1*var(--o)),calc(-1*var(--o)),0) rotateZ(45deg) rotateY(90deg);--dk:#00000028}
 .edge.t,.edge.b{left:0;top:calc(50% - var(--T)/2);width:100%;height:var(--T)}
 .edge.t{transform:rotateX(90deg) translateZ(calc(var(--W)/2));--dk:#00000014}
 .edge.t::after{background:var(--grain),linear-gradient(180deg,#00000030,#ffffff4a 45%,#ffffff1a 60%,#00000038),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
@@ -1588,7 +1599,8 @@ function fadeIn(i){
 }
 const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
 const spineBg=r=>r.spine||r.pal[0];
-const edgesHTML=(r,ks=['l','r','t','b'])=>ks.map(k=>`<div class="edge ${k}" style="background:${spineBg(r)}"></div>`).join('');
+// the edges wear the cover's own outermost pixels (the print wraps round the card), over the spine color until it loads
+const edgesHTML=(r,ks=['l','r','t','b','ctl','ctr','cbl','cbr'])=>ks.map(k=>`<div class="edge ${k}" style="background-color:${spineBg(r)}${r.front?`;--fimg:url('${img(r.front)}')`:''}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
 const fmtDate=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 const backHTML=(r,lazy)=>r.back?imgHTML(r.back,lazy):`<div class="art plain" style="background-color:${spineBg(r)}"></div>`; // no back on file: a plain jacket in the cover's color, with the ring the record wore into it
