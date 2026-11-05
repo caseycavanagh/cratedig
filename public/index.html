@@ -162,9 +162,9 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
   /* what scrolls under the name fades into it. A plain gradient: Safari draws a fading backdrop blur as a hard-edged band */
   html:not(.phone) .o-name::after{content:'';position:absolute;left:0;right:0;top:100%;height:44px;background:linear-gradient(var(--bg),color-mix(in srgb,var(--bg) 85%,transparent) 25%,color-mix(in srgb,var(--bg) 40%,transparent) 65%,transparent);pointer-events:none;opacity:0;transition:opacity .2s}
   html:not(.phone) .o-info.scrolled .o-name::after{opacity:1}
-  /* × waits just outside the record's top-left corner, a bare mark with no circle, rather than in the bottom bar */
+  /* × is a bare mark (no circle) in the top-right corner, mirroring the logo in the top-left, rather than in the bottom bar */
   html:not(.phone) .dock .px{display:none}
-  html:not(.phone):has(.crate.lifted) .open:not([hidden]) #close{display:inline-flex;left:calc(50vw - (var(--O) + 48px + var(--IW))/2 - 46px);right:auto;top:max(12px,calc(50vh - var(--O)/2 - 46px));width:44px;height:44px;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;color:var(--t1);transition:color .2s,opacity .3s .08s,scale .5s var(--spring) .08s,rotate .5s var(--spring) .08s}
+  html:not(.phone):has(.crate.lifted) .open:not([hidden]) #close{display:inline-flex;left:auto;right:calc(var(--edge) - 6px);top:calc(env(safe-area-inset-top) + 10px);width:44px;height:44px;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;color:var(--t1);transition:color .2s,opacity .3s .08s,scale .5s var(--spring) .08s,rotate .5s var(--spring) .08s}
   html:not(.phone) .open #close:hover{color:var(--fg);background:none}
   html:not(.phone) .open #close svg{width:20px;height:20px}
   html:not(.phone) .o-info.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 64px),transparent);mask-image:linear-gradient(#000 calc(100% - 64px),transparent)}
