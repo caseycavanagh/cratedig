@@ -3538,8 +3538,12 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   const iconOnly=b=>{if(!b.getAttribute('aria-label'))return false;const c=b.cloneNode(true);c.querySelectorAll('.sr,svg,i').forEach(n=>n.remove());return!c.textContent.trim()};
   const off=()=>{clearTimeout(t);el=null;tt.classList.remove('on')};
   $('#qf').dataset.tip='Search';$('#close').dataset.tip='Close';
+  // the sleeve's "Turn the sleeve over" comes up once ever, then never again
+  const ONCE='records-tip-turn',stage=$('#stage');
+  const seen=()=>{try{return localStorage.getItem(ONCE)==='1'}catch{return false}};
   function show(){
     if(!el||!el.isConnected||el.closest('[hidden]'))return off();
+    if(el===stage){if(seen())return off();try{localStorage.setItem(ONCE,'1')}catch{}}
     tt.textContent=el.dataset.tip||el.getAttribute('aria-label').replace(/\. .*$/,'');
     const r=el.getBoundingClientRect(),w=tt.offsetWidth,h=tt.offsetHeight,below=r.top+r.height/2<innerHeight/2;
     tt.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2))+'px';
@@ -3549,6 +3553,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
     if(e.pointerType!=='mouse')return;
     let b=e.target.closest?.('button,a,[role=button],[data-tip]');
     if(b?.matches('.q')&&b.matches(':focus-within,.has'))b=null; // the search, once it's open, says what it is
+    if(b===stage&&seen())b=null;
     if(b===el)return;
     if(!b||!(b.dataset.tip?b.innerText.trim()!==b.dataset.tip:iconOnly(b))){if(el){off();warm=performance.now()}return}
     off();el=b;const now=performance.now();
