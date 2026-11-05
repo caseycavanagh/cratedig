@@ -4,7 +4,7 @@ import sharp from "sharp";
 import { kv } from "@/lib/kv";
 import { IMG_ID, imgKey, readEdits, slugOf } from "@/lib/crate";
 
-// One of Casey's records, for a shared record link (/?r=<slug>) and its preview card (/og/r/<slug>).
+// One of Casey's records, for a shared record link (/casey?r=<slug>) and its preview card (/og/r/<slug>).
 // The list is the crate's own: public/index.html's RECORDS, facts from public/vinyl/covers.json, then Casey's edits on top.
 
 export type Shared = { slug: string; title: string; artist: string; year?: string; label?: string; front?: string };
@@ -99,6 +99,11 @@ export async function blurData(front: string | undefined, w: number, h: number):
 export async function crateCovers(n: number, size: number): Promise<string[]> {
   const all = [...(await base()).values()].filter((r) => r.front).slice(0, n);
   return (await Promise.all(all.map((r) => coverData(r.front, size)))).filter((x): x is string => !!x);
+}
+
+// the crate's first few records with covers, in the crate's order, for the landing page's little crate
+export async function crateFronts(n: number): Promise<Shared[]> {
+  return [...(await base()).values()].filter((r) => r.front).slice(0, n);
 }
 
 export const facts = (r: Shared) => [r.year, r.label].filter(Boolean).join(", ");

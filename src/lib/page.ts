@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-// Link previews need whole addresses, and the pages in public/ only know their paths. "/" and the make page come through here,
+// Link previews need whole addresses, and the pages in public/ only know their paths. "/", "/casey" and the make page come through here,
 // which puts the domain the page was asked for in front of og:url and og:image. It's read from each request, not baked in at build,
 // so every domain the site answers on (a renamed one, a custom one, a preview) points previews at itself.
 // The CDN keeps a copy per domain for a day; a new deploy clears it.
