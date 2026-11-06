@@ -1722,7 +1722,8 @@ const unsorted=r=>SORT.k==='year'?!+r.year:SORT.k==='label'&&!r.label;
 const bySort=(a,b)=>unsorted(a)-unsorted(b)||SORTS[SORT.k].by(a,b)*SORT.d;
 // where a record falls in the sort: a letter, a year, or a color
 const group=r=>{const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='color'?String(hue(r)):letter(r)};
-// A filter narrows the crate to one artist, label, year or format (from a record's details) or to a search; null is the whole crate
+// Filters narrow the crate: names from a record's details or offered by the search (an artist, label, year, genre…), plus any
+// words kept from the search. Names of different kinds narrow together; two of one kind keep either. filt is null for the whole crate
 // a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
 const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
 // producers, players and genres come from each record's liner notes (CRED, filled as they arrive), and a record can have several
@@ -1731,19 +1732,29 @@ const FIELD={artist:r=>r.artist,label:r=>r.label,year:r=>r.year,format:r=>r.form
   KIND={artist:'Artist',label:'Label',year:'Year',format:'Format',producer:'Producer',player:'Player',genre:'Genre'};
 const same=(a,b)=>Array.isArray(a)?a.some(x=>same(x,b)):!!a&&fold(a)===fold(b);
 const matchQ=(r,v)=>{const h=fold([r.artist,r.sortAs,r.title,r.label,r.year,r.format].join(' '));return fold(v).split(' ').filter(Boolean).every(t=>h.includes(t))};
-function matching(f){
-  if(!f)return RECORDS;
-  if(f.k==='q')return RECORDS.filter(r=>matchQ(r,f.v));
-  return RECORDS.filter(r=>same(FIELD[f.k](r),f.v));
+let FS=[],QW=''; // the names, in the order they were added, and the words
+const hasF=(fs,f)=>fs.some(x=>x.k===f.k&&same(String(x.v),String(f.v)));
+function matching(fs=FS,qw=QW){
+  const by={};for(const f of fs)(by[f.k]=by[f.k]||[]).push(f.v);const ks=Object.keys(by);
+  return RECORDS.filter(r=>ks.every(k=>{const x=FIELD[k](r);return by[k].some(v=>same(x,v))})&&(!qw||matchQ(r,qw)));
 }
-// the crate holds what a filter keeps, the record in front staying in front when it's among them; a filter that keeps nothing changes nothing
-function arrange(f,keep=order[cur]){
-  const list=matching(f);if(!list.length)return 0;
-  filt=f;order=[...list].sort(bySort);build();go(Math.max(0,order.indexOf(keep)),true);
-  if(f?.k!=='q'&&q.value){q.value='';qSync()}
+// the crate holds what the filters keep, the record in front staying in front when it's among them; filters that keep nothing change nothing
+function refine(fs,qw,keep=order[cur]){
+  const list=matching(fs,qw);if(!list.length)return 0;
+  const was=FS;FS=fs;QW=qw;filt=fs.length||qw?{fs,q:qw}:null;order=[...list].sort(bySort);build();go(Math.max(0,order.indexOf(keep)),true);
+  if(!qw&&q.value){q.value='';qSync()}
   showChip();
-  if(f)say(f.k==='q'?`${list.length} ${list.length>1?'records match':'record matches'}.`:`${list.length} records, ${KIND[f.k].toLowerCase()} ${f.v}.`);
+  if(filt){const n=list.length,add=fs.find(f=>!hasF(was,f));
+    say(add?`${n} ${n>1?'records':'record'}, ${KIND[add.k].toLowerCase()} ${asRead(add.k,add.v)}.`:qw&&fs===was?`${n} ${n>1?'records match':'record matches'}.`:`${n} ${n>1?'records':'record'}.`)}
   return list.length;
+}
+// one way in for the rest of the page: null is the whole crate, {k:'q'} the search's words, filt itself the same filters again,
+// and a name is one more filter on the ones already there
+function arrange(f,keep=order[cur]){
+  if(!f)return refine([],'',keep);
+  if(f.fs)return refine(f.fs,f.q,keep);
+  if(f.k==='q')return refine(FS,f.v,keep);
+  return refine(hasF(FS,f)?FS:[...FS,f],'',keep);
 }
 let nodes=[],jits=[],shown=[],frontBox=null,tail=null,tailN=0,tailS=0;
 // each record's node is made once and kept, so a filter that drops a record and brings it back doesn't load its covers again
@@ -1964,7 +1975,7 @@ const q=$('#q'),qf=$('#qf'),chip=$('#chip');let qT=0;
 const qSync=()=>{const v=q.value.trim();qf.classList.toggle('has',!!v);$('#qx').hidden=!v;if(!v){$('#qn').textContent='';$('#qnone').hidden=true;clearTimeout(mbT);mbN++}};
 function search(){
   qSync();const v=q.value.trim();
-  if(!v){if(filt?.k==='q')arrange(null);return}
+  if(!v){if(QW)arrange({fs:FS,q:''});return}
   const n=arrange({k:'q',v});
   $('#qn').textContent=n||'';panel(v,n);
   if(!n)$('#pos').textContent='Not in the crate.';
@@ -1987,14 +1998,25 @@ function choices(k){
   const az=x=>x.s.replace(/^the\s+/i,'');
   return[...m.values()].sort((a,b)=>k==='year'?a.v-b.v:az(a).localeCompare(az(b)));
 }
+// The filters you're in sit in a row of small pills just above the bar, each with its own ×, and Clear once there are two.
+// A year, label or artist's name opens a menu of the others of that kind. While the search is open they sit in its field instead.
+const fsEl=document.createElement('div');fsEl.className='fs';fsEl.id='fs';fsEl.setAttribute('role','group');fsEl.setAttribute('aria-label','Filters');fsEl.hidden=true;
+fsEl.innerHTML='<div class="fs-in"></div>';$('.find').after(fsEl);document.body.append($('#cmenu'));
+const qt=document.createElement('span');qt.className='qt';qt.id='qt';qt.hidden=true;q.before(qt);
+const tagHTML=(f,i,menu)=>{const v=escC(asRead(f.k,f.v)),kind=`<i class="ck">${KIND[f.k]}:</i>`;
+  return (menu&&KINDS[f.k]?`<button type="button" class="cn" data-i="${i}" aria-expanded="false" aria-controls="cmenu" aria-label="${KIND[f.k]}: ${v}. Choose another">${kind}<b>${v}</b></button>`:`<span class="cn">${kind}<b>${v}</b></span>`)
+    +`<button type="button" class="cx" data-x="${i}" aria-label="Take off ${KIND[f.k]}: ${v}">${X_ICON}</button>`};
 function showChip(){
-  const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;menuOff();if(!f)return roomForName();
-  const v=asRead(f.k,f.v),pick=KINDS[f.k];
-  const kind=`<i class="ck">${KIND[f.k]}:</i>`;
-  chip.innerHTML=(pick?`<button type="button" class="cn" aria-expanded="false" aria-controls="cmenu" aria-label="${pick}: ${escC(v)}. Choose another">${kind}<b>${escC(v)}</b></button>`:`${kind}<b>${escC(v)}</b>`)
-    +`<button type="button" class="cx" aria-label="Show the whole crate">${X_ICON}</button>`;
-  roomForName();
+  chip.hidden=true;menuOff();roomForName();
+  const n=FS.length,fin=fsEl.firstChild;document.body.classList.toggle('fon',!!n);fsEl.hidden=!n;
+  fin.innerHTML=FS.map((f,i)=>`<span class="fp">${tagHTML(f,i,true)}</span>`).join('')+(n>1?'<button type="button" class="fclr">Clear</button>':'');
+  qt.innerHTML=FS.map((f,i)=>`<span class="qtk">${tagHTML(f,i)}</span>`).join('');qt.hidden=!n;
+  fits();
 }
+// centered while they fit; once they don't, the row slides sideways and fades at its edges, and the field shows its newest
+function fits(){const fin=fsEl.firstChild;fsEl.classList.toggle('over',fin.scrollWidth>fin.clientWidth+1);qt.scrollLeft=qt.scrollWidth;qt.classList.toggle('over',qt.scrollLeft>0)}
+addEventListener('resize',fits);q.addEventListener('focus',()=>requestAnimationFrame(fits));qt.addEventListener('scroll',()=>qt.classList.toggle('over',qt.scrollLeft>0),{passive:true});
+function takeOff(i){const f=FS[i];if(!f)return;arrange({fs:FS.filter((_,j)=>j!==i),q:QW});if(!filt)say('The whole crate.')}
 // the crate's name steps aside while a filter pill would run into it (a narrow screen, a long name or label); the pill says where you are
 function roomForName(){
   const w=$('#where');if(!w)return;
@@ -2004,26 +2026,33 @@ function roomForName(){
   w.classList.toggle('tuck',b.width>0&&b.left<end+12&&b.top<a.bottom&&b.bottom>a.top);
 }
 addEventListener('resize',roomForName);document.fonts?.ready.then(roomForName);
-function menuOff(){const cmenu=$('#cmenu');if(cmenu.hidden)return;cmenu.hidden=true;$('.cn',chip)?.setAttribute('aria-expanded','false')}
-function menuOn(){
-  const cmenu=$('#cmenu'),f=filt;if(!f||!KINDS[f.k])return;
-  const list=choices(f.k);
-  cmenu.innerHTML=`<p class="ch">${KINDS[f.k]}</p><ul>${list.map((c,i)=>`<li><button type="button" data-i="${i}"${same(String(c.v),String(f.v))?' aria-current="true"':''}><span>${escC(c.s)}</span></button></li>`).join('')}</ul>`;
-  cmenu.list=list;cmenu.k=f.k;cmenu.hidden=false;$('.cn',chip).setAttribute('aria-expanded','true');
+function menuOff(){const cmenu=$('#cmenu');if(cmenu.hidden)return;cmenu.hidden=true;$$('.cn[aria-expanded]',fsEl).forEach(b=>b.setAttribute('aria-expanded','false'))}
+// the others of that kind, as they'd read in its place: only the ones that would leave something in the crate
+function menuOn(i){
+  const cmenu=$('#cmenu'),f=FS[i];if(!f||!KINDS[f.k])return;
+  const swap=v=>FS.map((x,j)=>j===i?{k:f.k,v}:x);
+  const list=choices(f.k).filter(c=>same(String(c.v),String(f.v))||matching(swap(c.v),QW).length);
+  cmenu.innerHTML=`<p class="ch">${KINDS[f.k]}</p><ul>${list.map((c,j)=>`<li><button type="button" data-i="${j}"${same(String(c.v),String(f.v))?' aria-current="true"':''}><span>${escC(c.s)}</span></button></li>`).join('')}</ul>`;
+  cmenu.list=list;cmenu.i=i;cmenu.hidden=false;
+  const b=$(`.cn[data-i="${i}"]`,fsEl);b.setAttribute('aria-expanded','true');
+  // it rises from its pill
+  const r=b.parentNode.getBoundingClientRect();cmenu.style.bottom=(innerHeight-r.top+8)+'px';
+  if(!PHONE){const W=cmenu.offsetWidth;cmenu.style.left=Math.max(12,Math.min(innerWidth-W-12,r.left+r.width/2-W/2))+'px'}
   const on=$('[aria-current]',cmenu);if(on){const ul=$('ul',cmenu);ul.scrollTop=on.offsetTop-ul.clientHeight/2+on.offsetHeight/2;on.focus({preventScroll:true})}
 }
-chip.addEventListener('click',e=>{
-  if(e.target.closest('.cx')){menuOff();arrange(null);say('The whole crate.');crate.focus({preventScroll:true});return}
-  if(e.target.closest('.cn'))$('#cmenu').hidden?menuOn():menuOff();
+fsEl.addEventListener('click',e=>{
+  const x=e.target.closest('[data-x]');if(x){menuOff();takeOff(+x.dataset.x);($('.cx',fsEl)||crate).focus({preventScroll:true,focusVisible:false});return}
+  if(e.target.closest('.fclr')){menuOff();arrange(null);say('The whole crate.');crate.focus({preventScroll:true});return}
+  const b=e.target.closest('.cn[data-i]');if(b){const i=+b.dataset.i;$('#cmenu').hidden||$('#cmenu').i!==i?menuOn(i):menuOff()}
 });
-$('#cmenu').addEventListener('click',e=>{const cmenu=$('#cmenu'),b=e.target.closest('[data-i]');if(!b)return;const c=cmenu.list[+b.dataset.i];
-  menuOff();if(!same(String(c.v),String(filt?.v)))arrange({k:cmenu.k,v:c.v});$('.cn',chip)?.focus({preventScroll:true})});
+$('#cmenu').addEventListener('click',e=>{const cmenu=$('#cmenu'),b=e.target.closest('[data-i]');if(!b)return;const c=cmenu.list[+b.dataset.i],i=cmenu.i,f=FS[i];
+  menuOff();if(f&&!same(String(c.v),String(f.v)))arrange({fs:FS.map((x,j)=>j===i?{k:f.k,v:c.v}:x),q:QW});$(`.cn[data-i="${i}"]`,fsEl)?.focus({preventScroll:true,focusVisible:false})});
 $('#cmenu').addEventListener('keydown',e=>{const cmenu=$('#cmenu');
-  if(e.key==='Escape'){e.preventDefault();menuOff();$('.cn',chip)?.focus();return}
+  if(e.key==='Escape'){e.preventDefault();e.stopPropagation();menuOff();$(`.cn[data-i="${cmenu.i}"]`,fsEl)?.focus();return} // the menu goes, the filters stay
   if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;e.preventDefault();
   const bs=$$('button',cmenu),i=bs.indexOf(document.activeElement);bs[Math.max(0,Math.min(bs.length-1,i+(e.key==='ArrowDown'?1:-1)))]?.focus();
 });
-addEventListener('pointerdown',e=>{if(!$('#cmenu').hidden&&!e.target.closest('#cmenu,#chip'))menuOff()});
+addEventListener('pointerdown',e=>{if(!$('#cmenu').hidden&&!e.target.closest('#cmenu,#fs'))menuOff()});
 
 // Pull a record out: big sleeve to turn over (drag, click, arrow keys), details and a Spotify link beside it
 // resting angle of a pulled-out sleeve: barely turned, unless you turn it
@@ -2299,7 +2328,7 @@ $('#oinfo').addEventListener('click',e=>{
     hop(i,nb.getBoundingClientRect());open.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}return}
   const b=e.target.closest('.meta');if(!b||busy)return;
   const f={k:b.dataset.f,v:b.dataset.v??FIELD[b.dataset.f](order[cur])};
-  if(!(filt&&filt.k===f.k&&same(filt.v,f.v)))arrange(f); // the crate changes behind the record, then the record goes home into it
+  if(!hasF(FS,f))arrange(f); // the crate changes behind the record, then the record goes home into it
   closeRecord();
 });
 function openRecord(deep,pulled){
@@ -3227,7 +3256,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     [...by].filter(([,n])=>n>=3).sort((a,b)=>name({artist:a[0]}).localeCompare(name({artist:b[0]}))).forEach(([a,n])=>out.push({label:a,f:{k:'artist',v:a},n}));
     return out;
   };
-  const isOn=f=>f?filt&&filt.k===f.k&&same(filt.v,f.v):!filt||filt.k==='q';
+  const isOn=f=>f?hasF(FS,f):!FS.length;
   function drawPills(){pills.innerHTML=SETS().map((s,i)=>`<button type="button" data-i="${i}" aria-pressed="${isOn(s.f)}">${s.label}</button>`).join('')}
   function draw(animate){
     if(view==='canvas'){drawPills();return lay()}
@@ -3704,7 +3733,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   new MutationObserver(lmark).observe(vwEl,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});lmark();
   pills.className='tray';pills.hidden=true;find.prepend(pills);
   vwEl.classList.add('tray');find.prepend(vwEl,so);
-  const mark=()=>{const on=!!(filt&&filt.k!=='q');fb.classList.toggle('on',on);fb.setAttribute('aria-label',on?`Filters: ${filt.v}`:'Filters')};
+  const mark=()=>{const on=!!FS.length;fb.classList.toggle('on',on);fb.setAttribute('aria-label',on?`Filters: ${FS.map(f=>f.v).join(', ')}`:'Filters')};
   const views=on=>{vwEl.hidden=!on;lb.setAttribute('aria-expanded',on);if(on){tray(false);if(!so.hidden)sorts(false)}document.body.classList.toggle('filtering',on||!pills.hidden)};
   const tray=on=>{pills.hidden=!on;fb.setAttribute('aria-expanded',on);if(on&&!vwEl.hidden){vwEl.hidden=true;lb.setAttribute('aria-expanded',false)}document.body.classList.toggle('filtering',on||!vwEl.hidden);
     if(on){const b=$('[aria-pressed=true]',pills);b&&b.scrollIntoView({inline:'center',block:'nearest'})}};
@@ -3770,12 +3799,34 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   const q=$('#q'),qf=$('#qf'),body=document.body,root=document.documentElement;
   const sl=document.createElement('div');sl.className='sl';sl.id='sl';sl.setAttribute('role','listbox');sl.setAttribute('aria-label','Records');document.body.append(sl);
   const sx=document.createElement('button');sx.type='button';sx.className='sx';sx.textContent='Cancel';qf.parentNode.insertBefore(sx,qf.nextSibling.nextSibling);
-  const on=()=>!editing,ph=()=>root.classList.contains('phone'),all=()=>[...RECORDS].sort(byName);
+  const on=()=>!editing,ph=()=>root.classList.contains('phone'),all=()=>[...matching(FS,'')].sort(byName); // the list keeps to the filters in the field
+  // What you type can be a filter too: names of every kind it starts a word of (a year or decade for digits), each one that
+  // would leave something in the crate with the filters already on. Picking one puts it in the field and clears the words.
+  const KO=['genre','label','artist','decade','year','producer','player'];
+  function offers(v){
+    const t=fold(v).trim(),num=/^\d+$/.test(t);if(!t)return[];
+    const hit=s=>{const n=fold(s);return t.includes(' ')?n.includes(t):n.split(/[^\p{L}\p{N}]+/u).some(w=>w.startsWith(t))};
+    const out=[],names=new Set(),base=matching(FS,'').length;
+    for(const k of KO){if(num!==(k==='year'||k==='decade')||!FIELD[k])continue;
+      const m=new Map();
+      for(const r of RECORDS){const x=FIELD[k](r);for(const v of Array.isArray(x)?x:[x]){
+        if(!v||(k!=='decade'&&k!=='year'&&/^various/i.test(v)))continue;const s=String(asRead(k,v)),key=fold(s);if(m.has(key))continue;
+        if(num?String(v).startsWith(k==='decade'&&t.length>3?t.slice(0,3):t):hit(s))m.set(key,{k,v,s})}}
+      for(const f of [...m.values()].sort((a,b)=>a.s.localeCompare(b.s,'en',{numeric:true}))){
+        const key=fold(f.s);if(k==='player'&&names.has(key))continue; // a player who's also the artist is offered once, as the artist
+        const n=hasF(FS,f)?0:matching([...FS,{k:f.k,v:f.v}],'').length; // one more of a kind already on has to bring records in
+        if(FS.some(x=>x.k===f.k)?n>base:n>0){out.push(f);names.add(key)}}
+    }
+    return out.slice(0,5);
+  }
+  const PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+  const offerRow=(f,i)=>`<li><button type="button" class="of" data-o="${i}"><i class="ofp">${PLUS}</i><span><b>${escC(f.s)}</b></span><i class="ofk">${KIND[f.k]}</i></button></li>`;
   const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
   function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
     sl.classList.toggle('idle',!v&&!ph()); // a laptop lists only what you've typed
-    if(!rs.length){sl.innerHTML='<p class="none">Not in the crate</p>';return}
-    if(v){sl.innerHTML=`<ul>${rs.map(row).join('')}</ul>`;if(!ph())$('button',sl)?.classList.add('on');return}
+    const os=sl.offers=seeking()?[]:offers(v); // with a record out, the search only finds records
+    if(!rs.length&&!os.length){sl.innerHTML='<p class="none">Not in the crate</p>';return}
+    if(v){sl.innerHTML=(os.length?`<ul class="ofs">${os.map(offerRow).join('')}</ul>`:'')+(rs.length?`<ul>${rs.map(row).join('')}</ul>`:'');if(!ph())$('button',sl)?.classList.add('on');return}
     let L='',h='';for(const r of rs){const l=letter(r);if(l!==L){if(L)h+='</ul>';L=l;h+=`<h4>${l}</h4><ul>`}h+=row(r)}sl.innerHTML=h+'</ul>'}
   // covers come from the small copies the grid uses; until one is ready the row shows a plain square
   // only rows on screen ask for one, so typing never queues work for covers nobody sees
@@ -3786,7 +3837,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   let open1=false;
   function enter(){if(open1||!on())return;open1=true;body.classList.add('searching');list();sl.scrollTop=0}
   const seeking=()=>body.classList.contains('seek');
-  function leave(keep){if(!open1)return;open1=false;body.classList.remove('searching');if(seeking()){body.classList.remove('seek');keep=false}if(!keep){q.value='';qSync();if(filt?.k==='q')arrange(null)}q.blur()}
+  function leave(keep){if(!open1)return;open1=false;body.classList.remove('searching');if(seeking()){body.classList.remove('seek');keep=false}if(!keep){q.value='';qSync();if(QW)arrange({fs:FS,q:''})}q.blur()}
   q.addEventListener('focus',enter);
   // while the list is up, typing narrows the list and the crate behind it; with a record out, only the list
   q.addEventListener('input',()=>{if(open1)list()});
@@ -3808,12 +3859,20 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   $('.logo').addEventListener('click',()=>leave()); // the mark takes you back to the front: the list goes too
   // a laptop: a click anywhere else puts the list away and leaves the crate as you narrowed it
   addEventListener('pointerdown',e=>{if(open1&&(!ph()||seeking())&&!e.target.closest('.find,.dock,.sl'))leave(true)},true);
+  // a name from the list joins the filters in the field; the keyboard stays up for the next
+  sl.addEventListener('pointerdown',e=>{if(e.target.closest('[data-o]'))e.preventDefault()});
+  sl.addEventListener('click',e=>{const o=e.target.closest('[data-o]'),f=o&&sl.offers?.[+o.dataset.o];if(!f)return;
+    e.stopImmediatePropagation();clearTimeout(qT);arrange({fs:[...FS,{k:f.k,v:f.v}],q:''});q.focus({preventScroll:true});list()});
+  // in the field, a filter's × takes it off, and so does Backspace at the start of the words
+  qt.addEventListener('pointerdown',e=>{if(e.target.closest('[data-x]'))e.preventDefault()});
+  qt.addEventListener('click',e=>{const x=e.target.closest('[data-x]');if(!x)return;e.preventDefault();takeOff(+x.dataset.x);q.focus({preventScroll:true});if(open1)list()});
+  q.addEventListener('keydown',e=>{if(e.key!=='Backspace'||!FS.length||q.selectionStart||q.selectionEnd)return;e.preventDefault();takeOff(FS.length-1);if(open1)list()});
   // a record from the list opens straight from the whole crate
   sl.addEventListener('click',e=>{const b=e.target.closest('[data-slug]');if(!b)return;const r=RECORDS.find(x=>x.slug===b.dataset.slug);
     const im=b.querySelector('img,.sw');pickFrom=im?im.getBoundingClientRect():null;clearTimeout(pickT);pickT=setTimeout(()=>{pickFrom=null},900);
     if(!open.hidden){const R=pickFrom;leave();pickFrom=null;let i=order.indexOf(r);if(i<0){arrange(null);i=order.indexOf(r)}if(i<0||busy)return; // a record is out: the pick takes its place
       clearTimeout(addr.t);const st=history.state||{};history.pushState({open:st.open||0,d:(st.d||0)+1},'','#record/'+r.slug);hop(i,R);return}
-    leave();if(filt)arrange(null);const j=order.indexOf(r);if(j<0)return;go(j,true);requestAnimationFrame(()=>openRecord(false))});
+    leave();if(!order.includes(r))arrange(null);const j=order.indexOf(r);if(j<0)return;go(j,true);requestAnimationFrame(()=>openRecord(false))});
   // a record picked from the list lifts out of its row, not out of the crate behind
   let pickFrom=null,pickT=0;
   const cp2=cratePose;cratePose=function(...a){const R=pickFrom;if(!R||!R.width)return cp2.apply(this,a);
@@ -4040,5 +4099,56 @@ html.phone .ab-sh{margin-top:20px}
   draw();
 })();
 </script>
+<style>
+/* the filters you're in: small pills in a row just above the bar, centered while they fit, sliding sideways once they don't */
+.fs{position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 12px);display:flex;justify-content:center;pointer-events:none;transition:opacity .2s,visibility 0s}
+html.phone .fs{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 12px)}
+.fs[hidden]{display:none}
+.fs-in{display:flex;align-items:center;gap:8px;max-width:100%;box-sizing:border-box;padding:2px max(14px,env(safe-area-inset-right)) 2px max(14px,env(safe-area-inset-left));overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;pointer-events:auto}
+.fs-in::-webkit-scrollbar{display:none}
+.fs.over .fs-in{-webkit-mask:linear-gradient(90deg,#0000,#000 14px,#000 calc(100% - 28px),#0000);mask:linear-gradient(90deg,#0000,#000 14px,#000 calc(100% - 28px),#0000)}
+.fp{flex:none;display:inline-flex;align-items:center;height:36px;max-width:min(320px,calc(100vw - 28px));box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);font-size:var(--fs-2);color:var(--fg);white-space:nowrap;transition:border-color .2s;animation:trayIn .3s var(--ease)}
+.fp:hover{border-color:#ffffff40}
+.fp .cn,.fp .cx,.qtk .cx{all:unset;box-sizing:border-box;height:100%;display:inline-flex;align-items:center;min-width:0}
+.fp button.cn,.fp .cx,.qtk .cx{cursor:pointer}
+.fp .cn{flex:0 1 auto;padding:0 2px 0 13px}
+.fp .ck,.qtk .ck{flex:none;font-style:normal;color:var(--m);padding-right:4px}
+.fp b,.qtk b{font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.fp .cx{flex:none;padding:0 12px 0 7px;color:var(--t2)}
+.fp .cx svg,.qtk .cx svg{width:11px;height:11px}
+.fp .cx:hover,.qtk .cx:hover{color:var(--fg)}
+.fclr{all:unset;cursor:pointer;flex:none;height:36px;padding:0 8px;font-size:var(--fs-2);color:var(--t2);transition:color .2s}
+.fclr:hover{color:var(--fg)}
+.fp .cn:focus-visible,.fp .cx:focus-visible,.fclr:focus-visible,.qtk .cx:focus-visible{outline:1px solid var(--ring);outline-offset:-2px;border-radius:var(--r-pill)}
+@media(prefers-reduced-motion:reduce){.fp{animation:none}}
+/* out of the way while the search is open (they're in its field), a record is out, or a stack or a toast is up over the bar */
+body:not(.ready) .fs,body.searching .fs,body:has(#qf:focus-within) .fs,body:has(#qf.has) .fs,html:has(.open:not([hidden])) .fs,body.stacking .fs,.dsay.on~.fs{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+/* the dial, the grid and the table make room above them */
+body.fon .kd,body.fon.filtering .kd,body.fon.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 34px + 44px)}
+html.phone body.fon .kd,html.phone body.fon.filtering .kd,html.phone body.fon.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 34px + 44px)}
+body.fon .wall,body.fon .tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 168px)}
+/* the swap menu rises from its pill */
+.cmenu{position:fixed;top:auto;translate:none}
+html.phone .cmenu{left:12px;right:12px}
+/* while searching, the filters are tokens in the field, before the words; the newest stays in view */
+.qt{display:flex;align-items:center;gap:6px;flex:0 1 auto;min-width:0;max-width:62%;overflow-x:auto;scrollbar-width:none;margin-left:calc(var(--H,54px)/2 + 22px)}
+.qt::-webkit-scrollbar{display:none}
+.qt[hidden],.dock .xb:not(.o) .qt{display:none}
+.dock .xb.o>.q:has(.qt:not([hidden])) input,html.phone .dock .xb.o>.q:has(.qt:not([hidden])) input{flex:1;width:auto;min-width:64px;padding-left:8px}
+.dock .xb>.q:has(.qt:not([hidden])) input::placeholder{color:transparent}
+.qtk{flex:none;display:inline-flex;align-items:center;height:30px;max-width:160px;padding-left:11px;box-sizing:border-box;border-radius:var(--r-pill);background:var(--sel);font-size:var(--fs-2);color:var(--fg);white-space:nowrap}
+html.phone .qtk{max-width:150px}
+.qt.over{-webkit-mask:linear-gradient(90deg,#0000,#000 18px);mask:linear-gradient(90deg,#0000,#000 18px)}
+.qtk .cn{display:inline-flex;align-items:center;min-width:0}
+.qtk .cx{flex:none;padding:0 9px 0 5px;color:var(--t2)}
+/* the search's offers: a name to add, a + where a cover would be and its kind at the end; then the records */
+.sl .ofs{padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.sl .ofs:last-child{padding-bottom:0;margin-bottom:0;border-bottom:0}
+.sl .ofp{flex:none;width:46px;height:46px;box-sizing:border-box;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--t1);font-style:normal}
+html:not(.phone) .sl .ofp{width:40px;height:40px}
+.sl .ofp svg{width:16px;height:16px}
+.sl .of>span{flex:1}
+.sl .ofk{flex:none;font-style:normal;font-size:var(--fs-2);color:var(--m);padding-right:6px}
+</style>
 </body>
 </html>
