@@ -1330,10 +1330,16 @@ html .dock .xb>.fb.dr{color:var(--t2)}
 .dock .dx{cursor:pointer;display:grid;place-items:center;color:var(--t1)}
 .dock .dx svg{width:18px;height:18px}
 .dock .xb.dx:hover{color:var(--fg)}
-.dsay{position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:calc(var(--db,18px) + var(--H,54px) + 10px);margin:0;text-align:center;font-size:var(--fs-2);color:var(--t2);pointer-events:none;opacity:0;transition:opacity .15s}
-.dsay.on{opacity:1;transition:opacity .25s .1s}
+/* what a tap on the bar changed: a glass pill like the circles, the new icon beside the words. It rises on the spring and leaves on a quick fade */
+.dsay{--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(var(--db) + var(--H,54px) + 14px);display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);box-sizing:border-box;height:40px;padding:0 16px 0 12px;margin:0;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);font-size:var(--fs-3);color:var(--fg);white-space:nowrap;pointer-events:none;
+  opacity:0;visibility:hidden;translate:-50% 10px;transition:opacity .15s var(--out),visibility 0s .15s,translate 0s .15s}
+.dsay.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--ease)}
 html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
-.dsay{--db:calc(env(safe-area-inset-bottom) + 18px)}
+.dsay>i{display:grid;color:var(--t2)}
+.dsay svg{width:18px;height:18px;display:block}
+.dsay .cw{width:16px;height:16px;margin:0}
+.dsay>span{overflow:hidden;text-overflow:ellipsis}
+@media(prefers-reduced-motion:reduce){.dsay,.dsay.on{translate:-50% 0;transition:opacity .2s}}
 /* sort, order and layout never change shape: a tap steps to the next one; a hold grows a stack of named choices out of the circle */
 .dock .xb{touch-action:none;-webkit-touch-callout:none}
 /* while a circle is pressed or its stack is up, nothing on the page can be selected: iOS would otherwise select the page under a held, sliding finger and bring up its loupe */
@@ -3630,6 +3636,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
     let b=e.target.closest?.('button,a,[role=button],[data-tip]');
     if(b?.matches('.q')&&b.matches(':focus-within,.has'))b=null; // the search, once it's open, says what it is
     if(b===stage&&seen())b=null;
+    if(b?.closest('.dock')&&$('.dsay.on'))b=null; // a circle just tapped: the toast above already says what it's on
     if(b===el)return;
     if(!b||!(b.dataset.tip?b.innerText.trim()!==b.dataset.tip:iconOnly(b))){if(el){off();warm=performance.now()}return}
     off();el=b;const now=performance.now();
@@ -3819,10 +3826,11 @@ html.phone .ab-sh{margin-top:20px}
   const shut=()=>{if(open()!=='q')return;if(qf.classList.contains('has'))$('#qx').click();if(body.classList.contains('searching'))$('.sx').click();qf.querySelector('input').blur();draw();dx.blur()};
   dx.onclick=shut;
 
-  // the line above names what changed, crossfading when it changes again, then goes
-  let sayT;const tell=t=>{const on=say.classList.contains('on');say.textContent=t;say.classList.add('on');
-    if(on&&!RM.matches)say.animate([{opacity:0},{opacity:1}],{duration:220});
-    clearTimeout(sayT);sayT=setTimeout(()=>say.classList.remove('on'),1500)};
+  // a toast above the bar names what changed, with the circle's new icon; a second tap crossfades it and starts its clock again
+  let sayT;const tell=(t,k)=>{const on=say.classList.contains('on'),g=rows(k).find(r=>r.on)?.g||'';
+    say.innerHTML=`${g?`<i>${g}</i>`:''}<span></span>`;say.lastChild.textContent=t;say.classList.add('on');
+    if(on&&!RM.matches)say.animate([{opacity:.2},{opacity:1}],{duration:200});
+    clearTimeout(sayT);sayT=setTimeout(()=>say.classList.remove('on'),1800)};
   // the new icon slides in from the side it comes from while the old one slides out
   const slide=(b,old,dir)=>{const nw=b.innerHTML;if(RM.matches||nw===old)return;
     b.innerHTML=`<span class="dic">${old}</span><span class="dic">${nw}</span>`;const [o,n]=b.children;
@@ -3836,10 +3844,10 @@ html.phone .ab-sh{margin-top:20px}
     :k==='view'?views().map(b=>({v:b.dataset.v,g:(b.querySelector('svg')||{}).outerHTML||'',n:b.querySelector('span')?.textContent||b.textContent,on:b.getAttribute('aria-pressed')==='true'}))
     :[1,-1].map(d=>({v:String(d),g:d>0?ARROW:ARROW.replace('<svg ','<svg style="rotate:180deg" '),n:dirSay(SORT.k,d),on:SORT.d===d}));
   const pick=(k,v)=>{
-    if(k==='sort'){const keys=Object.keys(SORTS),old=sb.innerHTML,from=keys.indexOf(SORT.k);setSort(v);slide(sb,old,keys.indexOf(v)>=from?1:-1);tell(word())}
+    if(k==='sort'){const keys=Object.keys(SORTS),old=sb.innerHTML,from=keys.indexOf(SORT.k);setSort(v);slide(sb,old,keys.indexOf(v)>=from?1:-1);tell(word(),'sort')}
     else if(k==='view'){const vs=views(),i=vs.findIndex(b=>b.getAttribute('aria-pressed')==='true'),j=vs.findIndex(b=>b.dataset.v===v);if(j<0)return;
-      const old=lb.innerHTML;if(i!==j){vs[j].click();requestAnimationFrame(()=>slide(lb,old,j>i?1:-1))}tell(vs[j].querySelector('span')?.textContent||'')}
-    else{if(+v!==SORT.d)setSort(SORT.k);tell(word())}};
+      const old=lb.innerHTML;if(i!==j){vs[j].click();requestAnimationFrame(()=>slide(lb,old,j>i?1:-1))}tell(vs[j].querySelector('span')?.textContent||'','view')}
+    else{if(+v!==SORT.d)setSort(SORT.k);tell(word(),'dir')}};
   // a tap: the next choice
   const step=k=>{
     if(k==='sort'){const keys=Object.keys(SORTS),n=keys[(keys.indexOf(SORT.k)+1)%keys.length];pick('sort',n)}
