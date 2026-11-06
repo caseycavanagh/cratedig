@@ -34,7 +34,13 @@ export type Patch = {
   // where Play goes, by service; an empty string takes a wrong link away
   links?: Record<string, string>;
 };
-export type Edits = { added: Rec[]; removed: string[]; patch: Record<string, Patch> };
+// More crates than the one: each is picked from Casey's records (records, by slug) and can hold records Casey doesn't own
+// (extra, which live only in that crate). "all" is the whole crate; it keeps a description here but never a list.
+// A crate's slug is its address (/casey/<slug>) and stays put when it's renamed, so shared links keep working.
+export type Crate = { slug: string; name: string; about?: string; records: string[]; extra: Rec[] };
+export type Crates = { pinned?: string; all?: { about?: string }; list: Crate[] };
+export type Edits = { added: Rec[]; removed: string[]; patch: Record<string, Patch>; crates?: Crates };
+export const ALL = "all";
 
 export const EDITS = "crate:edits";
 export const imgKey = (id: string) => `crate:img:${id}`;
@@ -47,9 +53,9 @@ export async function readEdits(run: Run): Promise<Edits> {
   const [v] = await run([["GET", EDITS]]);
   try {
     const e = JSON.parse(String(v));
-    return { added: e.added ?? [], removed: e.removed ?? [], patch: e.patch ?? {} };
+    return { added: e.added ?? [], removed: e.removed ?? [], patch: e.patch ?? {}, crates: e.crates ?? { list: [] } };
   } catch {
-    return { added: [], removed: [], patch: {} };
+    return { added: [], removed: [], patch: {}, crates: { list: [] } };
   }
 }
 
@@ -90,7 +96,7 @@ export function usedImgs(e: Edits) {
     const id = ownImg(u);
     if (id) s.add(id);
   };
-  for (const x of [...e.added, ...Object.values(e.patch)]) {
+  for (const x of [...e.added, ...Object.values(e.patch), ...(e.crates?.list ?? []).flatMap((c) => c.extra)]) {
     add(x.front);
     add(x.back);
   }

@@ -12,7 +12,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Crate Dig">
-<!-- the front door, served at / through src/app/landing (which fills in Casey's little crate). Casey's crate is at /casey. -->
+<!-- the front door, served at / through src/app/landing (which fills in Casey's little crate). Casey's crates are at /casey. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Crate Dig">
 <meta property="og:title" content="Crate Dig">
@@ -23,8 +23,8 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Crate Dig: every record you own, flipped through like a crate">
 <meta name="twitter:card" content="summary_large_image">
-<!-- links to Casey's crate from before it moved (/#record/<slug>) still open the record -->
-<script>if(location.hash.length>1)location.replace('/casey'+location.search+location.hash)</script>
+<!-- links to Casey's crate from before it moved (/#record/<slug>, /?edit) still open it; the server sends most, but not a bare ?edit -->
+<script>if(location.hash.length>1||/[?&](r|edit|dv|hints)(=|&|$)/.test(location.search))location.replace('/casey/all'+location.search+location.hash)</script>
 <link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
 /* tokens: /vinyl/tokens.css. The headline is the one size off the scale: it's the page's name. */
@@ -91,7 +91,7 @@ footer a:hover{color:var(--t1)}
   <p class="lede">Open one, then make yours.</p>
   <h2 id="ch">Crates</h2>
   <ul class="crates" aria-labelledby="ch">
-    <li><a class="crate" href="/casey"><span class="stk"><!--casey-stack--></span><span class="meta"><span class="who">Casey’s crate</span><span class="arts"><!--casey-artists--></span></span></a></li>
+    <li><a class="crate" href="/casey"><span class="stk"><!--casey-stack--></span><span class="meta"><span class="who">Casey’s crates</span><span class="arts"><!--casey-artists--></span></span></a></li>
     <li><a class="crate" href="/vinyl-make.html"><span class="stk empty" aria-hidden="true"><span class="r" style="--j:2"></span><span class="r" style="--j:1"></span><span class="r" style="--j:0"><svg class="plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></span><span class="meta"><span class="who">Your crate</span><span class="arts">Pick records, get a link</span></span></a></li>
   </ul>
 </main>

@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-// Link previews need whole addresses, and the pages in public/ only know their paths. "/", "/casey" and the make page come through here,
+// Link previews need whole addresses, and the pages in public/ only know their paths. "/", "/casey", each crate and the make page come through here,
 // which puts the domain the page was asked for in front of og:url and og:image. It's read from each request, not baked in at build,
 // so every domain the site answers on (a renamed one, a custom one, a preview) points previews at itself.
 // The CDN keeps a copy per domain for a day; a new deploy clears it.
@@ -13,13 +13,15 @@ export function origin(req: Request) {
 }
 
 export const CACHE = "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800";
+// pages that show Casey's edits (the crates on /casey) can't wait a day for them
+export const FRESH = "public, max-age=0, s-maxage=10, stale-while-revalidate=300";
 
 // tweak: a last say over the page for this request (a shared record names itself in its preview tags), or nothing
-export async function page(file: string, tweak?: (html: string, req: Request) => Promise<string | null>) {
+export async function page(file: string, tweak?: (html: string, req: Request) => Promise<string | null>, cache = CACHE) {
   const src = await readFile(join(process.cwd(), "public", file), "utf8");
   return async (req: Request) => {
     const html = ((tweak && (await tweak(src, req))) || src).replace(/(<meta property="og:(?:url|image)" content=")\//g, `$1${origin(req)}/`);
-    return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": CACHE } });
+    return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": cache } });
   };
 }
 
