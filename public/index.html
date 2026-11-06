@@ -439,7 +439,7 @@ html[data-theme=dark] .qnone{box-shadow:var(--float)}
 .where{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 16px);left:calc(max(14px,env(safe-area-inset-left)) + 46px);display:flex;align-items:center;max-width:min(320px,calc(100vw - 200px));
   height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);text-decoration:none;transition:color .2s,background .2s,opacity .3s}
 .where span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-body.searching .where,body.reading .where{opacity:0;pointer-events:none}
+body.searching .where,body.reading .where,.where.tuck{opacity:0;pointer-events:none}
 .where:hover{color:var(--fg);background:var(--hov)}
 body.editing-on .where{color:var(--fg);border:1px solid var(--line)}
 body:not(.ready) .where{opacity:0}
@@ -1986,12 +1986,22 @@ function choices(k){
   return[...m.values()].sort((a,b)=>k==='year'?a.v-b.v:az(a).localeCompare(az(b)));
 }
 function showChip(){
-  const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;menuOff();if(!f)return;
+  const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;menuOff();if(!f)return roomForName();
   const v=asRead(f.k,f.v),pick=KINDS[f.k];
   const kind=`<i class="ck">${KIND[f.k]}:</i>`;
   chip.innerHTML=(pick?`<button type="button" class="cn" aria-expanded="false" aria-controls="cmenu" aria-label="${pick}: ${escC(v)}. Choose another">${kind}<b>${escC(v)}</b></button>`:`${kind}<b>${escC(v)}</b>`)
     +`<button type="button" class="cx" aria-label="Show the whole crate">${X_ICON}</button>`;
+  roomForName();
 }
+// the crate's name steps aside while a filter pill would run into it (a narrow screen, a long name or label); the pill says where you are
+function roomForName(){
+  const w=$('#where');if(!w)return;
+  if(chip.hidden||w.hidden){w.classList.remove('tuck');return}
+  const a=w.getBoundingClientRect(),b=chip.getBoundingClientRect(),n=$('#whereN');
+  const end=a.left+parseFloat(getComputedStyle(w).paddingLeft)+Math.min(n.scrollWidth,n.offsetWidth); // where the words end, not the pill around them
+  w.classList.toggle('tuck',b.width>0&&b.left<end+12&&b.top<a.bottom&&b.bottom>a.top);
+}
+addEventListener('resize',roomForName);document.fonts?.ready.then(roomForName);
 function menuOff(){const cmenu=$('#cmenu');if(cmenu.hidden)return;cmenu.hidden=true;$('.cn',chip)?.setAttribute('aria-expanded','false')}
 function menuOn(){
   const cmenu=$('#cmenu'),f=filt;if(!f||!KINDS[f.k])return;
@@ -2886,7 +2896,7 @@ function bare(){
 // the crate's name: in the tab, at the top left (back to all of Casey's crates), and at the end of the crate
 function nameCrate(){
   const C=crateDef(),w=$('#where');if(visiting||!w)return;
-  const name=C?C.name:'Everything';w.hidden=false;$('#whereN').textContent=name;
+  const name=C?C.name:'Everything';w.hidden=false;$('#whereN').textContent=name;roomForName();
   document.title=TITLE=C?`${C.name} · Crate Dig`:'Crate Dig';if(open.hidden)document.title=TITLE;
 }
 // one change at a time, in order; the answer is the edits as saved
