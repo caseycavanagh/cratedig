@@ -1,0 +1,40 @@
+/* Crate Dig's tokens: one file for the landing page, every crate and the make page. Always dark.
+   Pages add their own layout values (the crate's --R and --S, for one) but take colors, type, corners, shadows and motion from here. */
+@font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
+:root{
+  color-scheme:dark;
+  /* type: the system font for words, Geist Mono for what you scrub through to find your place (dial, letters, years) */
+  --sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'Geist Mono',ui-monospace,monospace;
+  /* six sizes and nothing else: small print, labels, body, lede, a name on a phone, a name on a laptop */
+  --fs-1:12px;--fs-2:13px;--fs-3:15px;--fs-4:17px;--fs-5:26px;--fs-6:34px;
+
+  /* the page, white, and the grey ladder from bright to faint */
+  --bg:#121212;--fg:#fff;--on-fg:#111;
+  --t1:#d6d6d8;--t2:#a5a5aa;--m:#8e8e93;--t3:#6c6c70;--t4:#5f5f64;
+  --line:rgba(255,255,255,.13);--line2:#ffffff33;
+  /* surfaces: a button under the pointer, a sheet, and the frosted glass of anything floating */
+  --soft:#232325;--sheet:#1e1e20;--glass:rgba(30,30,32,.72);--blur:blur(24px) saturate(1.4);
+  /* fills under a pointer, pressed and picked, and the one focus ring (Tab only) */
+  --hov:#ffffff0f;--prs:#ffffff14;--sel:#ffffff1f;--ring:#ffffff3d;
+
+  /* corners: covers, things inside a panel (the panel's 20 less its 6px padding, so the curves run parallel), panels, pills */
+  --r-cover:2px;--r-in:14px;--r-panel:20px;--r-pill:999px;
+
+  /* three shadows: a cover lifting under the pointer, anything floating (menus, trays, search), and the record itself */
+  --lift:0 18px 36px -14px #000e,0 4px 10px -4px #0009;
+  --float:0 14px 40px #0008;
+  --rest:0 1px 2px #0006,0 24px 40px -14px #000a,0 60px 100px -36px #000d;
+
+  /* motion: one spring without overshoot for arriving, and a quick ease for leaving */
+  --ease:cubic-bezier(.22,1,.36,1);
+  --out:cubic-bezier(.4,0,1,1);
+
+  /* layers the whole page stacks by, bottom to top (inside a component, plain 1 to 4 is fine) */
+  --z-panel:5;--z-bar:6;--z-record:10;--z-raised:11;--z-pop:12;--z-toast:20;--z-tip:30;--z-about:100;--z-grain:2147483000;
+}
+/* Breakpoints can't be variables, so they're written out. These are the ones in use:
+   phone           (max-width:700px), or html.phone, which also catches a phone on its side; laptop from (min-width:701px)
+   wide laptop     (min-width:1041px) / (max-width:1040px)
+   short screens   (max-height:500px) a phone on its side, (max-height:620px) and (max-height:700px) short phones
+   narrow phones   (max-width:380px) and (max-width:369px) */
