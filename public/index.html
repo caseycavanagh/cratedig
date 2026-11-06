@@ -842,6 +842,8 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 /* the covers' column sorts by color: a small color wheel, lit when it's the sort */
 .tbl th.c0 .cw{width:14px;height:14px;opacity:.5;transition:opacity .2s}
 .tbl th.c0 .cn{display:none}
+.tbl th.c0 button{display:flex;justify-content:center;width:44px;position:relative} /* the wheel sits over the middle of the covers */
+.tbl th.c0 button>i:last-child{position:absolute;left:calc(50% + 11px)}
 .tbl th.c0 button:hover .cw,.tbl th.c0[aria-sort=ascending] .cw,.tbl th.c0[aria-sort=descending] .cw{opacity:1}
 .tbl th button:hover,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{color:var(--fg)}
 .tbl th button:focus-visible{outline:1px solid var(--ring);outline-offset:2px;border-radius:4px}
