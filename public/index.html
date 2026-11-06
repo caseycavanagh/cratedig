@@ -25,31 +25,31 @@
 <meta name="twitter:card" content="summary_large_image">
 <script>(function(){var u=new URL(location.href),r=u.searchParams.get('r');if(r){u.searchParams.delete('r');u.hash='record/'+r;history.replaceState(null,'',u)}})()</script>
 <script>var PHONE_Q='(max-width:700px),(pointer:coarse) and (max-height:500px)';document.documentElement.dataset.theme='dark';document.documentElement.classList.toggle('phone',matchMedia(PHONE_Q).matches)</script>
+<link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
-@font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
-:root{--rec:clamp(3px,1.1%,7px);--sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--R:min(62vh,46vw);--R:min(62svh,46vw);--S:calc(var(--R)*.965)}
+:root{--rec:clamp(3px,1.1%,7px);--R:min(62vh,46vw);--R:min(62svh,46vw);--S:calc(var(--R)*.965)}
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
 *{font-variant-numeric:tabular-nums}
 html{background:var(--bg);overscroll-behavior:none}
-body{font-family:var(--sans);font-size:16px;line-height:1.55;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{font-family:var(--sans);font-size:var(--fs-3);line-height:1.55;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 button{font:inherit;color:inherit}
 :focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 /* texture: fine grain and a soft pool of light behind the record, laid over everything (white, so it only lifts the dark) */
-body::after{content:"";position:fixed;inset:0;z-index:2147483000;pointer-events:none;opacity:.02;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2.2 0 0 0 -.9'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E"),radial-gradient(60% 55% at 50% 42%,#fff,transparent)}
+body::after{content:"";position:fixed;inset:0;z-index:var(--z-grain);pointer-events:none;opacity:.02;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2.2 0 0 0 -.9'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E"),radial-gradient(60% 55% at 50% 42%,var(--fg),transparent)}
 
 .page{height:100vh;height:100svh;display:grid;place-items:center;overflow:hidden}
 .page .crate{width:100%;height:100%;margin:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
 .top{display:flex;align-items:center;justify-content:space-between;gap:16px}
-.top h1{font:500 15px var(--mono)}
+.top h1{font:500 var(--fs-3) var(--sans)}
 .top h1 span{color:var(--m)}
-.icon{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--m);transition:transform .5s var(--flip)}
+.icon{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--m);transition:transform .5s var(--ease)}
 .icon:hover{color:var(--fg)}
 .icon:active{transform:scale(.96);transition-duration:.08s}
 .icon:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.btn{all:unset;cursor:pointer;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px;font-size:14px;transition:transform .5s var(--flip),border-color .2s,opacity .2s}
-.btn:hover{border-color:var(--m)}
-.btn:active{transform:scale(.99);transition-duration:.08s}
+.btn{all:unset;cursor:pointer;border-radius:var(--r-pill);border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px;transition:transform .5s var(--ease),border-color .2s,opacity .2s}
+
+.btn:active{transition-duration:.08s}
 .btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .btn[aria-pressed=true]{border-color:var(--fg)}
 .btn:disabled{opacity:.35;cursor:default}
@@ -80,12 +80,12 @@ html.phone.deck .tail{display:none}
 .rc.gone{display:none} /* out of sight: no layer at all */
 /* a flipped record sits in the shadow of the one it fell onto, darkest where they touch */
 .rc.fell .bk::after{background:linear-gradient(0deg,#00000070,#0000 22%),linear-gradient(180deg,#0000 70%,#0000002a),var(--shade,transparent)}
-.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:2px;container-type:inline-size}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;container-type:inline-size}
 .face::after{content:'';position:absolute;inset:0;background:var(--shade,transparent);pointer-events:none;box-shadow:inset 1px 1px 0 #ffffff30,inset -1px -1px 0 #0000002e}
 .bk{transform:rotateY(180deg)}
 /* every jacket has thickness: faces pushed apart, cardboard edges between them */
 .rc{--T:max(2px,calc(var(--S)*.005));--W:var(--S)}
-.rc .face,.sleeve .face{border-radius:1px}
+
 .rc .fr,.sleeve .fr{transform:translateZ(calc(var(--T)/2))}
 .rc .bk,.sleeve .bk{transform:rotateY(180deg) translateZ(calc(var(--T)/2))}
 .edge{position:absolute;top:0;left:calc(50% - var(--T)/2);width:var(--T);height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
@@ -105,7 +105,7 @@ html.phone.deck .tail{display:none}
 .edge.ctr{transform:translate3d(calc(-1*var(--o)),var(--o),0) rotateZ(-45deg) rotateY(90deg);--dk:#00000018}
 .edge.cbl{transform:translate3d(var(--o),calc(-1*var(--o)),0) rotateZ(-45deg) rotateY(-90deg);--dk:#00000030}
 .edge.cbr{transform:translate3d(calc(-1*var(--o)),calc(-1*var(--o)),0) rotateZ(45deg) rotateY(90deg);--dk:#00000028}
-.edge.t,.edge.b{left:0;top:calc(50% - var(--T)/2);width:100%;height:var(--T)}
+.edge.t,.edge.b{top:calc(50% - var(--T)/2);height:var(--T)}
 .edge.t{transform:rotateX(90deg) translateZ(calc(var(--W)/2));--dk:#00000014}
 .edge.t::after{background:var(--grain),linear-gradient(180deg,#00000030,#ffffff4a 45%,#ffffff1a 60%,#00000038),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
 .edge.b{transform:rotateX(-90deg) translateZ(calc(var(--W)/2));--dk:#00000080}
@@ -123,8 +123,8 @@ img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:
 .rc img.art:not(.on){opacity:0}
 .cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
 .cover-type b{display:block;font:500 6cqw var(--sans)}
-.cover-type i{display:block;font:400 4.4cqw var(--mono);font-style:normal;opacity:.85;margin-top:1.2cqw}
-.back-in{position:absolute;inset:0;padding:8cqw;font:400 3.6cqw/1.6 var(--mono);display:flex;flex-direction:column;justify-content:space-between}
+.cover-type i{display:block;font:400 4.4cqw var(--sans);font-style:normal;opacity:.85;margin-top:1.2cqw}
+.back-in{position:absolute;inset:0;padding:8cqw;font:400 3.6cqw/1.6 var(--sans);display:flex;flex-direction:column;justify-content:space-between}
 .back-in b{display:block;font:500 5cqw/1.25 var(--sans);margin-bottom:3cqw}
 .back-in dl{display:grid;grid-template-columns:auto 1fr;gap:.6cqw 4cqw}
 .back-in dt{opacity:.7}
@@ -134,28 +134,28 @@ html[data-theme=dark] .floor{background:radial-gradient(50% 30% at 50% 10%,#0000
 /* past the last record: the mark, a line and a way back to the front, where the last record stood (see "The end of the crate") */
 .fin{position:absolute;left:50%;top:calc(50% - var(--S)*.1);width:min(calc(var(--S)*1.1),calc(100% - 32px));translate:-50% -50%;display:grid;justify-items:center;gap:12px;text-align:center;opacity:0;pointer-events:none}
 .fin.on button{pointer-events:auto}
-.fin-mk{all:unset;cursor:pointer;display:grid;place-items:center;width:72px;height:72px;border-radius:50%;color:#fff;-webkit-tap-highlight-color:transparent}
+.fin-mk{all:unset;cursor:pointer;display:grid;place-items:center;width:72px;height:72px;border-radius:50%;color:var(--fg);-webkit-tap-highlight-color:transparent}
 .fin-mk svg{width:56px;height:56px;fill:currentColor}
-.fin p{font-size:15px;line-height:1.35;font-weight:500;text-wrap:balance;overflow-wrap:anywhere}
+.fin p{font-size:var(--fs-3);line-height:1.35;font-weight:500;text-wrap:balance;overflow-wrap:anywhere}
 .fin-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:2px}
 .fin-row svg{width:16px;height:16px;flex:none}
 html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;height:44px}
 
-.flips{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:-8px;font-size:14px}
-.flips .count{min-width:64px;text-align:center;color:var(--m);font-family:var(--mono);font-size:13px}
-.hint{text-align:center;color:var(--m);font-size:13px;margin-top:10px}
+.flips{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:-8px;font-size:var(--fs-2)}
+.flips .count{min-width:64px;text-align:center;color:var(--m);font-family:var(--sans);font-size:var(--fs-2)}
+.hint{text-align:center;color:var(--m);font-size:var(--fs-2);margin-top:10px}
 
 /* the record in front */
 .caption{text-align:center;margin-top:22px;min-height:50px}
-.caption b{display:block;font-weight:500;font-size:18px}
-.caption span{color:var(--m);font-size:15px}
+.caption b{display:block;font-weight:500;font-size:var(--fs-4)}
+.caption span{color:var(--m);font-size:var(--fs-3)}
 
 /* a record lifted out of the crate */
-.open{--O:min(var(--R),calc(100vw - 680px));position:fixed;inset:0;z-index:10;overflow:hidden auto;overscroll-behavior:none;scrollbar-width:none} /* a record sliding off to the side never brings in a scrollbar; the view never bounces past its top, and shows no scrollbar */
+.open{--O:min(var(--R),calc(100vw - 680px));position:fixed;inset:0;z-index:var(--z-record);overflow:hidden auto;overscroll-behavior:none;scrollbar-width:none} /* a record sliding off to the side never brings in a scrollbar; the view never bounces past its top, and shows no scrollbar */
 .open::-webkit-scrollbar{display:none}
 .open[hidden]{display:none}
 .open:focus{outline:none}
-#close{position:fixed;top:24px;left:24px;z-index:3;opacity:0;transition:opacity .3s,transform .5s var(--flip)}
+#close{position:fixed;z-index:3;opacity:0;}
 .open.in #close{opacity:1}
 .o-page{min-height:100%;display:grid;place-items:center;padding:80px 24px}
 /* the record and its details; on a laptop the pair is centered (below), on narrower screens the details go under the record */
@@ -175,7 +175,7 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
   html:not(.phone) .o-info.scrolled .o-name::after{opacity:1}
   /* × is a bare mark (no circle) in the top-right corner, mirroring the logo in the top-left, rather than in the bottom bar */
   html:not(.phone) .dock .px{display:none}
-  html:not(.phone):has(.crate.lifted) .open:not([hidden]) #close{display:inline-flex;left:auto;right:calc(var(--edge) - 6px);top:calc(env(safe-area-inset-top) + 10px);width:44px;height:44px;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;color:var(--t1);transition:color .2s,opacity .3s .08s,scale .5s var(--spring) .08s,rotate .5s var(--spring) .08s}
+  html:not(.phone):has(.crate.lifted) .open:not([hidden]) #close{display:inline-flex;left:auto;right:calc(var(--edge) - 6px);top:calc(env(safe-area-inset-top) + 10px);width:44px;height:44px;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;color:var(--t1);transition:color .2s,opacity .3s .08s,scale .5s var(--ease) .08s,rotate .5s var(--ease) .08s}
   html:not(.phone) .open #close:hover{color:var(--fg);background:none}
   html:not(.phone) .open #close svg{width:20px;height:20px}
   html:not(.phone) .o-info.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 64px),transparent);mask-image:linear-gradient(#000 calc(100% - 64px),transparent)}
@@ -185,92 +185,91 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
 .stage:focus-visible{outline:none}
 .lift{width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 50%}
 .lift.ghost{position:absolute;inset:0;pointer-events:none}
-.lift.moving{transition:transform .9s var(--flip)}
-.stage.moving{transition:perspective-origin .9s var(--flip),perspective .9s var(--flip)}
+.lift.moving{transition:transform .9s var(--ease)}
+.stage.moving{transition:perspective-origin .9s var(--ease),perspective .9s var(--ease)}
 .sleeve.fade>*{opacity:0;transition:opacity .12s} /* the sleeve's parts fade, never the sleeve: opacity on it would flatten it */
 .sleeve{position:relative;width:100%;height:100%;transform-style:preserve-3d}
 .sleeve{--T:max(3px,calc(var(--O)*.007));--W:var(--O)}
-.sleeve .face{border-radius:1px}
+
 /* one shadow behind each side, each seen only from its own side, so it turns with the sleeve and never shows in front */
-.sleeve .sh{position:absolute;inset:3% 3% 0;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 1px 2px #0002,0 6px 12px -4px #0002,0 24px 40px -14px #0005,0 60px 100px -36px #0008;transform:translateZ(calc(var(--T)/-2 - 1px));opacity:0;transition:opacity .6s}
+.sleeve .sh{position:absolute;inset:3% 3% 0;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:var(--rest);transform:translateZ(calc(var(--T)/-2 - 1px));opacity:0;transition:opacity .6s}
 .sleeve .sh.b{transform:rotateY(180deg) translateZ(calc(var(--T)/-2 - 1px))}
 .open.in .sleeve .sh{opacity:1}
-html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #000a,0 60px 100px -36px #000d}
+html[data-theme=dark] .sleeve .sh{box-shadow:var(--rest)}
 /* the neighbors peek in from the page edges; hover pulls one out a little further */
 .peek{all:unset;position:fixed;top:50%;z-index:2;width:var(--O);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
-  transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s;box-shadow:0 20px 40px -20px #0006}
+  transition:transform .35s var(--ease),opacity .25s;box-shadow:var(--lift)}
 .peek img,.peek>div:not(.cover-type){position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
 .peek{container-type:inline-size;overflow:hidden} /* a record without art sets its name to the peek's width, not the page's */
 .peek.prev{left:0;--x:calc(-100% + 28px);--h:calc(-100% + 96px)}
 .peek.next{right:0;--x:calc(100% - 28px);--h:calc(100% - 96px)}
 .peek{transform:translate(var(--x),-50%)}
-.open.in .peek.on{opacity:.45;pointer-events:auto;transition:transform .85s var(--flip),opacity .5s .25s}
-@media(hover:hover){.open.in .peek.on:hover{opacity:1;transform:translate(var(--h),-50%);transition:transform .6s var(--flip),opacity .25s}}
+.open.in .peek.on{opacity:.45;pointer-events:auto;transition:transform .85s var(--ease),opacity .5s .25s}
+@media(hover:hover){.open.in .peek.on:hover{opacity:1;transform:translate(var(--h),-50%);transition:transform .6s var(--ease),opacity .25s}}
 .open.in.swapping .peek{opacity:0;transition:none}
 /* hovering a peek names it, quietly, just below the edge it's peeking from */
-.phint{position:fixed;top:calc(50% + var(--O)/2 + 18px);z-index:2;display:grid;gap:2px;max-width:min(260px,40vw);pointer-events:none;opacity:0;transition:opacity .15s,transform .2s;font-size:14px;line-height:1.3}
+.phint{position:fixed;top:calc(50% + var(--O)/2 + 18px);z-index:2;display:grid;gap:2px;max-width:min(260px,40vw);pointer-events:none;opacity:0;transition:opacity .15s,transform .2s;font-size:var(--fs-2);line-height:1.3}
 .phint.prev{left:28px;transform:translateX(-6px)}
 .phint.next{right:28px;text-align:right;transform:translateX(6px)}
 .phint b{font-weight:500}
 .phint i{font-style:normal;color:var(--m)}
-.phint.prev::before,.phint.next::before{font:400 12px/1 var(--mono);color:var(--m);margin-bottom:6px}
+.phint.prev::before,.phint.next::before{font:400 var(--fs-1)/1 var(--sans);color:var(--m);margin-bottom:6px}
 .phint.prev::before{content:'← Previous'}
 .phint.next::before{content:'Next →'}
 /* gone the instant a record moves, and quiet until you hover a peek afresh, so a hint never shows the record after next */
 .open.swapping .phint,.open.hush .phint{opacity:0;transition:none}
-.open.in:not(.swapping):not(.hush) .peek.prev.on:hover~.phint.prev,.open.in:not(.swapping):not(.hush) .peek.next.on:hover~.phint.next{opacity:1;transform:none;transition:opacity .25s .05s,transform .5s var(--flip) .05s}
+.open.in:not(.swapping):not(.hush) .peek.prev.on:hover~.phint.prev,.open.in:not(.swapping):not(.hush) .peek.next.on:hover~.phint.next{opacity:1;transform:none;transition:opacity .25s .05s,transform .5s var(--ease) .05s}
 @media(hover:none){.phint{display:none}}
 /* the details start tucked under the record and slide out to the right */
-.o-info{position:absolute;left:calc(100% + 48px);top:50%;translate:0 -50%;z-index:1;flex:none;width:var(--IW);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
-.open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
-.open.in.swapping .o-info{opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .1s}
+.o-info{position:absolute;left:calc(100% + 48px);top:50%;translate:0 -50%;z-index:1;flex:none;width:var(--IW);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s var(--ease),opacity .2s}
+.open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--ease) .1s,opacity .4s .1s}
+
 @media(max-width:1040px){
   .open{--O:var(--R)}
   .o-grid{flex-direction:column;gap:32px}
   .o-info{position:relative;left:auto;top:auto;translate:none;width:var(--O);transform:translateY(-50%) scale(.96)}
-  .open.in.swapping .o-info{transform:translateY(-50%) scale(.96)}
+  
 }
-.o-info h2{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
-.o-info .by{font-size:19px;color:var(--m);margin-top:4px}
-.facts{display:grid;grid-template-columns:96px 1fr;gap:6px 16px;margin-top:22px;font:400 14px/1.5 var(--mono)}
+.o-info h2{font-weight:500;text-wrap:balance}
+.o-info .by{color:var(--m);margin-top:4px}
+.facts{grid-template-columns:96px 1fr;}
 .facts dt{color:var(--m)}
 .facts dd{margin:0}
 .facts div,html.phone .facts div{display:contents}
 .play{position:relative;margin-top:28px}
-.play .btn{height:40px;padding:0 20px 0 16px;font-size:15px;gap:8px}
+
 .play .btn svg{flex:none}
 .play .mk{flex:none;display:block}
 /* after a pick: Play carries the service's logo, and a small round button beside it switches */
-.pair{display:inline-flex;align-items:center;gap:6px}
+.pair{display:inline-flex;align-items:center;}
 .pm-h,.o-count,.dhint{display:none}
-.sw{all:unset;cursor:pointer;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--m);transition:transform .5s var(--flip),background-color .2s,color .2s}
-.sw:hover,.sw[aria-expanded=true]{background:var(--soft);color:var(--fg)}
+.sw{all:unset;cursor:pointer;display:grid;place-items:center;border-radius:50%;transition:transform .5s var(--ease),background-color .2s,color .2s}
+.sw:hover,.sw[aria-expanded=true]{color:var(--fg)}
 .sw:active{transform:scale(.96);transition-duration:.08s}
 .sw:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.sw svg{transition:transform .45s var(--flip)}
+.sw svg{transition:transform .45s var(--ease)}
 .sw[aria-expanded=true] svg{transform:rotate(180deg)}
 /* where there's hover, the caret waits tucked behind Play and slides out when you come near it (or tab to it); it leaves on a quick fade */
 @media(hover:hover){
   html:not(.phone) .pair .btn{position:relative;z-index:1}
-  html:not(.phone) .pair .sw{opacity:0;translate:-26px 0;transition:opacity .12s,translate 0s .12s,transform .5s var(--flip),background-color .2s,color .2s}
-  html:not(.phone) .pair:hover .sw,html:not(.phone) .pair:focus-within .sw,html:not(.phone) .pair .sw[aria-expanded=true]{opacity:1;translate:0;transition:opacity .2s,translate .55s var(--flip),transform .5s var(--flip),background-color .2s,color .2s}
+  html:not(.phone) .pair .sw{opacity:0;translate:-26px 0;transition:opacity .12s,translate 0s .12s,transform .5s var(--ease),background-color .2s,color .2s}
+  html:not(.phone) .pair:hover .sw,html:not(.phone) .pair:focus-within .sw,html:not(.phone) .pair .sw[aria-expanded=true]{opacity:1;translate:0;transition:opacity .2s,translate .55s var(--ease),transform .5s var(--ease),background-color .2s,color .2s}
 }
 @media(hover:hover) and (prefers-reduced-motion:reduce){html:not(.phone) .pair .sw{translate:0}}
 /* the caret's tooltip: after a short wait on it, a small label rises above it; it leaves on a quick fade and stays away while the menu is open */
 .sw{position:relative}
-.sw .tip{position:absolute;bottom:calc(100% + 8px);left:50%;padding:8px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);color:var(--fg);font-size:13px;line-height:1.3;white-space:nowrap;pointer-events:none;opacity:0;translate:-50% 4px;transition:opacity .1s,translate 0s .1s}
-@media(hover:hover){html:not(.phone) .sw:is(:hover,:focus-visible):not([aria-expanded=true]) .tip{opacity:1;translate:-50% 0;transition:opacity .2s .35s,translate .5s var(--flip) .35s}}
+.sw .tip{position:absolute;bottom:calc(100% + 8px);left:50%;padding:8px 12px;border-radius:var(--r-in);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);color:var(--fg);font-size:var(--fs-2);line-height:1.3;white-space:nowrap;pointer-events:none;opacity:0;translate:-50% 4px;transition:opacity .1s,translate 0s .1s}
+@media(hover:hover){html:not(.phone) .sw:is(:hover,:focus-visible):not([aria-expanded=true]) .tip{opacity:1;translate:-50% 0;transition:opacity .2s .35s,translate .5s var(--ease) .35s}}
 html.phone .sw .tip{display:none}
 @media(prefers-reduced-motion:reduce){.sw .tip{translate:-50% 0}}
 /* Play opens a short list of services; it arrives on a spring and leaves on a quick fade */
-.play-m{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;display:grid;padding:6px;border-radius:14px;background:var(--bg);border:1px solid var(--line);
-  box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
+.play-m{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;display:grid;border:1px solid var(--line);transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
   transition:opacity .12s,visibility 0s .12s,transform 0s .12s}
 .play.up .play-m{top:auto;bottom:calc(100% + 8px);transform-origin:20px 100%;transform:translateY(4px) scale(.97)}
 .o-info:has(.play.on){z-index:3}
-.play.on .play-m{opacity:1;visibility:visible;transform:none;transition:opacity .18s,transform .45s var(--flip)}
-.play-m a{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:14px;transition:transform .5s var(--flip),background-color .15s}
-.play-m a:hover{background:var(--soft)}
+.play.on .play-m{opacity:1;visibility:visible;transform:none;transition:opacity .18s,transform .45s var(--ease)}
+.play-m a{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;transition:transform .5s var(--ease),background-color .15s}
+
 .play-m a[aria-current]::after{content:'✓';margin-left:auto;padding-left:16px;color:var(--m)}
 .play-m a:active{transform:scale(.99);transition-duration:.08s}
 .play-m a:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
@@ -279,39 +278,39 @@ html[data-theme=dark] .play-m{box-shadow:var(--float)}
 @media(max-width:700px){
   .page{padding:24px 16px 80px}
   :root{--R:min(78vw,50vh);--R:min(78vw,50svh)}
-  .o-info h2{font-size:26px}
+  
 }
 /* Phones: the crate becomes a pile of records facing you; an open record stacks its details underneath, Play within reach of a thumb */
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 200px));-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-html.phone .page{padding:0}
+
 /* eye level with the bottom of the pile, so a record tipped all the way toward you is edge on and gone, not lying there */
-html.phone.deck .crate{perspective:1500px;perspective-origin:50% calc(50% + 12px + var(--S)/2);cursor:default;-webkit-touch-callout:none} /* eye level at the pile's bottom edge; eye() sets it again in pixels */
+html.phone.deck .crate{cursor:default;-webkit-touch-callout:none} /* eye level at the pile's bottom edge; eye() sets it again in pixels */
 html.phone.deck .stack{transform:none;bottom:calc(50% - 12px - var(--S)/2)} /* the pile, with the records peeking out above, sits dead center */
 html.phone.deck .rc{transform-origin:50% 50%}
 html.phone.deck .floor{display:none}
-html.phone.deck .rc .fr{box-shadow:0 1px 2px #0000001f,0 14px 28px -14px #00000059;transition:scale .5s var(--flip),opacity .4s}
-html.phone.deck[data-theme=dark] .rc .fr{box-shadow:0 1px 2px #0000008c,0 14px 28px -12px #000000b3}
+html.phone.deck .rc .fr{box-shadow:var(--lift);transition:scale .5s var(--ease),opacity .4s}
+html.phone.deck[data-theme=dark] .rc .fr{box-shadow:var(--lift)}
 html.phone.deck .crate.pressing .rc.cur .fr{scale:.985;transition:scale .08s}
 /* no labels on the pile, only a first-time hint that goes once you've flipped */
-html.phone.deck .dhint{display:block;position:absolute;left:0;right:0;top:calc(50% + 12px + var(--S)/2 + 28px);text-align:center;font:400 12px/1.4 var(--mono);color:var(--m);pointer-events:none;transition:opacity .4s}
+html.phone.deck .dhint{display:block;position:absolute;left:0;right:0;top:calc(50% + 12px + var(--S)/2 + 28px);text-align:center;font:400 var(--fs-1)/1.4 var(--sans);color:var(--m);pointer-events:none;transition:opacity .4s}
 .crate.swiped .dhint,.crate.lifted .dhint{opacity:0}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - 330px))}
 html.phone .o-page{display:flex;padding:calc(env(safe-area-inset-top) + 64px) 24px calc(env(safe-area-inset-bottom) + 20px)}
-html.phone .o-grid{flex:1;flex-direction:column;justify-content:flex-start;gap:22px}
+html.phone .o-grid{flex:1;flex-direction:column;}
 html.phone .stage{touch-action:none}
-html.phone .sleeve .sh{box-shadow:0 1px 2px #0002,0 8px 16px -6px #0003,0 24px 40px -18px #0005}
-html.phone[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 12px 24px -8px #0009,0 28px 44px -18px #000c}
+html.phone .sleeve .sh{box-shadow:var(--rest)}
+html.phone[data-theme=dark] .sleeve .sh{box-shadow:var(--rest)}
 /* the details slide down from under the record */
-html.phone .o-info{position:relative;left:auto;top:auto;translate:none;flex:1;display:flex;flex-direction:column;width:var(--O);transform:translateY(-56px) scale(.98)}
-html.phone .open.in .o-info{transform:none}
-html.phone .open.in.swapping .o-info{transform:translateY(-32px) scale(.98);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .12s}
-html.phone .o-info h2{font-size:25px}
-html.phone .o-info .by{font-size:17px;margin-top:2px}
-html.phone .facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:16px;font-size:13px}
+html.phone .o-info{position:relative;left:auto;top:auto;translate:none;display:flex;flex-direction:column;width:var(--O);}
+
+
+
+
+html.phone .facts{flex-wrap:wrap;font-size:var(--fs-2)}
 html.phone .facts div{display:grid;gap:1px;min-width:0}
-html.phone #close{top:calc(env(safe-area-inset-top) + 12px);left:calc(env(safe-area-inset-left) + 12px);width:40px;height:40px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px}
+
 html.phone #close .cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
-html.phone .o-count{display:block;position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 12px);right:calc(env(safe-area-inset-right) + 24px);font:400 13px/40px var(--mono);color:var(--m);opacity:0;transition:opacity .3s}
+html.phone .o-count{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 12px);right:calc(env(safe-area-inset-right) + 24px);font:400 var(--fs-2)/40px var(--sans);color:var(--m);opacity:0;transition:opacity .3s}
 html.phone .open.in .o-count{opacity:1}
 /* the neighbors wait as slivers at the edges, level with the record, and come in with your finger */
 html.phone .peek{top:var(--py,50%);transform:translate(calc(var(--x) + var(--dx,0px)),-50%);box-shadow:none}
@@ -326,79 +325,79 @@ html.pulldown .crate.lifted .rc:not(.cur) .face{opacity:1;transition:none}
 .veil{display:none}
 html.pulldown .veil{display:block;position:absolute;inset:0;background:var(--bg);pointer-events:none;will-change:opacity}
 html.phone .play{margin-top:0}
-html.phone .play>.btn,html.phone .pair{width:100%}
-html.phone .play .btn{box-sizing:border-box;height:52px;justify-content:center;font-size:16px;padding:0 20px}
+
+html.phone .play .btn{box-sizing:border-box;justify-content:center;}
 html.phone .pair{display:flex;gap:8px}
-html.phone .pair .btn{flex:1}
-html.phone .sw{box-sizing:border-box;width:52px;height:52px;flex:none;border:1px solid var(--line);color:var(--fg)}
+
+html.phone .sw{box-sizing:border-box;border:1px solid var(--line);color:var(--fg)}
 /* the services come up as a sheet from the bottom; pull it down or tap outside to put it away */
 html.phone .play::before{content:'';position:fixed;inset:0;z-index:2;background:#0000004d;opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s .2s}
 html.phone .play.on::before{opacity:1;visibility:visible;transition:opacity .3s}
-html.phone .play-m{position:fixed;top:auto;left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));max-width:440px;margin:0 auto;min-width:0;padding:6px 8px 8px;border:0;border-radius:24px;background:var(--sheet);box-shadow:0 -8px 40px -12px #0000004d;opacity:1;touch-action:none;
-  transform:translateY(calc(100% + 16px));transition:transform .22s cubic-bezier(.4,0,1,1),visibility 0s .22s}
-html.phone .play.on .play-m{visibility:visible;transform:none;transition:transform .5s var(--flip)}
+html.phone .play-m{position:fixed;top:auto;left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));max-width:440px;margin:0 auto;min-width:0;padding:6px 8px 8px;border:0;box-shadow:var(--float);opacity:1;touch-action:none;
+  transform:translateY(calc(100% + 16px));transition:transform .22s var(--out),visibility 0s .22s}
+html.phone .play.on .play-m{visibility:visible;transform:none;transition:transform .5s var(--ease)}
 html.phone .play-m::before{content:'';justify-self:center;width:36px;height:5px;border-radius:3px;background:var(--line);margin:2px 0 4px}
-html.phone .pm-h{display:block;padding:6px 14px 8px;font:400 12px/1.4 var(--mono);color:var(--m)}
-html.phone .play-m a{height:56px;padding:0 14px;gap:14px;font-size:17px;border-radius:14px}
+html.phone .pm-h{display:block;padding:6px 14px 8px;font:400 var(--fs-1)/1.4 var(--sans);color:var(--m)}
+html.phone .play-m a{height:56px;padding:0 14px;gap:14px;font-size:var(--fs-4);border-radius:var(--r-in)}
 html.phone .play-m .mk{width:26px;height:26px}
 html.phone .play-m a:hover{background:none}
 html.phone .play-m a:active{background:var(--soft);transform:none}
 /* short phones: tighter spacing so the record stays big and Play stays on screen */
 @media(max-height:620px){
   html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - 290px))}
-  html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + 58px);padding-bottom:calc(env(safe-area-inset-bottom) + 14px)}
-  html.phone .o-grid{gap:16px}
-  html.phone .o-info h2{font-size:22px}
-  html.phone .o-info .by{font-size:16px}
-  html.phone .facts{margin-top:12px}
-  html.phone .play{padding-top:16px}
+  
+  
+  
+  
+  
+  
 }
 /* phones on their side: the pile shrinks to fit, the details sit beside the record again */
 @media(max-height:500px){
   html.phone{--S:calc(100svh - 90px)}
-  html.phone .dhint{display:none}
+  
   html.phone .open{--O:calc(100svh - 72px)}
   html.phone .o-page{padding:36px calc(env(safe-area-inset-right) + 32px) 36px calc(env(safe-area-inset-left) + 32px)}
-  html.phone .o-grid{flex-direction:row;align-items:center;justify-content:center;gap:40px}
-  html.phone .o-info{flex:none;width:min(320px,42vw);transform:translateX(-40%) scale(.98)}
-  html.phone .open.in.swapping .o-info{transform:translateX(-24px) scale(.98)}
-  html.phone .play{margin-top:24px;padding-top:0}
+  html.phone .o-grid{flex-direction:row;align-items:center;}
+  html.phone .o-info{width:min(320px,42vw);}
+  
+  html.phone .play{margin-top:24px;}
 }
 @media(prefers-reduced-motion:reduce){html.phone .play-m,html.phone .play.on .play-m,html.phone .open.in.swapping .o-info{transition:none}}
 @media(prefers-reduced-motion:reduce){.peek,.open.in .peek.on,.open.in .peek.on:hover,.rc,.rc .fr,.lift.moving,.stage.moving,.o-info,.open.in .o-info,.play-m,.play.on .play-m,.sw svg{transition:none}}
 /* finding: a search at the top right, the filter you're in at the top left, every letter down the right edge.
    They come in after the crate and step aside while a record is out. */
-.find{position:fixed;z-index:4;top:20px;left:24px;right:24px;display:flex;align-items:flex-start;gap:12px;pointer-events:none}
+.find{position:fixed;z-index:4;display:flex;pointer-events:none}
 .find>*{pointer-events:auto}
 .find,.az{transition:opacity .4s .25s,visibility 0s .25s}
 body:not(.ready) .find,body:not(.ready) .az,.crate.lifted~.find,.crate.lifted~.az{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
-.chip{all:unset;pointer-events:auto;cursor:pointer;flex:0 1 auto;min-width:0;height:34px;padding:0 9px 0 14px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;gap:8px;font-size:14px;transition:transform .5s var(--flip),border-color .2s}
-.chip[hidden]{display:none}
-.chip:hover{border-color:var(--m)}
-.chip:active{transform:scale(.99);transition-duration:.08s}
+.chip{all:unset;pointer-events:auto;border-radius:var(--r-pill);align-items:center;}
+
+
+.chip:active{transition-duration:.08s}
 .chip:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.chip .k,.chip .n{flex:none;font:400 12px/1 var(--mono);color:var(--m)}
+.chip .k,.chip .n{flex:none;}
 .chip b{font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chip svg{flex:none;color:var(--m)}
-.q{position:relative;flex:none;margin-left:auto;display:flex;align-items:center;height:34px;border:1px solid var(--line);border-radius:999px;background:var(--bg);transition:border-color .2s}
-.q:hover,.q:focus-within{border-color:var(--m)}
+.chip svg{flex:none;}
+.q{flex:none;margin-left:auto;display:flex;align-items:center;border:1px solid var(--line);transition:border-color .2s}
+
 .q:has(input:focus-visible){outline:1px solid var(--ring);outline-offset:2px}
-.qi{position:absolute;left:11px;top:50%;translate:0 -50%;display:grid;color:var(--m);cursor:text}
-.q input{all:unset;box-sizing:border-box;width:140px;height:100%;padding:0 12px 0 34px;font-size:14px;transition:width .5s var(--flip)}
-.q input::placeholder{color:var(--m);opacity:1}
+.qi{position:absolute;top:50%;translate:0 -50%;display:grid;cursor:text}
+.q input{all:unset;box-sizing:border-box;height:100%;transition:width .5s var(--ease)}
+.q input::placeholder{opacity:1}
 .q input::-webkit-search-cancel-button{display:none}
-.q:focus-within input,.q.has input{width:260px}
+
 .q.has input{padding-right:62px}
-.qn{position:absolute;right:36px;font:400 12px/1 var(--mono);color:var(--m);pointer-events:none}
-.qx{all:unset;cursor:pointer;position:absolute;right:5px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;color:var(--m);transition:transform .5s var(--flip),background-color .15s,color .15s}
+.qn{position:absolute;font:400 var(--fs-1)/1 var(--sans);color:var(--m);pointer-events:none}
+.qx{all:unset;cursor:pointer;position:absolute;display:grid;place-items:center;border-radius:50%;transition:transform .5s var(--ease),background-color .15s,color .15s}
 .qx[hidden]{display:none}
-.qx:hover{color:var(--fg);background:var(--soft)}
+
 .qx:active{transform:scale(.96);transition-duration:.08s}
 .qx:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.qnone{position:absolute;right:0;top:calc(100% + 8px);min-width:200px;padding:11px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--line);box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;font-size:14px;color:var(--m)}
+.qnone{min-width:200px;border:1px solid var(--line);box-shadow:var(--float);color:var(--m)}
 html[data-theme=dark] .qnone{box-shadow:var(--float)}
-.az{position:fixed;z-index:4;right:14px;top:72px;bottom:24px;width:28px;display:flex;flex-direction:column;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
-.az button{all:unset;cursor:pointer;position:relative;flex:0 1 24px;min-height:0;display:grid;place-items:center;font:400 12px/1 var(--mono);color:var(--m);border-radius:6px;transition:transform .5s var(--flip),color .15s}
+.az{position:fixed;z-index:4;right:14px;width:28px;flex-direction:column;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.az button{all:unset;cursor:pointer;position:relative;flex:0 1 24px;min-height:0;display:grid;place-items:center;color:var(--m);border-radius:6px;transition:transform .5s var(--ease),color .15s}
 .az button:hover{color:var(--fg)}
 .az button:active{transform:scale(.96);transition-duration:.08s}
 .az button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
@@ -406,10 +405,10 @@ html[data-theme=dark] .qnone{box-shadow:var(--float)}
 .az button[aria-current=true]{color:var(--fg);font-weight:600}
 .az button[aria-current=true]::before{content:'';position:absolute;right:calc(100% - 2px);top:50%;width:6px;height:1px;background:currentColor}
 /* sliding a finger along the letters shows the one under it, big, beside it */
-.az::after{content:attr(data-l);position:absolute;right:calc(100% + 18px);top:var(--y,50%);width:56px;height:56px;margin-top:-28px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--bg);font:500 24px/1 var(--mono);opacity:0;scale:.8;transition:opacity .12s,scale 0s .12s;pointer-events:none}
-.az.scrub::after{opacity:1;scale:1;transition:opacity .15s,scale .4s var(--flip)}
+.az::after{content:attr(data-l);position:absolute;right:calc(100% + 18px);top:var(--y,50%);width:56px;height:56px;margin-top:-28px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--bg);opacity:0;scale:.8;transition:opacity .12s,scale 0s .12s;pointer-events:none}
+.az.scrub::after{opacity:1;scale:1;transition:opacity .15s,scale .4s var(--ease)}
 /* a detail shared with other records is a button: it fills the crate with them */
-.meta{all:unset;cursor:pointer;display:inline-block;text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em;transition:transform .5s var(--flip),text-decoration-color .15s}
+.meta{all:unset;cursor:pointer;display:inline-block;text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em;transition:transform .5s var(--ease),text-decoration-color .15s}
 .meta:hover{text-decoration-color:currentColor}
 .meta:active{transform:scale(.99);transition-duration:.08s}
 .meta:focus-visible{outline:1px solid var(--ring);outline-offset:2px;border-radius:2px}
@@ -418,19 +417,19 @@ html[data-theme=dark] .qnone{box-shadow:var(--float)}
 .ed[hidden]{display:none}
 .ed[aria-pressed=true]{border-color:var(--fg)}
 /* the search's panel: what's not in the crate; for Casey, editing, what's out of it and what MusicBrainz has to add */
-.qnone{width:min(380px,calc(100vw - 48px));max-height:min(62vh,520px);overflow:auto;overscroll-behavior:contain;padding:6px}
-.qnone .qh{padding:6px 8px 8px;font:400 12px/1.4 var(--mono)}
+.qnone{overflow:auto;overscroll-behavior:contain;}
+
 .qnone ul{list-style:none;padding:0;margin:0 0 4px}
-.hit{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:9px;color:var(--fg)}
-.hit img,.hit .ph{flex:none;width:40px;height:40px;border-radius:2px;object-fit:cover;background:var(--soft)}
+.hit{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:var(--r-in);color:var(--fg)}
+.hit img,.hit .ph{flex:none;width:40px;height:40px;object-fit:cover;background:var(--soft)}
 .hit span{flex:1;min-width:0;display:grid;line-height:1.3}
 .hit b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hit i{font-style:normal;font-size:13px;color:var(--m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.btn.sm{height:30px;padding:0 12px;font-size:13px;flex:none}
+.hit i{font-style:normal;font-size:var(--fs-2);color:var(--m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn.sm{height:30px;padding:0 12px;font-size:var(--fs-2);flex:none}
 .hit .in{flex:none}
 /* Casey's tools on a record, while editing */
 .own{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
-.own-c{position:relative;display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px 0 6px;border:1px solid var(--line);border-radius:999px;font-size:13px;cursor:pointer;transition:transform .5s var(--flip),border-color .2s}
+.own-c{position:relative;display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px 0 6px;border:1px solid var(--line);border-radius:var(--r-pill);font-size:var(--fs-2);cursor:pointer;transition:transform .5s var(--ease),border-color .2s}
 .own-c:hover{border-color:var(--m)}
 .own-c:active{transform:scale(.99);transition-duration:.08s}
 .own-c:has(input:focus-visible){outline:1px solid var(--ring);outline-offset:2px}
@@ -441,79 +440,77 @@ html[data-theme=dark] .qnone{box-shadow:var(--float)}
 .own.busy{opacity:.5;pointer-events:none}
 html.phone .own{margin-top:16px;padding-top:14px}
 /* a short note at the bottom, sometimes with an undo; it arrives on a spring and leaves on a quick fade */
-.toast{position:fixed;z-index:20;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;border-radius:999px;background:var(--fg);color:var(--bg);font-size:14px;
+.toast{position:fixed;z-index:var(--z-toast);left:50%;bottom:calc(24px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;border-radius:var(--r-pill);background:var(--fg);color:var(--bg);font-size:var(--fs-3);
   opacity:0;visibility:hidden;translate:-50% 12px;transition:opacity .15s,visibility 0s .15s,translate 0s .15s}
 .toast:not(:has(button)){padding-right:16px}
-.toast.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--flip)}
-.toast button{all:unset;cursor:pointer;height:28px;padding:0 12px;border-radius:999px;border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);font-size:13px;transition:transform .5s var(--flip)}
+.toast.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--ease)}
+.toast button{all:unset;cursor:pointer;height:28px;padding:0 12px;border-radius:var(--r-pill);border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);font-size:var(--fs-2);transition:transform .5s var(--ease)}
 .toast button:active{transform:scale(.99);transition-duration:.08s}
 .toast button:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 /* unlocking edit mode, once per device */
-.unlock{margin:auto;width:min(340px,calc(100vw - 32px));padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--bg);color:var(--fg);box-shadow:0 24px 64px -24px #0006}
+.unlock{margin:auto;width:min(340px,calc(100vw - 32px));padding:24px;border:1px solid var(--line);border-radius:var(--r-panel);background:var(--bg);color:var(--fg);box-shadow:var(--float)}
 .unlock::backdrop{background:#0000004d}
-.unlock h2{font-size:20px;font-weight:500;margin-bottom:16px}
-.unlock label{display:block;font:400 12px/1.4 var(--mono);color:var(--m);margin-bottom:6px}
-.unlock input{box-sizing:border-box;width:100%;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font:inherit;font-size:16px}
+.unlock h2{font-size:var(--fs-4);font-weight:500;margin-bottom:16px}
+.unlock label{display:block;font:400 var(--fs-1)/1.4 var(--sans);color:var(--m);margin-bottom:6px}
+.unlock input{box-sizing:border-box;width:100%;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--bg);color:var(--fg);font:inherit;font-size:var(--fs-4)}
 .unlock input:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.unlock .err{min-height:20px;margin-top:6px;font-size:13px;color:var(--m)}
+.unlock .err{min-height:20px;margin-top:6px;font-size:var(--fs-2);color:var(--m)}
 .unlock .row{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
 @media(prefers-reduced-motion:reduce){.toast,.toast.on{transition:opacity .2s;translate:-50% 0}}
 html.phone .ed{height:40px;margin-right:48px}
-html.phone .qnone{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 60px);width:auto;max-height:calc(100svh - 160px)}
-html.phone .find{top:calc(env(safe-area-inset-top) + 12px);left:calc(env(safe-area-inset-left) + 12px);right:calc(env(safe-area-inset-right) + 12px)}
-html.phone .chip{height:40px;max-width:calc(100% - 52px)}
+
+
+
 /* on a phone the search waits as a round button and opens across the top */
-html.phone .q{position:absolute;right:0;top:0;height:40px}
-html.phone .qi{left:12px}
-html.phone .q input{width:40px;padding:0 0 0 38px;font-size:16px;transition:none}
-html.phone .q:focus-within input,html.phone .q.has input{width:calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));padding-right:62px}
-html.phone .q:not(:focus-within):not(.has) input::placeholder{color:transparent}
-html.phone .az{right:calc(env(safe-area-inset-right) + 1px);top:calc(env(safe-area-inset-top) + 64px);bottom:calc(env(safe-area-inset-bottom) + 24px);width:22px}
-html.phone .az button{flex-basis:22px;font-size:11px}
+html.phone .q{right:0;top:0;}
+
+html.phone .q input{transition:none}
+html.phone .q:focus-within input,html.phone .q.has input{padding-right:62px}
+
+html.phone .az{right:calc(env(safe-area-inset-right) + 1px);width:22px}
+html.phone .az button{flex-basis:22px;font-size:var(--fs-1)}
 html.phone .az button[aria-current=true]::before{display:none}
 @media(prefers-reduced-motion:reduce){.q input,.az.scrub::after{transition:none}}
 /* loading: a quiet bar, then the whole crate rises in at once */
-.loading{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;font:400 13px/1 var(--mono);color:var(--m);transition:opacity .7s ease-out;pointer-events:none}
-.loading .bar{width:120px;height:1px;background:var(--line);overflow:hidden}
+.loading{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;color:var(--m);transition:opacity .7s ease-out;pointer-events:none}
+.loading .bar{width:120px;background:var(--line);overflow:hidden}
 .loading .bar i{display:block;height:100%;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;transition:transform .3s}
 .ready .loading{opacity:0}
 .crate{opacity:0;transform:translateY(24px)}
 body:not(.ready) .crate,body:not(.ready) .cv,body:not(.ready) .tbl{pointer-events:none} /* nothing answers the pointer until the crate is in */
-.ready .crate{opacity:1;transform:none;transition:opacity .5s .15s,transform 1s var(--flip) .15s}
+.ready .crate{opacity:1;transform:none;transition:opacity .5s .15s,transform 1s var(--ease) .15s}
 @media(prefers-reduced-motion:reduce){.ready .crate{transition:opacity .3s}}
 /* ===== After Cosmos =====
    This page is a copy of vinyl-prototype.html (the crate) dressed in the feel of the Cosmos app: always dark, all sans,
    white pills and circle buttons, a search that floats at the bottom, and a second view, the wall, a masonry of covers.
    Everything below overrides the crate's own styles; the crate's behavior is untouched. */
-:root,html[data-theme=dark]{--bg:#121212;--fg:#fff;--m:#8e8e93;--line:rgba(255,255,255,.13);--soft:#232325;--sheet:#1e1e20;--accent:#fff;--mono:var(--sans);--glass:rgba(30,30,32,.72);--flip:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.22,1,.36,1)}
-/* the grey ladder, the fills under a pointer, the one ring and the one floating shadow */
-:root{--t1:#d6d6d8;--t2:#a5a5aa;--t3:#6c6c70;--t4:#5f5f64;--soft2:#303033;--soft3:#3a3a3d;--hov:#ffffff0f;--prs:#ffffff14;--sel:#ffffff1f;--ring:#ffffff3d;--float:0 14px 40px #0008}
+/* colors, type, corners, shadows, motion and layers: /vinyl/tokens.css */
 html{color-scheme:dark}
 :focus-visible{outline-color:var(--ring)}
-.loading{font:400 15px/1 var(--sans)}
+.loading{font:400 var(--fs-3)/1 var(--sans)}
 .loading .bar{height:2px;border-radius:2px}
 /* buttons: tall pills; the main one is white */
-.btn{height:44px;padding:0 20px;font-size:15px;font-weight:500;border-color:var(--line)}
+.btn{height:44px;padding:0 20px;font-size:var(--fs-3);font-weight:500;border-color:var(--line)}
 .btn:hover{background:var(--soft);border-color:var(--line)}
 .btn:active,.chip:active,.vw button:active{transform:scale(.97)}
-.play .btn,html.phone .play .btn{height:54px;padding:0 28px 0 24px;font-size:17px;background:#fff;color:#111;border-color:#fff;gap:10px}
+.play .btn,html.phone .play .btn{background:var(--fg);color:var(--on-fg);border-color:var(--fg);}
 .play .btn:hover{background:#e7e7e8}
 .play .btn .mk path{fill:currentColor}
 .sw{width:54px;height:54px;border:1px solid var(--line);color:var(--fg)}
 .sw:hover,.sw[aria-expanded=true]{background:var(--soft)}
 .pair{gap:10px}
-.play-m{border-radius:18px;padding:6px;background:var(--soft);border-color:var(--line);box-shadow:var(--float)}
-.play-m a{height:48px;padding:0 16px;border-radius:12px;font-size:16px}
+.play-m{border-radius:var(--r-panel);padding:6px;background:var(--soft);border-color:var(--line);box-shadow:var(--float)}
+.play-m a{height:48px;padding:0 16px;border-radius:var(--r-in);font-size:var(--fs-3)}
 .play-m a:hover{background:var(--soft2)}
-html.phone .play-m{border-radius:32px 32px 28px 28px;background:var(--sheet)}
+html.phone .play-m{border-radius:var(--r-panel);background:var(--sheet)}
 /* the way back is a circle */
-#close,html.phone #close{width:52px;height:52px;padding:0;justify-content:center;font-size:20px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
+#close,html.phone #close{padding:0;justify-content:center;background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
 #close .cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
 /* a record's details: big white title, then the year and label as one quiet line */
-.o-info h2{font-size:34px;letter-spacing:-.02em;line-height:1.08}
-.o-info .by{font-size:20px}
+.o-info h2{font-size:var(--fs-6);letter-spacing:-.02em;line-height:1.08}
+.o-info .by{font-size:var(--fs-4)}
 .o-info .by .meta{text-decoration:none}.o-info .by .meta:hover{color:var(--fg)}
-.facts,html.phone .facts{display:flex;margin-top:10px;font:400 15px/24px var(--sans);gap:0;color:var(--t1);white-space:nowrap;min-width:0}
+.facts,html.phone .facts{display:flex;margin-top:10px;font:400 var(--fs-3)/24px var(--sans);gap:0;white-space:nowrap;min-width:0}
 /* year, label: one gray line, a comma between; a long label trails off */
 .facts,html.phone .facts{color:var(--m)}
 .facts span{flex:none}
@@ -525,18 +522,18 @@ html.phone .play-m{border-radius:32px 32px 28px 28px;background:var(--sheet)}
 /* below Play: a few lines about the record, then covers of others that share its artist, label or year */
 .o-info .ab,.o-info .near,.o-info .dets{margin-top:28px}
 /* who made it: labels on the left, names on the right, each role quiet beside its name */
-.dets dl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:7px 16px;margin:0;font-size:14px;line-height:1.45}
+.dets dl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:7px 16px;margin:0;font-size:var(--fs-3);line-height:1.45}
 .dets dt{color:var(--m)}
 .dets dd{margin:0;min-width:0;overflow-wrap:anywhere}
 .dets dd span{display:block}
 .dets dd i{font-style:normal;color:var(--m)}
 .dets .meta{display:inline}
-html.phone .dets dl{grid-template-columns:84px minmax(0,1fr);font-size:13.5px}
-.near .why{margin:0 0 10px;font-size:14px;color:var(--m)}
+html.phone .dets dl{grid-template-columns:84px minmax(0,1fr);font-size:var(--fs-2)}
+.near .why{margin:0 0 10px;font-size:var(--fs-2);color:var(--m)}
 .near .why .meta{color:var(--fg);display:inline}
 .dets.in>*,.near.in>*{animation:linerIn .35s ease-out both}
-.o-info .ohd{margin:0 0 8px;font-size:13px;line-height:1.2;color:var(--m)}
-.o-info .blurb{margin:0;font-size:15px;line-height:1.5;color:var(--t1)}
+.o-info .ohd{margin:0 0 8px;font-size:var(--fs-2);line-height:1.2;color:var(--m)}
+.o-info .blurb{margin:0;font-size:var(--fs-3);line-height:1.5;color:var(--t1)}
 /* while About is on its way: its label and a few quiet lines in its place; then the text fades in, or the block fades away */
 .ab .sk{display:grid;gap:9.5px;padding:6px 0 10px}
 .ab .sk i{display:block;height:13px;border-radius:3px;background:rgba(255,255,255,.07)}
@@ -548,17 +545,17 @@ html.phone .dets dl{grid-template-columns:84px minmax(0,1fr);font-size:13.5px}
 @keyframes linerIn{from{opacity:0}}
 @media(prefers-reduced-motion:no-preference){.ab .sk i{animation:linerWait 1.4s ease-in-out infinite alternate}}
 @keyframes linerWait{to{opacity:.45}}
-.o-info .ab a{display:inline-block;margin-top:6px;font-size:14px;color:var(--m);text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em}
+.o-info .ab a{display:inline-block;margin-top:6px;font-size:var(--fs-2);color:var(--m);text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em}
 .o-info .ab a:hover{color:var(--fg)}
 .thumbs{display:flex;gap:10px}
-.nb{all:unset;cursor:pointer;flex:0 0 76px;width:76px;height:76px;border-radius:1px;overflow:hidden;box-shadow:0 6px 14px -8px #000c}
+.nb{all:unset;cursor:pointer;flex:0 0 76px;width:76px;height:76px;overflow:hidden;box-shadow:none}
 .nb img,.nb i{display:block;width:100%;height:100%;object-fit:cover}
 .nb:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .nb:active{transform:scale(.97)}
 /* like the grid: under a pointer, a cover grows a little */
 @media (hover:hover){
-  .nb{position:relative;transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1)}
-  .nb:hover{z-index:1;transform:scale(1.03);box-shadow:0 18px 36px -14px #000e,0 4px 10px -4px #0009}
+  .nb{position:relative;transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
+  .nb:hover{z-index:1;transform:scale(1.03);box-shadow:var(--lift)}
   .nb:hover:active{transform:scale(1)}
 }
 @media(prefers-reduced-motion:reduce){.nb,.nb:hover{transition:none;transform:none}}
@@ -576,8 +573,8 @@ html.phone .nb{flex-basis:72px;width:72px;height:72px}
    so a long title never pushes Play off the screen and the record stays the same size from one to the next. Play sits
    right under the facts; a shorter title just leaves more air below. The artist and the facts each keep to one line. */
 /* --bot keeps Play clear of the bottom bar: the bar's 14px off the bottom, its 58px circles, and a gap */
-html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:calc(14px + 58px + 14px)}
-@media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--pb:50px;--bot:calc(14px + 58px + 10px)}}
+html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--bot:calc(14px + 58px + 14px)}
+@media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--bot:calc(14px + 58px + 10px)}}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap) - var(--info) - var(--bot) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
 @media(max-height:500px){html.phone .open{--O:calc(100svh - 72px)}}
 html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + var(--top));padding-bottom:calc(env(safe-area-inset-bottom) + var(--bot))}
@@ -587,41 +584,41 @@ html.phone .o-page{align-items:stretch}
 html.phone .o-grid{gap:var(--gap);justify-content:center}
 html.phone .o-info{flex:none;min-height:var(--info)}
 html.phone .o-info h2{font-size:var(--tl);line-height:1.12;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;text-wrap:balance}
-html.phone .o-info .by{font-size:17px;line-height:24px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.phone .o-info .by{font-size:var(--fs-4);line-height:24px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.phone .facts{margin-top:calc(var(--fm)*.5)}
 html.phone .play{padding-top:var(--pp)}
-html.phone .play .btn{height:var(--pb)}
+
 html.phone .sw{width:var(--pb);height:var(--pb);flex:none}
 @media(max-height:500px){html.phone .o-info h2{-webkit-line-clamp:4;line-clamp:4}html.phone .play{padding-top:0}}
 /* finding: the search floats at the bottom, the filter you're in sits under the views */
-.find,html.phone .find{top:auto;bottom:calc(18px + env(safe-area-inset-bottom));left:0;right:0;justify-content:center;align-items:center;padding:0 16px}
+.find,html.phone .find{left:0;right:0;}
 .find .sp{display:none}
-.q,html.phone .q{position:relative;margin:0;height:58px;width:min(440px,100%);border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);border-color:var(--line)}
+.q,html.phone .q{position:relative;margin:0;height:58px;width:min(440px,100%);border-radius:var(--r-pill);background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);border-color:var(--line)}
 .q:hover,.q:focus-within{border-color:rgba(255,255,255,.22)}
 .qi,html.phone .qi{left:20px;color:var(--t2)}
 .qi svg{width:20px;height:20px}
-.q input,.q:focus-within input,.q.has input,html.phone .q input,html.phone .q:focus-within input,html.phone .q.has input{width:100%;padding:0 70px 0 52px;font-size:17px}
+.q input,.q:focus-within input,.q.has input,html.phone .q input,html.phone .q:focus-within input,html.phone .q.has input{width:100%;padding:0 70px 0 52px;font-size:var(--fs-4)}
 html.phone .q:not(:focus-within):not(.has) input::placeholder{color:var(--m)}
 .q input::placeholder{color:var(--m)}
 .qx{right:12px;width:30px;height:30px;background:var(--t4);color:var(--sheet)}
-.qx:hover{background:#79797e;color:#111}
+.qx:hover{background:#79797e;color:var(--on-fg)}
 .qn{right:50px}
-.qnone,html.phone .qnone{position:absolute;top:auto;bottom:calc(100% + 10px);left:50%;right:auto;translate:-50% 0;width:min(440px,calc(100vw - 32px));border-radius:24px;background:var(--sheet);max-height:min(56vh,520px)}
-.chip,html.phone .chip{position:fixed;top:calc(env(safe-area-inset-top) + 74px);left:50%;translate:-50% 0;height:40px;max-width:calc(100vw - 32px);padding:0 10px 0 18px;font-size:15px;background:#fff;color:#111;border-color:#fff}
-.chip .k,.chip .n,.chip svg{color:var(--t3);font:400 13px/1 var(--sans)}
-.chip:hover{border-color:#fff;background:#e7e7e8}
-.ed{position:fixed;top:calc(env(safe-area-inset-top) + 18px);right:16px}
+.qnone,html.phone .qnone{position:absolute;background:var(--sheet);max-height:min(56vh,520px)}
+.chip,html.phone .chip{border-color:var(--fg)}
+.chip .k,.chip .n,.chip svg{color:var(--t3);font:400 var(--fs-2)/1 var(--sans)}
+
+
 /* letters: smaller and quieter, out of the views' way */
 .az,html.phone .az{top:calc(env(safe-area-inset-top) + 120px);bottom:calc(env(safe-area-inset-bottom) + 96px)}
-.az button{font:400 11px/1 var(--sans)}
-.az::after{font:500 24px/1 var(--sans)}
+.az button{font:400 var(--fs-1)/1 var(--mono)}
+.az::after{font:400 var(--fs-5)/1 var(--mono)}
 .dhint{font-family:var(--sans)}
 
 /* the two views, as words at the top */
-.vw{position:fixed;z-index:6;top:calc(env(safe-area-inset-top) + 16px);left:50%;translate:-50% 0;display:flex;padding:4px;border-radius:999px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 10px 30px #0007;transition:opacity .4s .25s,visibility 0s .25s}
-.vw button{all:unset;cursor:pointer;height:40px;padding:0 22px;border-radius:999px;font-size:16px;font-weight:500;color:var(--t2);transition:transform .5s var(--spring),color .2s,background-color .25s}
-.vw button:hover{color:#fff}
-.vw button[aria-pressed=true]{background:#fff;color:#111}
+.vw{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 16px);left:50%;translate:-50% 0;display:flex;padding:4px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);transition:opacity .4s .25s,visibility 0s .25s}
+.vw button{all:unset;cursor:pointer;height:40px;padding:0 22px;border-radius:var(--r-pill);font-size:var(--fs-3);font-weight:500;color:var(--t2);transition:transform .5s var(--ease),color .2s,background-color .25s}
+.vw button:hover{color:var(--fg)}
+.vw button[aria-pressed=true]{background:var(--fg);color:var(--on-fg)}
 .vw button:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 body:not(.ready) .vw,.crate.lifted~.vw,html:has(.open:not([hidden])) .vw{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 
@@ -632,35 +629,35 @@ body.walling .crate,body.walling .az{visibility:hidden}
 body.walling .find .chip{display:none}
 .wall .pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 16px;padding:2px 16px 4px;max-width:none}
 .wall .pills::-webkit-scrollbar{display:none}
-.wall .pills button{all:unset;cursor:pointer;flex:none;height:40px;padding:0 18px;border-radius:999px;border:1px solid var(--line);font-size:15px;color:var(--t1);white-space:nowrap;display:inline-flex;align-items:center;gap:8px;transition:transform .5s var(--spring),background-color .2s}
+.wall .pills button{all:unset;cursor:pointer;flex:none;height:40px;padding:0 18px;border-radius:var(--r-pill);border:1px solid var(--line);font-size:var(--fs-3);color:var(--t1);white-space:nowrap;display:inline-flex;align-items:center;gap:8px;transition:transform .5s var(--ease),background-color .2s}
 .wall .pills button:hover{background:var(--soft)}
 .wall .pills button:active{transform:scale(.97)}
 .wall .pills button:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.wall .pills button[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
-.wall .pills small{font-size:13px;opacity:.55}
+.wall .pills button[aria-pressed=true]{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
+.wall .pills small{font-size:var(--fs-2);opacity:.55}
 .wall .in{max-width:1400px;margin:0 auto}
 .tiles{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px}
 .tiles{position:relative;margin:0 -2px 0 34px}
-.gms p{position:absolute;right:calc(100% + 8px);margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:500 14px/1 var(--sans);color:var(--t1);pointer-events:none}
-.gms .yr{font:400 11px/1 'Geist Mono',ui-monospace,monospace;letter-spacing:-.03em;color:var(--t2)}
+.gms p{position:absolute;right:calc(100% + 8px);margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:500 var(--fs-2)/1 var(--sans);color:var(--t1);pointer-events:none}
+.gms .yr{font:400 var(--fs-1)/1 var(--mono);letter-spacing:-.03em;color:var(--t2)}
 .gms i{width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
-@media (min-width:700px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:15px}.gms .yr{font-size:13px}.gms i{width:22px;height:22px}}
+@media (min-width:701px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:var(--fs-3)}.gms .yr{font-size:var(--fs-2)}.gms i{width:22px;height:22px}}
 /* on a phone the group labels start where the logo does, and the covers end where the buttons at the top do */
-@media (max-width:699px){.tiles{margin:0}} /* on a phone the wall is centered with even margins, and the turns of the sort go unmarked */
-.tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
+@media (max-width:700px){.tiles{margin:0}} /* on a phone the wall is centered with even margins, and the turns of the sort go unmarked */
+.tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--ease)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
 .tile img.on{opacity:1}
-.tile .pl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:15px;line-height:1.15}
+.tile .pl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:var(--fs-3);line-height:1.15}
 .tile .pl small{font-weight:400;opacity:.7;margin-top:2px}
-.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,#000b);font-size:14px;line-height:1.2;opacity:0;transition:opacity .2s}
+.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,#000b);font-size:var(--fs-2);line-height:1.2;opacity:0;transition:opacity .2s}
 .tile .cap b{display:block;font-weight:500}.tile .cap span{color:var(--t1)}
 /* the grid names a record only when you tab to it; under a pointer, its cover comes a little off the page toward you instead */
 .tile:focus-visible .cap{opacity:1}
 @media (hover:hover){
-  .tiles .tile{transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1)}
-  .tiles .tile:hover{z-index:1;transform:scale(1.03);box-shadow:0 18px 36px -14px #000e,0 4px 10px -4px #0009}
+  .tiles .tile{transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
+  .tiles .tile:hover{z-index:1;transform:scale(1.03);box-shadow:var(--lift)}
   .tiles .tile:hover:active{transform:scale(1)}
 }
 /* the canvas: every cover once, in staggered columns, on a board you drag around; its edges give a little and spring back */
@@ -671,170 +668,170 @@ body.walling .find .chip{display:none}
 .board{position:absolute;left:0;top:0;will-change:transform;transform-origin:0 0}
 .board .tile{position:absolute;width:var(--T);height:var(--T)}
 .board .tile img{-webkit-user-drag:none;pointer-events:none}
-.cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--line);color:var(--t1);font-size:14px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
-@media (min-width:700px){.wall{padding-left:28px;padding-right:28px}.wall .pills{margin:0 -28px 18px;padding:2px 28px 4px}.tiles{gap:8px}}
+.cv .hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);translate:-50% 0;padding:10px 18px;border-radius:var(--r-pill);background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border:1px solid var(--line);color:var(--t1);font-size:var(--fs-2);white-space:nowrap;pointer-events:none;transition:opacity .6s}
+@media (min-width:701px){.wall{padding-left:28px;padding-right:28px}.wall .pills{margin:0 -28px 18px;padding:2px 28px 4px}.tiles{gap:8px}}
 @media(prefers-reduced-motion:reduce){.vw,.tile,.tiles .tile,.wall .pills button,.tile img,.rc img.art,.pic img{transition:none}.tiles .tile:hover{transform:none}}
-@media (max-width:699px){.wall,.tbl{scrollbar-width:none}.wall::-webkit-scrollbar,.tbl::-webkit-scrollbar{display:none;width:0;height:0}} /* on a phone the grid and the table scroll without a bar */
+@media (max-width:700px){.wall,.tbl{scrollbar-width:none}.wall::-webkit-scrollbar,.tbl::-webkit-scrollbar{display:none;width:0;height:0}} /* on a phone the grid and the table scroll without a bar */
 /* the dial, in place of the A–Z rail: open on every record; slide down on it for just the letters, up for records again */
 .az{display:none}
-.kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
+.kd{position:fixed;z-index:3;pointer-events:none;}
 body:not(.ready) .kd,.crate.lifted~.kd,body.walling .kd,html:has(.open:not([hidden])) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* phones: the pile sits in the space between the views switch and the dial */
 html.phone .page{padding:calc(env(safe-area-inset-top) + 70px) 0 calc(env(safe-area-inset-bottom) + 196px)}
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
-.kd::before{content:'';position:absolute;left:calc(50% - 50vw);width:100vw;top:-24px;bottom:calc(-82px - env(safe-area-inset-bottom));background:linear-gradient(#12121200,#121212e0 34%,#121212f2);pointer-events:none}
+.kd::before{content:'';position:absolute;left:calc(50% - 50vw);width:100vw;pointer-events:none}
 .kd-d{position:absolute;left:0;right:0;bottom:0;height:var(--kh,58px);cursor:grab;touch-action:none;outline:0;pointer-events:auto;user-select:none;-webkit-user-select:none}
 .kd-d:active{cursor:grabbing}
 .kd-d:focus-visible{outline:none}
 .kd-d.kf:focus-visible{outline:1px solid #ffffff3d;outline-offset:-1px;border-radius:14px} /* a quiet ring, only when Tab brought you here */
 .kd-c{position:absolute;inset:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
 .kd-c>*{position:absolute;left:50%;bottom:0;will-change:transform}
-.kd-l{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font:500 18px/24px var(--sans);color:var(--t3);transform-origin:50% 70%}
-.kd-l.on{color:#fff}
+.kd-l{width:36px;margin-left:-18px;height:24px;line-height:24px;text-align:center;font:400 var(--fs-4)/24px var(--mono);letter-spacing:-.02em;color:var(--t3);transform-origin:50% 70%}
+.kd-l.on{color:var(--fg)}
 .kd-t{width:1px;height:12px;margin-left:-.5px;background:var(--t4);transform-origin:50% 100%}
 /* sorted by year the marks are years, in mono; by color, dots in each color */
-.kd[data-marks=years] .kd-l{width:58px;margin-left:-29px;font:400 16px/24px 'Geist Mono',ui-monospace,monospace;letter-spacing:-.02em}
-.kd[data-marks=years] .kd-l.kd-nd{width:72px;margin-left:-36px;padding-left:22px;box-sizing:border-box;font-size:12px} /* nudged right, clear of the last year */
+.kd[data-marks=years] .kd-l{width:58px;margin-left:-29px;font:400 var(--fs-3)/24px var(--mono);letter-spacing:-.02em}
+.kd[data-marks=years] .kd-l.kd-nd{width:72px;margin-left:-36px;padding-left:22px;box-sizing:border-box;font-size:var(--fs-1)} /* nudged right, clear of the last year */
 .kd[data-marks=colors] .kd-l{display:grid;place-items:center}
 .kd[data-marks=colors] .kd-l i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
-.kd[data-marks=colors] .kd-l.on i{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px #fff}
-.kd-t.on{background:#fff}
-.kd-m{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:#fff;bottom:calc(var(--kh,58px) - 4px);opacity:calc(1 - var(--kz,0))}
-.kd-b{position:absolute;left:24px;right:24px;bottom:calc(var(--kh,58px) + 12px);height:18px;text-align:center;font:400 13px/18px var(--sans);color:var(--m)}
+.kd[data-marks=colors] .kd-l.on i{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--fg)}
+.kd-t.on{background:var(--fg)}
+.kd-m{position:absolute;left:50%;width:2px;height:10px;margin-left:-1px;border-radius:2px;background:var(--fg);bottom:calc(var(--kh,58px) - 4px);opacity:calc(1 - var(--kz,0))}
+.kd-b{position:absolute;left:24px;right:24px;bottom:calc(var(--kh,58px) + 12px);height:18px;text-align:center;font:400 var(--fs-2)/18px var(--sans);color:var(--m)}
 .kd-b span{position:absolute;inset:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kd-b .a{color:var(--t1)}
 /* one place for finding: the views, search and filters share a bar at the bottom; filters open in a tray above it */
 .chip{display:none!important}
-.find,html.phone .find{flex-wrap:wrap;gap:8px;max-width:600px;margin:0 auto;padding:0 12px}
-.find .vw{position:static;translate:none;flex:none;order:1;padding:4px;box-shadow:var(--float);height:58px;box-sizing:border-box;align-items:center}
-.find .vw button{height:48px;width:48px;padding:0;display:grid;place-items:center}
+.find,html.phone .find{flex-wrap:wrap;margin:0 auto;}
+.find .vw{box-sizing:border-box;align-items:center}
+.find .vw button{place-items:center}
 .find .vw svg{width:20px;height:20px;display:block}
-.find .q,html.phone .find .q{order:2;flex:1 1 0;width:auto;min-width:0}
-.fb{all:unset;pointer-events:auto;order:3;flex:none;cursor:pointer;width:58px;height:58px;box-sizing:border-box;border-radius:50%;display:grid;place-items:center;color:var(--t1);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);transition:transform .4s var(--spring),background-color .2s,color .2s}
+
+.fb{all:unset;pointer-events:auto;flex:none;cursor:pointer;width:58px;height:58px;box-sizing:border-box;border-radius:50%;display:grid;place-items:center;color:var(--t1);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);}
 .fb svg{width:22px;height:22px;display:block}
-.fb:hover{color:#fff}
-.fb:active{transform:scale(.96)}
+.fb:hover{color:var(--fg)}
+
 .fb:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.fb.on{background:#fff;color:#111;border-color:#fff}
-.find .vw,.fb{transition:transform .4s var(--spring),opacity .2s,width .3s var(--spring),margin .3s var(--spring),background-color .2s,color .2s}
+.fb.on{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
+
 /* while you type, search gets the whole bar */
 .find:has(.q:focus-within) .vw,.find:has(.q:focus-within) .fb{width:0;opacity:0;margin-right:-8px;padding:0;border-width:0;overflow:hidden}
 .tray{order:0;flex:1 0 100%;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;-webkit-mask:linear-gradient(90deg,#000 85%,transparent);mask:linear-gradient(90deg,#000 85%,transparent);transform-origin:50% 100%}
 .tray[hidden]{display:none}
 .tray::-webkit-scrollbar{display:none}
-.tray button{all:unset;cursor:pointer;flex:none;height:40px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);font-size:15px;color:var(--t1);white-space:nowrap;display:inline-flex;align-items:center;transition:transform .4s var(--spring),background-color .2s}
-.tray button:hover{color:#fff}
-.tray button:active{transform:scale(.97)}
+.tray button{all:unset;cursor:pointer;flex:none;height:40px;padding:0 18px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);font-size:var(--fs-3);color:var(--t1);white-space:nowrap;display:inline-flex;align-items:center;}
+.tray button:hover{color:var(--fg)}
+
 .tray button:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.tray button[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
-.tray:not([hidden]){animation:trayIn .35s var(--spring)}
+.tray button[aria-pressed=true]{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
+.tray:not([hidden]){animation:trayIn .35s var(--ease)}
 @keyframes trayIn{from{opacity:0;transform:translateY(8px)}}
-body.filtering .kd{bottom:calc(env(safe-area-inset-bottom) + 130px)}
-.kd{transition:opacity .4s .25s,visibility 0s .25s,bottom .35s var(--spring)}
-.wall{padding-top:calc(env(safe-area-inset-top) + 16px)}
+
+
+
 body.filtering .wall{padding-bottom:calc(env(safe-area-inset-bottom) + 160px)}
-html.phone .page{padding-top:calc(env(safe-area-inset-top) + 24px)}
+
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 300px))}
 body.filtering .crate{transition:none}
 @media(prefers-reduced-motion:reduce){.tray:not([hidden]){animation:none}}
 /* no numbers, no instructions */
 .o-count,html.phone .o-count,.dhint,html.phone .dhint{display:none!important}
 .find .q input,html.phone .find .q input{padding-right:16px}
-.find .q.has input,html.phone .find .q.has input{padding-right:70px}
-html.phone .find .vw button{width:42px;height:48px}
+
+
 html.phone .fb{width:58px}
 /* the bar: search, filters, layout. Layout is one button like filters; it opens the three views as a row above the bar */
-.find .q,html.phone .find .q{order:1}
+
 .fb{order:2}
-.fb.lb{order:3}
-.find .vw{order:0;flex:1 0 100%;height:auto;padding:2px 2px 4px;justify-content:flex-start;gap:8px;background:none;border:0;border-radius:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;-webkit-mask:none;mask:none}
-.find .vw[hidden]{display:none}
-.find .vw button,html.phone .find .vw button{width:auto;height:40px;padding:0 18px 0 14px;display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);font-size:15px;color:var(--t1)}
+
+.find .vw{height:auto;-webkit-mask:none;mask:none}
+
+
 .find .vw button svg{width:18px;height:18px}
-.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
-.find .vw:not([hidden]){animation:trayIn .35s cubic-bezier(.22,1,.36,1)}
-.find .vw,.fb,.tray button,.find .vw button{transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,width .3s cubic-bezier(.22,1,.36,1),margin .3s cubic-bezier(.22,1,.36,1),background-color .2s,color .2s}
-.tray:not([hidden]){animation-timing-function:cubic-bezier(.22,1,.36,1)}
+.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{border-color:var(--fg)}
+
+.find .vw,.fb,.tray button,.find .vw button{transition:transform .3s var(--ease),opacity .2s,width .3s var(--ease),margin .3s var(--ease),background-color .2s,color .2s}
+.tray:not([hidden]){animation-timing-function:var(--ease)}
 .fb:active,.tray button:active,.find .vw button:active{transform:scale(.96)}
-.kd{transition:opacity .4s .25s,visibility 0s .25s,bottom .35s cubic-bezier(.22,1,.36,1)}
+.kd{transition:opacity .4s .25s,visibility 0s .25s,bottom .35s var(--ease)}
 /* while you type, search gets the whole bar */
 .find:has(.q:focus-within) .fb{width:0;opacity:0;margin-left:-8px;padding:0;border-width:0;overflow:hidden}
 /* the bar stays put while you flip; it fades only for loading and an open record */
-.find{transition:opacity .3s,visibility 0s,translate .5s cubic-bezier(.22,1,.36,1)}
+.find{transition:opacity .3s,visibility 0s,translate .5s var(--ease)}
 /* phones keep the flipped pile: records lie toward you, backs up, under the dial and the bar */
 html.phone.deck .crate{perspective:calc(var(--S)*2.9);perspective-origin:50% calc(50% + 12px - var(--S)*1.13)} /* the same eye as the desktop crate: above, looking down onto the backs */
 html.phone.deck .kd::before{display:none}
 /* swapping records: the details, Play and all, leave and arrive together */
 .open.in.swapping .o-info,html.phone .open.in.swapping .o-info{opacity:1;transform:none;transition:none}
-.open.in :is(.o-info>:where(:not(.o-head)),.o-head>*){transition:transform .5s var(--flip),opacity .3s}
-.open.in.swapping :is(.o-info>:where(:not(.o-head)),.o-head>*){opacity:0;transform:translateY(-12px);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .12s}
+.open.in :is(.o-info>:where(:not(.o-head)),.o-head>*){transition:transform .5s var(--ease),opacity .3s}
+.open.in.swapping :is(.o-info>:where(:not(.o-head)),.o-head>*){opacity:0;transform:translateY(-12px);transition:transform .25s var(--ease),opacity .12s}
 /* phones: the words just cross-fade between records, and arrive with a short rise, no overshoot */
 html.phone .o-info{transform:translateY(10px)}
-html.phone .open.in .o-info{transform:none;transition:transform .45s cubic-bezier(.22,1,.36,1) .08s,opacity .3s .08s}
+html.phone .open.in .o-info{transform:none;transition:transform .45s var(--ease) .08s,opacity .3s .08s}
 html.phone .open.in :is(.o-info>:where(:not(.o-head)),.o-head>*){transition:opacity .22s}
 html.phone .open.in.swapping :is(.o-info>:where(:not(.o-head)),.o-head>*){transform:none;transition:opacity .1s}
 /* arriving: the crate rises first, then the dial and the bar settle in under it */
-body.ready .find,body.ready .kd{animation:barIn .7s cubic-bezier(.22,1,.36,1) .32s backwards}
+body.ready .find,body.ready .kd{animation:barIn .7s var(--ease) .32s backwards}
 @keyframes barIn{from{opacity:0;translate:0 18px}}
 @media(prefers-reduced-motion:reduce){body.ready .find,body.ready .kd{animation:none}}
 /* phone search: the crate steps back and a list of records rises in its place, above the keyboard; tap one to open it,
    Go to keep the crate narrowed to what matches, Cancel to put everything back */
 .sx{display:none}
-html.phone .sx{all:unset;display:none;order:4;flex:none;height:58px;padding:0 6px 0 4px;font-size:16px;color:#fff;cursor:pointer;pointer-events:auto}
+html.phone .sx{all:unset;order:4;flex:none;font-size:var(--fs-4);color:var(--fg);cursor:pointer;pointer-events:auto}
 html.phone .sx:active{opacity:.6}
-html.phone body.searching .sx{display:block}
+
 html.phone body.searching .find .vw,html.phone body.searching .fb{width:0;opacity:0;margin-right:-8px;padding:0;border-width:0;overflow:hidden}
-html.phone body.searching .find{bottom:calc(var(--kb,0px) + 14px + env(safe-area-inset-bottom));transition:bottom .25s cubic-bezier(.22,1,.36,1)}
+html.phone body.searching .find{transition:bottom .25s var(--ease)}
 html.phone body.searching .find .q{box-shadow:none}
-html.phone .page,html.phone .kd{transition:opacity .35s,scale .5s cubic-bezier(.22,1,.36,1)}
-html.phone body.searching .page{opacity:.12;scale:.94;pointer-events:none}
+html.phone .page,html.phone .kd{transition:opacity .35s,scale .5s var(--ease)}
+
 html.phone body.searching .kd{opacity:0;visibility:hidden}
 .sl{display:none}
-html.phone .sl{display:block;position:fixed;z-index:5;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 10px);bottom:calc(var(--kb,0px) + 86px + env(safe-area-inset-bottom));overflow:auto;overscroll-behavior:contain;border-radius:18px;background:#1e1e20ee;-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);border:1px solid var(--line);padding:6px;opacity:0;visibility:hidden;translate:0 14px;scale:.985;transition:opacity .15s,translate .2s,scale .2s,visibility 0s .2s,bottom .25s cubic-bezier(.22,1,.36,1)}
-html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:1;transition:opacity .25s,translate .5s cubic-bezier(.22,1,.36,1),scale .5s cubic-bezier(.22,1,.36,1),bottom .25s cubic-bezier(.22,1,.36,1)}
+html.phone .sl{display:block;position:fixed;z-index:var(--z-panel);left:10px;right:10px;overflow:auto;overscroll-behavior:contain;border-radius:var(--r-panel);background:#1e1e20ee;-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);border:1px solid var(--line);padding:6px;opacity:0;visibility:hidden;translate:0 14px;scale:.985;transition:opacity .15s,translate .2s,scale .2s,visibility 0s .2s,bottom .25s var(--ease)}
+html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:1;transition:opacity .25s,translate .5s var(--ease),scale .5s var(--ease),bottom .25s var(--ease)}
 .sl ul{list-style:none;margin:0;padding:0}
-.sl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border-radius:16px}
+.sl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border-radius:var(--r-in)}
 .sl button:active{background:var(--prs)}
-.sl .sw,.sl .pic{width:46px;height:46px;border-radius:3px;flex:none;background:#2c2c2e}
-.sl b{display:block;font-weight:500;font-size:16px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sl span span{display:block;color:var(--m);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl .sw,.sl .pic{width:46px;height:46px;flex:none;background:#2c2c2e}
+.sl b{display:block;font-weight:500;font-size:var(--fs-4);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl span span{display:block;color:var(--m);font-size:var(--fs-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span{min-width:0}
-.sl h4{position:sticky;top:-6px;z-index:1;margin:0 -6px;padding:10px 14px 6px;font-size:13px;font-weight:400;color:var(--m);background:var(--sheet)}
-.sl .none{padding:18px 14px;color:var(--m)}
+.sl h4{position:sticky;top:-6px;z-index:1;margin:0 -6px;padding:10px 14px 6px;font-size:var(--fs-2);font-weight:400;color:var(--m);background:var(--sheet)}
+
 @media(prefers-reduced-motion:reduce){html.phone .sl,html.phone body.searching .sl,html.phone .page{transition:none}}
 /* the canvas settles on one cover; the rest dim a little until you move again */
-.board .tile{transition:opacity .45s cubic-bezier(.22,1,.36,1)}
+.board .tile{transition:opacity .45s var(--ease)}
 .board.focus .tile:not(.on){opacity:.42}
 .tile.held{opacity:0!important;transition:none!important}
 /* reading a record opened from the wall or the canvas: they fade back behind it, and come back as it goes home */
-.wall,.cv{transition:opacity .4s cubic-bezier(.22,1,.36,1)}
+.wall,.cv{transition:opacity .4s var(--ease)}
 body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 /* the grid: pinch changes the columns, so the page itself doesn't zoom */
 .wall{touch-action:pan-y}
 /* the table: quiet rows, a cover, the facts; the headers sort */
-.tbl{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s cubic-bezier(.22,1,.36,1)}
+.tbl{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s var(--ease)}
 .tbl[hidden]{display:none}
 .tbl:focus{outline:none}
-.tbl table{width:100%;max-width:1400px;margin:0 auto;border-collapse:collapse;font-size:15px;table-layout:auto}
-.tbl thead th{position:sticky;top:-8px;z-index:1;background:var(--bg);text-align:left;font-weight:400;padding:10px 12px 8px;border-bottom:1px solid var(--line)}
-.tbl th button{all:unset;cursor:pointer;color:var(--m);font-size:13px;display:inline-flex;gap:4px;align-items:center}
-.tbl th>span{color:var(--m);font-size:13px;font-weight:400} /* format doesn't sort */
+.tbl table{width:100%;max-width:1400px;margin:0 auto;border-collapse:collapse;font-size:var(--fs-3);table-layout:auto}
+.tbl thead th{top:-8px;z-index:1;background:var(--bg);text-align:left;font-weight:400;padding:10px 12px 8px;border-bottom:1px solid var(--line)}
+.tbl th button{all:unset;cursor:pointer;color:var(--m);font-size:var(--fs-2);display:inline-flex;gap:4px;align-items:center}
+.tbl th>span{color:var(--m);font-size:var(--fs-2);font-weight:400} /* format doesn't sort */
 /* the covers' column sorts by color: a small color wheel, lit when it's the sort */
 .tbl th.c0 .cw{width:14px;height:14px;opacity:.5;transition:opacity .2s}
 .tbl th.c0 .cn{display:none}
 .tbl th.c0 button:hover .cw,.tbl th.c0[aria-sort=ascending] .cw,.tbl th.c0[aria-sort=descending] .cw{opacity:1}
-.tbl th button:hover,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{color:#fff}
+.tbl th button:hover,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{color:var(--fg)}
 .tbl th button:focus-visible{outline:1px solid var(--ring);outline-offset:2px;border-radius:4px}
-.tbl th i{font-style:normal;font-size:12px;width:10px}
+.tbl th i{font-style:normal;font-size:var(--fs-1);width:10px}
 .tbl tbody tr{cursor:pointer;transition:background-color .15s}
 .tbl tbody tr:hover{background:var(--hov)}
 .tbl tbody tr:active{background:var(--prs)}
 .tbl tbody tr:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
 .tbl td{padding:8px 12px;border-bottom:1px solid #ffffff0d;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;vertical-align:middle}
-.tbl td.c-title{color:#fff;max-width:340px}
+.tbl td.c-title{color:var(--fg);max-width:340px}
 .tbl td.c-title b{font-weight:500}
 .tbl .c0{width:48px;padding-right:4px}
-.tbl .c0 .sw,.tbl .c0 .pic{display:block;width:44px;height:44px;border-radius:3px;background:#2c2c2e}
+.tbl .c0 .sw,.tbl .c0 .pic{display:block;width:44px;height:44px;background:#2c2c2e}
 .pic{position:relative;overflow:hidden}
 /* table and search covers: the record's color first, then the cover fades in over it */
 .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
@@ -845,41 +842,41 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
   .tbl{padding-left:8px;padding-right:8px}
   .tbl .c-artist,.tbl .c-label,.tbl .c-format{display:none}
   .tbl td.c-title{white-space:normal;max-width:none}
-  .tbl td.c-title b,.tbl .m{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 150px)}
-  .tbl .m{color:var(--m);font-size:14px}
+  .tbl td.c-title b,.tbl .m{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tbl .m{color:var(--m);font-size:var(--fs-2)}
   .tbl .c-year{text-align:right;color:var(--m)}
 }
 body.reading .tbl{opacity:0;transition:opacity .3s}
 /* one row: search on the left, layout on the right, the scrubber between them in the same plane. No filters for now */
 .fb:not(.lb),#pills{display:none!important}
-.find,html.phone .find{justify-content:space-between;max-width:600px;box-sizing:border-box}
-.find .q,html.phone .find .q{flex:1 1 0;width:auto;max-width:58px;min-width:58px;transition:max-width .45s cubic-bezier(.22,1,.36,1),border-color .2s}
-.find .q:focus-within,.find .q.has,html.phone .find .q:focus-within,html.phone .find .q.has{max-width:600px}
+.find,html.phone .find{box-sizing:border-box}
+.find .q,html.phone .find .q{width:auto;transition:max-width .45s var(--ease),border-color .2s}
+
 .find .q:not(:focus-within):not(.has) input,html.phone .find .q:not(:focus-within):not(.has) input{color:transparent;padding:0;cursor:pointer}
 .find .q:not(:focus-within):not(.has) input::placeholder,html.phone .find .q:not(:focus-within):not(.has) input::placeholder{color:transparent}
 .find .q:not(:focus-within):not(.has) .qn{display:none}
 .find .qi{pointer-events:none}
-.kd{--kw:calc(min(600px,100vw) - 24px - 132px);left:50%;width:var(--kw);margin-left:calc(var(--kw)/-2);height:var(--kh,58px)}
-.kd,body.filtering .kd,body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px)}
+.kd{left:50%;width:var(--kw);margin-left:calc(var(--kw)/-2);height:var(--kh,58px)}
+
 .kd-b{display:none}
-.kd::before{top:-60px}
+
 body:has(.find .q:focus-within) .kd,body:has(.find .q.has) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* at rest, search and layout are bare icons; search becomes a pill only while it's open */
-.find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{background:none;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
-.find .q{transition:max-width .45s cubic-bezier(.22,1,.36,1),background-color .25s,border-color .25s,box-shadow .25s}
+.find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{box-shadow:none;}
+.find .q{transition:max-width .45s var(--ease),background-color .25s,border-color .25s,box-shadow .25s}
 .find .q:not(:focus-within):not(.has) .qi{color:var(--fg)}
-.find .q:not(:focus-within):not(.has):hover .qi,.fb.lb:hover{color:#fff}
-.fb.lb{color:var(--t1)}
+.find .q:not(:focus-within):not(.has):hover .qi,.fb.lb:hover{color:var(--fg)}
+
 .fb.lb svg{width:20px;height:20px}
-.fb.lb[aria-expanded=true]{color:#fff}
+.fb.lb[aria-expanded=true]{color:var(--fg)}
 /* search and layout sit at the top corners; the scrubber has the bottom to itself */
-.find,html.phone .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto;max-width:none;padding:0 14px}
+.find,html.phone .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto;max-width:none;}
 html.phone body.searching .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto}
-.find .vw{order:5}
+
 .qnone,html.phone .qnone{top:calc(100% + 10px);bottom:auto}
-html.phone .sl{top:calc(env(safe-area-inset-top) + 80px);bottom:calc(var(--kb,0px) + 10px + env(safe-area-inset-bottom))}
+
 .kd{--kw:min(520px,100vw)}
-.wall,.tbl{top:calc(env(safe-area-inset-top) + 68px);padding-top:8px}
+
 /* searching on a phone: the records dim behind the list; the search itself stays bright */
 html.phone body.searching .page{opacity:1;scale:none;pointer-events:auto}
 html.phone .page>:not(.find){transition:opacity .35s}
@@ -887,10 +884,10 @@ html.phone body.searching .page>:not(.find){opacity:.12;pointer-events:none}
 html.phone .page{padding-top:calc(env(safe-area-inset-top) + 72px)}
 /* phone search: a quiet field, room before Cancel, no count, covers in place */
 html.phone body.searching .find{gap:12px}
-html.phone .find .q:has(input:focus-visible){outline:none}
-html.phone .find .q:focus-within{border-color:rgba(255,255,255,.2)}
+
+
 html.phone .qn{display:none}
-html.phone .find .q.has input{padding-right:48px}
+
 html.phone .sx{padding:0 2px}
 .sl img:not([src]){visibility:visible}
 /* every record has the same slight corner, never a point: --rec, a hair rounder as the cover grows */
@@ -902,19 +899,19 @@ html.phone .sx{padding:0 2px}
 /* phones: the flipped records lying toward you fade out softly instead of ending in hard edges */
 html.phone.deck .crate{-webkit-mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8));mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8))}
 /* phone search: the results card hugs what's in it, and stops above the keyboard */
-html.phone .sl{bottom:auto;max-height:calc(100svh - env(safe-area-inset-top) - 90px - var(--kb,0px) - env(safe-area-inset-bottom))}
+html.phone .sl{max-height:calc(100svh - env(safe-area-inset-top) - 90px - var(--kb,0px) - env(safe-area-inset-bottom))}
 /* phone table: a list. A row of sort pills on top (title, artist, year), then cover, title over artist, year */
 @media (max-width:700px){
   .tbl{padding:8px 0 calc(env(safe-area-inset-bottom) + 100px)}
   .tbl table,.tbl thead,.tbl tbody{display:block}
-  .tbl thead tr{display:flex;gap:8px;padding:2px 16px 12px;background:var(--bg)}
-  .tbl thead{position:sticky;top:-8px;z-index:1}
-  .tbl thead th{position:static;display:block;padding:0;border:0}
+  .tbl thead tr{display:flex;gap:8px;}
+  .tbl thead{top:-8px;z-index:1}
+  .tbl thead th{display:block;padding:0;border:0}
   .tbl thead th.c0,.tbl thead th.c-label,.tbl thead th.c-format{display:none}
   .tbl thead th.c-artist{display:block}
-  .tbl th button{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);font-size:14px;color:var(--t1)}
-  .tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{background:#fff;color:#111;border-color:#fff}
-  .tbl th button:active{transform:scale(.96)}
+  
+  .tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{border-color:var(--fg)}
+  
   .tbl tbody tr{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:14px;padding:8px 16px;position:relative;-webkit-tap-highlight-color:transparent}
   .tbl tbody tr::after{content:'';position:absolute;left:82px;right:16px;bottom:0;height:1px;background:var(--hov)}
   .tbl td{display:block;padding:0;border:0;max-width:none}
@@ -922,20 +919,20 @@ html.phone .sl{bottom:auto;max-height:calc(100svh - env(safe-area-inset-top) - 9
   .tbl .c0{width:auto;padding:0}
   .tbl .c0 .sw,.tbl .c0 .pic{width:52px;height:52px}
   .tbl td.c-title b,.tbl .m{max-width:none}
-  .tbl td.c-title b{font-size:16px;line-height:1.3}
-  .tbl td.c-year{font-size:14px}
+  .tbl td.c-title b{font-size:var(--fs-3);line-height:1.3}
+  .tbl td.c-year{font-size:var(--fs-3)}
 }
 html.pulldown .kd{opacity:calc(1 - var(--pull,0)*3)!important;transition:none}
 /* edit (Casey only) sits at the bottom right; on a phone, just above the scrubber */
-.ed,html.phone .ed{position:fixed;top:auto;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;margin:0;z-index:12}
+.ed,html.phone .ed{position:fixed;top:auto;bottom:calc(env(safe-area-inset-bottom) + 24px);right:16px;margin:0;z-index:var(--z-pop)}
 html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
 /* hover a record in the crate and its name slides out from under its right edge: after a short rest, on a spring; it leaves on a quick fade */
-.hv{position:fixed;z-index:3;left:0;top:0;transform:translateY(-50%);width:var(--hw,280px);display:grid;gap:2px;font-size:14px;line-height:1.3;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
-.hv.on{pointer-events:auto;cursor:pointer;opacity:1;translate:0;transition:opacity .25s,translate .55s var(--flip),top .45s var(--flip)}
+.hv{position:fixed;z-index:3;left:0;top:0;transform:translateY(-50%);width:var(--hw,280px);display:grid;gap:2px;font-size:var(--fs-2);line-height:1.3;pointer-events:none;opacity:0;translate:-16px 0;transition:opacity .12s,translate 0s .12s}
+.hv.on{pointer-events:auto;cursor:pointer;opacity:1;translate:0;transition:opacity .25s,translate .55s var(--ease),top .45s var(--ease)}
 .hv b{display:block;font-weight:500;color:var(--fg);text-wrap:balance}
 .hv span{display:block;color:var(--m)}
 /* the same tokens as the record view's peek hints, with a small label below */
-.hv::after{content:'Open →';font:400 12px/1 var(--mono);color:var(--m);margin-top:6px}
+.hv::after{content:'Open →';font:400 var(--fs-1)/1 var(--sans);color:var(--m);margin-top:6px}
 @media(hover:none){.hv{display:none}}
 @media(prefers-reduced-motion:reduce){.hv,.hv.on{translate:0;transition:opacity .2s}}
 /* tabbed dividers: one stands just behind the record before each letter, all the way back, its tab above the tops and
@@ -952,11 +949,11 @@ html.phone .ed{bottom:calc(env(safe-area-inset-bottom) + 88px)}
 .dv.off span,.crate.lifted .dv span{pointer-events:none}
 html.phone.deck .dv{display:none}
 /* D2 kraft: record-store cardboard, the letter stamped in mono */
-[data-dv="2"] .dv{--dvc:#9a7650;--dvt:#1d140b;--dvf:600 calc(var(--S)*.034)/1 'Geist Mono',ui-monospace,monospace;--tr:2px}
+[data-dv="2"] .dv{--dvc:#9a7650;--dvt:#1d140b;--dvf:600 calc(var(--S)*.034)/1 var(--mono);--tr:2px}
 /* D3 white index cards */
 [data-dv="3"] .dv{--dvc:#e8e6e0;--dvt:#141414;--tr:2px}
 /* D4 smoked acrylic */
-[data-dv="4"] .dv{--dvc:rgb(255 255 255/.08);--dvt:#fff}
+[data-dv="4"] .dv{--dvc:rgb(255 255 255/.08);--dvt:var(--fg)}
 [data-dv="4"] .dv i,[data-dv="4"] .dv span{box-shadow:inset 0 0 0 1px rgb(255 255 255/.16)}
 [data-dv="4"] .dv span{clip-path:inset(0 0 1px 0)}
 /* D5 just the letters, standing above the tops */
@@ -988,30 +985,30 @@ body:not(.ready) .loading{pointer-events:auto}
 .loading .mk{position:absolute;left:21%;top:21%;width:58%;height:58%}
 .loading .mk path{transition:opacity .4s}
 .loading .mk:not(.ink){--p:1} /* the pressing is all there from the start; only the ink waits */
-.loading .mk.hi{fill:#fff;opacity:.07;translate:-1px -1px}
+.loading .mk.hi{fill:var(--fg);opacity:.07;translate:-1px -1px}
 .loading .mk.lo{fill:#000;opacity:.45;translate:1px 1.5px}
 .loading .mk.base{fill:#1d1d1f}
 .loading .mk.ink{fill:#f2f2f2;--lo:0}
 /* in the bar it sits between search and layout, and turns a little with the crate */
-.logo{order:2;flex:none;display:grid;place-items:center;width:44px;height:44px;margin:0 auto;border-radius:50%;color:#fff;transition:transform .5s var(--flip),opacity .2s}
-.logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.logo{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--fg);transition:transform .5s var(--ease),opacity .2s}
+.logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s var(--ease)}
 /* hovered, it turns an eighth more, on top of where the crate has turned it */
 @media(hover:hover){.logo:hover svg{transform:rotate(45deg)}}
 .logo:focus-visible svg{transform:rotate(45deg)}
 .logo:active{transform:scale(.96);transition-duration:.08s}
 .logo:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.find:has(.q:focus-within) .logo,.find:has(.q.has) .logo{opacity:0;pointer-events:none}
+
 /* the details and links, in a sheet of their own over the record */
 .own-d{width:min(520px,calc(100vw - 32px));max-height:calc(100svh - 48px);overflow:auto;overscroll-behavior:contain}
 .own-f{display:grid;gap:18px}
 .own-f h2{margin:0}
 .own-f fieldset{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
-.own-f legend{padding:0;margin-bottom:10px;font-size:13px;color:var(--m)}
-.own-d.unlock label{display:grid;gap:6px;margin:0;font:400 12px/1.4 var(--sans);color:var(--m);min-width:0}
-.own-d.unlock input{height:38px;min-width:0;font-size:15px;background:var(--soft)}
+.own-f legend{padding:0;margin-bottom:10px;font-size:var(--fs-2);color:var(--m)}
+.own-d.unlock label{display:grid;gap:6px;margin:0;font:400 var(--fs-1)/1.4 var(--sans);color:var(--m);min-width:0}
+.own-d.unlock input{height:38px;min-width:0;font-size:var(--fs-3);background:var(--soft)}
 .own-d input::placeholder{color:var(--t4)}
 .own-f .row{display:flex;justify-content:flex-end;gap:8px}
-.own-f #ownFs{background:#fff;color:#111;border-color:#fff}
+.own-f #ownFs{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
 @media(max-width:700px){.own-f fieldset{grid-template-columns:1fr}}
 /* the top bar: the mark top left; search and one view button top right. Search grows in place to the left of the view
    button, which stays put; the view button drops a small menu of the three views, the one you're in lit */
@@ -1020,31 +1017,31 @@ body:not(.ready) .loading{pointer-events:auto}
 .find .q,html.phone .find .q{order:1;height:44px;min-width:44px;max-width:44px;flex:0 1 auto}
 .find .q:focus-within,.find .q.has,html.phone .find .q:focus-within,html.phone .find .q.has{max-width:300px;width:300px}
 html.phone .find .q:focus-within,html.phone .find .q.has{max-width:none;width:auto;flex:1 1 0}
-.find .q input,.find .q:focus-within input,.find .q.has input,html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .find .q.has input{padding:0 16px 0 40px;font-size:15px}
-html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .find .q.has input{font-size:16px}
-.find .q.has input,html.phone .find .q.has input{padding-right:40px}
+.find .q input,.find .q:focus-within input,.find .q.has input,html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .find .q.has input{padding:0 16px 0 40px;font-size:var(--fs-3)}
+html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .find .q.has input{font-size:var(--fs-4)}
+
 .find .qi,html.phone .find .qi{left:11px}
 .find .vw[hidden],html.phone .find .vw[hidden]{display:none}
-.find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{background:var(--glass);border-color:var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
-.fb.lb,.find:has(.q:focus-within) .fb.lb,html.phone .fb.lb{order:2;width:44px;height:44px;margin:0;padding:0;opacity:1;border-width:1px;color:#fff;overflow:visible}
+.find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{background:var(--glass);border-color:var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.fb.lb,.find:has(.q:focus-within) .fb.lb,html.phone .fb.lb{order:2;width:44px;height:44px;margin:0;padding:0;opacity:1;border-width:1px;color:var(--fg);overflow:visible}
 .fb.lb[aria-expanded=true]{background:var(--soft3)}
 .fb.lb:active{transform:scale(.96)}
-.find .vw,html.phone .find .vw{position:absolute;top:calc(100% + 8px);left:auto;right:max(14px,env(safe-area-inset-right));translate:none;margin:0;order:9;flex:none;width:188px;padding:6px;display:grid;grid-template-columns:1fr;justify-content:stretch;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);transform-origin:100% 0}
-.find .vw:not([hidden]){animation:menuIn .35s cubic-bezier(.22,1,.36,1)}
+.find .vw,html.phone .find .vw{position:absolute;top:calc(100% + 8px);left:auto;right:max(14px,env(safe-area-inset-right));translate:none;margin:0;order:9;flex:none;width:188px;padding:6px;display:grid;grid-template-columns:1fr;justify-content:stretch;gap:2px;border-radius:var(--r-panel);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);transform-origin:100% 0}
+.find .vw:not([hidden]){animation:menuIn .35s var(--ease)}
 @keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.98)}}
-.find .vw button,html.phone .find .vw button{width:100%;box-sizing:border-box;height:42px;padding:0 12px;border:0;border-radius:12px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:400;color:var(--t1)}
-.find .vw button:hover{background:var(--hov);color:#fff}
-.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:var(--sel);color:#fff;border:0}
+.find .vw button,html.phone .find .vw button{width:100%;box-sizing:border-box;height:42px;padding:0 12px;border:0;border-radius:var(--r-in);background:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:flex;align-items:center;gap:10px;font-size:var(--fs-3);font-weight:400;color:var(--t1)}
+.find .vw button:hover{background:var(--hov);color:var(--fg)}
+.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:var(--sel);color:var(--fg);border:0}
 .find .vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
 .find .vw .vab{position:relative;margin-top:7px}
 .find .vw .vab::before{content:'';position:absolute;left:12px;right:12px;top:-4px;border-top:1px solid var(--line)}
 .find .vw .vab svg{width:18px;height:18px;fill:currentColor}
 .fb.sb[hidden]{display:none}
-.fb.lb.sb.on,html.phone .fb.lb.sb.on,.find:has(.q:focus-within) .fb.lb.sb.on{background:#fff;color:#111;border-color:#fff} /* sorted some other way than artist, A to Z */
+.fb.lb.sb.on,html.phone .fb.lb.sb.on,.find:has(.q:focus-within) .fb.lb.sb.on{background:var(--fg);color:var(--on-fg);border-color:var(--fg)} /* sorted some other way than artist, A to Z */
 .fb.lb.sb.on[aria-expanded=true]{background:#e6e6e6}
 /* a name for each icon button, after a short rest on it with a mouse */
-.tt{position:fixed;z-index:30;left:0;top:0;padding:6px 10px;border-radius:10px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);font:400 13px/1.2 var(--sans);color:var(--t1);white-space:nowrap;pointer-events:none;opacity:0;translate:0 -2px;transition:opacity .1s,translate 0s .1s}
-.tt.on{opacity:1;translate:0;transition:opacity .15s,translate .35s cubic-bezier(.22,1,.36,1)}
+.tt{position:fixed;z-index:var(--z-tip);left:0;top:0;padding:6px 10px;border-radius:var(--r-in);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);font:400 var(--fs-2)/1.2 var(--sans);color:var(--t1);white-space:nowrap;pointer-events:none;opacity:0;translate:0 -2px;transition:opacity .1s,translate 0s .1s}
+.tt.on{opacity:1;translate:0;transition:opacity .15s,translate .35s var(--ease)}
 @media(prefers-reduced-motion:reduce){.tt,.tt.on{transition:opacity .15s}}
 .fb.sb svg{width:22px;height:22px}
 .cw{width:18px;height:18px;border-radius:50%;background:conic-gradient(from 0deg,#e5534b,#e8a33d,#e6d84a,#6cc24a,#3fb8b0,#4a8fe6,#8a5ae6,#e05aa8,#e5534b);box-shadow:inset 0 0 0 3px #0000001f}
@@ -1052,15 +1049,15 @@ html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .fin
 .find .vw.so .cw{width:16px;height:16px;margin:0 2px;flex:none}
 .find .vw.so button i{margin-left:auto;font-style:normal;color:var(--t2)}
 /* an open record closes from where the view button sits: top right, the same 44px circle, so the mark keeps the top left */
-#close,html.phone #close{left:auto;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;font-size:18px;border:1px solid var(--line);box-sizing:border-box}
+#close,html.phone #close{left:auto;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;font-size:var(--fs-4);border:1px solid var(--line);box-sizing:border-box}
 /* a record's name over its mark on the dial, after a short rest; it leaves on a quick fade */
-.kd-t{transition:height .45s cubic-bezier(.22,1,.36,1),width .45s cubic-bezier(.22,1,.36,1),margin .45s cubic-bezier(.22,1,.36,1),translate .45s cubic-bezier(.22,1,.36,1),background-color .2s}
-.kd-t.kd-hv{height:17px;width:2px;margin-left:-1px;translate:0 -3px;background:#fff}
-.kd-tip{position:fixed;z-index:12;left:0;top:0;transform:translate(-50%,-100%);max-width:240px;padding:8px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);font-size:13px;line-height:1.3;text-align:center;pointer-events:none;opacity:0;translate:0 4px;transition:opacity .12s,translate 0s .12s}
-.kd-tip.on{opacity:1;translate:0;transition:opacity .2s,translate .45s cubic-bezier(.22,1,.36,1)}
-.kd-tip.on.glide{transition:opacity .2s,translate .45s cubic-bezier(.22,1,.36,1),left .32s cubic-bezier(.22,1,.36,1)}
+.kd-t{transition:height .45s var(--ease),width .45s var(--ease),margin .45s var(--ease),translate .45s var(--ease),background-color .2s}
+.kd-t.kd-hv{height:17px;width:2px;margin-left:-1px;translate:0 -3px;background:var(--fg)}
+.kd-tip{position:fixed;z-index:var(--z-pop);left:0;top:0;transform:translate(-50%,-100%);max-width:240px;padding:8px 12px;border-radius:var(--r-in);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);font-size:var(--fs-2);line-height:1.3;text-align:center;pointer-events:none;opacity:0;translate:0 4px;transition:opacity .12s,translate 0s .12s}
+.kd-tip.on{opacity:1;translate:0;transition:opacity .2s,translate .45s var(--ease)}
+.kd-tip.on.glide{transition:opacity .2s,translate .45s var(--ease),left .32s var(--ease)}
 .kd-tip b,.kd-tip span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kd-tip b{font-weight:500;color:#fff}
+.kd-tip b{font-weight:500;color:var(--fg)}
 .kd-tip span{color:var(--m)}
 @media(hover:none){.kd-tip{display:none}}
 @media(prefers-reduced-motion:reduce){.kd-tip,.kd-tip.on{translate:none}.kd-t{transition:background-color .2s}.kd-tip.on.glide{transition:opacity .2s}}
@@ -1071,14 +1068,14 @@ html.phone .sx{height:44px}
 /* search, quieter: a soft border for focus, a readable count, a small plain clear */
 .find .q:has(input:focus-visible),html.phone .find .q:has(input:focus-visible){outline:none}
 .find .q:focus-within,html.phone .find .q:focus-within{border-color:#ffffff38}
-.find .q .qn{right:42px;font:400 15px/1 var(--sans);font-variant-numeric:tabular-nums;color:var(--m)}
+.find .q .qn{right:42px;font:400 var(--fs-3)/1 var(--sans);font-variant-numeric:tabular-nums;color:var(--m)}
 .find .q .qx{right:9px;width:26px;height:26px;background:none;color:var(--m)}
-.find .q .qx:hover{background:var(--prs);color:#fff}
+.find .q .qx:hover{background:var(--prs);color:var(--fg)}
 .find .q .qx svg{width:12px;height:12px}
 .find .q .qx:focus-visible{outline:1px solid var(--ring);outline-offset:0}
 .find .q.has input,html.phone .find .q.has input{padding-right:40px}
 .find .q.has:has(.qn:not(:empty)) input{padding-right:68px}
-.qnone,html.phone .qnone{left:auto;right:0;translate:none;width:100%;box-sizing:border-box;border-radius:18px;padding:12px 16px;font-size:14px}
+.qnone,html.phone .qnone{left:auto;right:0;translate:none;width:100%;box-sizing:border-box;border-radius:var(--r-panel);padding:12px 16px;font-size:var(--fs-3)}
 .sl .none{margin:0;padding:14px 18px;line-height:1.4;color:var(--m)}
 .qnone:has(ul){padding:6px;width:max(100%,340px)}
 .qnone .qh{padding:0;margin:0;font:inherit;line-height:1.4;color:var(--m)}
@@ -1086,11 +1083,11 @@ html.phone .sx{height:44px}
 /* phones show the laptop's crate, set lower so the pile behind clears the bar; the dial's fade takes the records that fall forward */
 html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 /* the filter you're in, from a record's details: a pill in the middle of the top bar; tap it for the whole crate */
-.chip,html.phone .chip{display:inline-flex!important;position:absolute;top:0;left:50%;translate:-50% 0;height:44px;max-width:min(360px,calc(100vw - 236px));box-sizing:border-box;padding:0 12px 0 16px;gap:8px;font-size:15px;background:var(--glass);color:#fff;border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,border-color .2s}
+.chip,html.phone .chip{display:inline-flex!important;top:0;left:50%;height:44px;box-sizing:border-box;font-size:var(--fs-3);background:var(--glass);color:var(--fg);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);transition:transform .3s var(--ease),opacity .2s,border-color .2s}
 .chip[hidden],html.phone .chip[hidden],.find:has(.q:focus-within) .chip,.find:has(.q.has) .chip{display:none!important}
 .chip:hover{background:var(--glass);border-color:#ffffff40}
 .chip svg{color:var(--t2);width:12px;height:12px}
-.chip:hover svg{color:#fff}
+
 /* it sits in the row, not over it: centered on the screen while there's room, and when there isn't (a phone, a narrow window)
    it slides toward the logo to clear the buttons on the right, and its name gives way last. The spacer before it stands in
    for the buttons' extra width (search, sort, layout less the logo), and gives that up first */
@@ -1108,15 +1105,15 @@ html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
   html.phone .chip .cx{padding:0 12px 0 6px}
 }
 @media(max-width:369px){html.phone .chip{position:absolute;top:52px;left:50%;translate:-50% 0;max-width:calc(100vw - 28px)}}
-.chip:not([hidden]){animation:trayIn .3s cubic-bezier(.22,1,.36,1)}
+.chip:not([hidden]){animation:trayIn .3s var(--ease)}
 @media(prefers-reduced-motion:reduce){.chip:not([hidden]){animation:none}}
 /* Play: a slimmer button */
-.play .btn,html.phone .play .btn{height:44px;padding:0 22px 0 18px;font-size:15px;gap:8px}
+.play .btn,html.phone .play .btn{height:44px;padding:0 22px 0 18px;font-size:var(--fs-3);gap:8px}
 /* on a phone too: a compact button that hugs its label, not a bar across the screen */
 html.phone{--pb:44px}
 html.phone .play>.btn,html.phone .pair{width:auto}
 html.phone .pair .btn{flex:none}
-html.phone .play .btn{height:var(--pb);font-size:15px;padding:0 22px 0 18px}
+html.phone .play .btn{height:var(--pb);font-size:var(--fs-3);padding:0 22px 0 18px}
 /* the filter pill: its name opens a menu of the others of that kind; the × clears it */
 .chip,html.phone .chip{padding:0;gap:0;cursor:default}
 .chip .cn,.chip .cx{all:unset;cursor:pointer;height:100%;display:inline-flex;align-items:center;min-width:0}
@@ -1124,20 +1121,20 @@ html.phone .play .btn{height:var(--pb);font-size:15px;padding:0 22px 0 18px}
 .chip>b{padding-left:16px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip .cn b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip .cx{flex:none;padding:0 14px 0 8px}
-.chip .cx:hover svg{color:#fff}
-.chip .cn:focus-visible,.chip .cx:focus-visible{outline:1px solid var(--ring);outline-offset:-2px;border-radius:999px}
+.chip .cx:hover svg{color:var(--fg)}
+.chip .cn:focus-visible,.chip .cx:focus-visible{outline:1px solid var(--ring);outline-offset:-2px;border-radius:var(--r-pill)}
 .chip:hover svg{color:var(--t2)}
-.cmenu{position:absolute;z-index:5;top:54px;left:50%;translate:-50% 0;width:280px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:6px;border-radius:18px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--line);box-shadow:var(--float);pointer-events:auto;animation:trayIn .3s cubic-bezier(.22,1,.36,1)}
+.cmenu{position:absolute;z-index:var(--z-panel);top:54px;left:50%;translate:-50% 0;width:280px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:6px;border-radius:var(--r-panel);background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border:1px solid var(--line);box-shadow:var(--float);pointer-events:auto;animation:trayIn .3s var(--ease)}
 .cmenu[hidden]{display:none}
-.cmenu .ch{margin:0;padding:10px 12px 8px;font-size:13px;line-height:1.2;color:var(--m)}
+.cmenu .ch{margin:0;padding:10px 12px 8px;font-size:var(--fs-2);line-height:1.2;color:var(--m)}
 .cmenu ul{list-style:none;margin:0;padding:4px 0 0;-webkit-mask:linear-gradient(transparent,#000 14px);mask:linear-gradient(transparent,#000 14px);max-height:min(52vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
 .cmenu ul::-webkit-scrollbar{display:none}
-.cmenu li button{all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:42px;padding:0 12px;border-radius:12px;display:flex;align-items:center;gap:10px;font-size:15px;color:var(--t1)}
+.cmenu li button{all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:42px;padding:0 12px;border-radius:var(--r-in);display:flex;align-items:center;gap:10px;font-size:var(--fs-3);color:var(--t1)}
 .cmenu li button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cmenu li button:hover{background:var(--hov);color:#fff}
+.cmenu li button:hover{background:var(--hov);color:var(--fg)}
 .cmenu li button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
-.cmenu li button[aria-current]{background:var(--sel);color:#fff;font-weight:500}
-.cmenu li button[aria-current]::after{content:"";flex:none;width:10px;height:5px;border:solid #fff;border-width:0 0 1.75px 1.75px;rotate:-45deg;translate:0 -2px}
+.cmenu li button[aria-current]{background:var(--sel);color:var(--fg);font-weight:500}
+.cmenu li button[aria-current]::after{content:"";flex:none;width:10px;height:5px;border:solid var(--fg);border-width:0 0 1.75px 1.75px;rotate:-45deg;translate:0 -2px}
 html.phone .cmenu{width:auto;left:12px;right:12px;translate:none;max-width:none}
 html.phone .cmenu ul{max-height:min(60svh,480px)}
 .find:has(.q:focus-within) .cmenu{display:none}
@@ -1150,21 +1147,21 @@ html.phone .cmenu ul{max-height:min(60svh,480px)}
 /* everything on it fades in together */
 .about .ab-x,.ab-in>*{opacity:0;transition:opacity .2s}
 .about.in .ab-x,.about.in .ab-in>*{opacity:1;transition:opacity .35s .1s}
-.about .ab-x{position:fixed;z-index:1;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px;color:#fff;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
+.about .ab-x{position:fixed;z-index:1;top:calc(env(safe-area-inset-top) + 10px);right:max(14px,env(safe-area-inset-right));width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:var(--fs-4);color:var(--fg);background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
 .about .ab-x:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .ab-in{min-height:100%;box-sizing:border-box;display:grid;place-content:center;justify-items:start;gap:28px;padding:96px max(24px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
 .ab-in>*{margin:0;width:fit-content}
-.ab-mk{width:88px;height:88px;fill:#fff;margin-bottom:8px}
-.ab-name{margin-top:-8px!important;font:500 88px/.95 var(--sans);letter-spacing:-.045em;color:#fff}
-.ab-body{max-width:36ch;font-size:22px;line-height:1.4;color:var(--t1)}
-.ab-cr{margin-top:20px;font:400 12px/1.6 'Geist Mono',ui-monospace,monospace;color:var(--m)}
+.ab-mk{width:88px;height:88px;fill:var(--fg);margin-bottom:8px}
+.ab-name{margin-top:-8px!important;font:500 88px/.95 var(--sans);letter-spacing:-.045em;color:var(--fg)}
+.ab-body{max-width:36ch;font-size:var(--fs-5);line-height:1.4;color:var(--t1)}
+.ab-cr{margin-top:20px;font:400 var(--fs-1)/1.6 var(--mono);color:var(--m)}
 .ab-cr a{color:var(--t1);text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:3px;transition:color .2s,text-decoration-color .2s}
-.ab-cr a:hover{color:#fff;text-decoration-color:currentColor}
+.ab-cr a:hover{color:var(--fg);text-decoration-color:currentColor}
 .ab-cr a:focus-visible{outline:1px solid var(--ring);outline-offset:2px;border-radius:2px}
 html.phone .ab-in{gap:20px;padding:88px max(24px,env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
 html.phone .ab-mk{width:64px;height:64px;margin-bottom:4px}
 html.phone .ab-name{margin-top:-6px!important;font-size:56px}
-html.phone .ab-body{font-size:18px}
+html.phone .ab-body{font-size:var(--fs-4)}
 html.phone .ab-cr{margin-top:12px}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
 .find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
@@ -1182,18 +1179,18 @@ body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table i
   .tbl thead th[aria-sort=none]{display:none}
   .tbl thead th.c0:not([aria-sort=none]){display:block;width:auto} /* sorted by color, the line reads "Sorted by Color" */
   .tbl th.c0 .cw{display:none}.tbl th.c0 .cn{display:inline;font-weight:inherit}
-  .tbl th button,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{height:auto;padding:6px 0;border:0;border-radius:0;background:none;font-size:14px;color:#fff;gap:6px}
+  .tbl th button,.tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{height:auto;padding:6px 0;border:0;border-radius:0;background:none;font-size:var(--fs-2);color:var(--fg);gap:6px}
   .tbl th button::before{content:'Sorted by';color:var(--m)}
   .tbl th button::after{content:'';width:7px;height:7px;margin:-4px 0 0 2px;border:solid var(--m);border-width:0 1.5px 1.5px 0;rotate:45deg}
   .tbl th button[aria-expanded=true]::after{rotate:225deg;margin-top:4px}
   .tbl th button:active{transform:none;opacity:.7}
 }
-.tsm{position:fixed;z-index:6;width:188px;padding:6px;display:grid;gap:2px;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);transform-origin:0 0;animation:tsmIn .35s cubic-bezier(.22,1,.36,1)}
+.tsm{position:fixed;z-index:var(--z-bar);width:188px;padding:6px;display:grid;gap:2px;border-radius:var(--r-panel);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);transform-origin:0 0;animation:tsmIn .35s var(--ease)}
 .tsm[hidden]{display:none}
-.tsm button{all:unset;box-sizing:border-box;height:42px;padding:0 12px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;font-size:15px;color:var(--t1);cursor:pointer}
-.tsm button[aria-checked=true]{background:var(--sel);color:#fff}
+.tsm button{all:unset;box-sizing:border-box;height:42px;padding:0 12px;border-radius:var(--r-in);display:flex;align-items:center;justify-content:space-between;font-size:var(--fs-3);color:var(--t1);cursor:pointer}
+.tsm button[aria-checked=true]{background:var(--sel);color:var(--fg)}
 .tsm button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
-.tsm i{font-style:normal;color:#fff}
+.tsm i{font-style:normal;color:var(--fg)}
 @keyframes tsmIn{from{opacity:0;scale:.96}}
 @media(prefers-reduced-motion:reduce){.tsm{animation:none}}
 /* phones: the record stays put while you scroll; the details rise over it out of a long, soft fade, and the record dims behind them.
@@ -1218,7 +1215,7 @@ html.phone .o-info{padding-inline:12px}
    Each strip shows 5px of the page color, the least Safari picks up; About sits in the top layer, so it carries its own. */
 .sedge,.about::before,.about::after{display:none}
 @media(pointer:coarse){
-  .sedge,.about::before,.about::after{display:block;content:'';position:fixed;left:0;right:0;z-index:100;height:12px;background:var(--edge,var(--bg));pointer-events:none}
+  .sedge,.about::before,.about::after{display:block;content:'';position:fixed;left:0;right:0;z-index:var(--z-about);height:12px;background:var(--edge,var(--bg));pointer-events:none}
   .sedge.t,.about::before{top:-7px}
   .sedge.b,.about::after{bottom:-7px}
   html:has(.play.on) .sedge{--edge:#0d0d0d} /* the Play menu dims the page behind it; the toolbars dim with it */
@@ -1228,23 +1225,23 @@ html.phone .o-info{padding-inline:12px}
 html:not(.phone) .find{padding:0 var(--edge)}
 html:not(.phone) .find .vw{right:var(--edge)}
 html:not(.phone) #close,html:not(.phone) .about .ab-x{right:var(--edge)}
-#oq{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 10px);right:calc(max(14px,env(safe-area-inset-right)) + 52px);width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px;color:#fff;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);opacity:0;transition:opacity .3s,transform .5s var(--flip)}
+#oq{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 10px);right:calc(max(14px,env(safe-area-inset-right)) + 52px);width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:var(--fs-4);color:var(--fg);border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);}
 html:not(.phone) #oq{right:calc(var(--edge) + 52px)}
-.open.in #oq{opacity:1}
-html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3);transition:none}
+
+html.pulldown .open.in #oq{transition:none}
 #oq:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-body.seek .find{z-index:11}
+body.seek .find{z-index:var(--z-raised)}
 body.seek .find::before{opacity:0}
 body.seek .crate.lifted~.find>.q,body.seek .crate.lifted~.find>.sx{opacity:1;visibility:visible;pointer-events:auto;scale:1;transition:none}
 html:has(.crate.lifted) body.seek #oq{opacity:0;visibility:hidden}
-html body.seek .sl,html:not(.phone) body.seek .sl{z-index:12}
+html body.seek .sl,html:not(.phone) body.seek .sl{z-index:var(--z-pop)}
 html.phone body.seek #close{opacity:0;visibility:hidden}
 /* searching on a laptop: the matches drop down under the field while the crate narrows behind them */
-html:not(.phone) .sl{position:fixed;z-index:5;top:calc(env(safe-area-inset-top) + 62px);right:calc(var(--edge) + 52px);width:min(420px,calc(100vw - 28px));max-height:min(60vh,520px);box-sizing:border-box;padding:6px;overflow:auto;overscroll-behavior:contain;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float)}
-html:not(.phone) body.searching .sl:not(.idle){display:block;animation:menuIn .3s cubic-bezier(.22,1,.36,1)}
-html:not(.phone) .sl button{padding:6px;border-radius:12px;gap:12px}
+html:not(.phone) .sl{position:fixed;z-index:var(--z-panel);max-height:min(60vh,520px);box-sizing:border-box;padding:6px;overflow:auto;overscroll-behavior:contain;border-radius:var(--r-panel);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float)}
+html:not(.phone) body.searching .sl:not(.idle){display:block;animation:menuIn .3s var(--ease)}
+html:not(.phone) .sl button{padding:6px;border-radius:var(--r-in);gap:12px}
 html:not(.phone) .sl .sw,html:not(.phone) .sl .pic{width:40px;height:40px}
-html:not(.phone) .sl b{font-size:15px}
+html:not(.phone) .sl b{font-size:var(--fs-3)}
 html:not(.phone) .sl button:hover{background:var(--hov)}
 html:not(.phone) .sl button.on{background:var(--sel)}
 body.searching .qnone{display:none}
@@ -1253,36 +1250,36 @@ html.phone body.searching .page>:not(.find):not(.dock){opacity:.3}
 /* the bar hands over to an open record's buttons in place: search never moves or blinks (the two buttons swap in the same
    frame, on the same signal), the layout button turns into × and back, and the rest ease out and in around them */
 .crate.lifted~.find{opacity:1;visibility:visible;transition:none}
-.find>*{transition:opacity .35s .12s,scale .5s var(--spring) .12s,rotate .5s var(--spring) .12s,visibility 0s .12s}
-.crate.lifted~.find>*{opacity:0;visibility:hidden;scale:.92;pointer-events:none;transition:opacity .15s,scale .3s var(--spring),rotate .3s var(--spring),visibility 0s .15s}
+.find>*{transition:opacity .35s .12s,scale .5s var(--ease) .12s,rotate .5s var(--ease) .12s,visibility 0s .12s}
+.crate.lifted~.find>*{opacity:0;visibility:hidden;scale:.92;pointer-events:none;transition:opacity .15s,scale .3s var(--ease),rotate .3s var(--ease),visibility 0s .15s}
 .crate.lifted~.find>.fb.lb{rotate:90deg;scale:.6}
 html:has(.crate.lifted) .find>.q,html:not(:has(.crate.lifted)) #oq{transition:none}
 html:has(.crate.lifted) .find>.q{scale:1}
 /* the mark stays put over an open record too, above it, where it takes you back to the front */
-html:has(.open:not([hidden])) .find{z-index:11}
+html:has(.open:not([hidden])) .find{z-index:var(--z-raised)}
 html:has(.open:not([hidden])) .find::before{display:none}
 html:has(.open:not([hidden])) .find>.logo{opacity:1;visibility:visible;scale:1;pointer-events:auto;transition:none}
 #oq,.open.in #oq{opacity:0;transition:none}
 html:has(.crate.lifted) #oq{opacity:1}
-#close{scale:.6;rotate:-90deg;transition:opacity .15s,scale .3s var(--spring),rotate .3s var(--spring)}
-html:has(.crate.lifted) .open:not([hidden]) #close{opacity:1;scale:1;rotate:0deg;transition:opacity .3s .08s,scale .5s var(--spring) .08s,rotate .5s var(--spring) .08s}
+#close{scale:.6;rotate:-90deg;transition:opacity .15s,scale .3s var(--ease),rotate .3s var(--ease)}
+html:has(.crate.lifted) .open:not([hidden]) #close{opacity:1;scale:1;rotate:0deg;transition:opacity .3s .08s,scale .5s var(--ease) .08s,rotate .5s var(--ease) .08s}
 .find>.fb.lb{transition-delay:0s}
 html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3)}
 @media(prefers-reduced-motion:reduce){.find>*,.crate.lifted~.find>*,#close,html:has(.crate.lifted) .open:not([hidden]) #close{transition:opacity .15s;scale:none;rotate:none}.crate.lifted~.find>.fb.lb{scale:none;rotate:none}}
 /* the bottom bar: search, sort, order and layout as glass circles. Search opens across the bar; the others fold away and a ×
    takes their place. Up top, only the mark and the filter you're in, centered */
-.dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:6;left:0;right:0;bottom:var(--db);display:flex;justify-content:center;gap:12px;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s,bottom .25s cubic-bezier(.22,1,.36,1)}
+.dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:var(--db);display:flex;justify-content:center;gap:12px;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s,bottom .25s var(--ease)}
 html.phone .dock{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 body:not(.ready) .dock{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
-body.ready .dock{animation:barIn .7s cubic-bezier(.22,1,.36,1) .32s backwards}
-body.seek .crate.lifted~.dock{opacity:1;visibility:visible;z-index:11;transition:none}
+body.ready .dock{animation:barIn .7s var(--ease) .32s backwards}
+body.seek .crate.lifted~.dock{opacity:1;visibility:visible;z-index:var(--z-raised);transition:none}
 html.phone body.searching .page>.dock:not(.find){opacity:1}
 html.phone body.searching .dock{bottom:calc(var(--kb,0px) + 10px + env(safe-area-inset-bottom))}
-.dock .xb{all:unset;pointer-events:auto;position:relative;flex:none;box-sizing:border-box;width:var(--H);height:var(--H);border-radius:999px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);transition:width .5s cubic-bezier(.22,1,.36,1),margin .5s cubic-bezier(.22,1,.36,1),opacity .2s,border-width 0s}
-.dock .xb.gone{width:0;margin:0 -6px;opacity:0;border-width:0;pointer-events:none;overflow:hidden;transition:width .5s cubic-bezier(.22,1,.36,1),margin .5s cubic-bezier(.22,1,.36,1),opacity .15s,border-width 0s .5s}
+.dock .xb{all:unset;pointer-events:auto;position:relative;flex:none;box-sizing:border-box;width:var(--H);height:var(--H);border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);transition:width .5s var(--ease),margin .5s var(--ease),opacity .2s,border-width 0s}
+.dock .xb.gone{width:0;margin:0 -6px;opacity:0;border-width:0;pointer-events:none;overflow:hidden;transition:width .5s var(--ease),margin .5s var(--ease),opacity .15s,border-width 0s .5s}
 .dock .xb:has(>.fb.sb[hidden]){display:none}
 html .dock .xb>.fb,html .dock .xb>.fb.lb,html .dock .xb>.fb.lb.sb.on{all:unset;position:absolute;left:-1px;top:-1px;width:var(--H);height:var(--H);display:grid;place-items:center;border-radius:50%;cursor:pointer;color:var(--t2);transition:opacity .2s,color .2s}
-html .dock .xb>.fb:hover,html .dock .xb>.fb.lb.sb.on{color:#fff}
+html .dock .xb>.fb:hover,html .dock .xb>.fb.lb.sb.on{color:var(--fg)}
 html .dock .xb.o>.fb,html .dock .xb.o>.fb.lb,html .dock .xb.o>.fb.lb.sb.on{opacity:0;pointer-events:none}
 .dock .xb>.fb:focus-visible,.dock .dx:focus-visible{outline:1px solid var(--ring);outline-offset:-4px}
 .dock .xb>.fb svg{width:24px;height:24px;display:block}
@@ -1290,8 +1287,8 @@ html .dock .xb.o>.fb,html .dock .xb.o>.fb.lb,html .dock .xb.o>.fb.lb.sb.on{opaci
 .dock .xb>.vw,html.phone .dock .xb>.vw{all:unset;position:absolute;inset:0;display:flex;align-items:center;justify-content:space-around;padding:0 6px;animation:dIn .3s .12s backwards}
 .dock .xb>.vw[hidden],html.phone .dock .xb>.vw[hidden]{display:none}
 @keyframes dIn{from{opacity:0}}
-.dock .xb>.vw button,html.phone .dock .xb>.vw button{all:unset;cursor:pointer;flex:1;height:calc(var(--H) - 12px);display:grid;place-items:center;border-radius:999px;color:var(--t3);background:none;transition:color .2s}
-.dock .xb>.vw button:hover,.dock .xb>.vw button[aria-pressed=true],html.phone .dock .xb>.vw button[aria-pressed=true]{color:#fff;background:none}
+.dock .xb>.vw button,html.phone .dock .xb>.vw button{all:unset;cursor:pointer;flex:1;height:calc(var(--H) - 12px);display:grid;place-items:center;border-radius:var(--r-pill);color:var(--t3);background:none;transition:color .2s}
+.dock .xb>.vw button:hover,.dock .xb>.vw button[aria-pressed=true],html.phone .dock .xb>.vw button[aria-pressed=true]{color:var(--fg);background:none}
 .dock .xb>.vw button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
 .dock .xb>.vw button>:not(svg):not(.cw){display:none}
 .dock .xb>.vw svg{width:24px;height:24px;display:block}
@@ -1299,22 +1296,22 @@ html .dock .xb.o>.fb,html .dock .xb.o>.fb.lb,html .dock .xb.o>.fb.lb.sb.on{opaci
 /* the sort circle shows the sort it's on; press one and slide along its row to pick, a lit pill following the finger */
 .dock .xb>.fb .cw{width:22px;height:22px;margin:0}
 .dock .xb>.fb,.dock .xb>.vw{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.dock .xb>.fb>*,.dock .xb>.vw button>*{transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.dock .xb>.fb>*,.dock .xb>.vw button>*{transition:transform .35s var(--ease)}
 .dock .xb>.fb:active>*,.dock .xb>.vw button:active>*{transform:scale(.86)}
-.dock .th{position:absolute;top:6px;bottom:6px;left:calc(6px + (100% - 12px) * var(--i,0) / var(--n,3));width:calc((100% - 12px) / var(--n,3));border-radius:999px;background:#ffffff1a;opacity:0;pointer-events:none;transition:left .45s cubic-bezier(.22,1,.36,1),opacity .2s,background .2s}
-.dock .xb.o>.th{opacity:1;transition:left .45s cubic-bezier(.22,1,.36,1),opacity .3s .12s,background .2s}
-.dock .xb.drag>.th{background:#ffffff29;transition:left .18s cubic-bezier(.22,1,.36,1),background .2s}
+.dock .th{position:absolute;top:6px;bottom:6px;left:calc(6px + (100% - 12px) * var(--i,0) / var(--n,3));width:calc((100% - 12px) / var(--n,3));border-radius:var(--r-pill);background:#ffffff1a;opacity:0;pointer-events:none;transition:left .45s var(--ease),opacity .2s,background .2s}
+.dock .xb.o>.th{opacity:1;transition:left .45s var(--ease),opacity .3s .12s,background .2s}
+.dock .xb.drag>.th{background:#ffffff29;transition:left .18s var(--ease),background .2s}
 html .dock .xb.drag>.vw button[aria-pressed=true]{color:var(--t3)}
-html .dock .xb.drag>.vw button.hv{color:#fff}
+html .dock .xb.drag>.vw button.hv{color:var(--fg)}
 @media(prefers-reduced-motion:reduce){.dock .th,.dock .xb>.fb>*,.dock .xb>.vw button>*{transition:none}}
 html .dock .xb>.fb.dr{color:var(--t2)}
-.dock .xb>.fb.dr svg{width:22px;height:22px;transition:rotate .35s cubic-bezier(.22,1,.36,1)}
+.dock .xb>.fb.dr svg{width:22px;height:22px;transition:rotate .35s var(--ease)}
 .dock .xb>.fb.dr[data-d="-1"] svg{rotate:180deg}
 @media(prefers-reduced-motion:reduce){.dock .xb>.fb.dr svg{transition:none}}
-.dock .xb>.q,html.phone .dock .xb>.q{all:unset;position:absolute;inset:-1px;display:flex;align-items:center;border-radius:999px}
+.dock .xb>.q,html.phone .dock .xb>.q{all:unset;position:absolute;inset:-1px;display:flex;align-items:center;border-radius:var(--r-pill)}
 .dock .xb>.q .qi,html.phone .dock .xb>.q .qi{left:calc(var(--H)/2 - 12px);color:var(--t2);pointer-events:none}
 .dock .xb>.q .qi svg{width:24px;height:24px}
-.dock .xb>.q input,html.phone .dock .xb>.q input,.dock .xb>.q.has input{all:unset;box-sizing:border-box;width:100%;height:100%;padding:0 18px 0 calc(var(--H)/2 + 22px);font-size:16px;color:#fff;cursor:text}
+.dock .xb>.q input,html.phone .dock .xb>.q input,.dock .xb>.q.has input{all:unset;box-sizing:border-box;width:100%;height:100%;padding:0 18px 0 calc(var(--H)/2 + 22px);font-size:var(--fs-4);color:var(--fg);cursor:text}
 
 .dock .xb:not(.o)>.q input{color:transparent;cursor:pointer;padding:0}
 .dock .xb:not(.o)>.q input::placeholder{color:transparent}
@@ -1327,8 +1324,8 @@ html .dock .xb>.fb.dr{color:var(--t2)}
 .dock .xb>.q:has(input:focus-visible){outline:none}
 .dock .dx{cursor:pointer;display:grid;place-items:center;color:var(--t1)}
 .dock .dx svg{width:18px;height:18px}
-.dock .xb.dx:hover{color:#fff}
-.dsay{position:fixed;z-index:6;left:0;right:0;bottom:calc(var(--db,18px) + var(--H,54px) + 10px);margin:0;text-align:center;font-size:13px;color:var(--t2);pointer-events:none;opacity:0;transition:opacity .15s}
+.dock .xb.dx:hover{color:var(--fg)}
+.dsay{position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:calc(var(--db,18px) + var(--H,54px) + 10px);margin:0;text-align:center;font-size:var(--fs-2);color:var(--t2);pointer-events:none;opacity:0;transition:opacity .15s}
 .dsay.on{opacity:1;transition:opacity .25s .1s}
 html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 .dsay{--db:calc(env(safe-area-inset-bottom) + 18px)}
@@ -1340,27 +1337,27 @@ html.dpress,html.dpress *{-webkit-user-select:none!important;user-select:none!im
 .dock .xb>.fb *{pointer-events:none}
 .dock .dic{grid-area:1/1;display:grid;place-items:center}
 .dock .xb.dpr>.fb>*{transform:scale(.86)}
-.dst{position:fixed;z-index:8;display:grid;gap:2px;padding:6px;min-width:188px;border-radius:26px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.dst{position:fixed;z-index:8;display:grid;gap:2px;padding:6px;min-width:188px;border-radius:var(--r-panel);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .dst[hidden]{display:none}
-.dst .dhl{position:absolute;left:6px;right:6px;top:0;height:0;border-radius:999px;background:#ffffff24;opacity:0;pointer-events:none;transition:top .32s cubic-bezier(.22,1,.36,1),height .32s cubic-bezier(.22,1,.36,1),opacity .15s}
-.dsi{all:unset;position:relative;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px 10px 12px;border-radius:999px;color:var(--t2);font-size:15px;line-height:1.3;white-space:nowrap;transition:color .15s}
-.dsi.cur,.dsi.on{color:#fff}
-@media(hover:hover){.dsi:hover{color:#fff}}
+.dst .dhl{position:absolute;left:6px;right:6px;top:0;height:0;border-radius:var(--r-in);background:#ffffff24;opacity:0;pointer-events:none;transition:top .32s var(--ease),height .32s var(--ease),opacity .15s}
+.dsi{all:unset;position:relative;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px 10px 12px;border-radius:var(--r-in);color:var(--t2);font-size:var(--fs-3);line-height:1.3;white-space:nowrap;transition:color .15s}
+.dsi.cur,.dsi.on{color:var(--fg)}
+@media(hover:hover){.dsi:hover{color:var(--fg)}}
 .dsi:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
 .dsg{display:grid;place-items:center;width:22px;height:22px;flex:none}
 .dsg svg{width:22px;height:22px;display:block}
 .dsg .cw{width:20px;height:20px;margin:0}
-.dsx{margin-left:auto;padding-left:12px;font-size:12px;color:var(--m)}
-.dsv{position:fixed;inset:0;z-index:5;background:#0008;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .14s,visibility 0s .14s}
-body.stacking .dsv{opacity:1;visibility:visible;transition:opacity .35s cubic-bezier(.22,1,.36,1)}
+.dsx{margin-left:auto;padding-left:12px;font-size:var(--fs-1);color:var(--m)}
+.dsv{position:fixed;inset:0;z-index:var(--z-panel);background:#0008;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .14s,visibility 0s .14s}
+body.stacking .dsv{opacity:1;visibility:visible;transition:opacity .35s var(--ease)}
 body.stacking .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* an open record keeps the bar: search stays where it is, and × takes the place of sort, order and layout. Nothing at the top but the mark */
-html:has(.open:not([hidden])) .dock{z-index:11}
+html:has(.open:not([hidden])) .dock{z-index:var(--z-raised)}
 #oq,#close,html:has(.crate.lifted) #oq,html:has(.crate.lifted) .open:not([hidden]) #close{display:none}
 .dock .px svg{width:20px;height:20px}
 /* the record's link sits in line with Play */
 .play:has(#shareR){display:flex;align-items:center;gap:8px}
-#oinfo #shareR{position:static;opacity:1;flex:none;width:44px;height:44px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line);transition:transform .3s var(--spring),background-color .2s}
+#oinfo #shareR{position:static;opacity:1;flex:none;width:44px;height:44px;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line);transition:transform .3s var(--ease),background-color .2s}
 html.phone #oinfo #shareR{width:var(--pb,52px);height:var(--pb,52px)}
 #oinfo #shareR:hover{background:var(--soft)}
 /* on a laptop the link is a quiet mark at the end of the year and label line */
@@ -1373,7 +1370,7 @@ html:has(.open:not([hidden])) body .dock::before{height:calc(env(safe-area-inset
 /* where the caret waits tucked behind Play, the link sits right after Play and steps aside as the caret slides out */
 @media(hover:hover){
   html:not(.phone) .play:has(#shareR) .pair{margin-right:-66px;transition:margin .12s}
-  html:not(.phone) .play:has(#shareR) .pair:is(:hover,:focus-within),html:not(.phone) .play:has(#shareR) .pair:has(.sw[aria-expanded=true]){margin-right:0;transition:margin .55s var(--flip)}
+  html:not(.phone) .play:has(#shareR) .pair:is(:hover,:focus-within),html:not(.phone) .play:has(#shareR) .pair:has(.sw[aria-expanded=true]){margin-right:0;transition:margin .55s var(--ease)}
 }
 @media(prefers-reduced-motion:reduce){.dst .dhl,.dsv,body.stacking .dsv{transition:opacity .15s}}
 .kd,body.filtering .kd,body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 34px)}
@@ -3687,7 +3684,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
 </script>
 <style>
 /* sharing: the crate from About, a record from beside its close. Each button copies the link and turns into a check */
-.shb{all:unset;pointer-events:auto;cursor:pointer;flex:none;order:1;box-sizing:border-box;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s var(--spring),background-color .2s}
+.shb{all:unset;pointer-events:auto;cursor:pointer;flex:none;order:1;box-sizing:border-box;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--fg);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s var(--spring),background-color .2s}
 .shb svg{width:20px;height:20px;display:block}
 .shb:hover{background:var(--soft3)}
 .shb:active{transform:scale(.96)}
@@ -3699,7 +3696,7 @@ html.pulldown .open.in #shareR{opacity:calc(1 - var(--pull,0)*3);transition:none
 .ab-sh{margin-top:24px;height:40px;padding:0 18px 0 14px;font-size:15px;gap:8px}
 .ab-sh svg{width:18px;height:18px;flex:none}
 html.phone .ab-sh{margin-top:20px}
-[data-copied] svg{animation:shOk .35s cubic-bezier(.22,1,.36,1)}
+[data-copied] svg{animation:shOk .35s var(--ease)}
 @keyframes shOk{from{opacity:0;transform:scale(.8)}}
 @media(prefers-reduced-motion:reduce){[data-copied] svg{animation:none}}
 </style>
