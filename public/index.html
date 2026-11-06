@@ -47,9 +47,9 @@ body::after{content:"";position:fixed;inset:0;z-index:2147483000;pointer-events:
 .icon:hover{color:var(--fg)}
 .icon:active{transform:scale(.96);transition-duration:.08s}
 .icon:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.btn{all:unset;cursor:pointer;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px;font-size:14px;transition:transform .5s var(--flip),border-color .2s,opacity .2s}
-.btn:hover{border-color:var(--m)}
-.btn:active{transform:scale(.99);transition-duration:.08s}
+.btn{all:unset;cursor:pointer;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px;transition:transform .5s var(--flip),border-color .2s,opacity .2s}
+
+.btn:active{transition-duration:.08s}
 .btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .btn[aria-pressed=true]{border-color:var(--fg)}
 .btn:disabled{opacity:.35;cursor:default}
@@ -80,12 +80,12 @@ html.phone.deck .tail{display:none}
 .rc.gone{display:none} /* out of sight: no layer at all */
 /* a flipped record sits in the shadow of the one it fell onto, darkest where they touch */
 .rc.fell .bk::after{background:linear-gradient(0deg,#00000070,#0000 22%),linear-gradient(180deg,#0000 70%,#0000002a),var(--shade,transparent)}
-.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:2px;container-type:inline-size}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;container-type:inline-size}
 .face::after{content:'';position:absolute;inset:0;background:var(--shade,transparent);pointer-events:none;box-shadow:inset 1px 1px 0 #ffffff30,inset -1px -1px 0 #0000002e}
 .bk{transform:rotateY(180deg)}
 /* every jacket has thickness: faces pushed apart, cardboard edges between them */
 .rc{--T:max(2px,calc(var(--S)*.005));--W:var(--S)}
-.rc .face,.sleeve .face{border-radius:1px}
+
 .rc .fr,.sleeve .fr{transform:translateZ(calc(var(--T)/2))}
 .rc .bk,.sleeve .bk{transform:rotateY(180deg) translateZ(calc(var(--T)/2))}
 .edge{position:absolute;top:0;left:calc(50% - var(--T)/2);width:var(--T);height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
@@ -105,7 +105,7 @@ html.phone.deck .tail{display:none}
 .edge.ctr{transform:translate3d(calc(-1*var(--o)),var(--o),0) rotateZ(-45deg) rotateY(90deg);--dk:#00000018}
 .edge.cbl{transform:translate3d(var(--o),calc(-1*var(--o)),0) rotateZ(-45deg) rotateY(-90deg);--dk:#00000030}
 .edge.cbr{transform:translate3d(calc(-1*var(--o)),calc(-1*var(--o)),0) rotateZ(45deg) rotateY(90deg);--dk:#00000028}
-.edge.t,.edge.b{left:0;top:calc(50% - var(--T)/2);width:100%;height:var(--T)}
+.edge.t,.edge.b{top:calc(50% - var(--T)/2);height:var(--T)}
 .edge.t{transform:rotateX(90deg) translateZ(calc(var(--W)/2));--dk:#00000014}
 .edge.t::after{background:var(--grain),linear-gradient(180deg,#00000030,#ffffff4a 45%,#ffffff1a 60%,#00000038),linear-gradient(var(--dk),var(--dk));background-size:120px,auto,auto}
 .edge.b{transform:rotateX(-90deg) translateZ(calc(var(--W)/2));--dk:#00000080}
@@ -155,7 +155,7 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
 .open::-webkit-scrollbar{display:none}
 .open[hidden]{display:none}
 .open:focus{outline:none}
-#close{position:fixed;top:24px;left:24px;z-index:3;opacity:0;transition:opacity .3s,transform .5s var(--flip)}
+#close{position:fixed;z-index:3;opacity:0;}
 .open.in #close{opacity:1}
 .o-page{min-height:100%;display:grid;place-items:center;padding:80px 24px}
 /* the record and its details; on a laptop the pair is centered (below), on narrower screens the details go under the record */
@@ -190,7 +190,7 @@ html.phone .fin-mk{width:56px;height:56px}html.phone .fin-mk svg{width:44px;heig
 .sleeve.fade>*{opacity:0;transition:opacity .12s} /* the sleeve's parts fade, never the sleeve: opacity on it would flatten it */
 .sleeve{position:relative;width:100%;height:100%;transform-style:preserve-3d}
 .sleeve{--T:max(3px,calc(var(--O)*.007));--W:var(--O)}
-.sleeve .face{border-radius:1px}
+
 /* one shadow behind each side, each seen only from its own side, so it turns with the sleeve and never shows in front */
 .sleeve .sh{position:absolute;inset:3% 3% 0;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 1px 2px #0002,0 6px 12px -4px #0002,0 24px 40px -14px #0005,0 60px 100px -36px #0008;transform:translateZ(calc(var(--T)/-2 - 1px));opacity:0;transition:opacity .6s}
 .sleeve .sh.b{transform:rotateY(180deg) translateZ(calc(var(--T)/-2 - 1px))}
@@ -223,28 +223,28 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 /* the details start tucked under the record and slide out to the right */
 .o-info{position:absolute;left:calc(100% + 48px);top:50%;translate:0 -50%;z-index:1;flex:none;width:var(--IW);opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .2s}
 .open.in .o-info{opacity:1;transform:none;transition:transform .85s var(--flip) .1s,opacity .4s .1s}
-.open.in.swapping .o-info{opacity:0;transform:translateX(-60%) scale(.96);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .1s}
+
 @media(max-width:1040px){
   .open{--O:var(--R)}
   .o-grid{flex-direction:column;gap:32px}
   .o-info{position:relative;left:auto;top:auto;translate:none;width:var(--O);transform:translateY(-50%) scale(.96)}
-  .open.in.swapping .o-info{transform:translateY(-50%) scale(.96)}
+  
 }
-.o-info h2{font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
-.o-info .by{font-size:19px;color:var(--m);margin-top:4px}
-.facts{display:grid;grid-template-columns:96px 1fr;gap:6px 16px;margin-top:22px;font:400 14px/1.5 var(--mono)}
+.o-info h2{font-weight:500;text-wrap:balance}
+.o-info .by{color:var(--m);margin-top:4px}
+.facts{grid-template-columns:96px 1fr;}
 .facts dt{color:var(--m)}
 .facts dd{margin:0}
 .facts div,html.phone .facts div{display:contents}
 .play{position:relative;margin-top:28px}
-.play .btn{height:40px;padding:0 20px 0 16px;font-size:15px;gap:8px}
+
 .play .btn svg{flex:none}
 .play .mk{flex:none;display:block}
 /* after a pick: Play carries the service's logo, and a small round button beside it switches */
-.pair{display:inline-flex;align-items:center;gap:6px}
+.pair{display:inline-flex;align-items:center;}
 .pm-h,.o-count,.dhint{display:none}
-.sw{all:unset;cursor:pointer;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--m);transition:transform .5s var(--flip),background-color .2s,color .2s}
-.sw:hover,.sw[aria-expanded=true]{background:var(--soft);color:var(--fg)}
+.sw{all:unset;cursor:pointer;display:grid;place-items:center;border-radius:50%;transition:transform .5s var(--flip),background-color .2s,color .2s}
+.sw:hover,.sw[aria-expanded=true]{color:var(--fg)}
 .sw:active{transform:scale(.96);transition-duration:.08s}
 .sw:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .sw svg{transition:transform .45s var(--flip)}
@@ -263,14 +263,13 @@ html[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 24px 40px -14px #
 html.phone .sw .tip{display:none}
 @media(prefers-reduced-motion:reduce){.sw .tip{translate:-50% 0}}
 /* Play opens a short list of services; it arrives on a spring and leaves on a quick fade */
-.play-m{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;display:grid;padding:6px;border-radius:14px;background:var(--bg);border:1px solid var(--line);
-  box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
+.play-m{position:absolute;left:0;top:calc(100% + 8px);z-index:3;min-width:200px;display:grid;border:1px solid var(--line);transform-origin:20px 0;opacity:0;visibility:hidden;transform:translateY(-4px) scale(.97);
   transition:opacity .12s,visibility 0s .12s,transform 0s .12s}
 .play.up .play-m{top:auto;bottom:calc(100% + 8px);transform-origin:20px 100%;transform:translateY(4px) scale(.97)}
 .o-info:has(.play.on){z-index:3}
 .play.on .play-m{opacity:1;visibility:visible;transform:none;transition:opacity .18s,transform .45s var(--flip)}
-.play-m a{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:14px;transition:transform .5s var(--flip),background-color .15s}
-.play-m a:hover{background:var(--soft)}
+.play-m a{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;transition:transform .5s var(--flip),background-color .15s}
+
 .play-m a[aria-current]::after{content:'✓';margin-left:auto;padding-left:16px;color:var(--m)}
 .play-m a:active{transform:scale(.99);transition-duration:.08s}
 .play-m a:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
@@ -279,13 +278,13 @@ html[data-theme=dark] .play-m{box-shadow:var(--float)}
 @media(max-width:700px){
   .page{padding:24px 16px 80px}
   :root{--R:min(78vw,50vh);--R:min(78vw,50svh)}
-  .o-info h2{font-size:26px}
+  
 }
 /* Phones: the crate becomes a pile of records facing you; an open record stacks its details underneath, Play within reach of a thumb */
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 200px));-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-html.phone .page{padding:0}
+
 /* eye level with the bottom of the pile, so a record tipped all the way toward you is edge on and gone, not lying there */
-html.phone.deck .crate{perspective:1500px;perspective-origin:50% calc(50% + 12px + var(--S)/2);cursor:default;-webkit-touch-callout:none} /* eye level at the pile's bottom edge; eye() sets it again in pixels */
+html.phone.deck .crate{cursor:default;-webkit-touch-callout:none} /* eye level at the pile's bottom edge; eye() sets it again in pixels */
 html.phone.deck .stack{transform:none;bottom:calc(50% - 12px - var(--S)/2)} /* the pile, with the records peeking out above, sits dead center */
 html.phone.deck .rc{transform-origin:50% 50%}
 html.phone.deck .floor{display:none}
@@ -297,21 +296,21 @@ html.phone.deck .dhint{display:block;position:absolute;left:0;right:0;top:calc(5
 .crate.swiped .dhint,.crate.lifted .dhint{opacity:0}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - 330px))}
 html.phone .o-page{display:flex;padding:calc(env(safe-area-inset-top) + 64px) 24px calc(env(safe-area-inset-bottom) + 20px)}
-html.phone .o-grid{flex:1;flex-direction:column;justify-content:flex-start;gap:22px}
+html.phone .o-grid{flex:1;flex-direction:column;}
 html.phone .stage{touch-action:none}
 html.phone .sleeve .sh{box-shadow:0 1px 2px #0002,0 8px 16px -6px #0003,0 24px 40px -18px #0005}
 html.phone[data-theme=dark] .sleeve .sh{box-shadow:0 1px 2px #0006,0 12px 24px -8px #0009,0 28px 44px -18px #000c}
 /* the details slide down from under the record */
-html.phone .o-info{position:relative;left:auto;top:auto;translate:none;flex:1;display:flex;flex-direction:column;width:var(--O);transform:translateY(-56px) scale(.98)}
-html.phone .open.in .o-info{transform:none}
-html.phone .open.in.swapping .o-info{transform:translateY(-32px) scale(.98);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .12s}
-html.phone .o-info h2{font-size:25px}
-html.phone .o-info .by{font-size:17px;margin-top:2px}
-html.phone .facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:16px;font-size:13px}
+html.phone .o-info{position:relative;left:auto;top:auto;translate:none;display:flex;flex-direction:column;width:var(--O);}
+
+
+
+
+html.phone .facts{flex-wrap:wrap;font-size:13px}
 html.phone .facts div{display:grid;gap:1px;min-width:0}
-html.phone #close{top:calc(env(safe-area-inset-top) + 12px);left:calc(env(safe-area-inset-left) + 12px);width:40px;height:40px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px}
+
 html.phone #close .cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
-html.phone .o-count{display:block;position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 12px);right:calc(env(safe-area-inset-right) + 24px);font:400 13px/40px var(--mono);color:var(--m);opacity:0;transition:opacity .3s}
+html.phone .o-count{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 12px);right:calc(env(safe-area-inset-right) + 24px);font:400 13px/40px var(--mono);color:var(--m);opacity:0;transition:opacity .3s}
 html.phone .open.in .o-count{opacity:1}
 /* the neighbors wait as slivers at the edges, level with the record, and come in with your finger */
 html.phone .peek{top:var(--py,50%);transform:translate(calc(var(--x) + var(--dx,0px)),-50%);box-shadow:none}
@@ -326,15 +325,15 @@ html.pulldown .crate.lifted .rc:not(.cur) .face{opacity:1;transition:none}
 .veil{display:none}
 html.pulldown .veil{display:block;position:absolute;inset:0;background:var(--bg);pointer-events:none;will-change:opacity}
 html.phone .play{margin-top:0}
-html.phone .play>.btn,html.phone .pair{width:100%}
-html.phone .play .btn{box-sizing:border-box;height:52px;justify-content:center;font-size:16px;padding:0 20px}
+
+html.phone .play .btn{box-sizing:border-box;justify-content:center;}
 html.phone .pair{display:flex;gap:8px}
-html.phone .pair .btn{flex:1}
-html.phone .sw{box-sizing:border-box;width:52px;height:52px;flex:none;border:1px solid var(--line);color:var(--fg)}
+
+html.phone .sw{box-sizing:border-box;border:1px solid var(--line);color:var(--fg)}
 /* the services come up as a sheet from the bottom; pull it down or tap outside to put it away */
 html.phone .play::before{content:'';position:fixed;inset:0;z-index:2;background:#0000004d;opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s .2s}
 html.phone .play.on::before{opacity:1;visibility:visible;transition:opacity .3s}
-html.phone .play-m{position:fixed;top:auto;left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));max-width:440px;margin:0 auto;min-width:0;padding:6px 8px 8px;border:0;border-radius:24px;background:var(--sheet);box-shadow:0 -8px 40px -12px #0000004d;opacity:1;touch-action:none;
+html.phone .play-m{position:fixed;top:auto;left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));max-width:440px;margin:0 auto;min-width:0;padding:6px 8px 8px;border:0;box-shadow:0 -8px 40px -12px #0000004d;opacity:1;touch-action:none;
   transform:translateY(calc(100% + 16px));transition:transform .22s cubic-bezier(.4,0,1,1),visibility 0s .22s}
 html.phone .play.on .play-m{visibility:visible;transform:none;transition:transform .5s var(--flip)}
 html.phone .play-m::before{content:'';justify-self:center;width:36px;height:5px;border-radius:3px;background:var(--line);margin:2px 0 4px}
@@ -346,59 +345,59 @@ html.phone .play-m a:active{background:var(--soft);transform:none}
 /* short phones: tighter spacing so the record stays big and Play stays on screen */
 @media(max-height:620px){
   html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - 290px))}
-  html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + 58px);padding-bottom:calc(env(safe-area-inset-bottom) + 14px)}
-  html.phone .o-grid{gap:16px}
-  html.phone .o-info h2{font-size:22px}
-  html.phone .o-info .by{font-size:16px}
-  html.phone .facts{margin-top:12px}
-  html.phone .play{padding-top:16px}
+  
+  
+  
+  
+  
+  
 }
 /* phones on their side: the pile shrinks to fit, the details sit beside the record again */
 @media(max-height:500px){
   html.phone{--S:calc(100svh - 90px)}
-  html.phone .dhint{display:none}
+  
   html.phone .open{--O:calc(100svh - 72px)}
   html.phone .o-page{padding:36px calc(env(safe-area-inset-right) + 32px) 36px calc(env(safe-area-inset-left) + 32px)}
-  html.phone .o-grid{flex-direction:row;align-items:center;justify-content:center;gap:40px}
-  html.phone .o-info{flex:none;width:min(320px,42vw);transform:translateX(-40%) scale(.98)}
-  html.phone .open.in.swapping .o-info{transform:translateX(-24px) scale(.98)}
-  html.phone .play{margin-top:24px;padding-top:0}
+  html.phone .o-grid{flex-direction:row;align-items:center;}
+  html.phone .o-info{width:min(320px,42vw);}
+  
+  html.phone .play{margin-top:24px;}
 }
 @media(prefers-reduced-motion:reduce){html.phone .play-m,html.phone .play.on .play-m,html.phone .open.in.swapping .o-info{transition:none}}
 @media(prefers-reduced-motion:reduce){.peek,.open.in .peek.on,.open.in .peek.on:hover,.rc,.rc .fr,.lift.moving,.stage.moving,.o-info,.open.in .o-info,.play-m,.play.on .play-m,.sw svg{transition:none}}
 /* finding: a search at the top right, the filter you're in at the top left, every letter down the right edge.
    They come in after the crate and step aside while a record is out. */
-.find{position:fixed;z-index:4;top:20px;left:24px;right:24px;display:flex;align-items:flex-start;gap:12px;pointer-events:none}
+.find{position:fixed;z-index:4;display:flex;pointer-events:none}
 .find>*{pointer-events:auto}
 .find,.az{transition:opacity .4s .25s,visibility 0s .25s}
 body:not(.ready) .find,body:not(.ready) .az,.crate.lifted~.find,.crate.lifted~.az{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
-.chip{all:unset;pointer-events:auto;cursor:pointer;flex:0 1 auto;min-width:0;height:34px;padding:0 9px 0 14px;border-radius:999px;border:1px solid var(--line);display:inline-flex;align-items:center;gap:8px;font-size:14px;transition:transform .5s var(--flip),border-color .2s}
-.chip[hidden]{display:none}
-.chip:hover{border-color:var(--m)}
-.chip:active{transform:scale(.99);transition-duration:.08s}
+.chip{all:unset;pointer-events:auto;border-radius:999px;align-items:center;}
+
+
+.chip:active{transition-duration:.08s}
 .chip:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.chip .k,.chip .n{flex:none;font:400 12px/1 var(--mono);color:var(--m)}
+.chip .k,.chip .n{flex:none;}
 .chip b{font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chip svg{flex:none;color:var(--m)}
-.q{position:relative;flex:none;margin-left:auto;display:flex;align-items:center;height:34px;border:1px solid var(--line);border-radius:999px;background:var(--bg);transition:border-color .2s}
-.q:hover,.q:focus-within{border-color:var(--m)}
+.chip svg{flex:none;}
+.q{flex:none;margin-left:auto;display:flex;align-items:center;border:1px solid var(--line);transition:border-color .2s}
+
 .q:has(input:focus-visible){outline:1px solid var(--ring);outline-offset:2px}
-.qi{position:absolute;left:11px;top:50%;translate:0 -50%;display:grid;color:var(--m);cursor:text}
-.q input{all:unset;box-sizing:border-box;width:140px;height:100%;padding:0 12px 0 34px;font-size:14px;transition:width .5s var(--flip)}
-.q input::placeholder{color:var(--m);opacity:1}
+.qi{position:absolute;top:50%;translate:0 -50%;display:grid;cursor:text}
+.q input{all:unset;box-sizing:border-box;height:100%;transition:width .5s var(--flip)}
+.q input::placeholder{opacity:1}
 .q input::-webkit-search-cancel-button{display:none}
-.q:focus-within input,.q.has input{width:260px}
+
 .q.has input{padding-right:62px}
-.qn{position:absolute;right:36px;font:400 12px/1 var(--mono);color:var(--m);pointer-events:none}
-.qx{all:unset;cursor:pointer;position:absolute;right:5px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;color:var(--m);transition:transform .5s var(--flip),background-color .15s,color .15s}
+.qn{position:absolute;font:400 12px/1 var(--mono);color:var(--m);pointer-events:none}
+.qx{all:unset;cursor:pointer;position:absolute;display:grid;place-items:center;border-radius:50%;transition:transform .5s var(--flip),background-color .15s,color .15s}
 .qx[hidden]{display:none}
-.qx:hover{color:var(--fg);background:var(--soft)}
+
 .qx:active{transform:scale(.96);transition-duration:.08s}
 .qx:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.qnone{position:absolute;right:0;top:calc(100% + 8px);min-width:200px;padding:11px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--line);box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;font-size:14px;color:var(--m)}
+.qnone{min-width:200px;border:1px solid var(--line);box-shadow:0 1px 2px #0001,0 12px 32px -12px #0003;color:var(--m)}
 html[data-theme=dark] .qnone{box-shadow:var(--float)}
-.az{position:fixed;z-index:4;right:14px;top:72px;bottom:24px;width:28px;display:flex;flex-direction:column;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
-.az button{all:unset;cursor:pointer;position:relative;flex:0 1 24px;min-height:0;display:grid;place-items:center;font:400 12px/1 var(--mono);color:var(--m);border-radius:6px;transition:transform .5s var(--flip),color .15s}
+.az{position:fixed;z-index:4;right:14px;width:28px;flex-direction:column;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.az button{all:unset;cursor:pointer;position:relative;flex:0 1 24px;min-height:0;display:grid;place-items:center;color:var(--m);border-radius:6px;transition:transform .5s var(--flip),color .15s}
 .az button:hover{color:var(--fg)}
 .az button:active{transform:scale(.96);transition-duration:.08s}
 .az button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
@@ -406,7 +405,7 @@ html[data-theme=dark] .qnone{box-shadow:var(--float)}
 .az button[aria-current=true]{color:var(--fg);font-weight:600}
 .az button[aria-current=true]::before{content:'';position:absolute;right:calc(100% - 2px);top:50%;width:6px;height:1px;background:currentColor}
 /* sliding a finger along the letters shows the one under it, big, beside it */
-.az::after{content:attr(data-l);position:absolute;right:calc(100% + 18px);top:var(--y,50%);width:56px;height:56px;margin-top:-28px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--bg);font:500 24px/1 var(--mono);opacity:0;scale:.8;transition:opacity .12s,scale 0s .12s;pointer-events:none}
+.az::after{content:attr(data-l);position:absolute;right:calc(100% + 18px);top:var(--y,50%);width:56px;height:56px;margin-top:-28px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--bg);opacity:0;scale:.8;transition:opacity .12s,scale 0s .12s;pointer-events:none}
 .az.scrub::after{opacity:1;scale:1;transition:opacity .15s,scale .4s var(--flip)}
 /* a detail shared with other records is a button: it fills the crate with them */
 .meta{all:unset;cursor:pointer;display:inline-block;text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em;transition:transform .5s var(--flip),text-decoration-color .15s}
@@ -418,11 +417,11 @@ html[data-theme=dark] .qnone{box-shadow:var(--float)}
 .ed[hidden]{display:none}
 .ed[aria-pressed=true]{border-color:var(--fg)}
 /* the search's panel: what's not in the crate; for Casey, editing, what's out of it and what MusicBrainz has to add */
-.qnone{width:min(380px,calc(100vw - 48px));max-height:min(62vh,520px);overflow:auto;overscroll-behavior:contain;padding:6px}
-.qnone .qh{padding:6px 8px 8px;font:400 12px/1.4 var(--mono)}
+.qnone{overflow:auto;overscroll-behavior:contain;}
+
 .qnone ul{list-style:none;padding:0;margin:0 0 4px}
 .hit{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:9px;color:var(--fg)}
-.hit img,.hit .ph{flex:none;width:40px;height:40px;border-radius:2px;object-fit:cover;background:var(--soft)}
+.hit img,.hit .ph{flex:none;width:40px;height:40px;object-fit:cover;background:var(--soft)}
 .hit span{flex:1;min-width:0;display:grid;line-height:1.3}
 .hit b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hit i{font-style:normal;font-size:13px;color:var(--m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -459,22 +458,22 @@ html.phone .own{margin-top:16px;padding-top:14px}
 .unlock .row{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
 @media(prefers-reduced-motion:reduce){.toast,.toast.on{transition:opacity .2s;translate:-50% 0}}
 html.phone .ed{height:40px;margin-right:48px}
-html.phone .qnone{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 60px);width:auto;max-height:calc(100svh - 160px)}
-html.phone .find{top:calc(env(safe-area-inset-top) + 12px);left:calc(env(safe-area-inset-left) + 12px);right:calc(env(safe-area-inset-right) + 12px)}
-html.phone .chip{height:40px;max-width:calc(100% - 52px)}
+
+
+
 /* on a phone the search waits as a round button and opens across the top */
-html.phone .q{position:absolute;right:0;top:0;height:40px}
-html.phone .qi{left:12px}
-html.phone .q input{width:40px;padding:0 0 0 38px;font-size:16px;transition:none}
-html.phone .q:focus-within input,html.phone .q.has input{width:calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));padding-right:62px}
-html.phone .q:not(:focus-within):not(.has) input::placeholder{color:transparent}
-html.phone .az{right:calc(env(safe-area-inset-right) + 1px);top:calc(env(safe-area-inset-top) + 64px);bottom:calc(env(safe-area-inset-bottom) + 24px);width:22px}
+html.phone .q{right:0;top:0;}
+
+html.phone .q input{transition:none}
+html.phone .q:focus-within input,html.phone .q.has input{padding-right:62px}
+
+html.phone .az{right:calc(env(safe-area-inset-right) + 1px);width:22px}
 html.phone .az button{flex-basis:22px;font-size:11px}
 html.phone .az button[aria-current=true]::before{display:none}
 @media(prefers-reduced-motion:reduce){.q input,.az.scrub::after{transition:none}}
 /* loading: a quiet bar, then the whole crate rises in at once */
-.loading{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;font:400 13px/1 var(--mono);color:var(--m);transition:opacity .7s ease-out;pointer-events:none}
-.loading .bar{width:120px;height:1px;background:var(--line);overflow:hidden}
+.loading{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;color:var(--m);transition:opacity .7s ease-out;pointer-events:none}
+.loading .bar{width:120px;background:var(--line);overflow:hidden}
 .loading .bar i{display:block;height:100%;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;transition:transform .3s}
 .ready .loading{opacity:0}
 .crate{opacity:0;transform:translateY(24px)}
@@ -496,7 +495,7 @@ html{color-scheme:dark}
 .btn{height:44px;padding:0 20px;font-size:15px;font-weight:500;border-color:var(--line)}
 .btn:hover{background:var(--soft);border-color:var(--line)}
 .btn:active,.chip:active,.vw button:active{transform:scale(.97)}
-.play .btn,html.phone .play .btn{height:54px;padding:0 28px 0 24px;font-size:17px;background:#fff;color:#111;border-color:#fff;gap:10px}
+.play .btn,html.phone .play .btn{background:#fff;color:#111;border-color:#fff;}
 .play .btn:hover{background:#e7e7e8}
 .play .btn .mk path{fill:currentColor}
 .sw{width:54px;height:54px;border:1px solid var(--line);color:var(--fg)}
@@ -507,13 +506,13 @@ html{color-scheme:dark}
 .play-m a:hover{background:var(--soft2)}
 html.phone .play-m{border-radius:32px 32px 28px 28px;background:var(--sheet)}
 /* the way back is a circle */
-#close,html.phone #close{width:52px;height:52px;padding:0;justify-content:center;font-size:20px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
+#close,html.phone #close{padding:0;justify-content:center;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
 #close .cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
 /* a record's details: big white title, then the year and label as one quiet line */
 .o-info h2{font-size:34px;letter-spacing:-.02em;line-height:1.08}
 .o-info .by{font-size:20px}
 .o-info .by .meta{text-decoration:none}.o-info .by .meta:hover{color:var(--fg)}
-.facts,html.phone .facts{display:flex;margin-top:10px;font:400 15px/24px var(--sans);gap:0;color:var(--t1);white-space:nowrap;min-width:0}
+.facts,html.phone .facts{display:flex;margin-top:10px;font:400 15px/24px var(--sans);gap:0;white-space:nowrap;min-width:0}
 /* year, label: one gray line, a comma between; a long label trails off */
 .facts,html.phone .facts{color:var(--m)}
 .facts span{flex:none}
@@ -551,7 +550,7 @@ html.phone .dets dl{grid-template-columns:84px minmax(0,1fr);font-size:13.5px}
 .o-info .ab a{display:inline-block;margin-top:6px;font-size:14px;color:var(--m);text-decoration:underline 1px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:.22em}
 .o-info .ab a:hover{color:var(--fg)}
 .thumbs{display:flex;gap:10px}
-.nb{all:unset;cursor:pointer;flex:0 0 76px;width:76px;height:76px;border-radius:1px;overflow:hidden;box-shadow:0 6px 14px -8px #000c}
+.nb{all:unset;cursor:pointer;flex:0 0 76px;width:76px;height:76px;overflow:hidden;box-shadow:0 6px 14px -8px #000c}
 .nb img,.nb i{display:block;width:100%;height:100%;object-fit:cover}
 .nb:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .nb:active{transform:scale(.97)}
@@ -576,8 +575,8 @@ html.phone .nb{flex-basis:72px;width:72px;height:72px}
    so a long title never pushes Play off the screen and the record stays the same size from one to the next. Play sits
    right under the facts; a shorter title just leaves more air below. The artist and the facts each keep to one line. */
 /* --bot keeps Play clear of the bottom bar: the bar's 14px off the bottom, its 58px circles, and a gap */
-html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--pb:54px;--bot:calc(14px + 58px + 14px)}
-@media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--pb:50px;--bot:calc(14px + 58px + 10px)}}
+html.phone{--tl:26px;--top:64px;--gap:22px;--fm:18px;--pp:20px;--bot:calc(14px + 58px + 14px)}
+@media(max-height:700px){html.phone{--tl:22px;--top:58px;--gap:14px;--fm:12px;--pp:14px;--bot:calc(14px + 58px + 10px)}}
 html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - var(--top) - var(--gap) - var(--info) - var(--bot) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}
 @media(max-height:500px){html.phone .open{--O:calc(100svh - 72px)}}
 html.phone .o-page{padding-top:calc(env(safe-area-inset-top) + var(--top));padding-bottom:calc(env(safe-area-inset-bottom) + var(--bot))}
@@ -590,11 +589,11 @@ html.phone .o-info h2{font-size:var(--tl);line-height:1.12;display:-webkit-box;-
 html.phone .o-info .by{font-size:17px;line-height:24px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.phone .facts{margin-top:calc(var(--fm)*.5)}
 html.phone .play{padding-top:var(--pp)}
-html.phone .play .btn{height:var(--pb)}
+
 html.phone .sw{width:var(--pb);height:var(--pb);flex:none}
 @media(max-height:500px){html.phone .o-info h2{-webkit-line-clamp:4;line-clamp:4}html.phone .play{padding-top:0}}
 /* finding: the search floats at the bottom, the filter you're in sits under the views */
-.find,html.phone .find{top:auto;bottom:calc(18px + env(safe-area-inset-bottom));left:0;right:0;justify-content:center;align-items:center;padding:0 16px}
+.find,html.phone .find{left:0;right:0;}
 .find .sp{display:none}
 .q,html.phone .q{position:relative;margin:0;height:58px;width:min(440px,100%);border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);border-color:var(--line)}
 .q:hover,.q:focus-within{border-color:rgba(255,255,255,.22)}
@@ -606,11 +605,11 @@ html.phone .q:not(:focus-within):not(.has) input::placeholder{color:var(--m)}
 .qx{right:12px;width:30px;height:30px;background:var(--t4);color:var(--sheet)}
 .qx:hover{background:#79797e;color:#111}
 .qn{right:50px}
-.qnone,html.phone .qnone{position:absolute;top:auto;bottom:calc(100% + 10px);left:50%;right:auto;translate:-50% 0;width:min(440px,calc(100vw - 32px));border-radius:24px;background:var(--sheet);max-height:min(56vh,520px)}
-.chip,html.phone .chip{position:fixed;top:calc(env(safe-area-inset-top) + 74px);left:50%;translate:-50% 0;height:40px;max-width:calc(100vw - 32px);padding:0 10px 0 18px;font-size:15px;background:#fff;color:#111;border-color:#fff}
+.qnone,html.phone .qnone{position:absolute;background:var(--sheet);max-height:min(56vh,520px)}
+.chip,html.phone .chip{border-color:#fff}
 .chip .k,.chip .n,.chip svg{color:var(--t3);font:400 13px/1 var(--sans)}
-.chip:hover{border-color:#fff;background:#e7e7e8}
-.ed{position:fixed;top:calc(env(safe-area-inset-top) + 18px);right:16px}
+
+
 /* letters: smaller and quieter, out of the views' way */
 .az,html.phone .az{top:calc(env(safe-area-inset-top) + 120px);bottom:calc(env(safe-area-inset-bottom) + 96px)}
 .az button{font:400 11px/1 var(--sans)}
@@ -647,7 +646,7 @@ body.walling .find .chip{display:none}
 @media (min-width:700px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:15px}.gms .yr{font-size:13px}.gms i{width:22px;height:22px}}
 /* on a phone the group labels start where the logo does, and the covers end where the buttons at the top do */
 @media (max-width:699px){.tiles{margin:0}} /* on a phone the wall is centered with even margins, and the turns of the sort go unmarked */
-.tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
+.tile{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:1;overflow:hidden;background:var(--sheet);display:block;transition:transform .5s var(--spring)}
 .tile:active{transform:scale(.97)}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
@@ -677,12 +676,12 @@ body.walling .find .chip{display:none}
 @media (max-width:699px){.wall,.tbl{scrollbar-width:none}.wall::-webkit-scrollbar,.tbl::-webkit-scrollbar{display:none;width:0;height:0}} /* on a phone the grid and the table scroll without a bar */
 /* the dial, in place of the A–Z rail: open on every record; slide down on it for just the letters, up for records again */
 .az{display:none}
-.kd{position:fixed;z-index:3;left:50%;width:min(520px,100vw);margin-left:calc(min(520px,100vw)/-2);bottom:calc(env(safe-area-inset-bottom) + 82px);height:calc(var(--kh,58px) + 40px);pointer-events:none;transition:opacity .4s .25s,visibility 0s .25s}
+.kd{position:fixed;z-index:3;pointer-events:none;}
 body:not(.ready) .kd,.crate.lifted~.kd,body.walling .kd,html:has(.open:not([hidden])) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* phones: the pile sits in the space between the views switch and the dial */
 html.phone .page{padding:calc(env(safe-area-inset-top) + 70px) 0 calc(env(safe-area-inset-bottom) + 196px)}
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
-.kd::before{content:'';position:absolute;left:calc(50% - 50vw);width:100vw;top:-24px;bottom:calc(-82px - env(safe-area-inset-bottom));background:linear-gradient(#12121200,#121212e0 34%,#121212f2);pointer-events:none}
+.kd::before{content:'';position:absolute;left:calc(50% - 50vw);width:100vw;pointer-events:none}
 .kd-d{position:absolute;left:0;right:0;bottom:0;height:var(--kh,58px);cursor:grab;touch-action:none;outline:0;pointer-events:auto;user-select:none;-webkit-user-select:none}
 .kd-d:active{cursor:grabbing}
 .kd-d:focus-visible{outline:none}
@@ -705,54 +704,54 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd-b .a{color:var(--t1)}
 /* one place for finding: the views, search and filters share a bar at the bottom; filters open in a tray above it */
 .chip{display:none!important}
-.find,html.phone .find{flex-wrap:wrap;gap:8px;max-width:600px;margin:0 auto;padding:0 12px}
-.find .vw{position:static;translate:none;flex:none;order:1;padding:4px;box-shadow:var(--float);height:58px;box-sizing:border-box;align-items:center}
-.find .vw button{height:48px;width:48px;padding:0;display:grid;place-items:center}
+.find,html.phone .find{flex-wrap:wrap;margin:0 auto;}
+.find .vw{box-sizing:border-box;align-items:center}
+.find .vw button{place-items:center}
 .find .vw svg{width:20px;height:20px;display:block}
-.find .q,html.phone .find .q{order:2;flex:1 1 0;width:auto;min-width:0}
-.fb{all:unset;pointer-events:auto;order:3;flex:none;cursor:pointer;width:58px;height:58px;box-sizing:border-box;border-radius:50%;display:grid;place-items:center;color:var(--t1);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);transition:transform .4s var(--spring),background-color .2s,color .2s}
+
+.fb{all:unset;pointer-events:auto;flex:none;cursor:pointer;width:58px;height:58px;box-sizing:border-box;border-radius:50%;display:grid;place-items:center;color:var(--t1);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float);}
 .fb svg{width:22px;height:22px;display:block}
 .fb:hover{color:#fff}
-.fb:active{transform:scale(.96)}
+
 .fb:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .fb.on{background:#fff;color:#111;border-color:#fff}
-.find .vw,.fb{transition:transform .4s var(--spring),opacity .2s,width .3s var(--spring),margin .3s var(--spring),background-color .2s,color .2s}
+
 /* while you type, search gets the whole bar */
 .find:has(.q:focus-within) .vw,.find:has(.q:focus-within) .fb{width:0;opacity:0;margin-right:-8px;padding:0;border-width:0;overflow:hidden}
 .tray{order:0;flex:1 0 100%;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;-webkit-mask:linear-gradient(90deg,#000 85%,transparent);mask:linear-gradient(90deg,#000 85%,transparent);transform-origin:50% 100%}
 .tray[hidden]{display:none}
 .tray::-webkit-scrollbar{display:none}
-.tray button{all:unset;cursor:pointer;flex:none;height:40px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);font-size:15px;color:var(--t1);white-space:nowrap;display:inline-flex;align-items:center;transition:transform .4s var(--spring),background-color .2s}
+.tray button{all:unset;cursor:pointer;flex:none;height:40px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);font-size:15px;color:var(--t1);white-space:nowrap;display:inline-flex;align-items:center;}
 .tray button:hover{color:#fff}
-.tray button:active{transform:scale(.97)}
+
 .tray button:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .tray button[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
 .tray:not([hidden]){animation:trayIn .35s var(--spring)}
 @keyframes trayIn{from{opacity:0;transform:translateY(8px)}}
-body.filtering .kd{bottom:calc(env(safe-area-inset-bottom) + 130px)}
-.kd{transition:opacity .4s .25s,visibility 0s .25s,bottom .35s var(--spring)}
-.wall{padding-top:calc(env(safe-area-inset-top) + 16px)}
+
+
+
 body.filtering .wall{padding-bottom:calc(env(safe-area-inset-bottom) + 160px)}
-html.phone .page{padding-top:calc(env(safe-area-inset-top) + 24px)}
+
 html.phone{--S:min(calc(100vw - 48px),calc(100svh - 300px))}
 body.filtering .crate{transition:none}
 @media(prefers-reduced-motion:reduce){.tray:not([hidden]){animation:none}}
 /* no numbers, no instructions */
 .o-count,html.phone .o-count,.dhint,html.phone .dhint{display:none!important}
 .find .q input,html.phone .find .q input{padding-right:16px}
-.find .q.has input,html.phone .find .q.has input{padding-right:70px}
-html.phone .find .vw button{width:42px;height:48px}
+
+
 html.phone .fb{width:58px}
 /* the bar: search, filters, layout. Layout is one button like filters; it opens the three views as a row above the bar */
-.find .q,html.phone .find .q{order:1}
+
 .fb{order:2}
-.fb.lb{order:3}
-.find .vw{order:0;flex:1 0 100%;height:auto;padding:2px 2px 4px;justify-content:flex-start;gap:8px;background:none;border:0;border-radius:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;-webkit-mask:none;mask:none}
-.find .vw[hidden]{display:none}
-.find .vw button,html.phone .find .vw button{width:auto;height:40px;padding:0 18px 0 14px;display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);font-size:15px;color:var(--t1)}
+
+.find .vw{height:auto;-webkit-mask:none;mask:none}
+
+
 .find .vw button svg{width:18px;height:18px}
-.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{background:#fff;color:#111;border-color:#fff}
-.find .vw:not([hidden]){animation:trayIn .35s cubic-bezier(.22,1,.36,1)}
+.find .vw button[aria-pressed=true],html.phone .find .vw button[aria-pressed=true]{border-color:#fff}
+
 .find .vw,.fb,.tray button,.find .vw button{transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,width .3s cubic-bezier(.22,1,.36,1),margin .3s cubic-bezier(.22,1,.36,1),background-color .2s,color .2s}
 .tray:not([hidden]){animation-timing-function:cubic-bezier(.22,1,.36,1)}
 .fb:active,.tray button:active,.find .vw button:active{transform:scale(.96)}
@@ -780,27 +779,27 @@ body.ready .find,body.ready .kd{animation:barIn .7s cubic-bezier(.22,1,.36,1) .3
 /* phone search: the crate steps back and a list of records rises in its place, above the keyboard; tap one to open it,
    Go to keep the crate narrowed to what matches, Cancel to put everything back */
 .sx{display:none}
-html.phone .sx{all:unset;display:none;order:4;flex:none;height:58px;padding:0 6px 0 4px;font-size:16px;color:#fff;cursor:pointer;pointer-events:auto}
+html.phone .sx{all:unset;order:4;flex:none;font-size:16px;color:#fff;cursor:pointer;pointer-events:auto}
 html.phone .sx:active{opacity:.6}
-html.phone body.searching .sx{display:block}
+
 html.phone body.searching .find .vw,html.phone body.searching .fb{width:0;opacity:0;margin-right:-8px;padding:0;border-width:0;overflow:hidden}
-html.phone body.searching .find{bottom:calc(var(--kb,0px) + 14px + env(safe-area-inset-bottom));transition:bottom .25s cubic-bezier(.22,1,.36,1)}
+html.phone body.searching .find{transition:bottom .25s cubic-bezier(.22,1,.36,1)}
 html.phone body.searching .find .q{box-shadow:none}
 html.phone .page,html.phone .kd{transition:opacity .35s,scale .5s cubic-bezier(.22,1,.36,1)}
-html.phone body.searching .page{opacity:.12;scale:.94;pointer-events:none}
+
 html.phone body.searching .kd{opacity:0;visibility:hidden}
 .sl{display:none}
-html.phone .sl{display:block;position:fixed;z-index:5;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 10px);bottom:calc(var(--kb,0px) + 86px + env(safe-area-inset-bottom));overflow:auto;overscroll-behavior:contain;border-radius:18px;background:#1e1e20ee;-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);border:1px solid var(--line);padding:6px;opacity:0;visibility:hidden;translate:0 14px;scale:.985;transition:opacity .15s,translate .2s,scale .2s,visibility 0s .2s,bottom .25s cubic-bezier(.22,1,.36,1)}
+html.phone .sl{display:block;position:fixed;z-index:5;left:10px;right:10px;overflow:auto;overscroll-behavior:contain;border-radius:18px;background:#1e1e20ee;-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);border:1px solid var(--line);padding:6px;opacity:0;visibility:hidden;translate:0 14px;scale:.985;transition:opacity .15s,translate .2s,scale .2s,visibility 0s .2s,bottom .25s cubic-bezier(.22,1,.36,1)}
 html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:1;transition:opacity .25s,translate .5s cubic-bezier(.22,1,.36,1),scale .5s cubic-bezier(.22,1,.36,1),bottom .25s cubic-bezier(.22,1,.36,1)}
 .sl ul{list-style:none;margin:0;padding:0}
 .sl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border-radius:16px}
 .sl button:active{background:var(--prs)}
-.sl .sw,.sl .pic{width:46px;height:46px;border-radius:3px;flex:none;background:#2c2c2e}
+.sl .sw,.sl .pic{width:46px;height:46px;flex:none;background:#2c2c2e}
 .sl b{display:block;font-weight:500;font-size:16px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span span{display:block;color:var(--m);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span{min-width:0}
 .sl h4{position:sticky;top:-6px;z-index:1;margin:0 -6px;padding:10px 14px 6px;font-size:13px;font-weight:400;color:var(--m);background:var(--sheet)}
-.sl .none{padding:18px 14px;color:var(--m)}
+
 @media(prefers-reduced-motion:reduce){html.phone .sl,html.phone body.searching .sl,html.phone .page{transition:none}}
 /* the canvas settles on one cover; the rest dim a little until you move again */
 .board .tile{transition:opacity .45s cubic-bezier(.22,1,.36,1)}
@@ -816,7 +815,7 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .tbl[hidden]{display:none}
 .tbl:focus{outline:none}
 .tbl table{width:100%;max-width:1400px;margin:0 auto;border-collapse:collapse;font-size:15px;table-layout:auto}
-.tbl thead th{position:sticky;top:-8px;z-index:1;background:var(--bg);text-align:left;font-weight:400;padding:10px 12px 8px;border-bottom:1px solid var(--line)}
+.tbl thead th{top:-8px;z-index:1;background:var(--bg);text-align:left;font-weight:400;padding:10px 12px 8px;border-bottom:1px solid var(--line)}
 .tbl th button{all:unset;cursor:pointer;color:var(--m);font-size:13px;display:inline-flex;gap:4px;align-items:center}
 .tbl th>span{color:var(--m);font-size:13px;font-weight:400} /* format doesn't sort */
 /* the covers' column sorts by color: a small color wheel, lit when it's the sort */
@@ -834,7 +833,7 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .tbl td.c-title{color:#fff;max-width:340px}
 .tbl td.c-title b{font-weight:500}
 .tbl .c0{width:48px;padding-right:4px}
-.tbl .c0 .sw,.tbl .c0 .pic{display:block;width:44px;height:44px;border-radius:3px;background:#2c2c2e}
+.tbl .c0 .sw,.tbl .c0 .pic{display:block;width:44px;height:44px;background:#2c2c2e}
 .pic{position:relative;overflow:hidden}
 /* table and search covers: the record's color first, then the cover fades in over it */
 .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
@@ -845,41 +844,41 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
   .tbl{padding-left:8px;padding-right:8px}
   .tbl .c-artist,.tbl .c-label,.tbl .c-format{display:none}
   .tbl td.c-title{white-space:normal;max-width:none}
-  .tbl td.c-title b,.tbl .m{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 150px)}
+  .tbl td.c-title b,.tbl .m{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .tbl .m{color:var(--m);font-size:14px}
   .tbl .c-year{text-align:right;color:var(--m)}
 }
 body.reading .tbl{opacity:0;transition:opacity .3s}
 /* one row: search on the left, layout on the right, the scrubber between them in the same plane. No filters for now */
 .fb:not(.lb),#pills{display:none!important}
-.find,html.phone .find{justify-content:space-between;max-width:600px;box-sizing:border-box}
-.find .q,html.phone .find .q{flex:1 1 0;width:auto;max-width:58px;min-width:58px;transition:max-width .45s cubic-bezier(.22,1,.36,1),border-color .2s}
-.find .q:focus-within,.find .q.has,html.phone .find .q:focus-within,html.phone .find .q.has{max-width:600px}
+.find,html.phone .find{box-sizing:border-box}
+.find .q,html.phone .find .q{width:auto;transition:max-width .45s cubic-bezier(.22,1,.36,1),border-color .2s}
+
 .find .q:not(:focus-within):not(.has) input,html.phone .find .q:not(:focus-within):not(.has) input{color:transparent;padding:0;cursor:pointer}
 .find .q:not(:focus-within):not(.has) input::placeholder,html.phone .find .q:not(:focus-within):not(.has) input::placeholder{color:transparent}
 .find .q:not(:focus-within):not(.has) .qn{display:none}
 .find .qi{pointer-events:none}
-.kd{--kw:calc(min(600px,100vw) - 24px - 132px);left:50%;width:var(--kw);margin-left:calc(var(--kw)/-2);height:var(--kh,58px)}
-.kd,body.filtering .kd,body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px)}
+.kd{left:50%;width:var(--kw);margin-left:calc(var(--kw)/-2);height:var(--kh,58px)}
+
 .kd-b{display:none}
-.kd::before{top:-60px}
+
 body:has(.find .q:focus-within) .kd,body:has(.find .q.has) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* at rest, search and layout are bare icons; search becomes a pill only while it's open */
-.find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{background:none;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{box-shadow:none;}
 .find .q{transition:max-width .45s cubic-bezier(.22,1,.36,1),background-color .25s,border-color .25s,box-shadow .25s}
 .find .q:not(:focus-within):not(.has) .qi{color:var(--fg)}
 .find .q:not(:focus-within):not(.has):hover .qi,.fb.lb:hover{color:#fff}
-.fb.lb{color:var(--t1)}
+
 .fb.lb svg{width:20px;height:20px}
 .fb.lb[aria-expanded=true]{color:#fff}
 /* search and layout sit at the top corners; the scrubber has the bottom to itself */
-.find,html.phone .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto;max-width:none;padding:0 14px}
+.find,html.phone .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto;max-width:none;}
 html.phone body.searching .find{top:calc(env(safe-area-inset-top) + 10px);bottom:auto}
-.find .vw{order:5}
+
 .qnone,html.phone .qnone{top:calc(100% + 10px);bottom:auto}
-html.phone .sl{top:calc(env(safe-area-inset-top) + 80px);bottom:calc(var(--kb,0px) + 10px + env(safe-area-inset-bottom))}
+
 .kd{--kw:min(520px,100vw)}
-.wall,.tbl{top:calc(env(safe-area-inset-top) + 68px);padding-top:8px}
+
 /* searching on a phone: the records dim behind the list; the search itself stays bright */
 html.phone body.searching .page{opacity:1;scale:none;pointer-events:auto}
 html.phone .page>:not(.find){transition:opacity .35s}
@@ -887,10 +886,10 @@ html.phone body.searching .page>:not(.find){opacity:.12;pointer-events:none}
 html.phone .page{padding-top:calc(env(safe-area-inset-top) + 72px)}
 /* phone search: a quiet field, room before Cancel, no count, covers in place */
 html.phone body.searching .find{gap:12px}
-html.phone .find .q:has(input:focus-visible){outline:none}
-html.phone .find .q:focus-within{border-color:rgba(255,255,255,.2)}
+
+
 html.phone .qn{display:none}
-html.phone .find .q.has input{padding-right:48px}
+
 html.phone .sx{padding:0 2px}
 .sl img:not([src]){visibility:visible}
 /* every record has the same slight corner, never a point: --rec, a hair rounder as the cover grows */
@@ -902,19 +901,19 @@ html.phone .sx{padding:0 2px}
 /* phones: the flipped records lying toward you fade out softly instead of ending in hard edges */
 html.phone.deck .crate{-webkit-mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8));mask:linear-gradient(#000 calc(50% + 12px + var(--S)/2),#0000 calc(50% + 12px + var(--S)*.8))}
 /* phone search: the results card hugs what's in it, and stops above the keyboard */
-html.phone .sl{bottom:auto;max-height:calc(100svh - env(safe-area-inset-top) - 90px - var(--kb,0px) - env(safe-area-inset-bottom))}
+html.phone .sl{max-height:calc(100svh - env(safe-area-inset-top) - 90px - var(--kb,0px) - env(safe-area-inset-bottom))}
 /* phone table: a list. A row of sort pills on top (title, artist, year), then cover, title over artist, year */
 @media (max-width:700px){
   .tbl{padding:8px 0 calc(env(safe-area-inset-bottom) + 100px)}
   .tbl table,.tbl thead,.tbl tbody{display:block}
-  .tbl thead tr{display:flex;gap:8px;padding:2px 16px 12px;background:var(--bg)}
-  .tbl thead{position:sticky;top:-8px;z-index:1}
-  .tbl thead th{position:static;display:block;padding:0;border:0}
+  .tbl thead tr{display:flex;gap:8px;}
+  .tbl thead{top:-8px;z-index:1}
+  .tbl thead th{display:block;padding:0;border:0}
   .tbl thead th.c0,.tbl thead th.c-label,.tbl thead th.c-format{display:none}
   .tbl thead th.c-artist{display:block}
-  .tbl th button{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);font-size:14px;color:var(--t1)}
-  .tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{background:#fff;color:#111;border-color:#fff}
-  .tbl th button:active{transform:scale(.96)}
+  
+  .tbl th[aria-sort=ascending] button,.tbl th[aria-sort=descending] button{border-color:#fff}
+  
   .tbl tbody tr{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:14px;padding:8px 16px;position:relative;-webkit-tap-highlight-color:transparent}
   .tbl tbody tr::after{content:'';position:absolute;left:82px;right:16px;bottom:0;height:1px;background:var(--hov)}
   .tbl td{display:block;padding:0;border:0;max-width:none}
@@ -993,14 +992,14 @@ body:not(.ready) .loading{pointer-events:auto}
 .loading .mk.base{fill:#1d1d1f}
 .loading .mk.ink{fill:#f2f2f2;--lo:0}
 /* in the bar it sits between search and layout, and turns a little with the crate */
-.logo{order:2;flex:none;display:grid;place-items:center;width:44px;height:44px;margin:0 auto;border-radius:50%;color:#fff;transition:transform .5s var(--flip),opacity .2s}
+.logo{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:#fff;transition:transform .5s var(--flip),opacity .2s}
 .logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s cubic-bezier(.22,1,.36,1)}
 /* hovered, it turns an eighth more, on top of where the crate has turned it */
 @media(hover:hover){.logo:hover svg{transform:rotate(45deg)}}
 .logo:focus-visible svg{transform:rotate(45deg)}
 .logo:active{transform:scale(.96);transition-duration:.08s}
 .logo:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.find:has(.q:focus-within) .logo,.find:has(.q.has) .logo{opacity:0;pointer-events:none}
+
 /* the details and links, in a sheet of their own over the record */
 .own-d{width:min(520px,calc(100vw - 32px));max-height:calc(100svh - 48px);overflow:auto;overscroll-behavior:contain}
 .own-f{display:grid;gap:18px}
@@ -1022,7 +1021,7 @@ body:not(.ready) .loading{pointer-events:auto}
 html.phone .find .q:focus-within,html.phone .find .q.has{max-width:none;width:auto;flex:1 1 0}
 .find .q input,.find .q:focus-within input,.find .q.has input,html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .find .q.has input{padding:0 16px 0 40px;font-size:15px}
 html.phone .find .q input,html.phone .find .q:focus-within input,html.phone .find .q.has input{font-size:16px}
-.find .q.has input,html.phone .find .q.has input{padding-right:40px}
+
 .find .qi,html.phone .find .qi{left:11px}
 .find .vw[hidden],html.phone .find .vw[hidden]{display:none}
 .find .q:not(:focus-within):not(.has),html.phone .find .q:not(:focus-within):not(.has),.fb.lb,.fb.lb.on{background:var(--glass);border-color:var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4)}
@@ -1086,11 +1085,11 @@ html.phone .sx{height:44px}
 /* phones show the laptop's crate, set lower so the pile behind clears the bar; the dial's fade takes the records that fall forward */
 html.phone:not(.deck) .page{padding-top:calc(env(safe-area-inset-top) + 22svh)}
 /* the filter you're in, from a record's details: a pill in the middle of the top bar; tap it for the whole crate */
-.chip,html.phone .chip{display:inline-flex!important;position:absolute;top:0;left:50%;translate:-50% 0;height:44px;max-width:min(360px,calc(100vw - 236px));box-sizing:border-box;padding:0 12px 0 16px;gap:8px;font-size:15px;background:var(--glass);color:#fff;border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,border-color .2s}
+.chip,html.phone .chip{display:inline-flex!important;top:0;left:50%;height:44px;box-sizing:border-box;font-size:15px;background:var(--glass);color:#fff;border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s,border-color .2s}
 .chip[hidden],html.phone .chip[hidden],.find:has(.q:focus-within) .chip,.find:has(.q.has) .chip{display:none!important}
 .chip:hover{background:var(--glass);border-color:#ffffff40}
 .chip svg{color:var(--t2);width:12px;height:12px}
-.chip:hover svg{color:#fff}
+
 /* it sits in the row, not over it: centered on the screen while there's room, and when there isn't (a phone, a narrow window)
    it slides toward the logo to clear the buttons on the right, and its name gives way last. The spacer before it stands in
    for the buttons' extra width (search, sort, layout less the logo), and gives that up first */
@@ -1228,10 +1227,10 @@ html.phone .o-info{padding-inline:12px}
 html:not(.phone) .find{padding:0 var(--edge)}
 html:not(.phone) .find .vw{right:var(--edge)}
 html:not(.phone) #close,html:not(.phone) .about .ab-x{right:var(--edge)}
-#oq{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 10px);right:calc(max(14px,env(safe-area-inset-right)) + 52px);width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px;color:#fff;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);opacity:0;transition:opacity .3s,transform .5s var(--flip)}
+#oq{position:fixed;z-index:3;top:calc(env(safe-area-inset-top) + 10px);right:calc(max(14px,env(safe-area-inset-right)) + 52px);width:44px;height:44px;padding:0;box-sizing:border-box;justify-content:center;font-size:18px;color:#fff;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);}
 html:not(.phone) #oq{right:calc(var(--edge) + 52px)}
-.open.in #oq{opacity:1}
-html.pulldown .open.in #oq{opacity:calc(1 - var(--pull,0)*3);transition:none}
+
+html.pulldown .open.in #oq{transition:none}
 #oq:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 body.seek .find{z-index:11}
 body.seek .find::before{opacity:0}
@@ -1240,7 +1239,7 @@ html:has(.crate.lifted) body.seek #oq{opacity:0;visibility:hidden}
 html body.seek .sl,html:not(.phone) body.seek .sl{z-index:12}
 html.phone body.seek #close{opacity:0;visibility:hidden}
 /* searching on a laptop: the matches drop down under the field while the crate narrows behind them */
-html:not(.phone) .sl{position:fixed;z-index:5;top:calc(env(safe-area-inset-top) + 62px);right:calc(var(--edge) + 52px);width:min(420px,calc(100vw - 28px));max-height:min(60vh,520px);box-sizing:border-box;padding:6px;overflow:auto;overscroll-behavior:contain;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float)}
+html:not(.phone) .sl{position:fixed;z-index:5;max-height:min(60vh,520px);box-sizing:border-box;padding:6px;overflow:auto;overscroll-behavior:contain;border-radius:18px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);box-shadow:var(--float)}
 html:not(.phone) body.searching .sl:not(.idle){display:block;animation:menuIn .3s cubic-bezier(.22,1,.36,1)}
 html:not(.phone) .sl button{padding:6px;border-radius:12px;gap:12px}
 html:not(.phone) .sl .sw,html:not(.phone) .sl .pic{width:40px;height:40px}
