@@ -1616,6 +1616,13 @@ function art(r){
 }
 // local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
 const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f; // covers Casey uploads come from /api/crate/img
+// a smaller copy of a cover, where there is one: Casey's in vinyl/t/ (scripts/vinyl-thumbs.mjs), Casey's uploads from
+// /api/crate/img at ?w=, a visitor's from Apple at any width
+const smaller=(f,w)=>{let m;
+  if((m=f.match(/^vinyl\/([^/]+-front)\.webp$/)))return`vinyl/t/${m[1]}-${w}.webp`;
+  if(/^\/api\/crate\/img\/[0-9a-f]{24}$/.test(f))return`${f}?w=${w}`;
+  if((m=f.match(/^(https:\/\/[^?]+\/)\d+x\d+bb\.(jpg|png)$/)))return`${m[1]}${w}x${w}bb.jpg`;
+  return null};
 // a lazy image waits in data-src until its record comes near the front (see place)
 const BAKED=new Map(); // cover → the same cover with its paper and wear baked in (see "bake")
 const baked=u=>BAKED.get(new URL(u,location.href).href)||u;
@@ -1804,7 +1811,15 @@ function kick(){hvOff();if(reduce){pos=aim;vel=0;off.x=off.y=0;place(true);rende
 // Shading is two flat steps (behind, flipped), so a flip repaints only the records that change sides.
 // Covers load a few records beyond what's drawn, so one is always decoded before it shows. Only records near the front
 // can fall forward and show their back, so backs load over a shorter reach; a phone's pile never shows one.
-const warm=(n,d)=>{if(n._lazy.length)n._lazy=n._lazy.filter(i=>{if(d>4&&i.parentNode.classList.contains('bk'))return true;i.addEventListener('load',()=>bake(i,n),{once:true});i.src=i.dataset.src;i.removeAttribute('data-src');return false})};
+// Past the first few, a record only peeks out at the top of the pile, so it wears its cover's 360px copy, and takes the
+// cover itself a couple of records before it reaches the front, while it's still a sliver.
+const atFront=d=>d>=-2&&d<=2;
+const warm=(n,d)=>{
+  if(n._lazy.length)n._lazy=n._lazy.filter(i=>{if(d>4&&i.parentNode.classList.contains('bk'))return true;
+    const f=i.dataset.src,c=!atFront(d)&&i.parentNode.classList.contains('fr')&&smaller(f,360);if(c){i._full=f;n._up=i}
+    i.addEventListener('load',()=>bake(i,n),{once:true});i.src=c||f;i.removeAttribute('data-src');return false});
+  const i=n._up;if(i&&atFront(d)){n._up=null;i._baked=null;i.addEventListener('load',()=>bake(i,n),{once:true});i.src=i._full}
+};
 // about to jump somewhere (a letter under the pointer): load what will show there
 const warmAt=i=>{if(i==null)return;for(let j=Math.max(0,i-3);j<=Math.min(order.length-1,i+10);j++)warm(nodes[j],j-i)};
 function place(rest){
@@ -3045,9 +3060,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
   // most covers already come in smaller sizes: Casey's as copies in vinyl/t/ made at build time, a visitor's from Apple or
   // the Cover Art Archive, which serve the same cover at any of a few widths. A tile asks for the size nearest its own
   function sized(src){
-    let m;
-    if((m=src.match(/^vinyl\/([^/]+-front)\.webp$/))){const t=w=>`vinyl/t/${m[1]}-${w}.webp`;return{src:t(360),srcset:`${t(360)} 360w,${t(720)} 720w,${src} 1200w`}}
-    if((m=src.match(/^(https:\/\/[^?]+\/)\d+x\d+bb\.(jpg|png)$/))){const t=w=>`${m[1]}${w}x${w}bb.jpg`;return{src:t(360),srcset:`${t(360)} 360w,${t(720)} 720w,${t(1200)} 1200w`}}
+    if(smaller(src,360))return{src:smaller(src,360),srcset:`${smaller(src,360)} 360w,${smaller(src,720)} 720w,${/^https:/.test(src)?smaller(src,1200):src} 1200w`};
     try{const u=new URL(src,location.href),p=u.searchParams.get('img');
       if(u.pathname==='/api/musicbrainz'&&p&&/-1200(\.jpg)?$/.test(p)){u.searchParams.set('img',p.replace(/-1200(\.jpg)?$/,'-500$1'));return{src:u.href,srcset:`${u.href} 500w,${src} 1200w`}}}catch{}
     return null;
@@ -3096,6 +3109,7 @@ Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})
     tiles.style.setProperty('--cols',cols());sizeTiles();
     const f=document.createDocumentFragment();
     order.forEach(r=>f.append(tileFor(r)));
+    order.slice(0,cols()*2).forEach(r=>{const i=$('img',keep.get(r.slug));if(i)i.loading='eager'}); // the top rows show at once: no waiting to see them
     tiles.replaceChildren(f,marks);placeMarks();drawPills();
     if(!before.size)return;
     // covers glide from where they were; new ones grow in
