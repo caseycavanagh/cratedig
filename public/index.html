@@ -3692,8 +3692,8 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   drawSort();
   const sorts=on=>{so.hidden=!on;sb.setAttribute('aria-expanded',on);if(on){views(false);tray(false);const r=sb.getBoundingClientRect();so.style.right=Math.max(14,innerWidth-r.right)+'px'}};
   sb.onclick=()=>sorts(so.hidden);
-  // one way to sort, for the menu and the table's headers: the lit one again flips it
-  window.setSort=k=>{SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:1};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
+  // one way to sort, for the menu and the table's headers: the lit one again flips it; a new one keeps the direction
+  window.setSort=k=>{SORT={k,d:SORT.k===k?-SORT.d:SORT.d};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
     drawSort();arrange(filt,null);$('#wall').scrollTop=0}; // a new sort starts from its front: the oldest record, the first letter, the reds
   so.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setSort(b.dataset.k);so.querySelector(`[data-k=${b.dataset.k}]`).focus({focusVisible:false})});
   so.addEventListener('keydown',e=>{if(e.key==='Escape'){sorts(false);sb.focus({focusVisible:false})}});
