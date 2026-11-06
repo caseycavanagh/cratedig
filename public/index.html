@@ -1409,8 +1409,10 @@ html:has(.open:not([hidden])) body .dock::before{height:calc(env(safe-area-inset
   html:not(.phone) .play:has(#shareR) .pair:is(:hover,:focus-within),html:not(.phone) .play:has(#shareR) .pair:has(.sw[aria-expanded=true]){margin-right:0;transition:margin .55s var(--ease)}
 }
 @media(prefers-reduced-motion:reduce){.dst .dhl,.dsv,body.stacking .dsv{transition:opacity .15s}}
-.kd,body.filtering .kd,body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 34px)}
-html.phone .kd,html.phone body.filtering .kd,html.phone body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 34px)}
+.kd,body.filtering .kd,body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 18px)}
+html.phone .kd,html.phone body.filtering .kd,html.phone body.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 18px)} /* the dial sits close over the bar; the bar's toast rises over it, and the dial steps back while it's up */
+body:has(.dsay.on) .kd-c{opacity:.15;transition:opacity .2s}
+.kd-c{transition:opacity .4s}
 body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .xb.o) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* the list rises from the field: above it, across the screen on a phone, centered over it on a laptop */
 html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
