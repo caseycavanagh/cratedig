@@ -433,6 +433,29 @@ html[data-theme=dark] .qnone{box-shadow:var(--float)}
 .own-c:hover{border-color:var(--m)}
 .own-c:active{transform:scale(.99);transition-duration:.08s}
 .own-c:has(input:focus-visible){outline:1px solid var(--ring);outline-offset:2px}
+.own-k{position:relative}
+.own-k select{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;font-size:var(--fs-4)}
+/* the crate's name, top left: back to all of Casey's crates. While editing, it opens the crate's own settings */
+.where{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 16px);left:calc(max(14px,env(safe-area-inset-left)) + 46px);display:flex;align-items:center;max-width:min(320px,calc(100vw - 200px));
+  height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);text-decoration:none;transition:color .2s,background .2s,opacity .3s}
+.where span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.searching .where,body.reading .where{opacity:0;pointer-events:none}
+.where:hover{color:var(--fg);background:var(--hov)}
+body.editing-on .where{color:var(--fg);border:1px solid var(--line)}
+body:not(.ready) .where{opacity:0}
+.crate-d.unlock label{display:block;margin-bottom:6px}
+.crate-d.unlock #crateN{margin-bottom:14px}
+.crate-d.unlock #crateN:disabled{color:var(--t2)}
+.crate-d textarea{box-sizing:border-box;display:block;width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--soft);color:var(--fg);font:inherit;font-size:var(--fs-3);line-height:1.45;resize:none;margin-bottom:14px}
+.crate-d.unlock .pin{display:flex;align-items:center;gap:10px;font-size:var(--fs-2);color:var(--t1);margin:0 0 20px;cursor:pointer}
+.crate-d.unlock .pin input{flex:none;width:16px;height:16px;margin:0;accent-color:var(--fg)}
+.crate-d .row{display:flex;gap:8px;align-items:center}
+.crate-d .sp{flex:1}
+.crate-d #crateS{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
+@media(max-width:700px){.crate-d textarea,.crate-d.unlock #crateN{font-size:var(--fs-4)}}
+/* a crate with nothing in it yet */
+.bare-p{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;font-size:var(--fs-3);color:var(--t2);text-align:center;padding:0 32px}
+body.bare .kd,body.bare .az,body.bare .dhint{visibility:hidden}
 .own-c input{-webkit-appearance:none;appearance:none;width:20px;height:20px;padding:0;border:1px solid #0002;border-radius:50%;background:none;cursor:pointer}
 .own-c input::-webkit-color-swatch-wrapper{padding:0}
 .own-c input::-webkit-color-swatch{border:0;border-radius:50%}
@@ -1419,6 +1442,7 @@ html.phone .sx,html.phone body.searching .sx{display:none}
 </script>
 <main class="page">
   <h1 class="sr">Crate Dig</h1>
+  <a class="where" id="where" href="/casey" hidden><span class="sr">All of Casey’s crates. This is </span><span id="whereN"></span></a>
   <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record, slash searches.">
     <div class="floor"></div>
     <div class="stack" id="stack"></div>
@@ -1461,6 +1485,18 @@ html.phone .sx,html.phone body.searching .sx{display:none}
   </form>
 </dialog>
 
+<dialog class="unlock own-d crate-d" id="crateD" aria-labelledby="crateH">
+  <form id="crateF" method="dialog">
+    <h2 id="crateH">This crate</h2>
+    <label for="crateN">Name</label>
+    <input id="crateN" maxlength="60" autocomplete="off">
+    <label for="crateA">Description</label>
+    <textarea id="crateA" maxlength="300" rows="3"></textarea>
+    <label class="pin"><input type="checkbox" id="crateP"><span>Pin it first on your crates page</span></label>
+    <div class="row"><button type="button" class="btn sm" id="crateX">Delete crate</button><span class="sp"></span><button type="button" class="btn sm" id="crateC">Cancel</button><button class="btn sm" id="crateS">Save</button></div>
+  </form>
+</dialog>
+
 <div class="open" id="open" hidden tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="oTitle">
   <button class="peek prev" id="prevP" tabindex="-1" aria-hidden="true"></button>
   <button class="peek next" id="nextP" tabindex="-1" aria-hidden="true"></button>
@@ -1486,7 +1522,7 @@ html.phone .sx,html.phone body.searching .sx{display:none}
   </div>
 </dialog>
 
-<script src="vinyl/visitor-crate.js"></script>
+<script src="/vinyl/visitor-crate.js"></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1625,11 +1661,11 @@ function art(r){
   return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${g}</svg>`;
 }
 // local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
-const img=f=>/^(https?:|\/)/.test(f)?f:'vinyl/'+f; // covers Casey uploads come from /api/crate/img
+const img=f=>/^(https?:|\/)/.test(f)?f:'/vinyl/'+f; // covers Casey uploads come from /api/crate/img
 // a smaller copy of a cover, where there is one: Casey's in vinyl/t/ (scripts/vinyl-thumbs.mjs), Casey's uploads from
 // /api/crate/img at ?w=, a visitor's from Apple at any width
 const smaller=(f,w)=>{let m;
-  if((m=f.match(/^vinyl\/([^/]+-front)\.webp$/)))return`vinyl/t/${m[1]}-${w}.webp`;
+  if((m=f.match(/^\/vinyl\/([^/]+-front)\.webp$/)))return`/vinyl/t/${m[1]}-${w}.webp`;
   if(/^\/api\/crate\/img\/[0-9a-f]{24}$/.test(f))return`${f}?w=${w}`;
   if((m=f.match(/^(https:\/\/[^?]+\/)\d+x\d+bb\.(jpg|png)$/)))return`${m[1]}${w}x${w}bb.jpg`;
   return null};
@@ -1877,7 +1913,7 @@ function jump(i){
 const finEl=$('#fin');let crateBy='',finA=null;
 const ends=()=>!filt&&order.length>1;
 const spot=()=>cur+(fin?1:0); // where the crate rests, counting the end as one more place
-const finText=()=>{const nm=(visiting?crateBy:'Casey').trim();return nm?`That’s all of ${nm}${/s$/i.test(nm)?'’':'’s'} records.`:'That’s the whole crate.'};
+const finText=()=>{const C=!visiting&&crateDef();if(C)return`That’s everything in ${C.name}.`;const nm=(visiting?crateBy:'Casey').trim();return nm?`That’s all of ${nm}${/s$/i.test(nm)?'’':'’s'} records.`:'That’s the whole crate.'};
 function setFin(f){
   if(f===fin)return;fin=f;finEl.classList.toggle('on',f);finEl.inert=!f;
   finA?.cancel();finA=null;
@@ -2814,10 +2850,16 @@ const hexOf=c=>'#'+rgbOf(c).map(v=>(+v).toString(16).padStart(2,'0')).join('');
 const inkOn=c=>{const [r,g,b]=rgbOf(c);return r*.299+g*.587+b*.114>150?'#1a1a1a':'#f4f2ee'}; // type on a jacket of that color
 const TEXT=['title','artist','sortAs','year','label','format']; // the details Casey can correct
 const added=new Map(); // slug → record, the same object each time, so the crate keeps its node
+// Which crate this is: /casey/<crate>, or "all", the whole crate. The others are picked from the whole crate (records, by slug),
+// plus records only that crate holds (extra). Edits to a record show in every crate it's in.
+const CRATE=(location.pathname.match(/^\/casey\/([a-z0-9-]{1,80})\/?$/)||[])[1]||'all';
+const crateDef=()=>CRATE==='all'?null:(EDITS.crates?.list||[]).find(c=>c.slug===CRATE)||null;
 function applyEdits(){
   if(!BASE)return;
-  const mine=EDITS.added.map(a=>{const r=added.get(a.slug)||{};added.set(a.slug,r);for(const k of Object.keys(r))delete r[k];r._o={pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...a,mine:true};return r});
-  for(const r of [...BASE,...mine]){
+  const fresh=(a,more)=>{const r=added.get(a.slug)||{};added.set(a.slug,r);for(const k of Object.keys(r))delete r[k];r._o={pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...a,mine:true,...more};return r};
+  const mine=EDITS.added.map(a=>fresh(a)),C=crateDef(),owned=new Set([...BASE,...mine].map(r=>r.slug));
+  const extra=C?C.extra.filter(a=>!owned.has(a.slug)).map(a=>fresh(a,{extra:true})):[];
+  for(const r of [...BASE,...mine,...extra]){
     r._o||={front:r.front,back:r.back,spine:r.spine,pal:r.pal,...Object.fromEntries(TEXT.map(k=>[k,r[k]])),links:r.links,spotify:r.spotify,apple:r.apple};Object.assign(r,r._o);
     const p=EDITS.patch[r.slug];if(!p)continue;
     for(const k of TEXT)if(p[k]!=null)r[k]=p[k]||undefined;
@@ -2827,8 +2869,23 @@ function applyEdits(){
     if(p.front)r.front=p.front;if(p.back)r.back=p.back;if(p.spine)r.spine=p.spine;
     if(p.bg){const t=inkOn(p.bg);r.spine=p.bg;r.pal=[p.bg,t,t]}
   }
-  const out=new Set(EDITS.removed);
-  RECORDS.splice(0,RECORDS.length,...[...BASE,...mine].filter(r=>!out.has(r.slug)));
+  const out=new Set(EDITS.removed);let list=[...BASE,...mine].filter(r=>!out.has(r.slug));
+  if(C){const picked=new Set(C.records);list=[...list.filter(r=>picked.has(r.slug)),...extra]}
+  RECORDS.splice(0,RECORDS.length,...list);
+  nameCrate();bare();
+}
+// a crate with nothing in it yet says so; while editing, how to fill it
+function bare(){
+  const on=!RECORDS.length;document.body.classList.toggle('bare',on);let p=$('#bareP');
+  if(!on){p?.remove();return}
+  if(!p){p=document.createElement('p');p.id='bareP';p.className='bare-p';$('.page').append(p)}
+  p.textContent=editing?'Search to add records to this crate.':'Nothing in this crate yet.';
+}
+// the crate's name: in the tab, at the top left (back to all of Casey's crates), and at the end of the crate
+function nameCrate(){
+  const C=crateDef(),w=$('#where');if(visiting||!w)return;
+  const name=C?C.name:'Everything';w.hidden=false;$('#whereN').textContent=name;
+  document.title=TITLE=C?`${C.name} · Crate Dig`:'Crate Dig';if(open.hidden)document.title=TITLE;
 }
 // one change at a time, in order; the answer is the edits as saved
 let apiQ=Promise.resolve();
@@ -2876,7 +2933,7 @@ function toast(msg,act,fn){
 }
 const editB=$('#editB'),unlockD=$('#unlock');
 function setEditing(on){
-  editing=!!(on&&OWNER&&EDITABLE);editB.hidden=!(OWNER&&EDITABLE);editB.setAttribute('aria-pressed',editing);editB.textContent=editing?'Done':'Edit';
+  editing=!!(on&&OWNER&&EDITABLE);document.body.classList.toggle('editing-on',editing);if(BASE)bare();editB.hidden=!(OWNER&&EDITABLE);editB.setAttribute('aria-pressed',editing);editB.textContent=editing?'Done':'Edit';
   try{sessionStorage.setItem('records-editing',editing?'1':'')}catch{}
   if(!open.hidden)info(order[cur]);if(q.value.trim())search();
 }
@@ -2890,6 +2947,30 @@ function ownerInit(){
   else if(OWNER)dropAsk();
   else unlockD.showModal();
 }
+// This crate's own settings, while editing: tap its name at the top left. The whole crate takes words and a pin only.
+const crateD=$('#crateD'),crateF=$('#crateF');
+$('#where').addEventListener('click',e=>{
+  if(!editing)return;e.preventDefault();const C=crateDef(),cs=EDITS.crates||{};
+  $('#crateN').value=C?C.name:'Everything';$('#crateN').disabled=!C;$('#crateX').hidden=!C;
+  $('#crateA').value=(C?C.about:cs.all?.about)||'';$('#crateP').checked=cs.pinned===CRATE;
+  crateD.showModal();
+});
+$('#crateC').onclick=()=>crateD.close();
+crateF.addEventListener('submit',async e=>{
+  e.preventDefault();const C=crateDef(),cs=EDITS.crates||{},name=$('#crateN').value.trim(),about=$('#crateA').value.trim(),pin=$('#crateP').checked;
+  if(C&&!name){$('#crateN').focus();return}
+  crateD.close();
+  try{
+    if((C?C.name:'')!==name&&C||((C?C.about:cs.all?.about)||'')!==about)await api({op:'crate-set',crate:CRATE,...(C?{name}:{}),about});
+    if(pin!==(cs.pinned===CRATE))await api({op:'crate-pin',crate:pin?CRATE:null});
+    nameCrate();toast('Saved');
+  }catch(x){toast(x.message)}
+});
+$('#crateX').onclick=async()=>{
+  const b=$('#crateX');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Delete it for good';return}
+  try{await api({op:'crate-drop',crate:CRATE});location.href='/casey'}catch(x){toast(x.message)}
+};
+crateD.addEventListener('close',()=>{const b=$('#crateX');delete b.dataset.sure;b.textContent='Delete crate'});
 const dropAsk=()=>{const u=new URL(location.href);u.searchParams.delete('edit');history.replaceState(history.state,'',u)};
 $('#unlockF').addEventListener('submit',async e=>{
   e.preventDefault();const key=$('#key').value.trim(),b=$('#unlockB');if(!key)return;b.disabled=true;$('#keyErr').textContent='';
@@ -2915,8 +2996,11 @@ const ownHTML=r=>editing?`<div class="own">
       <button type="button" class="btn sm" id="ownD" aria-haspopup="dialog">Details and links</button>
       <label class="own-c"><input type="color" id="ownC" value="${hexOf(spineBg(r))}"><span>Jacket color</span></label>
       <button type="button" class="btn sm" data-up="front">${r.front?'New front':'Add a front'}</button><button type="button" class="btn sm" data-up="back">${r.back?'New back':'Add a back'}</button>
-      ${EDITS.patch[r.slug]?'<button type="button" class="btn sm" id="ownReset">Back to the original</button>':''}<button type="button" class="btn sm" id="ownX">Take it out of the crate</button>
+      ${EDITS.patch[r.slug]?'<button type="button" class="btn sm" id="ownReset">Back to the original</button>':''}${toCrateHTML(r)}<button type="button" class="btn sm" id="ownX">${crateDef()?'Take it out of this crate':'Take it out of the crate'}</button>
     </div>`:'';
+// one of Casey's records into another crate: the crates it isn't in yet
+const toCrateHTML=r=>{if(r.extra)return'';const cs=(EDITS.crates?.list||[]).filter(c=>c.slug!==CRATE&&!c.records.includes(r.slug));
+  return cs.length?`<label class="btn sm own-k"><span>Add to a crate</span><select id="ownK"><option value="">Add to a crate</option>${cs.map(c=>`<option value="${esc(c.slug)}">${esc(c.name)}</option>`).join('')}</select></label>`:''};
 const upF=$('#upF'),ownBusy=on=>$('#oinfo .own')?.classList.toggle('busy',on);
 $('#oinfo').addEventListener('click',e=>{
   if(!editing||busy)return;const r=order[cur];
@@ -2930,7 +3014,11 @@ $('#oinfo').addEventListener('input',e=>{
   if(e.target.id!=='ownC')return;const r=order[cur],c=e.target.value,t=inkOn(c),x={...r,spine:c,pal:[c,t,t]};
   $$('#sleeve .edge').forEach(n=>n.style.background=c);if(!r.front)$('#sleeve .fr').innerHTML=coverHTML(x);if(!r.back)$('#sleeve .bk').innerHTML=backHTML(x);
 });
-$('#oinfo').addEventListener('change',e=>{if(e.target.id==='ownC')patch(order[cur],{bg:e.target.value},'Jacket color saved')});
+$('#oinfo').addEventListener('change',async e=>{
+  if(e.target.id==='ownC')patch(order[cur],{bg:e.target.value},'Jacket color saved');
+  if(e.target.id==='ownK'&&e.target.value){const r=order[cur],c=(EDITS.crates?.list||[]).find(x=>x.slug===e.target.value);ownBusy(true);
+    try{await api({op:'crate-put',crate:c.slug,slug:r.slug});toast(`Added to ${c.name}`)}catch(x){toast(x.message)}afterEdit(r)}
+});
 // saving the details: only what changed goes; a field put back to how the script had it goes back to the original
 const ownDlg=document.createElement('dialog');ownDlg.className='unlock own-d';ownDlg.setAttribute('aria-label','Details and links');document.body.append(ownDlg);
 ownDlg.addEventListener('click',e=>{if(e.target.closest('#ownFx'))ownDlg.close()});
@@ -2958,15 +3046,18 @@ upF.addEventListener('change',async()=>{
   }catch(e){toast(e.message);ownBusy(false)}
 });
 // taking a record out: the record view fades, the crate closes up behind it, and an undo waits at the bottom
+// in another crate, it only leaves that crate: it stays in the whole crate (unless it was only ever in this one)
 async function takeOut(r){
   if(RECORDS.length<2)return;
   const next=order[cur+1]||order[cur-1];ownBusy(true);
-  try{await api({op:'remove',slug:r.slug})}catch(e){toast(e.message);ownBusy(false);return}
+  try{await api(crateDef()?{op:'crate-take',crate:CRATE,slug:r.slug}:{op:'remove',slug:r.slug})}catch(e){toast(e.message);ownBusy(false);return}
   made.delete(r);rearrange(next);vanish=true;closeRecord();
   toast(`Took out ${r.title}`,'Undo',()=>putBack(r));
 }
 async function putBack(r){
-  try{await api({op:'restore',slug:r.slug});made.delete(r);if(q.value){q.value='';qSync()}arrange(null,r);toast(`${r.title} is back`)}catch(e){toast(e.message)}
+  const C=crateDef(),{_o,mine,extra,...rec}={...r,...r._o};
+  try{await api(!C?{op:'restore',slug:r.slug}:r.extra?{op:'crate-add',crate:CRATE,record:rec}:{op:'crate-put',crate:CRATE,slug:r.slug});
+    if(r.extra)r=added.get(r.slug)||r;made.delete(r);if(q.value){q.value='';qSync()}arrange(null,r);toast(`${r.title} is back`)}catch(e){toast(e.message)}
 }
 // Search, while editing: records taken out that match, and what MusicBrainz has, to add
 const hitHTML=(x,act)=>`<li class="hit">${x.thumb||x.front?`<img src="${esc(x.thumb||img(x.front))}"${x.fallback?` data-fb="${esc(x.fallback)}"`:''} alt="" loading="lazy">`:'<i class="ph"></i>'}<span><b>${esc(x.title)}</b><i>${esc(x.artist)}${x.year?' · '+esc(x.year):''}</i></span>${act}</li>`;
@@ -2974,9 +3065,11 @@ const fallbacks=el=>$$('img',el).forEach(i=>i.addEventListener('error',()=>{if(i
 function panel(v,n){
   const p=$('#qnone');
   if(!editing){p.hidden=!!n;if(!n)p.innerHTML='<p class="qh">Not in the crate</p>';return}
-  const out=[...(BASE||[]),...added.values()].filter(r=>EDITS.removed.includes(r.slug)&&matchQ(r,v));
+  const C=crateDef(),here=new Set(RECORDS.map(r=>r.slug));
+  const out=C?[...(BASE||[]),...added.values()].filter(r=>!r.extra&&!EDITS.removed.includes(r.slug)&&!here.has(r.slug)&&matchQ(r,v)).slice(0,30)
+    :[...(BASE||[]),...added.values()].filter(r=>!r.extra&&EDITS.removed.includes(r.slug)&&matchQ(r,v));
   p.hidden=false;
-  p.innerHTML=`<p class="qh">${n?`${n} in the crate`:'Not in the crate'}</p>${out.length?`<ul>${out.map(r=>hitHTML(r,`<button type="button" class="btn sm" data-back="${esc(r.slug)}">Put back</button>`)).join('')}</ul>`:''}<p class="qh" id="mbH">Looking on MusicBrainz…</p><ul id="mbL"></ul>`;
+  p.innerHTML=`<p class="qh">${n?`${n} in the crate`:'Not in the crate'}</p>${out.length?`${C?'<p class="qh">In Everything</p>':''}<ul>${out.map(r=>hitHTML(r,C?`<button type="button" class="btn sm" data-put="${esc(r.slug)}">Add</button>`:`<button type="button" class="btn sm" data-back="${esc(r.slug)}">Put back</button>`)).join('')}</ul>`:''}<p class="qh" id="mbH">Looking on MusicBrainz…</p><ul id="mbL"></ul>`;
   fallbacks(p);clearTimeout(mbT);const my=++mbN;
   mbT=setTimeout(async()=>{ // MusicBrainz takes one search a second: wait for a pause in the typing
     let res=[];try{res=await VisitorCrate.search(v)}catch{}
@@ -2988,19 +3081,26 @@ function panel(v,n){
   },500);
 }
 $('#qnone').addEventListener('click',e=>{
-  const a=e.target.closest('[data-add]'),b=e.target.closest('[data-back]');
+  const a=e.target.closest('[data-add]'),b=e.target.closest('[data-back]'),c=e.target.closest('[data-put]');
+  if(c){c.disabled=true;putIn([...BASE,...added.values()].find(x=>x.slug===c.dataset.put))}
   if(b){b.disabled=true;putBack([...BASE,...added.values()].find(x=>x.slug===b.dataset.back))}
   if(a)addFrom(mbRes[+a.dataset.add],a);
 });
-// adding: the facts and covers from MusicBrainz, the covers kept in the crate's own store
+async function putIn(r){
+  try{await api({op:'crate-put',crate:CRATE,slug:r.slug});made.delete(r);q.value='';qSync();arrange(null,r);q.blur();toast(`Added ${r.title}`)}catch(e){toast(e.message)}
+}
+// adding: the facts and covers from MusicBrainz, the covers kept in the crate's own store. In another crate, a record Casey
+// already has goes in from the whole crate; one Casey doesn't have lives in that crate only
 async function addFrom(x,btn){
   btn.disabled=true;btn.textContent='Adding…';
+  const C=crateDef(),own=C&&[...BASE,...added.values()].find(r=>!r.extra&&!EDITS.removed.includes(r.slug)&&r.slug===slugOf(x.artist,x.title));
+  if(own)return putIn(own);
   try{
     let m=x;
     if(x.src==='m'){const d=await fetch('/api/musicbrainz?ids='+x.id).then(r=>r.ok?r.json():{}).catch(()=>({}));m={...x,...d.records?.[0]}}
     const keep=async u=>{if(!u)return'';try{const r=await fetch(u);return r.ok?await upload(await shrink(await r.blob())):''}catch{return''}};
     const [front,back]=await Promise.all([keep(m.front||(m.fallback||'').replace(/front-250$/,'front-1200')),keep(m.back)]);
-    await api({op:'add',record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined}});
+    await api({op:C?'crate-add':'add',crate:C?CRATE:undefined,record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined}});
     const r=added.get(slugOf(m.artist,m.title));q.value='';qSync();arrange(null,r);q.blur();
     toast(`Added ${m.title}`);
   }catch(e){btn.disabled=false;btn.textContent='Add';toast(e.message)}
@@ -3026,13 +3126,17 @@ function blobURL(c){const d=atob(c.toDataURL().split(',')[1]),a=new Uint8Array(d
 function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d');x.drawImage(i,0,0,i.naturalWidth*.03,i.naturalHeight,0,0,4,64);const d=x.getImageData(0,0,4,64).data;let r=0,g=0,b=0;for(let k=0;k<d.length;k+=4){r+=d[k];g+=d[k+1];b+=d[k+2]}const n=d.length/4;res(`rgb(${r/n|0},${g/n|0},${b/n|0})`)}catch{res(null)}};i.onerror=()=>res(null);i.crossOrigin='anonymous';i.src=src})}
 // Casey's crate, or a visitor's crate when the address carries one (vinyl-make.html builds those links)
 // Casey's edits come too (fresh for Casey, a few seconds old for everyone else), unless they're slow: the crate doesn't wait long for them
+// The whole crate doesn't wait long for them; another crate needs them for its list, so it waits longer
 const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(OWNER?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
-Promise.all([fetch('vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,2500))])]).then(async([m,v,ed])=>{
+Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
   if(v&&v.records.length){RECORDS.splice(0,RECORDS.length,...v.records);crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
   else{
     RECORDS.forEach(r=>Object.assign(r,{...m[r.slug],...r})); // a value written in RECORDS wins
     BASE=[...RECORDS];
     if(ed){EDITS=ed.edits||EDITS;EDITABLE=!!(ed.configured&&ed.editable);applyEdits()}
+    // a crate that isn't there (deleted, or a mistyped address): back to all of them
+    if(CRATE!=='all'&&!crateDef()){location.replace(ed?'/casey':'/casey/all');return}
+    nameCrate();
   }
   // a visitor's crate reads its spine colors from the covers; Casey's come with covers.json
   await Promise.race([Promise.all(RECORDS.filter(r=>r.front&&!r.spine).map(async r=>r.spine=await edgeColor(img(r.front)))),new Promise(r=>setTimeout(r,8000))]);

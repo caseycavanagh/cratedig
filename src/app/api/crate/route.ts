@@ -7,16 +7,24 @@
 //     op "restore" slug                  back in the crate
 //     op "patch"   slug, set             { bg, front, back, spine, title, artist, sortAs, year, label, format, links } for a
 //                                         record; null clears one, back to the original. links: { service: url }, "" takes one away
+//   More crates (src/lib/crate.ts, Crate):
+//     op "crate-new"  name, about          a new crate, empty; its slug comes from the name and never changes
+//     op "crate-set"  crate, name?, about? its name and its words ("all" takes words only)
+//     op "crate-pin"  crate | null         the crate that leads on /casey, or none
+//     op "crate-drop" crate                the crate itself; its records stay in the whole crate
+//     op "crate-put"  crate, slug          one of Casey's records into a crate
+//     op "crate-add"  crate, record        a record Casey doesn't own, into that crate only
+//     op "crate-take" crate, slug          a record out of a crate (out of the whole crate is "remove")
 // Covers Casey uploads go to /api/crate/img first and come back as /api/crate/img/<id>.
 import { connection } from "next/server";
 import { kv } from "@/lib/kv";
-import { EDITS, type Edits, type Patch, type Rec, denied, imgKey, ownImg, owner, readEdits, slugOf, usedImgs } from "@/lib/crate";
+import { ALL, EDITS, type Crate, type Edits, type Patch, type Rec, denied, imgKey, ownImg, owner, readEdits, slugOf, usedImgs } from "@/lib/crate";
 
 export async function GET() {
   await connection();
   const run = kv();
   const editable = !!process.env.CRATE_KEY?.trim();
-  if (!run) return Response.json({ configured: false, editable, edits: { added: [], removed: [], patch: {} } });
+  if (!run) return Response.json({ configured: false, editable, edits: { added: [], removed: [], patch: {}, crates: { list: [] } } });
   // the page asks for a fresh copy (?t=…) after Casey edits; everyone else can have one a few seconds old
   return Response.json(
     { configured: true, editable, edits: await readEdits(run) },
@@ -102,9 +110,60 @@ export async function POST(req: Request) {
     } else if (b.set.links === null) delete p.links;
     if (Object.keys(p).length) e.patch[slug] = p;
     else delete e.patch[slug];
+  } else if (typeof b?.op === "string" && b.op.startsWith("crate-")) {
+    const bad = crateEdit(e, b);
+    if (bad) return Response.json({ error: bad }, { status: 400 });
   } else return Response.json({ error: "unknown edit" }, { status: 400 });
 
   const after = usedImgs(e), gone = [...before].filter((id) => !after.has(id));
   await run([["SET", EDITS, JSON.stringify(e)], ...gone.map((id) => ["DEL", imgKey(id)])]);
   return Response.json({ edits: e });
+}
+
+// the crates: returns what went wrong, or nothing
+function crateEdit(e: Edits, b: Record<string, unknown>): string | undefined {
+  const cs = (e.crates ??= { list: [] }), id = typeof b.crate === "string" ? b.crate : "";
+  const c = cs.list.find((x) => x.slug === id);
+  const about = (v: unknown) => (typeof v === "string" ? v.trim().slice(0, 300) || undefined : undefined);
+  if (b.op === "crate-new") {
+    const name = text(b.name, 60);
+    if (!name) return "a crate needs a name";
+    if (cs.list.length >= 100) return "that’s a lot of crates";
+    const root = slugOf(name, "").slice(0, 60) || "crate";
+    let slug = root;
+    for (let n = 2; slug === ALL || cs.list.some((x) => x.slug === slug); n++) slug = `${root}-${n}`;
+    const made: Crate = { slug, name, records: [], extra: [] };
+    if (about(b.about)) made.about = about(b.about);
+    cs.list.push(made);
+    return;
+  }
+  if (b.op === "crate-pin") {
+    if (b.crate === null) delete cs.pinned;
+    else if (id === ALL || c) cs.pinned = id;
+    else return "no such crate";
+    return;
+  }
+  if (b.op === "crate-set" && id === ALL) {
+    if ("about" in b) cs.all = { about: about(b.about) };
+    return;
+  }
+  if (!c) return "no such crate";
+  const slug = typeof b.slug === "string" ? b.slug.slice(0, 200) : "";
+  if (b.op === "crate-set") {
+    if ("name" in b) c.name = text(b.name, 60) ?? c.name;
+    if ("about" in b) c.about = about(b.about);
+  } else if (b.op === "crate-drop") {
+    cs.list = cs.list.filter((x) => x !== c);
+    if (cs.pinned === id) delete cs.pinned;
+  } else if (b.op === "crate-put" && slug) {
+    if (!c.records.includes(slug) && !c.extra.some((x) => x.slug === slug)) c.records.push(slug);
+  } else if (b.op === "crate-add") {
+    const r = record((b.record ?? {}) as Record<string, unknown>);
+    if (!r) return "a record needs an artist and a title";
+    if (c.records.includes(r.slug)) return;
+    c.extra = [...c.extra.filter((x) => x.slug !== r.slug), r];
+  } else if (b.op === "crate-take" && slug) {
+    c.records = c.records.filter((s) => s !== slug);
+    c.extra = c.extra.filter((x) => x.slug !== slug);
+  } else return "unknown edit";
 }

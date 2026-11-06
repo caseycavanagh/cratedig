@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
 import { kv } from "@/lib/kv";
-import { IMG_ID, imgKey, readEdits, slugOf } from "@/lib/crate";
+import { ALL, type Edits, IMG_ID, type Rec, imgKey, readEdits, slugOf } from "@/lib/crate";
 
 // One of Casey's records, for a shared record link (/casey?r=<slug>) and its preview card (/og/r/<slug>).
 // The list is the crate's own: public/index.html's RECORDS, facts from public/vinyl/covers.json, then Casey's edits on top.
@@ -30,11 +30,14 @@ async function edits() {
   return Promise.race([readEdits(run).catch(() => null), new Promise<null>((r) => setTimeout(() => r(null), 1500))]);
 }
 
+const shared = (a: Rec): Shared => ({ slug: a.slug, title: a.title, artist: a.artist, year: a.year, label: a.label, front: a.front });
+
 export async function findRecord(slug: string): Promise<Shared | null> {
   const [all, e] = await Promise.all([base(), edits()]);
   if (e) {
     if (e.removed.includes(slug)) return null;
-    for (const a of e.added) if (a.slug === slug && !all.has(slug)) all.set(slug, { slug, title: a.title, artist: a.artist, year: a.year, label: a.label, front: a.front });
+    // records Casey added, and records that live in one of the other crates
+    for (const a of [...e.added, ...(e.crates?.list ?? []).flatMap((c) => c.extra)]) if (a.slug === slug && !all.has(slug)) all.set(slug, shared(a));
   }
   const r = all.get(slug);
   if (!r) return null;
@@ -104,6 +107,38 @@ export async function crateCovers(n: number, size: number): Promise<string[]> {
 // the crate's first few records with covers, in the crate's order, for the landing page's little crate
 export async function crateFronts(n: number): Promise<Shared[]> {
   return [...(await base()).values()].filter((r) => r.front).slice(0, n);
+}
+
+// Casey's crates, for /casey: the whole crate first, then the others in the order they were made, each with its first few covers
+export type Tile = { slug: string; name: string; about?: string; fronts: string[] };
+export async function crateTiles(n = 4): Promise<{ pinned?: string; list: Tile[] }> {
+  const [all, e] = await Promise.all([base(), edits() as Promise<Edits | null>]);
+  const front = (r: Shared | Rec) => e?.patch[r.slug]?.front || r.front;
+  if (e) for (const a of e.added) if (!all.has(a.slug)) all.set(a.slug, shared(a));
+  const out = new Set(e?.removed ?? []);
+  const owned = [...all.values()].filter((r) => !out.has(r.slug));
+  const covers = (rs: (Shared | Rec)[]) => rs.map(front).filter((f): f is string => !!f).slice(0, n);
+  const cs = e?.crates ?? { list: [] };
+  return {
+    pinned: cs.pinned,
+    list: [
+      { slug: ALL, name: "Everything", about: cs.all?.about, fronts: covers(owned) },
+      ...cs.list.map((c) => ({
+        slug: c.slug,
+        name: c.name,
+        about: c.about,
+        fronts: covers([...c.records.map((s) => all.get(s)).filter((r): r is Shared => !!r && !out.has(r.slug)), ...c.extra]),
+      })),
+    ],
+  };
+}
+
+// a crate's name and words, for its link preview
+export async function crateInfo(slug: string) {
+  const e = await edits();
+  if (slug === ALL) return { name: "Everything", about: e?.crates?.all?.about };
+  const c = e?.crates?.list.find((x) => x.slug === slug);
+  return c ? { name: c.name, about: c.about } : null;
 }
 
 export const facts = (r: Shared) => [r.year, r.label].filter(Boolean).join(", ");

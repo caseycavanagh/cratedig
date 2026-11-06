@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<title>Casey’s crates · Crate Dig</title>
+<meta name="description" content="Every crate of Casey’s records.">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Crate Dig">
+<!-- Casey's crates, served at /casey through src/app/crates, which puts the crates in where main says so. Each crate is at /casey/<slug>, the whole crate at /casey/all. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Crate Dig">
+<meta property="og:title" content="Casey’s crates">
+<meta property="og:description" content="Every crate of Casey’s records.">
+<meta property="og:url" content="/casey">
+<meta property="og:image" content="/og">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Crate Dig: every record Casey owns, flipped through like a crate">
+<meta name="twitter:card" content="summary_large_image">
+<!-- links from when /casey was the whole crate (/casey#record/<slug>, /casey?edit) open it there; the server sends most, but not a bare ?edit -->
+<script>if(location.hash.length>1||/[?&](r|edit|dv|hints|d|m|c)(=|&|$)/.test(location.search))location.replace('/casey/all'+location.search+location.hash)</script>
+<link rel="stylesheet" href="/vinyl/tokens.css">
+<style>
+/* tokens: /vinyl/tokens.css. The leaning stacks are the landing page's; a pinned crate, or the only one, leads big. */
+*,*::before,*::after{box-sizing:border-box}*{margin:0}
+*{font-variant-numeric:tabular-nums}
+html{background:var(--bg)}
+body{font-family:var(--sans);font-size:var(--fs-3);line-height:1.45;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+:focus{outline:none}
+:focus-visible{outline:1px solid var(--ring);outline-offset:4px;border-radius:4px}
+
+.nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:max(20px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) 0 max(24px,env(safe-area-inset-left))}
+.brand{display:flex;align-items:center;gap:10px;font-weight:500;font-size:var(--fs-3)}
+.brand svg{width:24px;height:24px;display:block}
+
+main{max-width:1184px;margin:0 auto;padding:72px max(24px,env(safe-area-inset-right)) 72px max(24px,env(safe-area-inset-left))}
+h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;margin-bottom:40px}
+
+.stk{position:relative;display:block;aspect-ratio:1/1.28;width:100%;max-width:100%}
+.stk .r{position:absolute;left:0;right:0;bottom:0;aspect-ratio:1;transform-origin:50% 100%;transform:translateY(calc(var(--j) * -9%)) scale(calc(1 - var(--j) * .05));filter:brightness(calc(1 - var(--j) * .14));box-shadow:0 10px 24px #0007;border-radius:var(--r-cover);overflow:hidden;background:var(--soft);transition:transform .5s var(--ease)}
+.stk img{display:block;width:100%;height:100%;object-fit:cover}
+a:hover .stk .r,a:focus-visible .stk .r{transform:translateY(calc(var(--j) * -11%)) scale(calc(1 - var(--j) * .05))}
+a:active .stk .r{transition-duration:.15s;transform:translateY(calc(var(--j) * -8%)) scale(calc(1 - var(--j) * .05))}
+.stk.empty .r{background:transparent;box-shadow:none;border:1px dashed var(--line2);filter:none;display:grid;place-items:center}
+.stk.empty .r:not(.j0){border-color:var(--line)}
+.plus{width:40px;height:40px;color:var(--t2);transition:color .2s}
+a:hover .plus,button:hover .plus{color:var(--fg)}
+
+.meta{display:grid;gap:4px;min-width:0}
+.nm{font-weight:500;font-size:var(--fs-4);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.ab{font-size:var(--fs-2);color:var(--t2);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+
+/* the crate that leads: a big stack with its name and words beside it */
+.hero{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:40px;align-items:end;margin-bottom:64px}
+.hero .meta{gap:10px;padding-bottom:16px}
+.hero .nm{font-size:var(--fs-6);letter-spacing:-.02em;line-height:1.1;-webkit-line-clamp:3}
+.hero .ab{font-size:var(--fs-4);-webkit-line-clamp:4;max-width:48ch}
+
+/* the rest, all the same size */
+.crates{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:40px 32px;list-style:none;padding:0}
+.tile{display:grid;gap:12px;min-width:0;align-content:start}
+.new{all:unset;cursor:pointer;display:grid;gap:12px;min-width:0;align-content:start}
+.new .nm{color:var(--t2)}
+
+/* making a crate (Casey only) */
+.mk{margin:auto;width:min(380px,calc(100vw - 32px));padding:24px;border:1px solid var(--line);border-radius:var(--r-panel);background:var(--bg);color:var(--fg);box-shadow:var(--float)}
+.mk::backdrop{background:#0000004d}
+.mk h2{font-size:var(--fs-4);font-weight:500;margin-bottom:16px}
+.mk label{display:block;font-size:var(--fs-1);color:var(--m);margin:0 0 6px}
+.mk input,.mk textarea{display:block;width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--bg);color:var(--fg);font:inherit;font-size:var(--fs-4);margin-bottom:14px;resize:none}
+.mk textarea{height:84px}
+.mk .err{min-height:1.4em;font-size:var(--fs-2);color:var(--t2)}
+.mk .row{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.btn{all:unset;cursor:pointer;height:40px;padding:0 18px;border-radius:var(--r-pill);border:1px solid var(--line);display:inline-flex;align-items:center;font-weight:500}
+.btn:hover{background:var(--soft)}
+.btn.go{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
+.btn:disabled{opacity:.35;cursor:default}
+
+footer{max-width:1184px;margin:0 auto;padding:0 max(24px,env(safe-area-inset-right)) max(40px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));font-family:var(--mono);font-size:var(--fs-2);color:var(--t3)}
+footer a:hover{color:var(--t1)}
+
+@media (max-width:700px){
+  .nav{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+  main{padding:44px max(20px,env(safe-area-inset-right)) 56px max(20px,env(safe-area-inset-left))}
+  h1{font-size:var(--fs-5);margin-bottom:24px}
+  .hero{grid-template-columns:1fr;gap:16px;margin-bottom:40px}
+  .hero .stk{width:78%}
+  .hero .meta{padding:0;gap:6px}
+  .hero .nm{font-size:var(--fs-5)}
+  .hero .ab{font-size:var(--fs-3)}
+  .crates{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 16px}
+  .nm{font-size:var(--fs-3)}
+  .mk input,.mk textarea{font-size:var(--fs-4)}
+  footer{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="/" aria-label="Crate Dig"><svg viewBox="0 0 350 350" fill="currentColor" aria-hidden="true"><path d="M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z"/><path d="M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z"/><path d="M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z"/><path d="M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z"/><path d="M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z"/><path d="M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z"/><path fill-rule="evenodd" d="M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z"/></svg><span>Crate Dig</span></a>
+</header>
+<main>
+  <h1>Casey’s crates</h1>
+  <!--crates-->
+</main>
+<footer><a href="https://caseycavanagh.com">Made by Casey Cavanagh</a></footer>
+<dialog class="mk" id="mk" aria-labelledby="mkH">
+  <form id="mkF">
+    <h2 id="mkH">New crate</h2>
+    <label for="mkN">Name</label>
+    <input id="mkN" maxlength="60" autocomplete="off" required>
+    <label for="mkA">Description</label>
+    <textarea id="mkA" maxlength="300"></textarea>
+    <p class="err" id="mkE" aria-live="polite"></p>
+    <div class="row"><button type="button" class="btn" id="mkX">Cancel</button><button class="btn go" id="mkB">Make it</button></div>
+  </form>
+</dialog>
+<script>
+// Casey's own, on a device unlocked in a crate (?edit): a "New crate" at the end of the list. Nobody else sees it.
+(()=>{
+  let key=null;try{key=localStorage.getItem('records-key')}catch{}
+  const list=document.querySelector('.crates');if(!key||!list)return;
+  const PLUS='<svg class="plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+  const li=document.createElement('li');
+  li.innerHTML=`<button type="button" class="new" id="newC"><span class="stk empty" aria-hidden="true"><span class="r" style="--j:2"></span><span class="r" style="--j:1"></span><span class="r j0" style="--j:0">${PLUS}</span></span><span class="meta"><span class="nm">New crate</span></span></button>`;
+  list.append(li);
+  const d=document.getElementById('mk'),f=document.getElementById('mkF'),err=document.getElementById('mkE');
+  document.getElementById('newC').onclick=()=>{d.showModal();document.getElementById('mkN').focus()};
+  document.getElementById('mkX').onclick=()=>d.close();
+  d.addEventListener('close',()=>{f.reset();err.textContent=''});
+  f.addEventListener('submit',async e=>{
+    e.preventDefault();const b=document.getElementById('mkB'),name=document.getElementById('mkN').value.trim();if(!name)return;b.disabled=true;err.textContent='';
+    const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json','X-Crate-Key':encodeURIComponent(key)},
+      body:JSON.stringify({op:'crate-new',name,about:document.getElementById('mkA').value})}).catch(()=>null);
+    const out=await r?.json().catch(()=>null);b.disabled=false;
+    if(!r?.ok){err.textContent=r?.status===401?'Your key stopped working. Open a crate with ?edit to unlock again':out?.error?out.error[0].toUpperCase()+out.error.slice(1):'That didn’t save';return}
+    const made=out.edits.crates.list.at(-1);
+    try{sessionStorage.setItem('records-editing','1')}catch{}
+    location.href='/casey/'+made.slug;
+  });
+})();
+</script>
+</body>
+</html>
