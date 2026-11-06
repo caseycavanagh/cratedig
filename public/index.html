@@ -2115,7 +2115,7 @@ function linkHTML(r){
     const more=RECORDS.filter(x=>x!==r&&same(FIELD[k](x),v)&&!same(x.artist,r.artist)).slice(0,4);
     if(!more.length)continue;
     const why=k==='producer'?`Also produced by ${credHTML(k,v)}`:same(more[0].artist,v)?`${credHTML(k,v)} plays on this record`:`Also with ${credHTML(k,v)}`;
-    return`<p class="ohd">In your crate</p><p class="why">${why}</p><div class="thumbs">${more.map(x=>`<button type="button" class="nb" data-slug="${x.slug}" aria-label="${x.title} by ${x.artist}">${x.front?`<img alt="" src="${img(x.thumb||x.front)}" decoding="async" draggable="false">`:`<i style="background:${spineBg(x)}"></i>`}</button>`).join('')}</div>`;
+    return`<p class="why">${why}</p><div class="thumbs">${more.map(x=>`<button type="button" class="nb" data-slug="${x.slug}" aria-label="${x.title} by ${x.artist}">${x.front?`<img alt="" src="${img(x.thumb||x.front)}" decoding="async" draggable="false">`:`<i style="background:${spineBg(x)}"></i>`}</button>`).join('')}</div>`;
   }
   return'';
 }
@@ -2162,7 +2162,7 @@ function knowCrate(){
       setTimeout(step,2500);
     });
 }
-// names just learned can link up on the open record: its details redrawn in place, In your crate fading in if it now has covers
+// names just learned can link up on the open record: its details redrawn in place, its related covers fading in if it now has some
 function relink(){
   const r=order[cur];if(open.hidden||!r||!LDONE.has(r.slug))return;const l=LDONE.get(r.slug);
   const d=$('#odets');if(d&&!d.hidden)d.innerHTML=detsHTML(r,l);
