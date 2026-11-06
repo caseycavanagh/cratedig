@@ -972,8 +972,9 @@ html.phone.deck .dv{display:none}
 .loading{--p:0;perspective:1400px}
 body:not(.ready) .loading{pointer-events:auto}
 .loading .lpose{transform-style:preserve-3d}
+/* the sleeve is placed by transforms alone, centered and then posed, so moving it to the crate is never a layout shift */
+.loading .lbox{position:absolute;left:0;top:0;translate:calc(50vw - 50%) calc(50vh - 50%)}
 .loading.posed{perspective:none}
-.loading.posed .lbox{position:absolute}
 .loading.posed .lpose{position:absolute;left:0;top:0;transform-origin:0 0}
 .loading .lsl{--S:min(480px,62vw,60vh);position:relative;width:var(--S);height:var(--S);border-radius:var(--rec);overflow:hidden;will-change:transform;opacity:0;transition:opacity .3s ease-out;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/160px,#1d1d1f;background-blend-mode:overlay;
@@ -2002,7 +2003,7 @@ function loadPose(){
     M=M.translate(parseFloat(s.left),parseFloat(s.top)).translate(ox,oy,oz).multiply(new DOMMatrix(s.transform==='none'?undefined:s.transform)).translate(-ox,-oy,-oz);
   }
   const ft=getComputedStyle($('.fr',node)).transform;if(ft&&ft!=='none')M=M.multiply(new DOMMatrix(ft));
-  Object.assign($('#lbox').style,{left:cr.left+'px',top:cr.top-dy+'px',width:cr.width+'px',height:cr.height+'px',perspective:cs.perspective,perspectiveOrigin:cs.perspectiveOrigin});
+  Object.assign($('#lbox').style,{translate:`${cr.left}px ${cr.top-dy}px`,width:cr.width+'px',height:cr.height+'px',perspective:cs.perspective,perspectiveOrigin:cs.perspectiveOrigin});
   $('#lpose').style.transform=M.toString();$('#lsl').style.setProperty('--S',node.offsetWidth+'px');
   L.classList.add('posed');
 }
