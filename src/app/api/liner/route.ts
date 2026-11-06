@@ -21,7 +21,7 @@ const MBID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 type Side = { side: string; tracks: string[] };
 type Credits = { producer: string[]; studio: string[]; recorded: string; players: [string, string][]; sleeve: [string, string][] };
-type Liner = { sides: Side[]; minutes: number; about: { text: string; url: string } | null; genres: string[]; credits: Credits | null };
+type Liner = { sides: Side[]; minutes: number; about: { text: string; url: string } | null; genres: string[]; credits: Credits | null; keyed?: boolean };
 const VERSION = "v2";
 
 // answers, kept between requests
@@ -137,6 +137,9 @@ export async function GET(request: NextRequest) {
   const store = kv();
   let liner = kept.get(key);
   if (!liner && store) liner = await store([["GET", `crate:liner:${key}`]]).then((r) => (r[0] ? (JSON.parse(r[0] as string) as Liner) : undefined)).catch(() => undefined);
+  // an answer kept from before ANTHROPIC_API_KEY was set has the plain About: look it up again, once, to write it
+  const keyed = !!process.env.ANTHROPIC_API_KEY;
+  if (liner?.about && keyed && !liner.keyed) liner = undefined;
   if (!liner) {
     let t: { sides: Side[]; ms: number } = { sides: [], ms: 0 };
     if (d) t = await fromDiscogs(d).catch(() => t);
@@ -146,7 +149,7 @@ export async function GET(request: NextRequest) {
       group ||= m.group;
     }
     if (!t.sides.length && a) t = await fromApple(a).catch(() => t);
-    liner = { sides: t.sides, minutes: Math.round(t.ms / 60000), ...(await notes(group, artist, title)) };
+    liner = { sides: t.sides, minutes: Math.round(t.ms / 60000), ...(await notes(group, artist, title)), keyed };
     if (store && (liner.sides.length || liner.about)) await store([["SET", `crate:liner:${key}`, JSON.stringify(liner), "EX", 2592000]]).catch(() => null);
   }
   kept.set(key, liner);
