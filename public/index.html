@@ -1120,6 +1120,10 @@ html.phone .play .btn{height:var(--pb);font-size:var(--fs-3);padding:0 22px 0 18
 .chip .cn{padding:0 2px 0 16px;flex:0 1 auto}
 .chip>b{padding-left:16px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip .cn b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* what kind of name it is (Producer:, Label:), quieter than the name, and the last to give way */
+.chip .ck{flex:none;font-style:normal;color:var(--m);padding-right:5px}
+.chip>.ck{padding-left:16px}
+.chip>.ck+b{padding-left:0}
 .chip .cx{flex:none;padding:0 14px 0 8px}
 .chip .cx:hover svg{color:var(--fg)}
 .chip .cn:focus-visible,.chip .cx:focus-visible{outline:1px solid var(--ring);outline-offset:-2px;border-radius:var(--r-pill)}
@@ -1924,7 +1928,8 @@ function choices(k){
 function showChip(){
   const f=filt&&filt.k!=='q'?filt:null;chip.hidden=!f;menuOff();if(!f)return;
   const v=asRead(f.k,f.v),pick=KINDS[f.k];
-  chip.innerHTML=(pick?`<button type="button" class="cn" aria-expanded="false" aria-controls="cmenu" aria-label="${pick}: ${escC(v)}. Choose another"><b>${escC(v)}</b></button>`:`<b>${escC(v)}</b>`)
+  const kind=`<i class="ck">${KIND[f.k]}:</i>`;
+  chip.innerHTML=(pick?`<button type="button" class="cn" aria-expanded="false" aria-controls="cmenu" aria-label="${pick}: ${escC(v)}. Choose another">${kind}<b>${escC(v)}</b></button>`:`${kind}<b>${escC(v)}</b>`)
     +`<button type="button" class="cx" aria-label="Show the whole crate">${X_ICON}</button>`;
 }
 function menuOff(){const cmenu=$('#cmenu');if(cmenu.hidden)return;cmenu.hidden=true;$('.cn',chip)?.setAttribute('aria-expanded','false')}
