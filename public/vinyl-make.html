@@ -270,6 +270,8 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&mine.classList.contains('up'
     try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s){$('#name').value=s.name||'';crate=s.crate||[]}}catch{}
   }
   render();
+  // a search started on the landing page carries on here
+  const q=(p.get('q')||'').trim();if(q){$('#q').value=q;find(q)}
 })();
 </script>
 </body>
