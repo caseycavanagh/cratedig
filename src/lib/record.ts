@@ -104,11 +104,6 @@ export async function crateCovers(n: number, size: number): Promise<string[]> {
   return (await Promise.all(all.map((r) => coverData(r.front, size)))).filter((x): x is string => !!x);
 }
 
-// the crate's first few records with covers, in the crate's order, for the landing page's little crate
-export async function crateFronts(n: number): Promise<Shared[]> {
-  return [...(await base()).values()].filter((r) => r.front).slice(0, n);
-}
-
 // Casey's crates, for /casey: the whole crate first, then the others in the order they were made, each with its first few covers
 export type Tile = { slug: string; name: string; about?: string; fronts: string[] };
 export async function crateTiles(n = 4): Promise<{ pinned?: string; list: Tile[] }> {
