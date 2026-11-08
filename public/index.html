@@ -2122,7 +2122,7 @@ function choices(k){
 // The filters you're in sit in a row of small pills just under the crate's name, each with its own ×, and Clear once there are two.
 // A year, label or artist's name opens a menu of the others of that kind. While the search is open they sit in its field instead.
 const fsEl=document.createElement('div');fsEl.className='fs';fsEl.id='fs';fsEl.setAttribute('role','group');fsEl.setAttribute('aria-label','Filters');fsEl.hidden=true;
-fsEl.innerHTML='<div class="fs-in"></div><button type="button" class="fclr" hidden>Clear all</button>';$('.find').after(fsEl);document.body.append($('#cmenu'));
+fsEl.innerHTML='<div class="fs-in"></div>';$('.find').after(fsEl);document.body.append($('#cmenu'));
 const qt=document.createElement('span');qt.className='qt';qt.id='qt';qt.hidden=true;q.before(qt);
 const tagHTML=(f,i,menu)=>{const v=escC(asRead(f.k,f.v)),kind=`<i class="ck">${KIND[f.k]}:</i>`;
   return (menu&&KINDS[f.k]?`<button type="button" class="cn" data-i="${i}" aria-expanded="false" aria-controls="cmenu" aria-label="${KIND[f.k]}: ${v}. Choose another">${kind}<b>${v}</b></button>`:`<span class="cn">${kind}<b>${v}</b></span>`)
@@ -2130,11 +2130,11 @@ const tagHTML=(f,i,menu)=>{const v=escC(asRead(f.k,f.v)),kind=`<i class="ck">${K
 function showChip(){
   chip.hidden=true;menuOff();roomForName();
   const n=FS.length,fin=fsEl.firstChild;document.body.classList.toggle('fon',!!n);fsEl.hidden=!n;
-  fin.innerHTML=FS.map((f,i)=>`<span class="fp">${tagHTML(f,i,true)}</span>`).join('');$('.fclr',fsEl).hidden=n<2;
+  fin.innerHTML=FS.map((f,i)=>`<span class="fp">${tagHTML(f,i,true)}</span>`).join('')+(n>1?'<button type="button" class="fclr">Clear all</button>':'');
   qt.innerHTML=FS.map((f,i)=>`<span class="qtk">${tagHTML(f,i)}</span>`).join('');qt.hidden=!n;
   fits();
 }
-// in a row from the left, Clear all after them; once they don't fit, Clear all holds the right end and the row slides sideways and fades at its edges, and the field shows its newest
+// in a row from the left, Clear all at its end; once they don't fit, the row slides sideways and fades at its edges, and the field shows its newest
 function fits(){edges();qt.scrollLeft=qt.scrollWidth;qt.classList.toggle('over',qt.scrollLeft>0)}
 // each edge fades only while there's more past it
 function edges(){const fin=fsEl.firstChild,x=fin.scrollLeft,m=fin.scrollWidth-fin.clientWidth;fsEl.classList.toggle('fl',x>1);fsEl.classList.toggle('fr',x<m-1)}
@@ -4370,10 +4370,6 @@ html.phone .ab-sh{margin-top:20px}
 .fs-in{--fl:0px;--fr:0px;-webkit-mask:linear-gradient(90deg,#0000,#000 var(--fl),#000 calc(100% - var(--fr)),#0000);mask:linear-gradient(90deg,#0000,#000 var(--fl),#000 calc(100% - var(--fr)),#0000)}
 .fs.fl .fs-in{--fl:64px}
 .fs.fr .fs-in{--fr:64px}
-/* Clear all stays put after the row, at the right end once the row runs past it */
-.fs .fclr{pointer-events:auto;margin-left:-6px;padding:0 max(14px,env(safe-area-inset-right)) 0 8px}
-.fs .fclr[hidden]{display:none}
-.fs:has(.fclr:not([hidden])) .fs-in{padding-right:6px}
 .fp{flex:none;display:inline-flex;align-items:center;height:36px;max-width:min(320px,calc(100vw - 28px));box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);font-size:var(--fs-2);color:var(--fg);white-space:nowrap;transition:border-color .2s;animation:trayIn .3s var(--ease)}
 .fp:hover{border-color:#ffffff40}
 .fp .cn,.fp .cx,.qtk .cx{all:unset;box-sizing:border-box;height:100%;display:inline-flex;align-items:center;min-width:0}
