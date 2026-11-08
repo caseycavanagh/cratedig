@@ -5,8 +5,10 @@
 //     op "add"     record                a record: artist, title, year, label, format, front, back, spine, spotify, links
 //     op "remove"  slug                  off the crate (kept, covers and all, so it can be put back)
 //     op "restore" slug                  back in the crate
-//     op "patch"   slug, set             { bg, front, back, spine, title, artist, sortAs, year, label, format, links } for a
-//                                         record; null clears one, back to the original. links: { service: url }, "" takes one away
+//     op "patch"   slug, set             { bg, front, back, spine, title, artist, sortAs, year, label, format, links, notes } for a
+//                                         record; null clears one, back to the original. links: { service: url }, "" takes one away.
+//                                         notes: { about, producer, recorded, minutes, genres, players, sleeve } over the liner notes,
+//                                         each null to go back to what was found, or empty to hide it
 //   More crates (src/lib/crate.ts, Crate):
 //     op "crate-new"  name, about          a new crate, empty; its slug comes from the name and never changes
 //     op "crate-set"  crate, name?, about? its name and its words ("all" takes words only)
@@ -18,7 +20,7 @@
 // Covers Casey uploads go to /api/crate/img first and come back as /api/crate/img/<id>.
 import { connection } from "next/server";
 import { kv } from "@/lib/kv";
-import { ALL, EDITS, type Crate, type Edits, type Patch, type Rec, denied, imgKey, ownImg, owner, readEdits, slugOf, usedImgs } from "@/lib/crate";
+import { ALL, EDITS, type Crate, type Edits, type Notes, type Patch, type Rec, denied, imgKey, ownImg, owner, readEdits, slugOf, usedImgs } from "@/lib/crate";
 
 export async function GET() {
   await connection();
@@ -37,6 +39,28 @@ const text = (v: unknown, max = 200) => (typeof v === "string" && v.trim() ? v.t
 const color = (v: unknown) => (typeof v === "string" && /^(#[0-9a-f]{6}|rgb\(\d{1,3},\s?\d{1,3},\s?\d{1,3}\))$/i.test(v) ? v : undefined);
 // a cover is one of Casey's uploads or an image on the web
 const image = (v: unknown) => (typeof v === "string" && (ownImg(v) || /^https:\/\/[^\s"'<>]+$/.test(v)) ? v.slice(0, 500) : undefined);
+
+// the liner notes Casey writes in: each one cleaned, or undefined when it isn't the right shape
+const line = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : undefined);
+const names = (v: unknown, n: number) =>
+  Array.isArray(v) ? v.map((x) => line(x, 120)).filter((x): x is string => !!x).slice(0, n) : undefined;
+const pairs = (v: unknown, n: number) =>
+  Array.isArray(v)
+    ? v
+        .filter((x): x is unknown[] => Array.isArray(x))
+        .map((x) => [line(x[0], 120) ?? "", line(x[1], 120) ?? ""] as [string, string])
+        .filter((x) => x[0] || x[1])
+        .slice(0, n)
+    : undefined;
+const NOTES: Record<keyof Notes, (v: unknown) => unknown> = {
+  about: (v) => line(v, 2000),
+  producer: (v) => names(v, 12),
+  recorded: (v) => line(v, 200),
+  minutes: (v) => (v === "" ? "" : typeof v === "number" && v > 0 && v < 1000 ? Math.round(v) : undefined),
+  genres: (v) => names(v, 8),
+  players: (v) => pairs(v, 40),
+  sleeve: (v) => pairs(v, 20),
+};
 
 function record(b: Record<string, unknown>): Rec | null {
   const artist = text(b.artist), title = text(b.title);
@@ -108,6 +132,20 @@ export async function POST(req: Request) {
       if (Object.keys(l).length) p.links = l;
       else delete p.links;
     } else if (b.set.links === null) delete p.links;
+    if (b.set.notes && typeof b.set.notes === "object") {
+      const n: Notes = { ...p.notes };
+      for (const [k, v] of Object.entries(b.set.notes as Record<string, unknown>)) {
+        if (!(k in NOTES)) continue;
+        const key = k as keyof Notes;
+        if (v === null) delete n[key];
+        else {
+          const ok = NOTES[key](v);
+          if (ok !== undefined) (n as Record<string, unknown>)[key] = ok;
+        }
+      }
+      if (Object.keys(n).length) p.notes = n;
+      else delete p.notes;
+    } else if (b.set.notes === null) delete p.notes;
     if (Object.keys(p).length) e.patch[slug] = p;
     else delete e.patch[slug];
   } else if (typeof b?.op === "string" && b.op.startsWith("crate-")) {
