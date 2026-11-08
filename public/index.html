@@ -656,7 +656,8 @@ html.phone .play-m{border-radius:var(--r-panel);background:var(--sheet)}
 .facts .meta:hover{color:var(--fg)}
 .facts .meta{display:inline}
 /* below Play: a few lines about the record, then covers of others that share its artist, label or year */
-.o-info .ab,.o-info .near,.o-info .dets{margin-top:28px}
+.o-info{--sec:28px} /* the space between sections */
+.o-info .ab,.o-info .near,.o-info .dets{margin-top:var(--sec)}
 /* who made it: labels on the left, names on the right, each role quiet beside its name */
 .dets dl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:7px 16px;margin:0;font-size:var(--fs-3);line-height:1.45}
 .dets dt{color:var(--m)}
@@ -719,6 +720,8 @@ html.phone .o-page{align-items:stretch}
 /* the record and a details block of fixed height, centered together: the record sits in the same place for every title */
 html.phone .o-grid{gap:var(--gap);justify-content:center}
 html.phone .o-info{flex:none;min-height:var(--info)}
+/* at the end of the page, the last section sits a section's space above the bottom bar: --bot already leaves about half of it */
+html.phone .o-info{padding-bottom:calc(var(--sec)/2)}
 html.phone .o-info h2{font-size:var(--tl);line-height:1.12;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;text-wrap:balance}
 html.phone .o-info .by{font-size:var(--fs-4);line-height:24px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.phone .facts{margin-top:calc(var(--fm)*.5)}
