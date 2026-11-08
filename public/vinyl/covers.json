@@ -1685,5 +1685,18 @@
     "front": "mt-joy-mt-joy-front.webp",
     "frontSource": "caa",
     "spine": "#91726a"
+  },
+  "hiss-golden-messenger-im-people": {
+    "year": 2026,
+    "label": "Chrysalis",
+    "group": "a034edbd-1b5a-4dba-8651-ab34f1d69cdd",
+    "release": "60ea95cb-8a5d-4b02-bf4f-e18bfae7e407",
+    "links": {
+      "appleMusic": "https://music.apple.com/us/album/im-people/1862131785",
+      "deezer": "https://www.deezer.com/album/879265212"
+    },
+    "front": "hiss-golden-messenger-im-people-front.webp",
+    "frontSource": "apple",
+    "spine": "#ae9f91"
   }
 }
