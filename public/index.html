@@ -2119,7 +2119,7 @@ function choices(k){
   const az=x=>x.s.replace(/^the\s+/i,'');
   return[...m.values()].sort((a,b)=>k==='year'?a.v-b.v:az(a).localeCompare(az(b)));
 }
-// The filters you're in sit in a row of small pills just above the bar, each with its own ×, and Clear once there are two.
+// The filters you're in sit in a row of small pills just under the crate's name, each with its own ×, and Clear once there are two.
 // A year, label or artist's name opens a menu of the others of that kind. While the search is open they sit in its field instead.
 const fsEl=document.createElement('div');fsEl.className='fs';fsEl.id='fs';fsEl.setAttribute('role','group');fsEl.setAttribute('aria-label','Filters');fsEl.hidden=true;
 fsEl.innerHTML='<div class="fs-in"></div>';$('.find').after(fsEl);document.body.append($('#cmenu'));
@@ -2134,7 +2134,7 @@ function showChip(){
   qt.innerHTML=FS.map((f,i)=>`<span class="qtk">${tagHTML(f,i)}</span>`).join('');qt.hidden=!n;
   fits();
 }
-// centered while they fit; once they don't, the row slides sideways and fades at its edges, and the field shows its newest
+// in a row from the left; once they don't fit, the row slides sideways and fades at its edges, and the field shows its newest
 function fits(){const fin=fsEl.firstChild;fsEl.classList.toggle('over',fin.scrollWidth>fin.clientWidth+1);qt.scrollLeft=qt.scrollWidth;qt.classList.toggle('over',qt.scrollLeft>0)}
 addEventListener('resize',fits);q.addEventListener('focus',()=>requestAnimationFrame(fits));qt.addEventListener('scroll',()=>qt.classList.toggle('over',qt.scrollLeft>0),{passive:true});
 function takeOff(i){const f=FS[i];if(!f)return;arrange({fs:FS.filter((_,j)=>j!==i),q:QW});if(!filt)say('The whole crate.')}
@@ -2156,8 +2156,8 @@ function menuOn(i){
   cmenu.innerHTML=`<p class="ch">${KINDS[f.k]}</p><ul>${list.map((c,j)=>`<li><button type="button" data-i="${j}"${same(String(c.v),String(f.v))?' aria-current="true"':''}><span>${escC(c.s)}</span></button></li>`).join('')}</ul>`;
   cmenu.list=list;cmenu.i=i;cmenu.hidden=false;
   const b=$(`.cn[data-i="${i}"]`,fsEl);b.setAttribute('aria-expanded','true');
-  // it rises from its pill
-  const r=b.parentNode.getBoundingClientRect();cmenu.style.bottom=(innerHeight-r.top+8)+'px';
+  // it drops from its pill
+  const r=b.parentNode.getBoundingClientRect();cmenu.style.top=(r.bottom+8)+'px';
   if(!PHONE){const W=cmenu.offsetWidth;cmenu.style.left=Math.max(12,Math.min(innerWidth-W-12,r.left+r.width/2-W/2))+'px'}
   const on=$('[aria-current]',cmenu);if(on){const ul=$('ul',cmenu);ul.scrollTop=on.offsetTop-ul.clientHeight/2+on.offsetHeight/2;on.focus({preventScroll:true})}
 }
@@ -4357,9 +4357,9 @@ html.phone .ab-sh{margin-top:20px}
 })();
 </script>
 <style>
-/* the filters you're in: small pills in a row just above the bar, centered while they fit, sliding sideways once they don't */
-.fs{position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 12px);display:flex;justify-content:center;pointer-events:none;transition:opacity .2s,visibility 0s}
-html.phone .fs{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 12px)}
+/* the filters you're in: small pills in a row just under the crate's name, lined up with the logo, staying put while the crate
+   scrolls under them; they slide sideways once they don't fit */
+.fs{position:fixed;z-index:var(--z-bar);left:0;right:0;top:calc(env(safe-area-inset-top) + 70px);display:flex;justify-content:flex-start;pointer-events:none;transition:opacity .2s,visibility 0s}
 .fs[hidden]{display:none}
 .fs-in{display:flex;align-items:center;gap:8px;max-width:100%;box-sizing:border-box;padding:2px max(14px,env(safe-area-inset-right)) 2px max(14px,env(safe-area-inset-left));overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;pointer-events:auto}
 .fs-in::-webkit-scrollbar{display:none}
@@ -4379,13 +4379,11 @@ html.phone .fs{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 12px)}
 .fp .cn:focus-visible,.fp .cx:focus-visible,.fclr:focus-visible,.qtk .cx:focus-visible{outline:1px solid var(--ring);outline-offset:-2px;border-radius:var(--r-pill)}
 @media(prefers-reduced-motion:reduce){.fp{animation:none}}
 /* out of the way while the search is open (they're in its field), a record is out, or a stack or a toast is up over the bar */
-body:not(.ready) .fs,body.searching .fs,body:has(#qf:focus-within) .fs,body:has(#qf.has) .fs,html:has(.open:not([hidden])) .fs,body.stacking .fs,.dsay.on~.fs{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
-/* the dial, the grid and the table make room above them */
-body.fon .kd,body.fon.filtering .kd,body.fon.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 34px + 44px)}
-html.phone body.fon .kd,html.phone body.fon.filtering .kd,html.phone body.fon.quiet .kd{bottom:calc(env(safe-area-inset-bottom) + 14px + 58px + 34px + 44px)}
-body.fon .wall,body.fon .tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 168px)}
-/* the swap menu rises from its pill */
-.cmenu{position:fixed;top:auto;translate:none}
+body:not(.ready) .fs,body.searching .fs,body:has(#qf:focus-within) .fs,body:has(#qf.has) .fs,html:has(.open:not([hidden])) .fs{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+/* the grid and the table start below them */
+body.fon .wall,body.fon .tbl{padding-top:calc(env(safe-area-inset-top) + 72px + 48px)}
+/* the swap menu drops from its pill */
+.cmenu{position:fixed;translate:none}
 html.phone .cmenu{left:12px;right:12px}
 /* while searching, the filters are tokens in the field, before the words; the newest stays in view */
 .qt{display:flex;align-items:center;gap:6px;flex:0 1 auto;min-width:0;max-width:62%;overflow-x:auto;scrollbar-width:none;margin-left:calc(var(--H,54px)/2 + 22px)}
