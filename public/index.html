@@ -435,14 +435,127 @@ html[data-theme=dark] .qnone{box-shadow:var(--float)}
 .own-c:has(input:focus-visible){outline:1px solid var(--ring);outline-offset:2px}
 .own-k{position:relative}
 .own-k select{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;font-size:var(--fs-4)}
-/* the crate's name, top left: back to all of Casey's crates. While editing, it opens the crate's own settings */
-.where{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 16px);left:calc(max(14px,env(safe-area-inset-left)) + 46px);display:flex;align-items:center;max-width:min(320px,calc(100vw - 200px));
-  height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);text-decoration:none;transition:color .2s,background .2s,opacity .3s}
-.where span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-body.searching .where,body.reading .where,.where.tuck{opacity:0;pointer-events:none}
-.where:hover{color:var(--fg);background:var(--hov)}
-body.editing-on .where{color:var(--fg);border:1px solid var(--line)}
-body:not(.ready) .where{opacity:0}
+/* the crate's name, top left: it opens the crates (switch, and on Casey's devices make one). Edit sits right after it, on Casey's devices */
+.wbar{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 16px);left:calc(max(14px,env(safe-area-inset-left)) + 46px);display:flex;align-items:center;gap:6px;max-width:calc(100vw - 120px);transition:opacity .3s}
+.where{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:4px;min-width:0;max-width:min(320px,calc(100vw - 200px));
+  height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);transition:color .2s,background .2s,opacity .3s}
+.where[hidden]{display:none}
+#whereN{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.where .wc{display:none;flex:none;width:16px;height:16px;margin-right:-4px}
+.where.menu{cursor:pointer;padding-right:10px}
+.where.menu .wc{display:block}
+.where[aria-expanded=true]{color:var(--fg);background:var(--hov)}
+@media(hover:hover){.where.menu:hover{color:var(--fg);background:var(--hov)}}
+.where:focus-visible,.wedit:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+body.searching .wbar,body.reading .wbar,.wbar.tuck{opacity:0;pointer-events:none}
+body.editing-on .where{color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+body:not(.ready) .wbar{opacity:0}
+.wedit{all:unset;box-sizing:border-box;cursor:pointer;flex:none;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 10px;border-radius:var(--r-pill);border:1px solid var(--line);font-size:var(--fs-2);font-weight:500;color:var(--t1);transition:color .2s,border-color .2s,transform .5s var(--ease)}
+.wedit[hidden]{display:none}
+.wedit svg{width:14px;height:14px}
+@media(hover:hover){.wedit:hover{color:var(--fg);border-color:var(--m)}}
+.wedit:active{transform:scale(.97);transition-duration:.08s}
+/* the crates, under the name; on a phone, a sheet from the bottom */
+.wm{position:fixed;z-index:var(--z-pop);top:calc(env(safe-area-inset-top) + 54px);left:calc(max(14px,env(safe-area-inset-left)) + 40px);width:300px;max-height:min(520px,calc(100svh - 120px));overflow:auto;overscroll-behavior:contain;box-sizing:border-box;padding:6px;border-radius:var(--r-panel);background:var(--sheet);border:1px solid var(--line);box-shadow:var(--float)}
+.wm[hidden]{display:none}
+.wm .wr{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:6px 10px 6px 8px;border-radius:var(--r-in);font-size:var(--fs-3);color:var(--t1)}
+.wm .wr:hover{background:var(--hov);color:var(--fg)}
+.wm .wr:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
+.wm .wr.cur{color:var(--fg)}
+.wm .wn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wm .wcv{flex:none;width:30px;height:30px;border-radius:var(--r-cover);overflow:hidden;background:var(--soft)}
+.wm .wcv img,.wm .wcv i{display:block;width:100%;height:100%;object-fit:cover}
+.wm .wic{flex:none;width:30px;display:grid;place-items:center}
+.wm svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;display:block}
+.wm .wck{flex:none;color:var(--fg)}
+.wm hr{border:0;border-top:1px solid var(--line);margin:6px 8px}
+.wm .wgrab{display:block;width:36px;height:4px;border-radius:2px;background:var(--t4);margin:2px auto 10px}
+.wm.sheet{top:auto;left:0;right:0;bottom:0;width:auto;max-height:min(80svh,640px);padding:8px max(14px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 18px) max(14px,env(safe-area-inset-left));border-radius:var(--r-panel) var(--r-panel) 0 0;border-width:1px 0 0}
+.wm.sheet .wr{min-height:56px;font-size:var(--fs-4)}
+.wm.sheet .wcv{width:40px;height:40px}
+.wm .wbtns{display:flex;gap:8px;margin-top:12px}
+.wm .wbtns .btn{flex:1;justify-content:center;height:48px;gap:8px;font-size:var(--fs-3)}
+.wm .wbtns .btn.w{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
+html.phone body.wm-on::after{content:'';position:fixed;inset:0;z-index:calc(var(--z-pop) - 1);background:#0000004d}
+/* while editing, the tools take the bar's place at the bottom; Add brings search back over them */
+body.editing-on:not(.adding) .dock,body.editing-on:not(.adding) .dsay{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+body.editing-on.adding .dock{transition:opacity .25s,visibility 0s}
+.crate-d [hidden]{display:none!important}
+.eb{position:fixed;z-index:var(--z-raised);left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);translate:-50% 0;display:flex;align-items:center;gap:2px;padding:6px;border-radius:var(--r-panel);background:var(--sheet);border:1px solid var(--line);box-shadow:var(--float);transition:opacity .25s,visibility 0s}
+.eb[hidden]{display:none}
+body.adding .eb,body:not(.ready) .eb{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+.ebb{all:unset;box-sizing:border-box;position:relative;cursor:pointer;flex:none;display:grid;justify-items:center;gap:3px;min-width:56px;padding:8px 10px 6px;border-radius:var(--r-in);font-size:var(--fs-1);color:var(--t1);transition:color .2s,background .2s,transform .5s var(--ease)}
+.ebb:hover{color:var(--fg);background:var(--hov)}
+.ebb:active{transform:scale(.96);transition-duration:.08s}
+.ebb.on,.ebb[aria-expanded=true]{color:var(--fg);background:var(--sel)}
+.ebb:focus-visible,.ebd:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
+.eb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;display:block}
+.ebb input[type=color]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+.ebx{display:none}
+.ebs{flex:none;width:1px;align-self:stretch;margin:6px 4px;background:var(--line)}
+.ebd{all:unset;box-sizing:border-box;cursor:pointer;flex:none;display:inline-flex;align-items:center;height:34px;margin:0 6px;padding:0 14px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);font-size:var(--fs-2);font-weight:500;transition:transform .5s var(--ease)}
+.ebd:active{transform:scale(.96);transition-duration:.08s}
+.ebd svg{display:none}
+html.phone .eb{left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));translate:none;justify-content:space-between;bottom:calc(env(safe-area-inset-bottom) + 14px)}
+html.phone .ebb{min-width:0;padding:8px 2px 6px;flex:1;white-space:nowrap}
+html.phone .ebb span{font-size:11px}
+html.phone .ebs{display:none}
+html.phone .ebd{width:44px;height:44px;margin:0 0 0 4px;padding:0;justify-content:center;border-radius:50%}
+html.phone .ebd span{display:none}
+html.phone .ebd svg{display:block}
+html.phone body.reading .ebx{display:grid;align-content:center;min-width:44px;flex:none}
+/* covers and crates open small menus above the bar */
+.ebp{position:fixed;z-index:var(--z-pop);min-width:220px;max-width:calc(100vw - 24px);max-height:min(420px,60svh);overflow:auto;box-sizing:border-box;padding:6px;border-radius:var(--r-panel);background:var(--sheet);border:1px solid var(--line);box-shadow:var(--float)}
+.ebp[hidden]{display:none}
+.ebp button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:0 12px;border-radius:var(--r-in);font-size:var(--fs-3);color:var(--t1)}
+.ebp button:hover{background:var(--hov);color:var(--fg)}
+.ebp button:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
+.ebp button span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ebp button svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.ebp .ebc.on{color:var(--fg)}
+.ebp .ebc.on svg{opacity:1}
+.ebp [aria-disabled=true]{cursor:default;color:var(--m)!important;background:none!important}
+.ebp hr{border:0;border-top:1px solid var(--line);margin:6px 8px}
+.ebp .ebh{padding:8px 12px 4px;font-size:var(--fs-1);color:var(--m)}
+.ebp .ebn{padding:6px 12px 8px;font-size:var(--fs-2);color:var(--m);max-width:240px}
+/* the record sheet: everything about one record. On a laptop at the right, the crate moving over; on a phone, from the bottom */
+.rs{position:fixed;z-index:var(--z-pop);top:16px;right:16px;bottom:16px;width:400px;box-sizing:border-box;display:flex;flex-direction:column;border-radius:var(--r-panel);background:var(--sheet);border:1px solid var(--line);box-shadow:var(--float)}
+.rs[hidden]{display:none}
+.rs-h{flex:none;display:flex;align-items:center;gap:12px;padding:16px 12px 14px 20px;border-bottom:1px solid var(--line)}
+.rs-c{flex:none;width:40px;height:40px;border-radius:var(--r-cover);overflow:hidden;background:var(--soft)}
+.rs-c img,.rs-c i{display:block;width:100%;height:100%;object-fit:cover}
+.rs-n{flex:1;min-width:0;display:grid;line-height:1.3}
+.rs-n b{font-weight:500;font-size:var(--fs-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs-n span{font-size:var(--fs-2);color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs-s{flex:none;font-size:var(--fs-1);color:var(--m);opacity:0;transition:opacity .3s}
+.rs-s.on{opacity:1}
+.rs-x{all:unset;cursor:pointer;flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--t2);transition:color .2s,background .2s}
+.rs-x:hover{color:var(--fg);background:var(--hov)}
+.rs-x:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.rs-x svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.rs-f{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:4px 20px 28px}
+.rs-f h3{font-size:var(--fs-2);font-weight:500;color:var(--fg);margin:22px 0 10px}
+.rs-f h3:first-child{margin-top:16px}
+.rs-f .rf{display:grid;gap:5px;margin-bottom:10px;min-width:0}
+.rs-f .rf>span{font-size:var(--fs-1);color:var(--m)}
+.rs-f input,.rs-f textarea{box-sizing:border-box;width:100%;min-width:0;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--bg);color:var(--fg);font:inherit;font-size:var(--fs-3);line-height:1.45;transition:border-color .2s}
+.rs-f input{height:38px;padding-block:0}
+.rs-f textarea{resize:vertical;display:block}
+.rs-f input::placeholder,.rs-f textarea::placeholder{color:var(--t4)}
+.rs-f input:focus,.rs-f textarea:focus{outline:none;border-color:var(--m)}
+.rs-f .rrow{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.rs-f .rrow .rf.half:first-child{grid-column:1}
+html:not(.phone) body.rs-on .page,html:not(.phone) body.rs-on .kd{translate:-200px 0}
+html:not(.phone) body.rs-on .open{translate:-150px 0}
+html:not(.phone) body.rs-on .eb{translate:calc(-50% - 200px) 0}
+.rs-veil{position:fixed;inset:0;z-index:calc(var(--z-pop) - 1);background:#0000004d}
+.rs-veil[hidden]{display:none}
+html.phone .rs{top:calc(env(safe-area-inset-top) + 72px);left:0;right:0;bottom:0;width:auto;border-radius:var(--r-panel) var(--r-panel) 0 0;border-width:1px 0 0}
+html.phone .rs-h{padding:14px max(10px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left))}
+html.phone .rs-f{padding:4px max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 28px) max(16px,env(safe-area-inset-left))}
+html.phone .rs-f input,html.phone .rs-f textarea{font-size:var(--fs-4)}
+html.phone .rs-f input{height:42px}
+@media(prefers-reduced-motion:reduce){.page,.kd,.open,.eb{transition-duration:0s}}
 .crate-d.unlock label{display:block;margin-bottom:6px}
 .crate-d.unlock #crateN{margin-bottom:14px}
 .crate-d.unlock #crateN:disabled{color:var(--t2)}
@@ -1446,7 +1559,8 @@ html.phone .sx,html.phone body.searching .sx{display:none}
 </script>
 <main class="page">
   <h1 class="sr">Crate Dig</h1>
-  <a class="where" id="where" href="/casey" hidden><span class="sr">All of Casey’s crates. This is </span><span id="whereN"></span></a>
+  <div class="wbar" id="wbar"><button type="button" class="where" id="where" aria-haspopup="menu" aria-expanded="false" hidden><span class="sr">Crates. This is </span><span id="whereN"></span><svg class="wc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button type="button" class="wedit" id="editB" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5l1-4L15.8 5.2a1.8 1.8 0 0 1 2.5 0l.5.5a1.8 1.8 0 0 1 0 2.5L8.5 18.5z M14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Edit</button></div>
+  <div class="wm" id="wm" role="menu" aria-label="Crates" hidden></div>
   <section class="crate" id="crate" tabindex="0" aria-roledescription="record crate" aria-label="Record crate. Arrow keys flip forward and back, Enter pulls out the front record, slash searches.">
     <div class="floor"></div>
     <div class="stack" id="stack"></div>
@@ -1460,7 +1574,6 @@ html.phone .sx,html.phone body.searching .sx{display:none}
     <div class="cmenu" id="cmenu" hidden></div>
     <span class="sp"></span>
     <a class="logo" href="./" aria-label="Back to the front"><svg aria-hidden="true"><use href="#mark"/></svg></a>
-    <button type="button" class="btn ed" id="editB" aria-pressed="false" hidden>Edit</button>
     <form class="q" id="qf" role="search">
       <label class="qi" for="q"><svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></svg><span class="sr">Search the crate</span></label>
       <input id="q" type="search" placeholder="Search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
@@ -1478,6 +1591,10 @@ html.phone .sx,html.phone body.searching .sx{display:none}
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
 <div class="hv" id="hv" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="eb" id="eb" role="toolbar" aria-label="Edit the record in front" hidden></div>
+<div class="ebp" id="ebp" role="menu" hidden></div>
+<div class="rs-veil" id="rsV" hidden></div>
+<aside class="rs" id="rs" aria-label="Details" hidden></aside>
 <input type="file" id="upF" accept="image/*" hidden>
 <dialog class="unlock" id="unlock" aria-labelledby="unlockH">
   <form id="unlockF">
@@ -1522,7 +1639,7 @@ html.phone .sx,html.phone body.searching .sx{display:none}
     <svg class="ab-mk" aria-hidden="true"><use href="#mark"/></svg>
     <p class="ab-name">Crate Dig</p>
     <p class="ab-body">Every record Casey owns, in one crate. Flip through, pull one out, turn it over. Before long, you’ll be able to make a crate of your own.</p>
-    <p class="ab-cr">Covers from Apple Music and the Cover Art Archive · Facts from MusicBrainz<br>Made by <a href="https://caseycavanagh.com" target="_blank" rel="noopener">Casey Cavanagh</a> · © <span id="abY">2026</span></p>
+    <p class="ab-cr">Covers from Apple Music and the Cover Art Archive · Facts from MusicBrainz<br>Made by <a href="https://caseycavanagh.com" target="_blank" rel="noopener">Casey Cavanagh</a> · © <span id="abY">2026</span><span id="abIn" hidden> · <button type="button" class="ab-in-b">Sign in</button></span></p>
   </div>
 </dialog>
 
@@ -2020,10 +2137,10 @@ function takeOff(i){const f=FS[i];if(!f)return;arrange({fs:FS.filter((_,j)=>j!==
 // the crate's name steps aside while a filter pill would run into it (a narrow screen, a long name or label); the pill says where you are
 function roomForName(){
   const w=$('#where');if(!w)return;
-  if(chip.hidden||w.hidden){w.classList.remove('tuck');return}
+  if(chip.hidden||w.hidden){w.classList.remove('tuck');w.parentElement.classList.remove('tuck');return}
   const a=w.getBoundingClientRect(),b=chip.getBoundingClientRect(),n=$('#whereN');
   const end=a.left+parseFloat(getComputedStyle(w).paddingLeft)+Math.min(n.scrollWidth,n.offsetWidth); // where the words end, not the pill around them
-  w.classList.toggle('tuck',b.width>0&&b.left<end+12&&b.top<a.bottom&&b.bottom>a.top);
+  w.classList.toggle('tuck',b.width>0&&b.left<end+12&&b.top<a.bottom&&b.bottom>a.top);w.parentElement.classList.toggle('tuck',w.classList.contains('tuck'));
 }
 addEventListener('resize',roomForName);document.fonts?.ready.then(roomForName);
 function menuOff(){const cmenu=$('#cmenu');if(cmenu.hidden)return;cmenu.hidden=true;$$('.cn[aria-expanded]',fsEl).forEach(b=>b.setAttribute('aria-expanded','false'))}
@@ -2252,7 +2369,7 @@ function fetchLiner(r){
 }
 // a record's names, for links and filters, from its liner notes or from the ones already looked up for the crate
 const linerKey=r=>{const q=linerQ(r);return['v2',q.get('mb')||'',q.get('d')||'',q.get('a')||'',q.get('g')||'',(q.get('artist')||'').slice(0,200),(q.get('title')||'').slice(0,200)].join('|')};
-function credOf(r,l){CRED[r.slug]={producer:l.credits?.producer||[],players:(l.credits?.players||[]).map(p=>p[0]),genres:l.genres||[]}}
+function credOf(r,l){l=withNotes(r,l)||{};CRED[r.slug]={producer:l.credits?.producer||[],players:(l.credits?.players||[]).map(p=>p[0]),genres:l.genres||[]}}
 // once the crate has settled: the names already known for every record, then, one at a time and unhurried, the liner
 // notes of records not looked up yet, so names shared across the crate link up everywhere
 let known=null;
@@ -2260,7 +2377,7 @@ function knowCrate(){
   if(known)return;
   known=fetch('/api/liner/known',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keys:RECORDS.map(linerKey)})})
     .then(x=>x.ok?x.json():{}).catch(()=>({})).then(m=>{
-      for(const r of RECORDS){const c=m[linerKey(r)];if(c&&!CRED[r.slug])CRED[r.slug]=c}
+      for(const r of RECORDS){const c=m[linerKey(r)];if(c&&!CRED[r.slug]){CRED[r.slug]=c;if(r.notes)credOf(r,{credits:{producer:c.producer,players:c.players.map(n=>[n,''])},genres:c.genres})}}
       relink();setTimeout(relink,1200);
       const todo=RECORDS.filter(r=>!CRED[r.slug]);
       const step=()=>{const r=todo.shift();if(!r)return;if(document.hidden){setTimeout(()=>{todo.unshift(r);step()},5000);return}
@@ -2270,7 +2387,7 @@ function knowCrate(){
 }
 // names just learned can link up on the open record: its details redrawn in place, its related covers fading in if it now has some
 function relink(){
-  const r=order[cur];if(open.hidden||!r||!LDONE.has(r.slug))return;const l=LDONE.get(r.slug);
+  const r=order[cur];if(open.hidden||!r||!LDONE.has(r.slug))return;const l=withNotes(r,LDONE.get(r.slug));
   const d=$('#odets');if(d&&!d.hidden)d.innerHTML=detsHTML(r,l);
   const k=$('#olink'),h=linkHTML(r);if(k&&h&&k.hidden){k.hidden=false;k.className='near in';k.innerHTML=h;room(k,0,k.offsetHeight)}
 }
@@ -2279,11 +2396,11 @@ const preLiner=()=>{const r=order[cur];if(r&&open.hidden)fetchLiner(r);if(!known
 function liner(r){
   const p=fetchLiner(r);knowCrate();
   const show=(l,late)=>{
-    if(order[cur]!==r||open.hidden)return;
+    if(order[cur]!==r||open.hidden)return;l=withNotes(r,l);
     const ab=$('#oabout');
     // arriving late, About opens its room on a spring and the words fade in after, so what's below glides down
     const was=ab.hidden?0:ab.offsetHeight;
-    if(l?.about){ab.hidden=false;ab.className='ab in'+(late?' late':'');ab.innerHTML=`<p class="ohd">About</p><p class="blurb">${esc(l.about.text)}</p><a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`;
+    if(l?.about){ab.hidden=false;ab.className='ab in'+(late?' late':'');ab.innerHTML=`<p class="ohd">About</p><p class="blurb">${esc(l.about.text)}</p>${l.about.url?`<a href="${l.about.url}" target="_blank" rel="noopener">via Wikipedia${NEW_TAB}</a>`:''}`;
       if(late)room(ab,was,ab.offsetHeight)}
     else if(!ab.hidden){ab.className='ab gone';room(ab,was,0).then(()=>{if(ab.classList.contains('gone'))ab.hidden=true})}
     // then who made it, as labeled rows, and other records in the crate that share a producer or a player
@@ -2295,7 +2412,7 @@ function liner(r){
   if(LDONE.has(r.slug)){show(LDONE.get(r.slug));return}
   // still on its way: About holds its place with quiet lines only when it's known to be coming; otherwise it fades in if it
   // arrives. The track list simply fades in when it's ready
-  if(HAS[r.slug]){const ab=$('#oabout');ab.hidden=false;ab.className='ab wait';ab.innerHTML='<p class="ohd">About</p><div class="sk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'}
+  if(HAS[r.slug]||r.notes?.about){const ab=$('#oabout');ab.hidden=false;ab.className='ab wait';ab.innerHTML='<p class="ohd">About</p><div class="sk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'}
   p.then(l=>show(l,true));
 }
 // a block's height (and the gap above it) eased from one size to another; 0 means it isn't there
@@ -2883,7 +3000,8 @@ addEventListener('keydown',e=>{
 
 // ---------- Edit mode: Casey's own, online (api/crate and src/lib/crate.ts) ----------
 // Edits lay over RECORDS: records added and taken out, jacket colors, covers. Only Casey's crate has them, never a visitor's.
-// A device unlocks once with the key (open the page with ?edit) and keeps it; from then on it shows an Edit button. Nobody else sees any of it.
+// A device signs in once with the key (from About, or by opening the page with ?edit) and keeps it; from then on Edit sits beside the
+// crate's name, and the tools take the bottom bar while editing. Nobody else sees any of it.
 let BASE=null,EDITS={added:[],removed:[],patch:{}},EDITABLE=false,OWNER=null,editing=false,vanish=false,mbT=0,mbN=0,mbRes=[];
 try{OWNER=localStorage.getItem('records-key')}catch{}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>`&#${c.charCodeAt(0)};`);
@@ -2904,7 +3022,7 @@ function applyEdits(){
   const extra=C?C.extra.filter(a=>!owned.has(a.slug)).map(a=>fresh(a,{extra:true})):[];
   for(const r of [...BASE,...mine,...extra]){
     r._o||={front:r.front,back:r.back,spine:r.spine,pal:r.pal,...Object.fromEntries(TEXT.map(k=>[k,r[k]])),links:r.links,spotify:r.spotify,apple:r.apple};Object.assign(r,r._o);
-    const p=EDITS.patch[r.slug];if(!p)continue;
+    const p=EDITS.patch[r.slug];r.notes=p?.notes;if(!p)continue;
     for(const k of TEXT)if(p[k]!=null)r[k]=p[k]||undefined;
     // a corrected link wins over the one the script found; an empty one takes it away
     if(p.links){const l={...r.links};if(r.spotify)l.spotify='https://open.spotify.com/album/'+r.spotify;if(r.apple)l.appleMusic=r.apple;
@@ -2927,7 +3045,7 @@ function bare(){
 // the crate's name: in the tab, at the top left (back to all of Casey's crates), and at the end of the crate
 function nameCrate(){
   const C=crateDef(),w=$('#where');if(visiting||!w)return;
-  const name=C?C.name:'Everything';w.hidden=false;$('#whereN').textContent=name;roomForName();
+  const name=C?C.name:'Everything';w.hidden=false;$('#whereN').textContent=name;w.classList.toggle('menu',menuful());w.tabIndex=menuful()?0:-1;roomForName();
   document.title=TITLE=C?`${C.name} · Crate Dig`:'Crate Dig';if(open.hidden)document.title=TITLE;
 }
 // one change at a time, in order; the answer is the edits as saved
@@ -2974,36 +3092,82 @@ function toast(msg,act,fn){
   if(fn)toastEl.querySelector('button').onclick=()=>{toastEl.classList.remove('on');fn()};
   toastEl.classList.add('on');toastT=setTimeout(()=>toastEl.classList.remove('on'),act?7000:3500);
 }
-const editB=$('#editB'),unlockD=$('#unlock');
+const editB=$('#editB'),unlockD=$('#unlock'),eb=$('#eb');
+// Edit sits beside the crate's name on Casey's devices; while editing, the bar at the bottom holds the tools and Done
 function setEditing(on){
-  editing=!!(on&&OWNER&&EDITABLE);document.body.classList.toggle('editing-on',editing);if(BASE)bare();editB.hidden=!(OWNER&&EDITABLE);editB.setAttribute('aria-pressed',editing);editB.textContent=editing?'Done':'Edit';
+  editing=!!(on&&OWNER&&EDITABLE);const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut()}
+  if(BASE)bare();editB.hidden=!(OWNER&&EDITABLE)||editing;eb.hidden=!editing;nameCrate();
   try{sessionStorage.setItem('records-editing',editing?'1':'')}catch{}
   if(!open.hidden)info(order[cur]);if(q.value.trim())search();
 }
-editB.onclick=()=>setEditing(!editing);
-function lockOut(){OWNER=null;try{localStorage.removeItem('records-key')}catch{}setEditing(false);toast('Your key stopped working. Open the page with ?edit to unlock again')}
+editB.onclick=()=>{setEditing(true);editB.blur()};
+function lockOut(){OWNER=null;try{localStorage.removeItem('records-key')}catch{}setEditing(false);signable();toast('Your key stopped working. Sign in again from About')}
+// a device that isn't signed in can sign in from About (or by opening the page with ?edit); nobody else sees it
+const signable=()=>{$('#abIn').hidden=!(EDITABLE&&!OWNER)};
+$('#abIn').addEventListener('click',()=>{$('#abX').click();setTimeout(()=>unlockD.showModal(),60)});
 function ownerInit(){
   const ask=new URLSearchParams(location.search).has('edit');let was='';try{was=sessionStorage.getItem('records-editing')}catch{}
-  setEditing(OWNER&&(was||ask));
+  setEditing(OWNER&&(was||ask));signable();
   if(!ask)return;
   if(!EDITABLE){toast('Edit mode isn’t set up here yet');dropAsk()}
   else if(OWNER)dropAsk();
   else unlockD.showModal();
 }
-// This crate's own settings, while editing: tap its name at the top left. The whole crate takes words and a pin only.
-const crateD=$('#crateD'),crateF=$('#crateF');
-$('#where').addEventListener('click',e=>{
-  if(!editing)return;e.preventDefault();const C=crateDef(),cs=EDITS.crates||{};
-  $('#crateN').value=C?C.name:'Everything';$('#crateN').disabled=!C;$('#crateX').hidden=!C;
-  $('#crateA').value=(C?C.about:cs.all?.about)||'';$('#crateP').checked=cs.pinned===CRATE;
-  crateD.showModal();
+// The crate's name opens the crates: switch to another, and on Casey's devices make a new one or change this one's name and words.
+// On a phone it's a sheet from the bottom, within reach of a thumb
+const wm=$('#wm'),where=$('#where'),PH=()=>document.documentElement.classList.contains('phone');
+const PLUS='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',PEN='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5l1-4L15.8 5.2a1.8 1.8 0 0 1 2.5 0l.5.5a1.8 1.8 0 0 1 0 2.5L8.5 18.5z M14 7l3 3"/></svg>',
+  CHECK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',WORDS='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h9"/></svg>';
+const crateList=()=>[{slug:'all',name:'Everything',records:null},...(EDITS.crates?.list||[])];
+const menuful=()=>!visiting&&((EDITS.crates?.list||[]).length>0||!!(OWNER&&EDITABLE));
+// each crate shows the cover of its first record, so they're easy to tell apart
+function crateCover(c){
+  const all=[...(BASE||[]),...added.values()],out=new Set(EDITS.removed||[]);
+  const r=c.records?all.find(x=>c.records.includes(x.slug)&&!out.has(x.slug))||c.extra?.[0]:[...all].filter(x=>!out.has(x.slug)).sort((a,b)=>sortKey(a).localeCompare(sortKey(b)))[0];
+  return r?.front?`<img alt="" src="${esc(img(r.thumb||r.front))}" decoding="async">`:`<i style="background:${r?spineBg(r):'var(--soft)'}"></i>`;
+}
+const sortKey=r=>String(r.sortAs||r.artist||'').replace(/^the\s+/i,'').toLowerCase();
+function wmDraw(){
+  const own=OWNER&&EDITABLE,ph=PH();
+  const rows=crateList().map(c=>`<a role="menuitemradio" aria-checked="${c.slug===CRATE}" href="/casey/${esc(c.slug)}" class="wr${c.slug===CRATE?' cur':''}"><span class="wcv">${crateCover(c)}</span><span class="wn">${esc(c.name)}</span>${c.slug===CRATE?`<span class="wck">${CHECK}</span>`:''}</a>`).join('');
+  const more=!own?'':ph?`<div class="wbtns"><button type="button" class="btn" data-w="new">${PLUS}New crate</button>${editing?`<button type="button" class="btn" data-w="name">${WORDS}Name and words</button>`:`<button type="button" class="btn w" data-w="edit">${PEN}Edit this crate</button>`}</div>`
+    :`<hr><button type="button" role="menuitem" class="wr" data-w="new"><span class="wic">${PLUS}</span><span class="wn">New crate</span></button>${editing?`<button type="button" role="menuitem" class="wr" data-w="name"><span class="wic">${WORDS}</span><span class="wn">Name and words</span></button>`:''}`;
+  wm.innerHTML=(ph?'<i class="wgrab" aria-hidden="true"></i>':'')+`<div class="wl">${rows}</div>`+more;
+}
+function wmOpen(){
+  if(!menuful()||!wm.hidden)return;wmDraw();wm.hidden=false;wm.classList.toggle('sheet',PH());where.setAttribute('aria-expanded','true');document.body.classList.add('wm-on');
+  if(!reduce)wm.animate(PH()?[{transform:'translateY(100%)'},{transform:'none'}]:[{opacity:0,transform:'translateY(-6px) scale(.98)'},{opacity:1,transform:'none'}],{duration:PH()?420:260,easing:'cubic-bezier(.22,1,.36,1)'});
+}
+function wmShut(){if(wm.hidden)return;where.setAttribute('aria-expanded','false');document.body.classList.remove('wm-on');
+  if(reduce){wm.hidden=true;return}
+  wm.animate(PH()?[{transform:'none'},{transform:'translateY(100%)'}]:[{opacity:1},{opacity:0}],{duration:PH()?220:120,easing:'cubic-bezier(.4,0,1,1)'}).onfinish=()=>{if(where.getAttribute('aria-expanded')==='false')wm.hidden=true}}
+where.addEventListener('click',e=>{e.preventDefault();wm.hidden?wmOpen():wmShut();where.blur()});
+// a tap outside closes the crates and does nothing else, so it never opens the record under it
+let wmEat=0;
+addEventListener('pointerdown',e=>{if(!wm.hidden&&!wm.contains(e.target)&&!where.contains(e.target)){wmShut();wmEat=performance.now();e.preventDefault();e.stopPropagation()}},true);
+for(const t of['pointerup','click'])addEventListener(t,e=>{if(performance.now()-wmEat<700){if(t==='click')wmEat=0;e.preventDefault();e.stopPropagation()}},true);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!wm.hidden){e.stopPropagation();wmShut()}},true);
+wm.addEventListener('click',e=>{
+  const b=e.target.closest('[data-w]');if(!b)return;const w=b.dataset.w;wmShut();
+  if(w==='edit')setEditing(true);else crateOpen(w==='new');
 });
+// This crate's name and words, or a new crate: the same small dialog. The whole crate takes words and a pin only
+const crateD=$('#crateD'),crateF=$('#crateF');let making=false;
+function crateOpen(fresh){
+  making=fresh;const C=crateDef(),cs=EDITS.crates||{};
+  $('#crateH').textContent=fresh?'New crate':'This crate';$('#crateS').textContent=fresh?'Make it':'Save';
+  $('#crateN').value=fresh?'':C?C.name:'Everything';$('#crateN').disabled=!fresh&&!C;$('#crateX').hidden=fresh||!C;$('.crate-d .pin').hidden=fresh;
+  $('#crateA').value=fresh?'':(C?C.about:cs.all?.about)||'';$('#crateP').checked=!fresh&&cs.pinned===CRATE;
+  crateD.showModal();if(fresh)$('#crateN').focus();
+}
 $('#crateC').onclick=()=>crateD.close();
 crateF.addEventListener('submit',async e=>{
   e.preventDefault();const C=crateDef(),cs=EDITS.crates||{},name=$('#crateN').value.trim(),about=$('#crateA').value.trim(),pin=$('#crateP').checked;
-  if(C&&!name){$('#crateN').focus();return}
+  if((making||C)&&!name){$('#crateN').focus();return}
   crateD.close();
   try{
+    if(making){const before=new Set((EDITS.crates?.list||[]).map(c=>c.slug));await api({op:'crate-new',name,about});
+      const c=(EDITS.crates?.list||[]).find(x=>!before.has(x.slug));if(c){try{sessionStorage.setItem('records-editing','1')}catch{}location.href='/casey/'+c.slug}return}
     if((C?C.name:'')!==name&&C||((C?C.about:cs.all?.about)||'')!==about)await api({op:'crate-set',crate:CRATE,...(C?{name}:{}),about});
     if(pin!==(cs.pinned===CRATE))await api({op:'crate-pin',crate:pin?CRATE:null});
     nameCrate();toast('Saved');
@@ -3011,7 +3175,7 @@ crateF.addEventListener('submit',async e=>{
 });
 $('#crateX').onclick=async()=>{
   const b=$('#crateX');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Delete it for good';return}
-  try{await api({op:'crate-drop',crate:CRATE});location.href='/casey'}catch(x){toast(x.message)}
+  try{await api({op:'crate-drop',crate:CRATE});location.href='/casey/all'}catch(x){toast(x.message)}
 };
 crateD.addEventListener('close',()=>{const b=$('#crateX');delete b.dataset.sure;b.textContent='Delete crate'});
 const dropAsk=()=>{const u=new URL(location.href);u.searchParams.delete('edit');history.replaceState(history.state,'',u)};
@@ -3023,57 +3187,146 @@ $('#unlockF').addEventListener('submit',async e=>{
   const why=r&&!r.ok?await r.json().catch(()=>null):null;
   if(!r?.ok){$('#keyErr').textContent=!r?'Couldn’t reach the site':r.status===429?'Too many tries. Try again in an hour':why?.error==='not allowed'?'That key didn’t work':`The site didn’t check the key (${r.status}${why?.error?', '+why.error:''})`;return}
   OWNER=key;try{localStorage.setItem('records-key',key)}catch{}
-  EDITS=(await r.json()).edits;applyEdits();rearrange(order[cur]);unlockD.close();setEditing(true);toast('Unlocked. Edit is at the top right');
+  EDITS=(await r.json()).edits;applyEdits();rearrange(order[cur]);unlockD.close();setEditing(true);signable();toast('Signed in. Edit is beside the crate’s name');
 });
 $('#unlockX').onclick=()=>unlockD.close();
 unlockD.addEventListener('close',()=>{$('#key').value='';$('#keyErr').textContent='';dropAsk()});
-// Casey's tools on an open record: jacket color, new covers, take it out
+// Casey's tools, in the bar at the bottom while editing. They change the record in front, in the crate or open:
+// Add (search, with what MusicBrainz has), Details (the sheet), Covers, Color, Crates, Take out, and Done
 const LINKS=[['spotify','Spotify'],['appleMusic','Apple Music'],['youtubeMusic','YouTube Music'],['tidal','Tidal'],['amazonMusic','Amazon Music'],['deezer','Deezer']];
 const linksOf=r=>{const l={...r.links};if(r.spotify)l.spotify='https://open.spotify.com/album/'+r.spotify;if(r.apple)l.appleMusic=r.apple;return l};
-// the details and links, as a form: a field left as it was, or emptied where the script had nothing, saves nothing
-const detailsHTML=r=>{const l=linksOf(r),f=(k,t,v,ph='')=>`<label><span>${t}</span><input name="${k}" value="${esc(v??'')}" placeholder="${esc(ph)}" autocomplete="off" spellcheck="false"${k==='year'?' inputmode="numeric" maxlength="4"':''}></label>`;
-  return`<form class="own-f" id="ownF" method="dialog"><h2>${esc(r.title)}</h2><fieldset><legend>Details</legend>${f('title','Title',r.title)}${f('artist','Artist',r.artist)}${f('sortAs','Sort as',r.sortAs,'Same as the artist')}${f('year','Year',r.year)}${f('label','Label',r.label)}${f('format','Format',r.format)}</fieldset>
-    <fieldset><legend>Links</legend>${LINKS.map(([k,t])=>f('l-'+k,t,l[k],'https://')).join('')}</fieldset>
-    <div class="row"><button type="button" class="btn sm" id="ownFx">Cancel</button><button class="btn sm" id="ownFs">Save</button></div></form>`};
-const ownHTML=r=>editing?`<div class="own">
-      <button type="button" class="btn sm" id="ownD" aria-haspopup="dialog">Details and links</button>
-      <label class="own-c"><input type="color" id="ownC" value="${hexOf(spineBg(r))}"><span>Jacket color</span></label>
-      <button type="button" class="btn sm" data-up="front">${r.front?'New front':'Add a front'}</button><button type="button" class="btn sm" data-up="back">${r.back?'New back':'Add a back'}</button>
-      ${EDITS.patch[r.slug]?'<button type="button" class="btn sm" id="ownReset">Back to the original</button>':''}${toCrateHTML(r)}<button type="button" class="btn sm" id="ownX">${crateDef()?'Take it out of this crate':'Take it out of the crate'}</button>
-    </div>`:'';
-// one of Casey's records into another crate: the crates it isn't in yet
-const toCrateHTML=r=>{if(r.extra)return'';const cs=(EDITS.crates?.list||[]).filter(c=>c.slug!==CRATE&&!c.records.includes(r.slug));
-  return cs.length?`<label class="btn sm own-k"><span>Add to a crate</span><select id="ownK"><option value="">Add to a crate</option>${cs.map(c=>`<option value="${esc(c.slug)}">${esc(c.name)}</option>`).join('')}</select></label>`:''};
-const upF=$('#upF'),ownBusy=on=>$('#oinfo .own')?.classList.toggle('busy',on);
-$('#oinfo').addEventListener('click',e=>{
-  if(!editing||busy)return;const r=order[cur];
-  const u=e.target.closest('[data-up]');if(u){upF.dataset.side=u.dataset.up;upF.click()}
-  if(e.target.closest('#ownReset'))patch(r,{bg:null,spine:null,front:null,back:null,...Object.fromEntries(TEXT.map(k=>[k,null])),links:null},'Back to the original');
-  if(e.target.closest('#ownD')){ownDlg.innerHTML=detailsHTML(r);ownDlg.showModal();$('#ownF').elements.title.focus()}
-  if(e.target.closest('#ownX'))takeOut(r);
+const ownHTML=()=>'';
+const EBI={add:'<path d="M12 5v14M5 12h14"/>',details:'<path d="M5 7h14M5 12h14M5 17h9"/>',covers:'<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9.5" cy="9.5" r="1.5"/><path d="M20 15l-4.5-4.5L6 20"/>',
+  color:'<path d="M12 4c3 4 6 7 6 10a6 6 0 0 1-12 0c0-3 3-6 6-10z"/>',crates:'<rect x="5" y="10" width="14" height="9" rx="2"/><path d="M7 7h10M9 4.5h6"/>',out:'<path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>'};
+const ebIc=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${EBI[k]}</svg>`;
+eb.innerHTML=`<button type="button" class="ebb ebx" data-e="close" aria-label="Put it back">${ebIc('x')}</button>`+
+  [['add','Add'],['details','Details'],['covers','Covers'],['color','Color'],['crates','Crates'],['out','Take out']].map(([k,t])=>`<button type="button" class="ebb" data-e="${k}"${k==='covers'||k==='crates'?' aria-haspopup="menu"':''}>${ebIc(k)}<span>${t}</span>${k==='color'?'<input type="color" id="ebC" aria-label="Jacket color" tabindex="-1">':''}</button>`).join('')+
+  `<span class="ebs" aria-hidden="true"></span><button type="button" class="ebd" data-e="done"><span>Done</span>${ebIc('check')}</button>`;
+const ebp=$('#ebp'),ebR=()=>order[cur];
+const ebBtn=k=>eb.querySelector(`[data-e="${k}"]`);
+function ebShut(){if(ebp.hidden)return;ebp.hidden=true;eb.querySelectorAll('[aria-expanded]').forEach(b=>b.setAttribute('aria-expanded','false'))}
+// a small menu that grows up out of its tool
+function ebOpen(k,html){
+  const b=ebBtn(k);if(!ebp.hidden&&b.getAttribute('aria-expanded')==='true'){ebShut();return}
+  ebShut();ebp.innerHTML=html;ebp.hidden=false;b.setAttribute('aria-expanded','true');
+  const c=b.getBoundingClientRect(),W=ebp.offsetWidth,L=Math.max(12,Math.min(innerWidth-W-12,c.left+c.width/2-W/2));
+  ebp.style.left=L+'px';ebp.style.bottom=(innerHeight-eb.getBoundingClientRect().top+10)+'px';
+  if(!reduce)ebp.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'none'}],{duration:260,easing:'cubic-bezier(.22,1,.36,1)'});
+}
+const inCrate=(c,r)=>c.records.includes(r.slug)||c.extra.some(x=>x.slug===r.slug);
+eb.addEventListener('click',e=>{
+  const b=e.target.closest('[data-e]');if(!b||e.target.id==='ebC')return;const k=b.dataset.e,r=ebR();b.blur();
+  if(k==='done'){setEditing(false);return}
+  if(k==='close'){$('#close').click();return}
+  if(k==='add'){ebShut();rsShut();document.body.classList.add('adding');q.focus();requestAnimationFrame(()=>q.focus());return}
+  if(!r)return;
+  if(k==='details'){ebShut();rs.hidden?rsOpen(r):rsShut();return}
+  if(k==='out'){ebShut();rsShut();takeOut(r);return}
+  if(k==='covers')ebOpen(k,`<button type="button" role="menuitem" data-up="front">${r.front?'New front':'Add a front'}</button><button type="button" role="menuitem" data-up="back">${r.back?'New back':'Add a back'}</button>${EDITS.patch[r.slug]&&(EDITS.patch[r.slug].front||EDITS.patch[r.slug].back||EDITS.patch[r.slug].bg)?'<hr><button type="button" role="menuitem" data-up="reset">Back to the original covers</button>':''}`);
+  if(k==='crates'){const cs=(EDITS.crates?.list||[]);
+    ebOpen(k,`<p class="ebh">In these crates</p><button type="button" role="menuitemcheckbox" aria-checked="true" aria-disabled="true" class="ebc on"><span>Everything</span>${ebIc('check')}</button>${cs.map(c=>`<button type="button" role="menuitemcheckbox" aria-checked="${inCrate(c,r)}" class="ebc${inCrate(c,r)?' on':''}" data-crate="${esc(c.slug)}"${r.extra&&c.slug===CRATE?' aria-disabled="true"':''}><span>${esc(c.name)}</span>${ebIc('check')}</button>`).join('')}${cs.length?'':'<p class="ebn">Make another crate from the crate’s name at the top.</p>'}`)}
 });
-// the color shows on the record as you pick it, and saves when you're done
-$('#oinfo').addEventListener('input',e=>{
-  if(e.target.id!=='ownC')return;const r=order[cur],c=e.target.value,t=inkOn(c),x={...r,spine:c,pal:[c,t,t]};
-  $$('#sleeve .edge').forEach(n=>n.style.background=c);if(!r.front)$('#sleeve .fr').innerHTML=coverHTML(x);if(!r.back)$('#sleeve .bk').innerHTML=backHTML(x);
+// the color picker sits over its tool: the record takes the color as you pick it, and it saves when you're done
+const ebC=$('#ebC');
+ebBtn('color').addEventListener('pointerdown',()=>{ebShut();const r=ebR();if(r)ebC.value=hexOf(spineBg(r))});
+ebC.addEventListener('input',()=>{const r=ebR();if(!r||open.hidden)return;const c=ebC.value,t=inkOn(c),x={...r,spine:c,pal:[c,t,t]};
+  $$('#sleeve .edge').forEach(n=>n.style.background=c);if(!r.front)$('#sleeve .fr').innerHTML=coverHTML(x);if(!r.back)$('#sleeve .bk').innerHTML=backHTML(x)});
+ebC.addEventListener('change',()=>{const r=ebR();if(r)patch(r,{bg:ebC.value},'Jacket color saved')});
+ebp.addEventListener('click',async e=>{
+  const r=ebR(),u=e.target.closest('[data-up]'),c=e.target.closest('[data-crate]');if(!r)return;
+  if(u){ebShut();if(u.dataset.up==='reset')patch(r,{bg:null,spine:null,front:null,back:null},'Back to the original covers');else{upF.dataset.side=u.dataset.up;upF.click()}}
+  if(c&&c.getAttribute('aria-disabled')!=='true'){const cr=(EDITS.crates?.list||[]).find(x=>x.slug===c.dataset.crate),on=inCrate(cr,r);
+    c.classList.toggle('on',!on);c.setAttribute('aria-checked',!on);
+    if(on&&cr.slug===CRATE){ebShut();takeOut(r);return}
+    try{await api(on?{op:'crate-take',crate:cr.slug,slug:r.slug}:{op:'crate-put',crate:cr.slug,slug:r.slug});toast(on?`Took it out of ${cr.name}`:`Added to ${cr.name}`)}catch(x){toast(x.message);c.classList.toggle('on',on);c.setAttribute('aria-checked',on)}}
 });
-$('#oinfo').addEventListener('change',async e=>{
-  if(e.target.id==='ownC')patch(order[cur],{bg:e.target.value},'Jacket color saved');
-  if(e.target.id==='ownK'&&e.target.value){const r=order[cur],c=(EDITS.crates?.list||[]).find(x=>x.slug===e.target.value);ownBusy(true);
-    try{await api({op:'crate-put',crate:c.slug,slug:r.slug});toast(`Added to ${c.name}`)}catch(x){toast(x.message)}afterEdit(r)}
+addEventListener('pointerdown',e=>{if(!ebp.hidden&&!ebp.contains(e.target)&&!eb.contains(e.target))ebShut()},true);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!ebp.hidden){e.stopPropagation();ebShut()}},true);
+// Add opens search over the bar; when the search closes, the tools come back
+const addDone=()=>setTimeout(()=>{if(!q.value.trim()&&!$('#qf').matches(':focus-within'))document.body.classList.remove('adding')},200);
+document.addEventListener('focusout',addDone);addEventListener('keyup',e=>{if(e.key==='Escape')addDone()});
+
+// ---------- The record sheet: everything about one record, saved as you go ----------
+// The record's words, its liner notes (About and who made it), and its links. A field put back the way it was found goes back to the
+// original; one emptied hides that line. On a laptop it stands at the right and the crate moves over; on a phone it rises from the bottom
+const rs=$('#rs'),rsV=$('#rsV');let rsR=null,rsL=null;
+// liner notes as found, with Casey's own over them
+function withNotes(r,l){
+  const n=r?.notes;if(!n)return l;const o={...(l||{}),credits:{...(l?.credits||{})}};
+  if('about' in n)o.about=n.about?{text:n.about}:null;
+  for(const k of['producer','players','sleeve'])if(k in n)o.credits[k]=n[k];
+  if('recorded' in n){o.credits.recorded=n.recorded;o.credits.studio=[]}
+  if('minutes' in n)o.minutes=n.minutes||0;
+  if('genres' in n)o.genres=n.genres;
+  return o;
+}
+// each liner field as words in a box, and back
+const NOTE={
+  about:{t:'About',area:5,get:l=>l?.about?.text||'',put:v=>v},
+  producer:{t:'Producer',get:l=>(l?.credits?.producer||[]).join(', '),put:v=>v.split(',').map(x=>x.trim()).filter(Boolean),ph:'Names, with commas between'},
+  recorded:{t:'Recorded',get:l=>[l?.credits?.recorded,...(l?.credits?.studio||[])].filter(Boolean).join(', '),put:v=>v},
+  minutes:{t:'Length',get:l=>l?.minutes?String(l.minutes):'',put:v=>v?Math.round(parseFloat(v))||'':'',ph:'Minutes',num:1},
+  genres:{t:'Genre',get:l=>(l?.genres||[]).join(', '),put:v=>v.split(',').map(x=>x.trim()).filter(Boolean),ph:'Genres, with commas between'},
+  players:{t:'Players',area:4,get:l=>(l?.credits?.players||[]).map(([n,i])=>i?`${n}, ${i}`:n).join('\n'),put:v=>v.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf(',');return i<0?[x,'']:[x.slice(0,i).trim(),x.slice(i+1).trim()]}),ph:'One a line: name, what they play'},
+  sleeve:{t:'Sleeve',area:2,get:l=>(l?.credits?.sleeve||[]).map(([i,n])=>`${i}, ${n}`).join('\n'),put:v=>v.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf(',');return i<0?['',x]:[x.slice(0,i).trim(),x.slice(i+1).trim()]}),ph:'One a line: role, name'},
+};
+const FIELDS=[['title','Title'],['artist','Artist'],['sortAs','Sort as','Same as the artist'],['year','Year'],['label','Label'],['format','Format']];
+function rsHTML(r,l){
+  const m=withNotes(r,l),ln=linksOf(r);
+  const box=(name,t,v,{ph='',area=0,num=0,half=0}={})=>`<label class="rf${half?' half':''}"><span>${t}</span>${area?`<textarea name="${name}" rows="${area}" placeholder="${esc(ph)}" spellcheck="${name==='about'}">${esc(v)}</textarea>`:`<input name="${name}" value="${esc(v)}" placeholder="${esc(ph)}" autocomplete="off" spellcheck="false"${name==='year'?' inputmode="numeric" maxlength="4"':num?' inputmode="numeric" maxlength="3"':''}>`}</label>`;
+  const cover=r.front?`<img alt="" src="${esc(img(r.thumb||r.front))}">`:`<i style="background:${spineBg(r)}"></i>`;
+  return`<div class="rs-h"><span class="rs-c">${cover}</span><span class="rs-n"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><span class="rs-s" id="rsS" aria-live="polite"></span><button type="button" class="rs-x" id="rsX" aria-label="Close the details">${ebIc('x')}</button></div>
+  <form class="rs-f" id="rsF" autocomplete="off">
+    <h3>Record</h3>${box('title','Title',r.title)}${box('artist','Artist',r.artist)}${box('sortAs','Sort as',r.sortAs,{ph:'Same as the artist'})}<div class="rrow">${box('year','Year',r.year,{half:1})}${box('format','Format',r.format,{half:1})}</div>${box('label','Label',r.label)}
+    <h3>About</h3>${box('n-about','About',NOTE.about.get(m),{area:5,ph:l?.about?.text?'':'A few lines about how it was made'})}
+    <h3>Who made it</h3>${['producer','recorded'].map(k=>box('n-'+k,NOTE[k].t,NOTE[k].get(m),{ph:NOTE[k].ph||''})).join('')}<div class="rrow">${box('n-minutes','Length',NOTE.minutes.get(m),{num:1,ph:'Minutes',half:1})}${box('n-genres','Genre',NOTE.genres.get(m),{ph:'With commas between',half:2})}</div>${['players','sleeve'].map(k=>box('n-'+k,NOTE[k].t,NOTE[k].get(m),{area:NOTE[k].area,ph:NOTE[k].ph})).join('')}
+    <h3>Links</h3>${LINKS.map(([k,t])=>box('l-'+k,t,ln[k]||'',{ph:'https://'})).join('')}
+  </form>`;
+}
+// on a laptop the crate and an open record step aside for the sheet, and come back after
+const rsBefore=()=>$$('.page,.kd,.open,.eb').map(el=>[el,getComputedStyle(el).translate]);
+const rsAfter=b=>{if(PH()||reduce)return;for(const[el,from]of b){const to=getComputedStyle(el).translate;if(from!==to)el.animate([{translate:from},{translate:to}],{duration:450,easing:'cubic-bezier(.22,1,.36,1)'})}};
+function rsOpen(r){
+  rsR=r;rsL=LDONE.get(r.slug)||null;rs.innerHTML=rsHTML(r,rsL);
+  if(!LDONE.has(r.slug))fetchLiner(r).then(l=>{if(rsR!==r||rs.hidden)return;rsL=l;const f=$('#rsF'),m=withNotes(r,l);
+    for(const k of Object.keys(NOTE)){const el=f.elements['n-'+k];if(el&&document.activeElement!==el&&!el.dataset.dirty)el.value=NOTE[k].get(m)}});
+  const b4=rsBefore();rs.hidden=false;rsV.hidden=!PH();document.body.classList.add('rs-on');ebBtn('details').classList.add('on');rsAfter(b4);
+  if(!reduce)rs.animate(PH()?[{transform:'translateY(100%)'},{transform:'none'}]:[{opacity:0,transform:'translateX(24px)'},{opacity:1,transform:'none'}],{duration:PH()?460:420,easing:'cubic-bezier(.22,1,.36,1)'});
+}
+function rsShut(){if(rs.hidden)return;$('#rsF')?.querySelector(':focus')?.blur();const b4=rsBefore();document.body.classList.remove('rs-on');rsAfter(b4);ebBtn('details')?.classList.remove('on');rsV.hidden=true;
+  if(reduce){rs.hidden=true;return}
+  rs.animate(PH()?[{transform:'none'},{transform:'translateY(100%)'}]:[{opacity:1},{opacity:0,transform:'translateX(16px)'}],{duration:180,easing:'cubic-bezier(.4,0,1,1)'}).onfinish=()=>{if(!document.body.classList.contains('rs-on'))rs.hidden=true}}
+rs.addEventListener('click',e=>{if(e.target.closest('#rsX'))rsShut()});
+rsV.addEventListener('click',rsShut);
+rs.addEventListener('input',e=>{e.target.dataset.dirty='1'});
+// Return in a one-line field saves it; Esc closes the sheet
+rs.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();e.target.blur()}if(e.key==='Escape'){e.stopPropagation();rsShut()}});
+const rsSay=t=>{const s=$('#rsS');if(!s)return;s.textContent=t;s.classList.toggle('on',!!t)};
+// one field at a time, when you leave it
+rs.addEventListener('change',async e=>{
+  const el=e.target,name=el.name,r=rsR;if(!name||!r)return;delete el.dataset.dirty;
+  const v=el.value.trim(),o=r._o||{},set={};
+  if(TEXT.includes(name)){
+    if(v===String(r[name]??''))return;
+    if((name==='title'||name==='artist')&&!v){el.value=r[name];toast('A record needs a title and an artist');return}
+    if(name==='year'&&v&&!/^\d{4}$/.test(v)){el.value=r.year||'';toast('A year is four numbers');return}
+    set[name]=v===String(o[name]??'')?null:v;
+  }else if(name.startsWith('l-')){
+    const k=name.slice(2),now=linksOf(r)[k]??'',was=linksOf(o)[k]??'';if(v===now)return;
+    if(v&&!/^https:\/\/\S+$/.test(v)){toast('A link starts with https://');el.focus();return}
+    set.links={[k]:v===was?null:v};
+  }else if(name.startsWith('n-')){
+    const k=name.slice(2),N=NOTE[k],found=N.get(rsL),mine=N.get(withNotes(r,rsL));if(v===mine)return;
+    set.notes={[k]:v===found?null:N.put(v)};
+  }else return;
+  rsSay('Saving…');
+  try{await api({op:'patch',slug:r.slug,set});rsSay('Saved');setTimeout(()=>{if($('#rsS')?.textContent==='Saved')rsSay('')},1800)}catch(x){rsSay('');toast(x.message)}
+  if(set.notes&&LDONE.has(r.slug))credOf(r,LDONE.get(r.slug));
+  if(set.title||set.artist){const h=$('.rs-n',rs);if(h)h.innerHTML=`<b>${esc(r.title)}</b><span>${esc(r.artist)}</span>`}
+  afterEdit(r);
 });
-// saving the details: only what changed goes; a field put back to how the script had it goes back to the original
-const ownDlg=document.createElement('dialog');ownDlg.className='unlock own-d';ownDlg.setAttribute('aria-label','Details and links');document.body.append(ownDlg);
-ownDlg.addEventListener('click',e=>{if(e.target.closest('#ownFx'))ownDlg.close()});
-ownDlg.addEventListener('submit',e=>{
-  e.preventDefault();const r=order[cur],F=e.target.elements,o=r._o||{},ol=linksOf(o),now=linksOf(r),set={},links={};
-  for(const k of TEXT){const v=F[k].value.trim();if(v===String(r[k]??''))continue;set[k]=v===String(o[k]??'')?null:v}
-  for(const [k] of LINKS){const v=F['l-'+k].value.trim();if(v===(now[k]??''))continue;if(v&&!/^https:\/\/\S+$/.test(v)){toast('A link starts with https://');F['l-'+k].focus();return}links[k]=v===(ol[k]??'')?null:v}
-  if(Object.keys(links).length)set.links=links;
-  if(!Object.keys(set).length){ownDlg.close();return}
-  if('title' in set&&!F.title.value.trim()||'artist' in set&&!F.artist.value.trim()){toast('A record needs a title and an artist');return}
-  ownDlg.close();patch(r,set,'Details saved');
-});
+const upF=$('#upF'),ownBusy=()=>{};
 async function patch(r,set,msg){
   ownBusy(true);
   try{await api({op:'patch',slug:r.slug,set});toast(msg)}catch(e){toast(e.message)}
@@ -3094,7 +3347,7 @@ async function takeOut(r){
   if(RECORDS.length<2)return;
   const next=order[cur+1]||order[cur-1];ownBusy(true);
   try{await api(crateDef()?{op:'crate-take',crate:CRATE,slug:r.slug}:{op:'remove',slug:r.slug})}catch(e){toast(e.message);ownBusy(false);return}
-  made.delete(r);rearrange(next);vanish=true;closeRecord();
+  made.delete(r);rearrange(next);if(!open.hidden){vanish=true;closeRecord()}
   toast(`Took out ${r.title}`,'Undo',()=>putBack(r));
 }
 async function putBack(r){

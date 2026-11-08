@@ -33,6 +33,17 @@ export type Patch = {
   format?: string;
   // where Play goes, by service; an empty string takes a wrong link away
   links?: Record<string, string>;
+  // the liner notes, by hand, over what /api/liner found; an empty value (or list) hides that line
+  notes?: Notes;
+};
+export type Notes = {
+  about?: string;
+  producer?: string[];
+  recorded?: string;
+  minutes?: number | "";
+  genres?: string[];
+  players?: [string, string][]; // name, what they play
+  sleeve?: [string, string][]; // role, name
 };
 // More crates than the one: each is picked from Casey's records (records, by slug) and can hold records Casey doesn't own
 // (extra, which live only in that crate). "all" is the whole crate; it keeps a description here but never a list.
