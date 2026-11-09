@@ -6,9 +6,9 @@
 //   &artist=…&title=…                       for finding the Wikipedia article when MusicBrainz has no link to it
 // Answers { sides: [{ side: "A", tracks: ["…"] }], about: { text, url } | null, minutes, genres, credits }.
 // A side is "" when the source doesn't say (a CD or digital release); the back then lists the songs without
-// side breaks. About is written from the article (src/lib/about.ts); genres are MusicBrainz's, the album's or
-// else the artist's; credits (producer, studio, recorded, players, sleeve) come from the article's infobox
-// and Personnel list. Answers are kept in Upstash for a month, so each album is looked up and written once.
+// side breaks. About is written from the article (src/lib/about.ts); genres are Discogs styles when Discogs knows
+// the album, else MusicBrainz's, the album's or else the artist's; credits (producer, studio, recorded, players,
+// sleeve) come from the article's infobox and Personnel list. Answers are kept in Upstash for a month, so each album is looked up and written once.
 
 import { connection, type NextRequest } from "next/server";
 import { kv } from "@/lib/kv";
@@ -21,7 +21,7 @@ const MBID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 type Side = { side: string; tracks: string[] };
 type Credits = { producer: string[]; studio: string[]; recorded: string; players: [string, string][]; sleeve: [string, string][] };
-type Liner = { sides: Side[]; minutes: number; about: { text: string; url: string } | null; genres: string[]; credits: Credits | null; keyed?: boolean };
+type Liner = { sides: Side[]; minutes: number; about: { text: string; url: string } | null; genres: string[]; credits: Credits | null; keyed?: boolean; styled?: boolean };
 const VERSION = "v2";
 
 // answers, kept between requests
@@ -81,16 +81,43 @@ async function fromApple(id: string) {
 const top = (gs: { name: string; count: number }[] = []) =>
   gs.filter((g) => g.count > 0).sort((a, b) => b.count - a.count).slice(0, 3).map((g) => g.name[0].toUpperCase() + g.name.slice(1));
 
+// Discogs styles (Alt-Country, Neo Soul…), which name an album more closely than MusicBrainz's genres. Reading a
+// master or release needs no token, so any crate gets them: Discogs records by their own ID, the rest through
+// MusicBrainz's link to Discogs.
+type Rel = { type: string; url?: { resource: string } };
+async function styles(path: string): Promise<string[]> {
+  const t = process.env.DISCOGS_TOKEN;
+  const r = await get(`https://api.discogs.com/${path}`, t ? { Authorization: `Discogs token=${t}` } : {});
+  return ((r?.styles ?? []) as string[]).slice(0, 3);
+}
+function discogsPath(rels: Rel[]) {
+  const urls = rels.filter((x) => x.type === "discogs").map((x) => x.url?.resource ?? "");
+  const m = urls.map((u) => u.match(/discogs\.com\/master\/(\d+)/)?.[1]).find(Boolean);
+  if (m) return `masters/${m}`;
+  const r = urls.map((u) => u.match(/discogs\.com\/release\/(\d+)/)?.[1]).find(Boolean);
+  return r ? `releases/${r}` : "";
+}
+
+// a record's genres: Discogs styles when Discogs knows the album, else MusicBrainz's
+async function genresOf(g: { genres?: { name: string; count: number }[]; relations?: Rel[]; "artist-credit"?: { artist?: { id?: string } }[] } | null, d: string) {
+  const path = d ? `releases/${d}` : discogsPath(g?.relations ?? []);
+  const s = path ? await styles(path).catch(() => []) : [];
+  if (s.length) return s;
+  let genres = top(g?.genres);
+  const who = g?.["artist-credit"]?.[0]?.artist?.id;
+  if (!genres.length && who && MBID.test(who)) genres = top((await mb(`artist/${who}?inc=genres`))?.genres);
+  return genres;
+}
+
 // the album's English Wikipedia article: by MusicBrainz's link to it when there is one, else by a search.
-// The same MusicBrainz answer carries the album's genres.
-async function article(group: string, artist: string, title: string): Promise<{ name: string | null; genres: string[] }> {
+// The same MusicBrainz answer carries the album's genres and its link to Discogs.
+async function article(group: string, artist: string, title: string, d: string): Promise<{ name: string | null; genres: string[] }> {
   let genres: string[] = [];
+  if (!MBID.test(group)) genres = d ? await styles(`releases/${d}`).catch(() => []) : [];
   if (MBID.test(group)) {
     const g = await mb(`release-group/${group}?inc=url-rels+genres+artist-credits`);
-    genres = top(g?.genres);
-    const who = g?.["artist-credit"]?.[0]?.artist?.id as string | undefined;
-    if (!genres.length && who && MBID.test(who)) genres = top((await mb(`artist/${who}?inc=genres`))?.genres);
-    const rels: { type: string; url?: { resource: string } }[] = g?.relations ?? [];
+    genres = await genresOf(g, d);
+    const rels: Rel[] = g?.relations ?? [];
     const wiki = rels.find((x) => x.type === "wikipedia" && /\/\/en\.wikipedia\.org\/wiki\//.test(x.url?.resource ?? ""));
     if (wiki) return { name: decodeURIComponent(wiki.url!.resource.split("/wiki/")[1]), genres };
     const q = rels.find((x) => x.type === "wikidata")?.url?.resource.match(/Q\d+$/)?.[0];
@@ -112,8 +139,8 @@ async function article(group: string, artist: string, title: string): Promise<{ 
   return { name: (hit?.title as string) ?? null, genres };
 }
 
-async function notes(group: string, artist: string, title: string) {
-  const { name, genres } = await article(group, artist, title).catch(() => ({ name: null, genres: [] as string[] }));
+async function notes(group: string, artist: string, title: string, d: string) {
+  const { name, genres } = await article(group, artist, title, d).catch(() => ({ name: null, genres: [] as string[] }));
   const a = name ? await readArticle(name.replace(/_/g, " "), artist).catch(() => null) : null;
   if (!a) return { about: null, genres, credits: null };
   const text = (await summarize(makingText(a))) ?? plainAbout(a);
@@ -140,6 +167,14 @@ export async function GET(request: NextRequest) {
   // an answer kept from before ANTHROPIC_API_KEY was set has the plain About: look it up again, once, to write it
   const keyed = !!process.env.ANTHROPIC_API_KEY;
   if (liner?.about && keyed && !liner.keyed) liner = undefined;
+  // an answer kept from before Discogs styles: look up its genres again, once, and keep the rest
+  if (liner && !liner.styled) {
+    const g0 = group || (mbid ? (await fromMusicBrainz(mbid).catch(() => ({ group: "" }))).group : "");
+    const g = MBID.test(g0) ? await mb(`release-group/${g0}?inc=url-rels+genres+artist-credits`).catch(() => null) : null;
+    const genres = g || d ? await genresOf(g, d).catch(() => liner!.genres) : liner.genres;
+    liner = { ...liner, genres, styled: true };
+    if (store) await store([["SET", `crate:liner:${key}`, JSON.stringify(liner), "EX", 2592000]]).catch(() => null);
+  }
   if (!liner) {
     let t: { sides: Side[]; ms: number } = { sides: [], ms: 0 };
     if (d) t = await fromDiscogs(d).catch(() => t);
@@ -149,7 +184,7 @@ export async function GET(request: NextRequest) {
       group ||= m.group;
     }
     if (!t.sides.length && a) t = await fromApple(a).catch(() => t);
-    liner = { sides: t.sides, minutes: Math.round(t.ms / 60000), ...(await notes(group, artist, title)), keyed };
+    liner = { sides: t.sides, minutes: Math.round(t.ms / 60000), ...(await notes(group, artist, title, d)), keyed, styled: true };
     if (store && (liner.sides.length || liner.about)) await store([["SET", `crate:liner:${key}`, JSON.stringify(liner), "EX", 2592000]]).catch(() => null);
   }
   kept.set(key, liner);
