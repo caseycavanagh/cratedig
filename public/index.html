@@ -480,6 +480,7 @@ html.phone body.wm-on::after{content:'';position:fixed;inset:0;z-index:calc(var(
 /* while editing, the tools take the bar's place at the bottom; Add brings search back over them */
 body.editing-on:not(.adding) .dock,body.editing-on:not(.adding) .dsay{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
 body.editing-on.adding .dock{transition:opacity .25s,visibility 0s}
+body.editing-on .toast{bottom:calc(env(safe-area-inset-bottom) + 108px)}
 .crate-d [hidden]{display:none!important}
 .eb{position:fixed;z-index:var(--z-raised);left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);translate:-50% 0;display:flex;align-items:center;gap:2px;padding:6px;border-radius:var(--r-panel);background:var(--sheet);border:1px solid var(--line);box-shadow:var(--float);transition:opacity .25s,visibility 0s}
 .eb[hidden]{display:none}
@@ -3100,14 +3101,15 @@ function toast(msg,act,fn){
   toastEl.classList.add('on');toastT=setTimeout(()=>toastEl.classList.remove('on'),act?7000:3500);
 }
 const editB=$('#editB'),unlockD=$('#unlock'),eb=$('#eb');
-// Edit sits beside the crate's name on Casey's devices; while editing, the bar at the bottom holds the tools and Done
+// Edit sits beside the crate's name wherever edit mode is set up (a device not signed in asks for the key first); while editing, the bar at the bottom holds the tools and Done
 function setEditing(on){
   editing=!!(on&&OWNER&&EDITABLE);const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut()}
-  if(BASE)bare();editB.hidden=!(OWNER&&EDITABLE)||editing;eb.hidden=!editing;nameCrate();
+  if(BASE)bare();editB.hidden=!EDITABLE||editing;eb.hidden=!editing;nameCrate();
   try{sessionStorage.setItem('records-editing',editing?'1':'')}catch{}
   if(!open.hidden)info(order[cur]);if(q.value.trim())search();
 }
-editB.onclick=()=>{setEditing(true);editB.blur()};
+// on a device that isn't signed in yet, Edit asks for the key once, then edits
+editB.onclick=()=>{editB.blur();if(!OWNER){unlockD.showModal();return}setEditing(true)};
 function lockOut(){OWNER=null;try{localStorage.removeItem('records-key')}catch{}setEditing(false);signable();toast('Your key stopped working. Sign in again from About')}
 // a device that isn't signed in can sign in from About (or by opening the page with ?edit); nobody else sees it
 const signable=()=>{$('#abIn').hidden=!(EDITABLE&&!OWNER)};
@@ -3194,7 +3196,7 @@ $('#unlockF').addEventListener('submit',async e=>{
   const why=r&&!r.ok?await r.json().catch(()=>null):null;
   if(!r?.ok){$('#keyErr').textContent=!r?'Couldn’t reach the site':r.status===429?'Too many tries. Try again in an hour':why?.error==='not allowed'?'That key didn’t work':`The site didn’t check the key (${r.status}${why?.error?', '+why.error:''})`;return}
   OWNER=key;try{localStorage.setItem('records-key',key)}catch{}
-  EDITS=(await r.json()).edits;applyEdits();rearrange(order[cur]);unlockD.close();setEditing(true);signable();toast('Signed in. Edit is beside the crate’s name');
+  EDITS=(await r.json()).edits;applyEdits();rearrange(order[cur]);unlockD.close();setEditing(true);signable();toast('Signed in');
 });
 $('#unlockX').onclick=()=>unlockD.close();
 unlockD.addEventListener('close',()=>{$('#key').value='';$('#keyErr').textContent='';dropAsk()});
