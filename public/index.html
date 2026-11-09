@@ -1643,7 +1643,7 @@ html.phone .sx,html.phone body.searching .sx{display:none}
     <svg class="ab-mk" aria-hidden="true"><use href="#mark"/></svg>
     <p class="ab-name">Crate Dig</p>
     <p class="ab-body">Every record Casey owns, in one crate. Flip through, pull one out, turn it over. Before long, you’ll be able to make a crate of your own.</p>
-    <p class="ab-cr">Covers from Apple Music and the Cover Art Archive · Facts from MusicBrainz<br>Made by <a href="https://caseycavanagh.com" target="_blank" rel="noopener">Casey Cavanagh</a> · © <span id="abY">2026</span><span id="abIn" hidden> · <button type="button" class="ab-in-b">Sign in</button></span></p>
+    <p class="ab-cr">Covers from Apple Music and the Cover Art Archive · Facts from MusicBrainz<br>Made by <a href="https://caseycavanagh.com" target="_blank" rel="noopener">Casey Cavanagh</a> · © <span id="abY">2026</span><span id="abIn" hidden> · <button type="button" class="ab-in-b">Sign in</button></span><span id="abOut" hidden> · <button type="button" class="ab-in-b">Sign out</button></span></p>
   </div>
 </dialog>
 
@@ -3011,7 +3011,10 @@ addEventListener('keydown',e=>{
 // A device signs in once with the key (from About, or by opening the page with ?edit) and keeps it; from then on Edit sits beside the
 // crate's name, and the tools take the bottom bar while editing. Nobody else sees any of it.
 let BASE=null,EDITS={added:[],removed:[],patch:{}},EDITABLE=false,OWNER=null,editing=false,vanish=false,mbT=0,mbN=0,mbRes=[];
-try{OWNER=localStorage.getItem('records-key')}catch{}
+// OWNER is the key typed on this device, or true when it's signed in with Google (a cookie the page can't read; /api/auth says)
+let GOOGLE=false;try{OWNER=localStorage.getItem('records-key')}catch{}
+const keyH=()=>typeof OWNER==='string'?{'X-Crate-Key':encodeURIComponent(OWNER)}:{};
+let signedHere=!!OWNER;try{signedHere||=!!localStorage.getItem('records-signed')}catch{}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>`&#${c.charCodeAt(0)};`);
 const slugOf=(a,t)=>(a+' '+t).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const rgbOf=c=>c?.[0]==='#'?[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)):(String(c).match(/\d+/g)||[216,211,202]).slice(0,3).map(Number);
@@ -3060,16 +3063,16 @@ function nameCrate(){
 let apiQ=Promise.resolve();
 function api(body){
   const p=apiQ.then(async()=>{
-    const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json','X-Crate-Key':encodeURIComponent(OWNER)},body:JSON.stringify(body)}).catch(()=>null);
+    const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json',...keyH()},body:JSON.stringify(body)}).catch(()=>null);
     const d=await r?.json().catch(()=>({}));
-    if(r?.status===401){lockOut();throw new Error('Your key stopped working')}
+    if(r?.status===401){lockOut();throw new Error('You’re signed out')}
     if(!r?.ok)throw new Error(d?.error?d.error[0].toUpperCase()+d.error.slice(1):'That didn’t save');
     EDITS=d.edits;applyEdits();return d;
   });
   apiQ=p.catch(()=>{});return p;
 }
 async function upload(blob){
-  const r=await fetch('/api/crate/img',{method:'POST',headers:{'Content-Type':blob.type,'X-Crate-Key':encodeURIComponent(OWNER)},body:blob}).catch(()=>null);
+  const r=await fetch('/api/crate/img',{method:'POST',headers:{'Content-Type':blob.type,...keyH()},body:blob}).catch(()=>null);
   const d=await r?.json().catch(()=>({}));
   if(!r?.ok)throw new Error('The cover didn’t upload');
   return d.url;
@@ -3104,23 +3107,36 @@ const editB=$('#editB'),unlockD=$('#unlock'),eb=$('#eb');
 // Edit sits beside the crate's name wherever edit mode is set up (a device not signed in asks for the key first); while editing, the bar at the bottom holds the tools and Done
 function setEditing(on){
   editing=!!(on&&OWNER&&EDITABLE);const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut()}
-  if(BASE)bare();editB.hidden=!EDITABLE||editing;eb.hidden=!editing;nameCrate();
+  if(BASE)bare();editB.hidden=!(EDITABLE&&OWNER)||editing;eb.hidden=!editing;nameCrate();
   try{sessionStorage.setItem('records-editing',editing?'1':'')}catch{}
   if(!open.hidden)info(order[cur]);if(q.value.trim())search();
 }
-// on a device that isn't signed in yet, Edit asks for the key once, then edits
-editB.onclick=()=>{editB.blur();if(!OWNER){unlockD.showModal();return}setEditing(true)};
-function lockOut(){OWNER=null;try{localStorage.removeItem('records-key')}catch{}setEditing(false);signable();toast('Your key stopped working. Sign in again from About')}
-// a device that isn't signed in can sign in from About (or by opening the page with ?edit); nobody else sees it
-const signable=()=>{$('#abIn').hidden=!(EDITABLE&&!OWNER)};
-$('#abIn').addEventListener('click',()=>{$('#abX').click();setTimeout(()=>unlockD.showModal(),60)});
-function ownerInit(){
-  const ask=new URLSearchParams(location.search).has('edit');let was='';try{was=sessionStorage.getItem('records-editing')}catch{}
+// Edit shows only on a device that's signed in, so nobody else sees it
+editB.onclick=()=>{editB.blur();setEditing(true)};
+function forget(){OWNER=null;signedHere=false;try{localStorage.removeItem('records-key');localStorage.removeItem('records-signed')}catch{}setEditing(false);signable()}
+function lockOut(){forget();toast('You’re signed out. Sign in again from About')}
+// a device that isn't signed in can sign in from About (or by opening the page with ?edit): with Google where that's set up,
+// which comes back here editing, else with the key
+const signable=()=>{$('#abIn').hidden=!(EDITABLE&&!OWNER);$('#abOut').hidden=!(EDITABLE&&OWNER)};
+function signIn(){
+  if(!GOOGLE){unlockD.showModal();return}
+  const u=new URL(location.href);u.searchParams.delete('edit');u.searchParams.delete('signin');
+  try{sessionStorage.setItem('records-editing','1')}catch{}
+  location.href='/api/auth/google?back='+encodeURIComponent(u.pathname+u.search);
+}
+$('#abIn').addEventListener('click',()=>{$('#abX').click();setTimeout(signIn,60)});
+$('#abOut').addEventListener('click',async()=>{$('#abX').click();if(OWNER===true)await fetch('/api/auth',{method:'DELETE'}).catch(()=>null);forget();toast('Signed out')});
+async function ownerInit(){
+  const a=await authQ;GOOGLE=!!a?.google;
+  if(a?.owner){OWNER=true;try{localStorage.setItem('records-signed','1')}catch{}}
+  else if(OWNER===null&&signedHere)try{localStorage.removeItem('records-signed')}catch{}
+  const sp=new URLSearchParams(location.search),ask=sp.has('edit');let was='';try{was=sessionStorage.getItem('records-editing')}catch{}
   setEditing(OWNER&&(was||ask));signable();
+  if(sp.get('signin')==='no'){toast('That account can’t edit this crate');const u=new URL(location.href);u.searchParams.delete('signin');history.replaceState(history.state,'',u)}
   if(!ask)return;
   if(!EDITABLE){toast('Edit mode isn’t set up here yet');dropAsk()}
   else if(OWNER)dropAsk();
-  else unlockD.showModal();
+  else signIn();
 }
 // The crate's name opens the crates: switch to another, and on Casey's devices make a new one or change this one's name and words.
 // On a phone it's a sheet from the bottom, within reach of a thumb
@@ -3432,7 +3448,8 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 // Casey's crate, or a visitor's crate when the address carries one (vinyl-make.html builds those links)
 // Casey's edits come too (fresh for Casey, a few seconds old for everyone else), unless they're slow: the crate doesn't wait long for them
 // The whole crate doesn't wait long for them; another crate needs them for its list, so it waits longer
-const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(OWNER?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
+const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(signedHere?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
+const authQ=visiting?null:fetch('/api/auth').then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
   if(v&&v.records.length){RECORDS.splice(0,RECORDS.length,...v.records);crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
   else{

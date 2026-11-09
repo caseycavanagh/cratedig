@@ -1,8 +1,9 @@
 // Casey's edits to the records crate (public/index.html, and the original in public/vinyl-prototype.html), kept in Upstash Redis (src/lib/kv.ts)
 // next to the likes: records added and taken out, jacket colors, and covers Casey uploads. Anyone can read them,
-// because the crate shows them; only Casey can change them, with the key in CRATE_KEY sent in an X-Crate-Key header.
+// because the crate shows them; only Casey can change them: signed in with Google (src/lib/auth.ts), or with the key in CRATE_KEY sent in an X-Crate-Key header.
 import { createHash, timingSafeEqual } from "node:crypto";
 import { kv } from "@/lib/kv";
+import { signedIn } from "@/lib/auth";
 
 export type Run = NonNullable<ReturnType<typeof kv>>;
 export type Rec = {
@@ -70,8 +71,10 @@ export async function readEdits(run: Run): Promise<Edits> {
   }
 }
 
-// Is this Casey? Wrong guesses are counted per address, and past 20 in an hour that address waits.
+// Is this Casey? Signed in with Google (src/lib/auth.ts), or holding CRATE_KEY.
+// Wrong keys are counted per address, and past 20 in an hour that address waits.
 export async function owner(req: Request, run: Run): Promise<boolean | "slow"> {
+  if (await signedIn(req, run)) return true;
   // both sides cleaned the same way: a key pasted into Vercel often carries a trailing newline, space or quotes
   const clean = (s?: string | null) => (s ?? "").normalize("NFC").trim().replace(/^(["'])(.*)\1$/, "$2").trim();
   const key = clean(process.env.CRATE_KEY);
