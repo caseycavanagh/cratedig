@@ -1,6 +1,6 @@
 // Casey's edits to the records crate (src/lib/crate.ts). The crate page reads them and lays them over its own list.
 //   GET  /api/crate                     → { configured, editable, edits: { added, removed, patch } }
-//   POST /api/crate { op, ... }          → { edits }, with the key in CRATE_KEY in an X-Crate-Key header
+//   POST /api/crate { op, ... }          → { edits }, signed in with Google (src/lib/auth.ts) or with CRATE_KEY in an X-Crate-Key header
 //     op "check"                         is the key right
 //     op "add"     record                a record: artist, title, year, label, format, front, back, spine, spotify, links
 //     op "remove"  slug                  off the crate (kept, covers and all, so it can be put back)
@@ -20,12 +20,13 @@
 // Covers Casey uploads go to /api/crate/img first and come back as /api/crate/img/<id>.
 import { connection } from "next/server";
 import { kv } from "@/lib/kv";
+import { google } from "@/lib/auth";
 import { ALL, EDITS, type Crate, type Edits, type Notes, type Patch, type Rec, denied, imgKey, ownImg, owner, readEdits, slugOf, usedImgs } from "@/lib/crate";
 
 export async function GET() {
   await connection();
   const run = kv();
-  const editable = !!process.env.CRATE_KEY?.trim();
+  const editable = !!(process.env.CRATE_KEY?.trim() || google());
   if (!run) return Response.json({ configured: false, editable, edits: { added: [], removed: [], patch: {}, crates: { list: [] } } });
   // the page asks for a fresh copy (?t=…) after Casey edits; everyone else can have one a few seconds old
   return Response.json(
