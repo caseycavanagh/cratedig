@@ -117,7 +117,7 @@ export async function crateTiles(n = 4): Promise<{ pinned?: string; list: Tile[]
   return {
     pinned: cs.pinned,
     list: [
-      { slug: ALL, name: "Everything", about: cs.all?.about, fronts: covers(owned) },
+      { slug: ALL, name: cs.all?.name || "Everything", about: cs.all?.about, fronts: covers(owned) },
       ...cs.list.map((c) => ({
         slug: c.slug,
         name: c.name,
@@ -131,7 +131,7 @@ export async function crateTiles(n = 4): Promise<{ pinned?: string; list: Tile[]
 // a crate's name and words, for its link preview
 export async function crateInfo(slug: string) {
   const e = await edits();
-  if (slug === ALL) return { name: "Everything", about: e?.crates?.all?.about };
+  if (slug === ALL) return { name: e?.crates?.all?.name || "Everything", about: e?.crates?.all?.about };
   const c = e?.crates?.list.find((x) => x.slug === slug);
   return c ? { name: c.name, about: c.about } : null;
 }

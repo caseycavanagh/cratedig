@@ -47,10 +47,10 @@ export type Notes = {
   sleeve?: [string, string][]; // role, name
 };
 // More crates than the one: each is picked from Casey's records (records, by slug) and can hold records Casey doesn't own
-// (extra, which live only in that crate). "all" is the whole crate; it keeps a description here but never a list.
+// (extra, which live only in that crate). "all" is the whole crate; it keeps a name and description here but never a list.
 // A crate's slug is its address (/casey/<slug>) and stays put when it's renamed, so shared links keep working.
 export type Crate = { slug: string; name: string; about?: string; records: string[]; extra: Rec[] };
-export type Crates = { pinned?: string; all?: { about?: string }; list: Crate[] };
+export type Crates = { pinned?: string; all?: { name?: string; about?: string }; list: Crate[] };
 export type Edits = { added: Rec[]; removed: string[]; patch: Record<string, Patch>; crates?: Crates };
 export const ALL = "all";
 

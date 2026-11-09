@@ -3026,6 +3026,7 @@ const added=new Map(); // slug → record, the same object each time, so the cra
 // Which crate this is: /casey/<crate>, or "all", the whole crate. The others are picked from the whole crate (records, by slug),
 // plus records only that crate holds (extra). Edits to a record show in every crate it's in.
 const CRATE=(location.pathname.match(/^\/casey\/([a-z0-9-]{1,80})\/?$/)||[])[1]||'all';
+const allName=()=>EDITS.crates?.all?.name||'Everything';
 const crateDef=()=>CRATE==='all'?null:(EDITS.crates?.list||[]).find(c=>c.slug===CRATE)||null;
 function applyEdits(){
   if(!BASE)return;
@@ -3057,7 +3058,7 @@ function bare(){
 // the crate's name: in the tab, at the top left (back to all of Casey's crates), and at the end of the crate
 function nameCrate(){
   const C=crateDef(),w=$('#where');if(visiting||!w)return;
-  const name=C?C.name:'Everything';w.hidden=false;$('#whereN').textContent=name;w.classList.toggle('menu',menuful());w.tabIndex=menuful()?0:-1;roomForName();
+  const name=C?C.name:allName();w.hidden=false;$('#whereN').textContent=name;w.classList.toggle('menu',menuful());w.tabIndex=menuful()?0:-1;roomForName();
   document.title=TITLE=C?`${C.name} · Crate Dig`:'Crate Dig';if(open.hidden)document.title=TITLE;
 }
 // one change at a time, in order; the answer is the edits as saved
@@ -3144,7 +3145,7 @@ async function ownerInit(){
 const wm=$('#wm'),where=$('#where'),PH=()=>document.documentElement.classList.contains('phone');
 const PLUS='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',PEN='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5l1-4L15.8 5.2a1.8 1.8 0 0 1 2.5 0l.5.5a1.8 1.8 0 0 1 0 2.5L8.5 18.5z M14 7l3 3"/></svg>',
   CHECK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',WORDS='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h9"/></svg>';
-const crateList=()=>[{slug:'all',name:'Everything',records:null},...(EDITS.crates?.list||[])];
+const crateList=()=>[{slug:'all',name:allName(),records:null},...(EDITS.crates?.list||[])];
 const menuful=()=>!visiting&&((EDITS.crates?.list||[]).length>0||!!(OWNER&&EDITABLE));
 // each crate shows the cover of its first record, so they're easy to tell apart
 function crateCover(c){
@@ -3182,19 +3183,19 @@ const crateD=$('#crateD'),crateF=$('#crateF');let making=false;
 function crateOpen(fresh){
   making=fresh;const C=crateDef(),cs=EDITS.crates||{};
   $('#crateH').textContent=fresh?'New crate':'This crate';$('#crateS').textContent=fresh?'Make it':'Save';
-  $('#crateN').value=fresh?'':C?C.name:'Everything';$('#crateN').disabled=!fresh&&!C;$('#crateX').hidden=fresh||!C;$('.crate-d .pin').hidden=fresh;
+  $('#crateN').value=fresh?'':C?C.name:allName();$('#crateX').hidden=fresh||!C;$('.crate-d .pin').hidden=fresh;
   $('#crateA').value=fresh?'':(C?C.about:cs.all?.about)||'';$('#crateP').checked=!fresh&&cs.pinned===CRATE;
   crateD.showModal();if(fresh)$('#crateN').focus();
 }
 $('#crateC').onclick=()=>crateD.close();
 crateF.addEventListener('submit',async e=>{
   e.preventDefault();const C=crateDef(),cs=EDITS.crates||{},name=$('#crateN').value.trim(),about=$('#crateA').value.trim(),pin=$('#crateP').checked;
-  if((making||C)&&!name){$('#crateN').focus();return}
+  if(!name){$('#crateN').focus();return}
   crateD.close();
   try{
     if(making){const before=new Set((EDITS.crates?.list||[]).map(c=>c.slug));await api({op:'crate-new',name,about});
       const c=(EDITS.crates?.list||[]).find(x=>!before.has(x.slug));if(c){try{sessionStorage.setItem('records-editing','1')}catch{}location.href='/casey/'+c.slug}return}
-    if((C?C.name:'')!==name&&C||((C?C.about:cs.all?.about)||'')!==about)await api({op:'crate-set',crate:CRATE,...(C?{name}:{}),about});
+    if((C?C.name:allName())!==name||((C?C.about:cs.all?.about)||'')!==about)await api({op:'crate-set',crate:CRATE,name,about});
     if(pin!==(cs.pinned===CRATE))await api({op:'crate-pin',crate:pin?CRATE:null});
     nameCrate();toast('Saved');
   }catch(x){toast(x.message)}
@@ -3251,7 +3252,7 @@ eb.addEventListener('click',e=>{
   if(k==='out'){ebShut();rsShut();takeOut(r);return}
   if(k==='covers')ebOpen(k,`<button type="button" role="menuitem" data-up="front">${r.front?'New front':'Add a front'}</button><button type="button" role="menuitem" data-up="back">${r.back?'New back':'Add a back'}</button>${EDITS.patch[r.slug]&&(EDITS.patch[r.slug].front||EDITS.patch[r.slug].back||EDITS.patch[r.slug].bg)?'<hr><button type="button" role="menuitem" data-up="reset">Back to the original covers</button>':''}`);
   if(k==='crates'){const cs=(EDITS.crates?.list||[]);
-    ebOpen(k,`<p class="ebh">In these crates</p><button type="button" role="menuitemcheckbox" aria-checked="true" aria-disabled="true" class="ebc on"><span>Everything</span>${ebIc('check')}</button>${cs.map(c=>`<button type="button" role="menuitemcheckbox" aria-checked="${inCrate(c,r)}" class="ebc${inCrate(c,r)?' on':''}" data-crate="${esc(c.slug)}"${r.extra&&c.slug===CRATE?' aria-disabled="true"':''}><span>${esc(c.name)}</span>${ebIc('check')}</button>`).join('')}${cs.length?'':'<p class="ebn">Make another crate from the crate’s name at the top.</p>'}`)}
+    ebOpen(k,`<p class="ebh">In these crates</p><button type="button" role="menuitemcheckbox" aria-checked="true" aria-disabled="true" class="ebc on"><span>${esc(allName())}</span>${ebIc('check')}</button>${cs.map(c=>`<button type="button" role="menuitemcheckbox" aria-checked="${inCrate(c,r)}" class="ebc${inCrate(c,r)?' on':''}" data-crate="${esc(c.slug)}"${r.extra&&c.slug===CRATE?' aria-disabled="true"':''}><span>${esc(c.name)}</span>${ebIc('check')}</button>`).join('')}${cs.length?'':'<p class="ebn">Make another crate from the crate’s name at the top.</p>'}`)}
 });
 // the color picker sits over its tool: the record takes the color as you pick it, and it saves when you're done
 const ebC=$('#ebC');
@@ -3391,7 +3392,7 @@ function panel(v,n){
   const out=C?[...(BASE||[]),...added.values()].filter(r=>!r.extra&&!EDITS.removed.includes(r.slug)&&!here.has(r.slug)&&matchQ(r,v)).slice(0,30)
     :[...(BASE||[]),...added.values()].filter(r=>!r.extra&&EDITS.removed.includes(r.slug)&&matchQ(r,v));
   p.hidden=false;
-  p.innerHTML=`<p class="qh">${n?`${n} in the crate`:'Not in the crate'}</p>${out.length?`${C?'<p class="qh">In Everything</p>':''}<ul>${out.map(r=>hitHTML(r,C?`<button type="button" class="btn sm" data-put="${esc(r.slug)}">Add</button>`:`<button type="button" class="btn sm" data-back="${esc(r.slug)}">Put back</button>`)).join('')}</ul>`:''}<p class="qh" id="mbH">Looking on MusicBrainz…</p><ul id="mbL"></ul>`;
+  p.innerHTML=`<p class="qh">${n?`${n} in the crate`:'Not in the crate'}</p>${out.length?`${C?`<p class="qh">In ${esc(allName())}</p>`:''}<ul>${out.map(r=>hitHTML(r,C?`<button type="button" class="btn sm" data-put="${esc(r.slug)}">Add</button>`:`<button type="button" class="btn sm" data-back="${esc(r.slug)}">Put back</button>`)).join('')}</ul>`:''}<p class="qh" id="mbH">Looking on MusicBrainz…</p><ul id="mbL"></ul>`;
   fallbacks(p);clearTimeout(mbT);const my=++mbN;
   mbT=setTimeout(async()=>{ // MusicBrainz takes one search a second: wait for a pause in the typing
     let res=[];try{res=await VisitorCrate.search(v)}catch{}
