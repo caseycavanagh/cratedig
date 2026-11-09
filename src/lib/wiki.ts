@@ -1,13 +1,21 @@
 // Reading an album's Wikipedia article for the open record: its prose by section, the infobox's
 // producer, studio and recording dates, and the players and sleeve credits from its Personnel list.
 
+import { shaky, troubled } from "@/lib/shaky";
+
 const UA = "cratedig/1.0 (https://github.com/caseycavanagh/cratedig)";
 const API = "https://en.wikipedia.org/w/api.php?format=json&formatversion=2&redirects=1&";
 
 const get = (q: string) =>
   fetch(API + q, { headers: { "User-Agent": UA }, cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : null))
-    .catch(() => null);
+    .then((r) => {
+      if (troubled(r.status)) shaky();
+      return r.ok ? r.json() : null;
+    })
+    .catch(() => {
+      shaky();
+      return null;
+    });
 
 export type Section = { heading: string; text: string };
 export type Article = {

@@ -2375,9 +2375,10 @@ const LDONE=new Map(); // answers already in, drawn at once
 const HAS=(()=>{try{return JSON.parse(localStorage.getItem('crate:about'))||{}}catch{return{}}})();
 function fetchLiner(r){
   let p=LINER.get(r.slug);
+  // an answer that didn't come, or came without a source that was down, isn't remembered: the next look asks again
   if(!p){p=fetch('/api/liner?'+linerQ(r)).then(x=>x.ok?x.json():null).catch(()=>null).then(l=>{
-    LDONE.set(r.slug,l);
-    if(l){HAS[r.slug]=l.about?1:0;credOf(r,l);try{localStorage.setItem('crate:about',JSON.stringify(HAS))}catch{}}
+    if(!l||l.partial){LINER.delete(r.slug);return l}
+    LDONE.set(r.slug,l);HAS[r.slug]=l.about?1:0;credOf(r,l);try{localStorage.setItem('crate:about',JSON.stringify(HAS))}catch{}
     return l});LINER.set(r.slug,p)}
   return p;
 }
@@ -2410,7 +2411,8 @@ const preLiner=()=>{const r=order[cur];if(r&&open.hidden)fetchLiner(r);if(!known
 function liner(r){
   const p=fetchLiner(r);knowCrate();
   const show=(l,late)=>{
-    if(order[cur]!==r||open.hidden)return;l=withNotes(r,l);
+    // an answer already in is drawn as the record opens (before the open view shows); one arriving later only if it's still open
+    if(order[cur]!==r||(late&&open.hidden))return;l=withNotes(r,l);
     const ab=$('#oabout');
     // arriving late, About opens its room on a spring and the words fade in after, so what's below glides down
     const was=ab.hidden?0:ab.offsetHeight;
