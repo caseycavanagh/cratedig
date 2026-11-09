@@ -1467,7 +1467,8 @@ html .dock .xb>.fb.dr{color:var(--t2)}
 .dock .xb>.q .qx{right:12px;width:28px;height:28px;background:none;color:var(--m)}
 .dock .xb>.q .qx svg{width:12px;height:12px}
 .dock .xb>.q .qx{display:none} /* the round × beside the field clears and closes; one × is enough */
-.dock .xb>.q .qnone{bottom:calc(100% + 10px);top:auto;left:50%;right:auto;translate:-50% 0;width:min(380px,calc(100vw - 28px))}
+/* it opens above the field from its left edge, as wide as the field, or on a phone out to the × (centered on a phone's field, it ran off the screen) */
+.dock .xb>.q .qnone{bottom:calc(100% + 10px);top:auto;left:0;right:auto;translate:none;width:max(100%,min(380px,calc(100vw - 28px)))}
 .dock .xb>.q:has(input:focus-visible){outline:none}
 .dock .dx{cursor:pointer;display:grid;place-items:center;color:var(--t1)}
 .dock .dx svg{width:18px;height:18px}
@@ -3382,7 +3383,7 @@ async function putBack(r){
 }
 // Search, while editing: records taken out that match, and what MusicBrainz has, to add
 const hitHTML=(x,act)=>`<li class="hit">${x.thumb||x.front?`<img src="${esc(x.thumb||img(x.front))}"${x.fallback?` data-fb="${esc(x.fallback)}"`:''} alt="" loading="lazy">`:'<i class="ph"></i>'}<span><b>${esc(x.title)}</b><i>${esc(x.artist)}${x.year?' · '+esc(x.year):''}</i></span>${act}</li>`;
-const fallbacks=el=>$$('img',el).forEach(i=>i.addEventListener('error',()=>{if(i.dataset.fb){i.src=i.dataset.fb;delete i.dataset.fb}else i.style.visibility='hidden'}));
+const fallbacks=el=>$$('img',el).forEach(i=>i.addEventListener('error',()=>{if(i.dataset.fb){i.src=i.dataset.fb;delete i.dataset.fb}else{const ph=document.createElement('i');ph.className='ph';i.replaceWith(ph)}}));
 function panel(v,n){
   const p=$('#qnone');
   if(!editing){p.hidden=!!n;if(!n)p.innerHTML='<p class="qh">Not in the crate</p>';return}
