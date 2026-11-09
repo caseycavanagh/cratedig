@@ -11,7 +11,7 @@
 //                                         each null to go back to what was found, or empty to hide it
 //   More crates (src/lib/crate.ts, Crate):
 //     op "crate-new"  name, about          a new crate, empty; its slug comes from the name and never changes
-//     op "crate-set"  crate, name?, about? its name and its words ("all" takes words only)
+//     op "crate-set"  crate, name?, about? its name and its words (the slug never changes, "all" included)
 //     op "crate-pin"  crate | null         the crate that leads on /casey, or none
 //     op "crate-drop" crate                the crate itself; its records stay in the whole crate
 //     op "crate-put"  crate, slug          one of Casey's records into a crate
@@ -183,7 +183,14 @@ function crateEdit(e: Edits, b: Record<string, unknown>): string | undefined {
     return;
   }
   if (b.op === "crate-set" && id === ALL) {
-    if ("about" in b) cs.all = { about: about(b.about) };
+    const all = { ...cs.all };
+    if ("name" in b) {
+      const n = text(b.name, 60);
+      if (n && n !== "Everything") all.name = n;
+      else delete all.name;
+    }
+    if ("about" in b) all.about = about(b.about);
+    cs.all = all;
     return;
   }
   if (!c) return "no such crate";
