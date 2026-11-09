@@ -1424,6 +1424,7 @@ body.ready .dock{animation:barIn .7s var(--ease) .32s backwards}
 body.seek .crate.lifted~.dock{opacity:1;visibility:visible;z-index:var(--z-raised);transition:none}
 html.phone body.searching .page>.dock:not(.find){opacity:1}
 html.phone body.searching .dock{bottom:calc(var(--kb,0px) + 10px + env(safe-area-inset-bottom))}
+html.phone.kbup body.searching .dock{bottom:calc(var(--kb,0px) + 8px)} /* the keyboard covers the home bar, so the field sits right on the keyboard */
 .dock .xb{all:unset;pointer-events:auto;position:relative;flex:none;box-sizing:border-box;width:var(--H);height:var(--H);border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);transition:width .5s var(--ease),margin .5s var(--ease),opacity .2s,border-width 0s}
 .dock .xb.gone{width:0;margin:0 -6px;opacity:0;border-width:0;pointer-events:none;overflow:hidden;transition:width .5s var(--ease),margin .5s var(--ease),opacity .15s,border-width 0s .5s}
 .dock .xb:has(>.fb.sb[hidden]){display:none}
@@ -1536,6 +1537,8 @@ body:has(.dsay.on) .kd-c{opacity:.15;transition:opacity .2s}
 body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .xb.o) .kd{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 /* the list rises from the field: above it, across the screen on a phone, centered over it on a laptop */
 html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
+/* with the keyboard up, the list fits between the field and the status bar of what's actually on screen (iOS scrolls the page up under the status bar, so the full height isn't) */
+html.phone.kbup .sl{bottom:calc(var(--kb,0px) + 8px + 58px + 8px);max-height:calc(var(--vvh,100svh) - 8px - 58px - 8px - env(safe-area-inset-top) - 10px)}
 body.walling .dock::before,html:has(.open:not([hidden])) .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
 .wall,.tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 120px)}
 @media (max-width:700px){.tbl thead{display:none}} /* the bar's sort button sorts the table too, so the table's own "Sorted by" line goes */
@@ -4166,7 +4169,11 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   sl.addEventListener('touchmove',()=>{if(document.activeElement===q)q.blur()},{passive:true});
   // the keyboard: keep the bar and the list just above it
   const vv=window.visualViewport;
-  if(vv){const fit=()=>{const kb=Math.max(0,innerHeight-vv.height-vv.offsetTop);root.style.setProperty('--kb',kb.toFixed(0)+'px')};vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit)}
+  // iOS keeps the page its full height under the keyboard and scrolls it up to show the field, so both the keyboard's height
+  // and how much of the page is on screen come from the visual viewport
+  if(vv){const fit=()=>{const kb=Math.max(0,innerHeight-vv.height-vv.offsetTop);root.style.setProperty('--kb',kb.toFixed(0)+'px');
+    root.style.setProperty('--vvh',vv.height.toFixed(0)+'px');root.classList.toggle('kbup',kb>80)};
+    vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit);q.addEventListener('blur',()=>setTimeout(fit,300));fit()}
 })();
 </script>
 <style>
