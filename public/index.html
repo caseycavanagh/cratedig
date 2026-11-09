@@ -473,8 +473,10 @@ body:not(.ready) .wbar{opacity:0}
 .wm.sheet{top:auto;left:0;right:0;bottom:0;width:auto;max-height:min(80svh,640px);padding:8px max(14px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 18px) max(14px,env(safe-area-inset-left));border-radius:var(--r-panel) var(--r-panel) 0 0;border-width:1px 0 0}
 .wm.sheet .wr{min-height:56px;font-size:var(--fs-4)}
 .wm.sheet .wcv{width:40px;height:40px}
-.wm .wbtns{display:flex;gap:8px;margin-top:12px}
-.wm .wbtns .btn{flex:1;justify-content:center;height:48px;gap:8px;font-size:var(--fs-3)}
+/* stacked full width, so no label ever wraps, however narrow the phone */
+.wm .wbtns{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.wm .wbtns .btn{justify-content:center;height:48px;gap:8px;font-size:var(--fs-3);white-space:nowrap}
+.wm .wbtns .btn svg{flex:none}
 .wm .wbtns .btn.w{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
 html.phone body.wm-on::after{content:'';position:fixed;inset:0;z-index:calc(var(--z-pop) - 1);background:#0000004d}
 /* while editing, the tools take the bar's place at the bottom; Add brings search back over them */
