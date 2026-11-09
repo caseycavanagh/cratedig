@@ -8,12 +8,14 @@
 // A side is "" when the source doesn't say (a CD or digital release); the back then lists the songs without
 // side breaks. About is written from the article (src/lib/about.ts); genres are Discogs styles when Discogs knows
 // the album, else MusicBrainz's, the album's or else the artist's; credits (producer, studio, recorded, players,
-// sleeve) come from the article's infobox and Personnel list. Answers are kept in Upstash for a month, so each album is looked up and written once.
+// sleeve) come from the article's infobox and Personnel list. Answers are kept in Upstash for a month, so each album is looked up and written once (one without an About for a week);
+// an answer put together while a source was down or rate-limiting isn't kept, and says partial: true.
 
 import { connection, type NextRequest } from "next/server";
 import { kv } from "@/lib/kv";
 import { article as readArticle, makingText, plainAbout } from "@/lib/wiki";
 import { summarize } from "@/lib/about";
+import { watch, shaky, troubled } from "@/lib/shaky";
 
 const MB = "https://musicbrainz.org/ws/2/";
 const UA = "cratedig/1.0 (https://github.com/caseycavanagh/cratedig)";
@@ -21,25 +23,36 @@ const MBID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 type Side = { side: string; tracks: string[] };
 type Credits = { producer: string[]; studio: string[]; recorded: string; players: [string, string][]; sleeve: [string, string][] };
-type Liner = { sides: Side[]; minutes: number; about: { text: string; url: string } | null; genres: string[]; credits: Credits | null; keyed?: boolean; styled?: boolean };
+type Liner = { sides: Side[]; minutes: number; about: { text: string; url: string } | null; genres: string[]; credits: Credits | null; keyed?: boolean; styled?: boolean; whole?: boolean };
 const VERSION = "v2";
 
 // answers, kept between requests
 const kept = new Map<string, Liner>();
 
-// MusicBrainz asks for at most one request a second
+// MusicBrainz asks for at most one request a second, and answers 503 when it's asked faster: then it's asked once more
 let next = 0;
 async function mb(path: string) {
-  const wait = next - Date.now();
-  next = Math.max(Date.now(), next) + 1100;
-  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-  const res = await fetch(`${MB}${path}&fmt=json`, { headers: { "User-Agent": UA, Accept: "application/json" }, cache: "no-store" });
-  return res.ok ? res.json() : null;
+  for (let tries = 2; tries--; ) {
+    const wait = next - Date.now();
+    next = Math.max(Date.now(), next) + 1100;
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    const res = await fetch(`${MB}${path}&fmt=json`, { headers: { "User-Agent": UA, Accept: "application/json" }, cache: "no-store" }).catch(() => null);
+    if (res?.ok) return res.json();
+    if (res && !troubled(res.status)) return null;
+  }
+  shaky();
+  return null;
 }
 const get = (url: string, headers: Record<string, string> = {}) =>
   fetch(url, { headers: { "User-Agent": UA, ...headers }, cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : null))
-    .catch(() => null);
+    .then((r) => {
+      if (troubled(r.status)) shaky();
+      return r.ok ? r.json() : null;
+    })
+    .catch(() => {
+      shaky();
+      return null;
+    });
 
 // tracks numbered A1, A2, B1… go to their side; anything else stays in its disc, with no side named
 function bySide(tracks: { pos: string; title: string; disc?: number }[]): Side[] {
@@ -167,26 +180,43 @@ export async function GET(request: NextRequest) {
   // an answer kept from before ANTHROPIC_API_KEY was set has the plain About: look it up again, once, to write it
   const keyed = !!process.env.ANTHROPIC_API_KEY;
   if (liner?.about && keyed && !liner.keyed) liner = undefined;
+  // an answer kept without an About, from before answers said whether every source answered: look it up again, once,
+  // since a source that was down then may have left the About out
+  if (liner && !liner.about && !liner.whole) liner = undefined;
+  let shook = false;
   // an answer kept from before Discogs styles: look up its genres again, once, and keep the rest
   if (liner && !liner.styled) {
-    const g0 = group || (mbid ? (await fromMusicBrainz(mbid).catch(() => ({ group: "" }))).group : "");
-    const g = MBID.test(g0) ? await mb(`release-group/${g0}?inc=url-rels+genres+artist-credits`).catch(() => null) : null;
-    const genres = g || d ? await genresOf(g, d).catch(() => liner!.genres) : liner.genres;
-    liner = { ...liner, genres, styled: true };
-    if (store) await store([["SET", `crate:liner:${key}`, JSON.stringify(liner), "EX", 2592000]]).catch(() => null);
+    const was = liner;
+    const { value: genres, shaky: rough } = await watch(async () => {
+      const g0 = group || (mbid ? (await fromMusicBrainz(mbid).catch(() => ({ group: "" }))).group : "");
+      const g = MBID.test(g0) ? await mb(`release-group/${g0}?inc=url-rels+genres+artist-credits`).catch(() => null) : null;
+      return g || d ? await genresOf(g, d).catch(() => was.genres) : was.genres;
+    });
+    if (!rough) {
+      liner = { ...liner, genres, styled: true };
+      if (store) await store([["SET", `crate:liner:${key}`, JSON.stringify(liner), "EX", 2592000]]).catch(() => null);
+    }
   }
   if (!liner) {
-    let t: { sides: Side[]; ms: number } = { sides: [], ms: 0 };
-    if (d) t = await fromDiscogs(d).catch(() => t);
-    if (!t.sides.length && mbid) {
-      const m = await fromMusicBrainz(mbid).catch(() => ({ sides: [], group: "", ms: 0 }));
-      t = m;
-      group ||= m.group;
-    }
-    if (!t.sides.length && a) t = await fromApple(a).catch(() => t);
-    liner = { sides: t.sides, minutes: Math.round(t.ms / 60000), ...(await notes(group, artist, title, d)), keyed, styled: true };
-    if (store && (liner.sides.length || liner.about)) await store([["SET", `crate:liner:${key}`, JSON.stringify(liner), "EX", 2592000]]).catch(() => null);
+    const { value, shaky: rough } = await watch(async () => {
+      let t: { sides: Side[]; ms: number } = { sides: [], ms: 0 };
+      if (d) t = await fromDiscogs(d).catch(() => t);
+      if (!t.sides.length && mbid) {
+        const m = await fromMusicBrainz(mbid).catch(() => ({ sides: [], group: "", ms: 0 }));
+        t = m;
+        group ||= m.group;
+      }
+      if (!t.sides.length && a) t = await fromApple(a).catch(() => t);
+      return { sides: t.sides, minutes: Math.round(t.ms / 60000), ...(await notes(group, artist, title, d)), keyed, styled: true };
+    });
+    liner = { ...value, whole: !rough };
+    shook = rough;
+    // kept a month; one without an About is looked up again after a week, in case its article turns up.
+    // One put together while a source was in trouble isn't kept at all, so the next look asks again
+    if (store && !rough && (liner.sides.length || liner.about)) await store([["SET", `crate:liner:${key}`, JSON.stringify(liner), "EX", liner.about ? 2592000 : 604800]]).catch(() => null);
   }
+  if (shook) return Response.json({ ...liner, partial: true }, { headers: { "Cache-Control": "no-store" } });
   kept.set(key, liner);
-  return Response.json(liner, { headers: { "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=2592000" } });
+  const age = liner.about ? "s-maxage=604800, stale-while-revalidate=2592000" : "s-maxage=86400";
+  return Response.json(liner, { headers: { "Cache-Control": `public, ${age}` } });
 }
