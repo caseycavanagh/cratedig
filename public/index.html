@@ -4394,17 +4394,20 @@ html.phone .ab-sh{margin-top:20px}
 })();
 </script>
 <style>
-/* the filters you're in: small pills in a row just under the crate's name, lined up with the logo, staying put while the crate
+/* the filters you're in: small pills in a row just under the crate's name, starting where the mark does, staying put while the crate
    scrolls under them; they slide sideways once they don't fit */
-.fs{position:fixed;z-index:var(--z-bar);left:0;right:0;top:calc(env(safe-area-inset-top) + 70px);display:flex;align-items:center;justify-content:flex-start;pointer-events:none;transition:opacity .2s,visibility 0s}
+.fs{position:fixed;z-index:var(--z-bar);left:0;right:0;top:calc(env(safe-area-inset-top) + 62px);display:flex;align-items:center;justify-content:flex-start;pointer-events:none;transition:opacity .2s,visibility 0s}
 .fs[hidden]{display:none}
 .fs-in{display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;box-sizing:border-box;padding:2px max(14px,env(safe-area-inset-right)) 2px max(14px,env(safe-area-inset-left));overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;pointer-events:auto}
 .fs-in::-webkit-scrollbar{display:none}
+/* the first pill starts where the mark does: the logo's box sits at the page's edge, its mark 10px in from that */
+.fs-in{padding-left:calc(max(14px,env(safe-area-inset-left)) + 10px)}
+html:not(.phone) .fs-in{padding-left:calc(var(--edge) + 10px)}
 /* an edge with more past it fades out over a pill's width or so, so a pill there reads as going on, not cut off */
 .fs-in{--fl:0px;--fr:0px;-webkit-mask:linear-gradient(90deg,#0000,#000 var(--fl),#000 calc(100% - var(--fr)),#0000);mask:linear-gradient(90deg,#0000,#000 var(--fl),#000 calc(100% - var(--fr)),#0000)}
 .fs.fl .fs-in{--fl:64px}
 .fs.fr .fs-in{--fr:64px}
-.fp{flex:none;display:inline-flex;align-items:center;height:36px;max-width:min(320px,calc(100vw - 28px));box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);font-size:var(--fs-2);color:var(--fg);white-space:nowrap;transition:border-color .2s;animation:trayIn .3s var(--ease)}
+.fp{flex:none;display:inline-flex;align-items:center;height:36px;max-width:min(320px,calc(100vw - 38px));box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);font-size:var(--fs-2);color:var(--fg);white-space:nowrap;transition:border-color .2s;animation:trayIn .3s var(--ease)}
 .fp:hover{border-color:#ffffff40}
 .fp .cn,.fp .cx,.qtk .cx{all:unset;box-sizing:border-box;height:100%;display:inline-flex;align-items:center;min-width:0}
 .fp button.cn,.fp .cx,.qtk .cx{cursor:pointer}
@@ -4421,7 +4424,7 @@ html.phone .ab-sh{margin-top:20px}
 /* out of the way while the search is open (they're in its field), a record is out, or a stack or a toast is up over the bar */
 body:not(.ready) .fs,body.searching .fs,body:has(#qf:focus-within) .fs,body:has(#qf.has) .fs,html:has(.open:not([hidden])) .fs{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
 /* the grid and the table start below them */
-body.fon .wall,body.fon .tbl{padding-top:calc(env(safe-area-inset-top) + 72px + 48px)}
+body.fon .wall,body.fon .tbl{padding-top:calc(env(safe-area-inset-top) + 72px + 44px)}
 /* the swap menu drops from its pill */
 .cmenu{position:fixed;translate:none}
 html.phone .cmenu{left:12px;right:12px}
