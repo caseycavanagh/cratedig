@@ -1855,8 +1855,10 @@ const group=r=>{const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r
 // a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
 const labelName=l=>String(l||'').replace(/\u2010/g,'-').replace(/ Records$/,'').replace(/^\p{Ll}/u,c=>c.toUpperCase());
 // producers, players and genres come from each record's liner notes (CRED, filled as they arrive), and a record can have several
+// names Casey typed into a record's liner notes count from the start, before (or without) its notes being looked up
 const CRED={};
-const FIELD={artist:r=>r.artist,label:r=>r.label,year:r=>r.year,format:r=>r.format,producer:r=>CRED[r.slug]?.producer||[],player:r=>[...(CRED[r.slug]?.players||[]),r.artist],genre:r=>CRED[r.slug]?.genres||[]},
+const credIn=(r,k)=>{const n=r.notes;if(n&&k in n){const v=n[k]||[];return k==='players'?v.map(p=>p[0]):v}return CRED[r.slug]?.[k]||[]};
+const FIELD={artist:r=>r.artist,label:r=>r.label,year:r=>r.year,format:r=>r.format,producer:r=>credIn(r,'producer'),player:r=>[...credIn(r,'players'),r.artist],genre:r=>credIn(r,'genres')},
   KIND={artist:'Artist',label:'Label',year:'Year',format:'Format',producer:'Producer',player:'Player',genre:'Genre'};
 const same=(a,b)=>Array.isArray(a)?a.some(x=>same(x,b)):!!a&&fold(a)===fold(b);
 const matchQ=(r,v)=>{const h=fold([r.artist,r.sortAs,r.title,r.label,r.year,r.format].join(' '));return fold(v).split(' ').filter(Boolean).every(t=>h.includes(t))};
