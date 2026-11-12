@@ -558,6 +558,51 @@ html:not(.phone) body.rs-on .eb{translate:calc(-50% - 200px) 0}
 html.phone .rs{top:calc(env(safe-area-inset-top) + 72px);left:0;right:0;bottom:0;width:auto;border-radius:var(--r-panel) var(--r-panel) 0 0;border-width:1px 0 0}
 html.phone .rs-h{padding:14px max(10px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left))}
 html.phone .rs-f{padding:4px max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 28px) max(16px,env(safe-area-inset-left))}
+/* Add: the same sheet as Details. A search field with Bulk add and Scan at its end; what's found goes straight in, with Undo */
+.as .rs-h{border-bottom:0;padding-bottom:6px}
+.as-t{flex:1;min-width:0;margin:0;font-size:var(--fs-4);font-weight:500}
+.as-in{flex:none;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:0 20px 10px}
+.as-fld{display:flex;align-items:center;gap:4px;min-height:44px;padding:0 5px 0 14px;border-radius:var(--r-pill);background:var(--soft);color:var(--m)}
+.as-fld>svg{flex:none;width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.as-fld input,.as-fld textarea{all:unset;box-sizing:border-box;flex:1;min-width:0;color:var(--fg);font-size:var(--fs-3);line-height:1.45}
+.as-fld input{height:44px;padding-left:6px;width:100%}
+.as-fld input::placeholder,.as-fld textarea::placeholder{color:var(--m)}
+.as-fld input::-webkit-search-cancel-button{display:none}
+.as-fld textarea{display:none;padding:11px 0;min-height:132px;max-height:40svh;overflow:auto;white-space:pre;resize:none}
+.as-fld.bulk{align-items:flex-start;border-radius:var(--r-in);padding-left:14px}
+.as-fld.bulk>svg,.as-fld.bulk input{display:none}
+.as-fld.bulk textarea{display:block}
+.as-fld.bulk .as-b{margin-top:5px}
+.as-b{all:unset;cursor:pointer;flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--t1);transition:color .2s,background .2s}
+.as-b:hover{background:var(--hov)}
+.as-b[aria-pressed=true]{background:var(--sel);color:var(--fg)}
+.as-b:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.as-b svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.as-go{all:unset;box-sizing:border-box;cursor:pointer;justify-self:start;height:36px;padding:0 16px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);font-size:var(--fs-2);font-weight:500;white-space:nowrap}
+.as-go[hidden]{display:none}
+.as-cam{position:relative;height:180px;border-radius:var(--r-in);overflow:hidden;background:#050505}
+.as-cam[hidden]{display:none}
+.as-cam video{width:100%;height:100%;object-fit:cover;display:block}
+.as-brk{position:absolute;inset:26px 48px;border:2px solid #fff8;border-radius:12px;pointer-events:none;
+  -webkit-mask:conic-gradient(at 26px 26px,#0000 75%,#000 0) 0 0/calc(100% - 26px) calc(100% - 26px);mask:conic-gradient(at 26px 26px,#0000 75%,#000 0) 0 0/calc(100% - 26px) calc(100% - 26px)}
+.as-cs{position:absolute;left:10px;right:10px;bottom:10px;margin:0;padding:6px 12px;border-radius:var(--r-pill);background:#000a;color:var(--t1);font-size:var(--fs-2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.as-cs:empty{display:none}
+.as-f{padding-top:0}
+.as-f h3{margin:16px 0 4px}
+.as-l{list-style:none;padding:0;margin:0 -8px}
+.as-l .hit{min-height:52px}
+.hit .as-s{flex:none;display:block;font-size:var(--fs-2);color:var(--m);white-space:nowrap}
+.as-u{all:unset;cursor:pointer;flex:none;font-size:var(--fs-2);color:var(--fg);padding:6px 4px;text-decoration:underline;text-decoration-color:var(--t3);text-underline-offset:3px}
+.as-u:focus-visible{outline:1px solid var(--ring);border-radius:6px}
+.as-l .hit.out{opacity:.5}
+.as-l .hit.none b{font-weight:400;color:var(--t2)}
+.as-no{padding:10px 8px;color:var(--m);font-size:var(--fs-3)}
+html:not(.phone) body.as-on .page,html:not(.phone) body.as-on .kd{translate:-200px 0}
+html:not(.phone) body.as-on .open{translate:-150px 0}
+html:not(.phone) body.as-on .eb{translate:calc(-50% - 200px) 0}
+html.phone .as-in{padding:0 max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))}
+html.phone .as-fld input,html.phone .as-fld textarea{font-size:var(--fs-4)} /* 17px, so iOS doesn't zoom */
+html.phone .as-cam{height:200px}
 html.phone .rs-f input,html.phone .rs-f textarea{font-size:var(--fs-4)}
 html.phone .rs-f input{height:42px}
 @media(prefers-reduced-motion:reduce){.page,.kd,.open,.eb{transition-duration:0s}}
@@ -1611,6 +1656,21 @@ html.phone .sx,html.phone body.searching .sx{display:none}
 <div class="ebp" id="ebp" role="menu" hidden></div>
 <div class="rs-veil" id="rsV" hidden></div>
 <aside class="rs" id="rs" aria-label="Details" hidden></aside>
+<aside class="rs as" id="as" aria-label="Add records" hidden>
+  <div class="rs-h"><h2 class="as-t">Add records</h2><button type="button" class="rs-x" id="asX" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="as-in">
+    <div class="as-fld" id="asF">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+      <input id="asQ" type="search" placeholder="Find a record" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Find a record">
+      <textarea id="asL" rows="5" placeholder="One record to a line" autocapitalize="off" spellcheck="false" aria-label="Records, one to a line"></textarea>
+      <button type="button" class="as-b" id="asBulk" aria-pressed="false" aria-label="Bulk add" title="Bulk add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11M4 12h11M4 17h7M18 14v6M15 17h6"/></svg></button>
+      <button type="button" class="as-b" id="asScan" aria-pressed="false" aria-label="Scan barcodes" title="Scan barcodes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M8 9v6M11 9v6M13.5 9v6M16 9v6"/></svg></button>
+    </div>
+    <button type="button" class="as-go" id="asGo" hidden>Add these</button>
+    <div class="as-cam" id="asCam" hidden><video id="asVid" playsinline muted></video><span class="as-brk" aria-hidden="true"></span><p class="as-cs" id="asCs" aria-live="polite"></p></div>
+  </div>
+  <div class="rs-f as-f"><ul class="as-l" id="asR"></ul><h3 id="asAH" hidden>Just added</h3><ul class="as-l" id="asA"></ul></div>
+</aside>
 <input type="file" id="upF" accept="image/*" hidden>
 <dialog class="unlock" id="unlock" aria-labelledby="unlockH">
   <form id="unlockF">
@@ -3133,7 +3193,7 @@ function toast(msg,act,fn){
 const editB=$('#editB'),unlockD=$('#unlock'),eb=$('#eb');
 // Edit sits beside the crate's name wherever edit mode is set up (a device not signed in asks for the key first); while editing, the bar at the bottom holds the tools and Done
 function setEditing(on){
-  editing=!!(on&&OWNER&&EDITABLE);const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut()}
+  editing=!!(on&&OWNER&&EDITABLE);const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut();asShut()}
   if(BASE)bare();editB.hidden=!(EDITABLE&&OWNER)||editing;eb.hidden=!editing;nameCrate();
   try{sessionStorage.setItem('records-editing',editing?'1':'')}catch{}
   if(!open.hidden)info(order[cur]);if(q.value.trim())search();
@@ -3271,9 +3331,9 @@ eb.addEventListener('click',e=>{
   const b=e.target.closest('[data-e]');if(!b||e.target.id==='ebC')return;const k=b.dataset.e,r=ebR();b.blur();
   if(k==='done'){setEditing(false);return}
   if(k==='close'){$('#close').click();return}
-  if(k==='add'){ebShut();rsShut();document.body.classList.add('adding');q.focus();requestAnimationFrame(()=>q.focus());return}
+  if(k==='add'){ebShut();as.hidden?asOpen():asShut();return}
   if(!r)return;
-  if(k==='details'){ebShut();rs.hidden?rsOpen(r):rsShut();return}
+  if(k==='details'){ebShut();asShut();rs.hidden?rsOpen(r):rsShut();return}
   if(k==='out'){ebShut();rsShut();takeOut(r);return}
   if(k==='covers')ebOpen(k,`<button type="button" role="menuitem" data-up="front">${r.front?'New front':'Add a front'}</button><button type="button" role="menuitem" data-up="back">${r.back?'New back':'Add a back'}</button>${EDITS.patch[r.slug]&&(EDITS.patch[r.slug].front||EDITS.patch[r.slug].back||EDITS.patch[r.slug].bg)?'<hr><button type="button" role="menuitem" data-up="reset">Back to the original covers</button>':''}`);
   if(k==='crates'){const cs=(EDITS.crates?.list||[]);
@@ -3438,21 +3498,133 @@ $('#qnone').addEventListener('click',e=>{
 async function putIn(r){
   try{await api({op:'crate-put',crate:CRATE,slug:r.slug});made.delete(r);q.value='';qSync();arrange(null,r);q.blur();toast(`Added ${r.title}`)}catch(e){toast(e.message)}
 }
-// adding: the facts and covers from MusicBrainz, the covers kept in the crate's own store. In another crate, a record Casey
-// already has goes in from the whole crate; one Casey doesn't have lives in that crate only
+// adding: the facts and covers from Discogs or MusicBrainz, the covers kept in the crate's own store. In another crate, a record Casey
+// already has goes in from the whole crate; one Casey doesn't have lives in that crate only. Says how, so it can be undone
+async function addCore(x){
+  const C=crateDef(),own=C&&[...BASE,...added.values()].find(r=>!r.extra&&!EDITS.removed.includes(r.slug)&&r.slug===slugOf(x.artist,x.title));
+  if(own){await api({op:'crate-put',crate:CRATE,slug:own.slug});made.delete(own);return {r:own,how:'crate-put'}}
+  const m=await VisitorCrate.details(x).catch(()=>x);
+  const keep=async u=>{if(!u)return'';try{const r=await fetch(u);return r.ok?await upload(await shrink(await r.blob())):''}catch{return''}};
+  const [front,back]=await Promise.all([keep(m.front||(m.fallback||'').replace(/front-250$/,'front-1200')||(m.thumb||'').replace(/front-250$/,'front-1200')),keep(m.back)]);
+  await api({op:C?'crate-add':'add',crate:C?CRATE:undefined,record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined,added:today()}});
+  return {r:added.get(slugOf(m.artist,m.title)),how:C?'crate-add':'add'};
+}
 async function addFrom(x,btn){
   btn.disabled=true;btn.textContent='Adding…';
-  const C=crateDef(),own=C&&[...BASE,...added.values()].find(r=>!r.extra&&!EDITS.removed.includes(r.slug)&&r.slug===slugOf(x.artist,x.title));
-  if(own)return putIn(own);
-  try{
-    let m=x;
-    if(x.src==='m'){const d=await fetch('/api/musicbrainz?ids='+x.id).then(r=>r.ok?r.json():{}).catch(()=>({}));m={...x,...d.records?.[0]}}
-    const keep=async u=>{if(!u)return'';try{const r=await fetch(u);return r.ok?await upload(await shrink(await r.blob())):''}catch{return''}};
-    const [front,back]=await Promise.all([keep(m.front||(m.fallback||'').replace(/front-250$/,'front-1200')),keep(m.back)]);
-    await api({op:C?'crate-add':'add',crate:C?CRATE:undefined,record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined,added:today()}});
-    const r=added.get(slugOf(m.artist,m.title));q.value='';qSync();arrange(null,r);q.blur();
-    toast(`Added ${m.title}`);
-  }catch(e){btn.disabled=false;btn.textContent='Add';toast(e.message)}
+  try{const {r}=await addCore(x);q.value='';qSync();arrange(null,r);q.blur();toast(`Added ${r.title}`)}
+  catch(e){btn.disabled=false;btn.textContent='Add';toast(e.message)}
+}
+
+// The Add sheet: find a record and it goes straight in; Bulk add takes a list, one record to a line; Scan reads barcodes.
+// Everything added collects under Just added, each with Undo
+const as=$('#as'),asQ=$('#asQ'),asL=$('#asL'),asF=$('#asF'),asR=$('#asR'),asA=$('#asA'),asGo=$('#asGo'),asCam=$('#asCam'),asVid=$('#asVid'),asCs=$('#asCs');
+const asBulkB=$('#asBulk'),asScanB=$('#asScan'),asDone=new Map();let asT=0,asN=0,asRes=[];
+const have=x=>RECORDS.some(r=>r.slug===slugOf(x.artist,x.title));
+const asLine=(x,act,cls='',note)=>`<li class="hit ${cls}">${x.thumb||x.front?`<img src="${esc(x.thumb||img(x.front))}" alt="" loading="lazy">`:'<i class="ph"></i>'}<span><b>${esc(x.title)}</b><i>${note??esc(x.artist)+(x.year?' · '+esc(x.year):'')}</i></span>${act}</li>`;
+function asOpen(){
+  rsShut();const b4=rsBefore();as.hidden=false;rsV.hidden=!PH();document.body.classList.add('as-on');ebBtn('add')?.classList.add('on');rsAfter(b4);
+  if(!reduce)as.animate(PH()?[{transform:'translateY(100%)'},{transform:'none'}]:[{opacity:0,transform:'translateX(24px)'},{opacity:1,transform:'none'}],{duration:PH()?460:420,easing:'cubic-bezier(.22,1,.36,1)'});
+  (asF.classList.contains('bulk')?asL:asQ).focus({preventScroll:true});
+}
+function asShut(){
+  if(as.hidden)return;scanOff();as.querySelector(':focus')?.blur();const b4=rsBefore();document.body.classList.remove('as-on');rsAfter(b4);ebBtn('add')?.classList.remove('on');rsV.hidden=true;
+  if(reduce){as.hidden=true;return}
+  as.animate(PH()?[{transform:'none'},{transform:'translateY(100%)'}]:[{opacity:1},{opacity:0,transform:'translateX(16px)'}],{duration:180,easing:'cubic-bezier(.4,0,1,1)'}).onfinish=()=>{if(!document.body.classList.contains('as-on'))as.hidden=true};
+}
+$('#asX').onclick=asShut;rsV.addEventListener('click',asShut);
+as.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();asShut()}});
+// search: MusicBrainz takes one search a second, so wait for a pause in the typing
+function asFind(){
+  clearTimeout(asT);const v=asQ.value.trim(),my=++asN;if(!v){asR.innerHTML='';return}
+  asT=setTimeout(async()=>{let res=[];try{res=await VisitorCrate.search(v)}catch{}if(my!==asN)return;asRes=res.slice(0,12);
+    asR.innerHTML=asRes.length?asRes.map((x,i)=>asLine(x,have(x)?'<span class="as-s">In the crate</span>':`<button type="button" class="btn sm" data-i="${i}">Add</button>`)).join(''):'<li class="as-no">Nothing found</li>';fallbacks(asR)},450);
+}
+asQ.addEventListener('input',asFind);
+asQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();asQ.blur()}});
+asR.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-i]');if(!b)return;const x=asRes[+b.dataset.i];b.disabled=true;b.textContent='Adding…';
+  try{const d=await asIn(x);b.outerHTML='<span class="as-s">Added</span>';asJust(d,x)}catch(err){b.disabled=false;b.textContent='Add';toast(err.message)}
+});
+// in it goes, and the crate shows it without losing your place
+async function asIn(x){const d=await addCore(x);rearrange(order[cur]&&order[cur]!==d.r?order[cur]:d.r);return d}
+function asJust(d,x,note,li){
+  asDone.set(d.r.slug,d);$('#asAH').hidden=false;
+  const html=asLine({...x,title:d.r.title,artist:d.r.artist,year:d.r.year,front:d.r.front||'',thumb:d.r.front?'':x.thumb},`<button type="button" class="as-u" data-u="${esc(d.r.slug)}">Undo</button>`,'',note);
+  if(li)li.outerHTML=html;else asA.insertAdjacentHTML('afterbegin',html);fallbacks(asA);
+}
+asA.addEventListener('click',async e=>{
+  const u=e.target.closest('[data-u]'),f=e.target.closest('[data-fix]');
+  if(f){const line=f.dataset.fix;f.closest('li').remove();asMode(false);asQ.value=line;asFind();asQ.focus();return}
+  if(!u)return;const d=asDone.get(u.dataset.u);if(!d)return;u.disabled=true;
+  try{await api(d.how==='add'?{op:'unadd',slug:d.r.slug}:{op:'crate-take',crate:CRATE,slug:d.r.slug});asDone.delete(d.r.slug);
+    const li=u.closest('li');li.classList.add('out');u.outerHTML='<span class="as-s">Undone</span>';
+    rearrange(order[cur]!==d.r?order[cur]:order[cur+1]||order[cur-1])}
+  catch(err){u.disabled=false;toast(err.message)}
+});
+const asWait=(t,sub)=>`<li class="hit"><i class="ph"></i><span><b>${esc(t)}</b><i>${esc(sub)}</i></span></li>`;
+const asMiss=(t,sub,fix)=>`<li class="hit none"><i class="ph"></i><span><b>${esc(t)}</b><i>${esc(sub)}</i></span><button type="button" class="btn sm" data-fix="${esc(fix)}">Fix</button></li>`;
+// Bulk add: the field becomes a box for a list, one record to a line
+function asMode(bulk){
+  asF.classList.toggle('bulk',bulk);asBulkB.setAttribute('aria-pressed',bulk);asGo.hidden=!bulk||!asL.value.trim();
+  if(bulk){asR.innerHTML='';asL.focus()}else asQ.focus();
+}
+asBulkB.onclick=()=>{asBulkB.blur();asMode(!asF.classList.contains('bulk'))};
+asL.addEventListener('input',()=>{asGo.hidden=!asL.value.trim()});
+// a line as typed: "1. Neil Young – Harvest", "Harvest by Neil Young", "Neil Young, Harvest"
+const asClean=l=>l.replace(/^\s*(\d+[.)]|[-*•·])\s*/,'').replace(/\s+[–—-]\s+|\s+by\s+|,\s*|\t+/gi,' ').replace(/\s+/g,' ').trim();
+const words=t=>(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,'').split(/[^a-z0-9]+/).filter(w=>w&&!['the','a','and','of'].includes(w));
+// sure when every word of the title, and a word of the artist, is in the line; anything else is a best guess
+const sure=(line,x)=>{const w=new Set(words(line)),t=words(x.title),a=words(x.artist);return t.length&&t.every(k=>w.has(k))&&(!a.length||a.some(k=>w.has(k)))};
+let asBusy=Promise.resolve();
+asGo.onclick=()=>{
+  const lines=asL.value.split('\n').map(l=>l.trim()).filter(Boolean);if(!lines.length)return;
+  asL.value='';asGo.hidden=true;$('#asAH').hidden=false;
+  asA.insertAdjacentHTML('afterbegin',lines.map(l=>asWait(l,'Finding…')).join(''));
+  const lis=[...asA.children].slice(0,lines.length);
+  lines.forEach((line,i)=>{asBusy=asBusy.then(async()=>{
+    const li=lis[i],q1=asClean(line);let res=[];try{res=await VisitorCrate.search(q1)}catch{}
+    const x=res[0];
+    if(!x){li.outerHTML=asMiss(line,'Nothing found',q1);return}
+    if(have(x)){li.outerHTML=asLine(x,'<span class="as-s">In the crate</span>','out');return}
+    try{const d=await asIn(x);asJust(d,x,sure(line,x)?undefined:`Best guess for “${esc(line)}”`,li)}
+    catch(err){li.outerHTML=asMiss(line,err.message,q1)}
+  })});
+};
+// Scan: the camera reads a barcode, which names the pressing. Where the browser can't read barcodes itself, a reader loads the first time
+let asStream=null,asDet=null,asLoop=0,asLast='',asLastT=0;
+asScanB.onclick=()=>{asScanB.blur();asStream||!asCam.hidden?scanOff():scanOn()};
+async function detector(){
+  if(asDet)return asDet;const F=['ean_13','upc_a','ean_8','upc_e'];let D=window.BarcodeDetector;
+  try{if(D&&!(await D.getSupportedFormats()).includes('ean_13'))D=null}catch{D=null}
+  if(!D)D=(await import('https://cdn.jsdelivr.net/npm/barcode-detector@3.2.2/ponyfill/+esm')).BarcodeDetector;
+  return asDet=new D({formats:F});
+}
+async function scanOn(){
+  asCam.hidden=false;asScanB.setAttribute('aria-pressed','true');asCs.textContent='';
+  try{asStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280}},audio:false})}
+  catch{asCs.textContent='The camera didn’t open';asScanB.setAttribute('aria-pressed','false');return}
+  if(asCam.hidden){scanOff();return}
+  asVid.srcObject=asStream;asVid.play().catch(()=>{});
+  let det;try{det=await detector()}catch{asCs.textContent='Barcodes can’t be read here';return}
+  const tick=async()=>{
+    if(!asStream)return;
+    if(asVid.readyState>=2){const c=await det.detect(asVid).catch(()=>[]),code=c[0]?.rawValue;
+      if(code&&(code!==asLast||Date.now()-asLastT>5000)){asLast=code;asLastT=Date.now();asCode(code)}}
+    asLoop=setTimeout(tick,180);
+  };tick();
+}
+function scanOff(){clearTimeout(asLoop);asStream?.getTracks().forEach(t=>t.stop());asStream=null;asVid.srcObject=null;asCam.hidden=true;asScanB.setAttribute('aria-pressed','false')}
+function asCode(code){
+  navigator.vibrate?.(20);asCs.textContent='Looking…';$('#asAH').hidden=false;
+  asA.insertAdjacentHTML('afterbegin',asWait(code,'Looking…'));const li=asA.firstElementChild;
+  asBusy=asBusy.then(async()=>{
+    let res=[];try{res=await VisitorCrate.barcode(code)}catch{}
+    const x=res[0];
+    if(!x){li.outerHTML=asMiss(code,'Nothing found for this barcode','');asCs.textContent='Nothing found';return}
+    if(have(x)){li.outerHTML=asLine(x,'<span class="as-s">In the crate</span>','out');asCs.textContent=`${x.title} is in the crate`;return}
+    try{const d=await asIn(x);asJust(d,x,undefined,li);asCs.textContent=`Added ${d.r.title}`}
+    catch(err){li.outerHTML=asMiss(code,err.message,'');asCs.textContent=err.message}
+  });
 }
 
 function start(){
