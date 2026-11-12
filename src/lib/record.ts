@@ -137,3 +137,25 @@ export async function crateInfo(slug: string) {
 }
 
 export const facts = (r: Shared) => [r.year, r.label].filter(Boolean).join(", ");
+
+// What Casey added to the crate and when, newest first, for the Recently feed on caseycavanagh.com: records added in code
+// carry added:'YYYY-MM-DD' in RECORDS, records added in edit mode carry the day they were saved. Taken-out records drop off.
+export type Added = { slug: string; artist: string; title: string; added: string };
+export async function additions(): Promise<Added[]> {
+  const [html, e] = await Promise.all([readFile(pub("index.html"), "utf8"), edits()]);
+  const list = html.match(/const RECORDS=\[([\s\S]*?)\]\.map\(/)?.[1] ?? "";
+  const out = new Map<string, Added>();
+  for (const m of list.matchAll(/\{artist:'([^']*)',title:'([^']*)'[^}]*?\badded:'(\d{4}-\d{2}-\d{2})'/g)) {
+    const [, artist, title, added] = m, slug = slugOf(artist, title);
+    out.set(slug, { slug, artist, title, added });
+  }
+  for (const a of e?.added ?? []) if (a.added && !out.has(a.slug)) out.set(a.slug, { slug: a.slug, artist: a.artist, title: a.title, added: a.added });
+  for (const s of e?.removed ?? []) out.delete(s);
+  // the names as Casey corrected them
+  for (const r of out.values()) {
+    const p = e?.patch[r.slug];
+    if (p?.title) r.title = p.title;
+    if (p?.artist) r.artist = p.artist;
+  }
+  return [...out.values()].sort((a, b) => b.added.localeCompare(a.added));
+}
