@@ -572,7 +572,7 @@ html.phone .rs-f input{height:42px}
 .crate-d #crateS{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
 @media(max-width:700px){.crate-d textarea,.crate-d.unlock #crateN{font-size:var(--fs-4)}}
 /* a crate with nothing in it yet */
-.bare-p{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;font-size:var(--fs-3);color:var(--t2);text-align:center;padding:0 32px}
+.bare-p{position:fixed;inset:0;z-index:4;display:grid;place-items:center;pointer-events:none;font-size:var(--fs-3);color:var(--t2);text-align:center;padding:0 32px}
 body.bare .kd,body.bare .az,body.bare .dhint{visibility:hidden}
 .own-c input{-webkit-appearance:none;appearance:none;width:20px;height:20px;padding:0;border:1px solid #0002;border-radius:50%;background:none;cursor:pointer}
 .own-c input::-webkit-color-swatch-wrapper{padding:0}
@@ -1838,7 +1838,7 @@ const byName=(a,b)=>name(a).localeCompare(name(b),'en',{sensitivity:'base'})||yr
 // for matching, text folds to plain lowercase letters and digits: "ivan alyosha" finds Ivan & Alyosha, "2x" finds 2×LP
 const fold=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/×/g,'x').replace(/[’'.]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const initial=s=>{const c=fold(s)[0]||'';return /[a-z]/.test(c)?c.toUpperCase():'#'};
-const letter=r=>initial(name(r));
+const letter=r=>r?initial(name(r)):''; // an empty crate has no record in front
 // The crate and the grid share one sort (the table keeps its own): artist, title, year, label or color; d is 1, or -1 reversed.
 // A record with no year or no label goes last either way.
 const ttl=r=>r.title.replace(/^(the|an?) /i,'');
@@ -1862,7 +1862,7 @@ let SORT={k:'artist',d:1};try{const s=JSON.parse(localStorage.getItem('records-s
 const unsorted=r=>SORT.k==='year'?!+r.year:SORT.k==='label'?!r.label:SORT.k==='added'&&DATED&&!dayOf(r);
 const bySort=(a,b)=>unsorted(a)-unsorted(b)||SORTS[SORT.k].by(a,b)*SORT.d;
 // where a record falls in the sort: a letter, a year, the month it came in, or a color
-const group=r=>{const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='added'?(dayOf(r).slice(0,7)||'—'):k==='color'?String(hue(r)):letter(r)};
+const group=r=>{if(!r)return'';const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='added'?(dayOf(r).slice(0,7)||'—'):k==='color'?String(hue(r)):letter(r)};
 // and how that reads: "Oct ’26" for a month
 const gName=g=>SORT.k==='color'?HUES[+g]:g==='—'?'No date':SORT.k==='added'?`${MON[+g.slice(5)-1]} ’${g.slice(2,4)}`:g;
 // Filters narrow the crate: names from a record's details or offered by the search (an artist, label, year, genre…), plus any
@@ -1885,7 +1885,8 @@ function matching(fs=FS,qw=QW){
 }
 // the crate holds what the filters keep, the record in front staying in front when it's among them; filters that keep nothing change nothing
 function refine(fs,qw,keep=order[cur]){
-  const list=matching(fs,qw);if(!list.length)return 0;
+  // an empty crate is still arranged (as nothing), so nothing from the crate before it stays behind
+  const list=matching(fs,qw);if(!list.length&&RECORDS.length)return 0;
   const was=FS;FS=fs;QW=qw;filt=fs.length||qw?{fs,q:qw}:null;order=[...list].sort(bySort);build();go(Math.max(0,order.indexOf(keep)),true);
   if(!qw&&q.value){q.value='';qSync()}
   showChip();
@@ -1998,7 +1999,7 @@ function render(){
     if(!off){const p=seat(d),q=jits[j],g=Math.max(1.5,(p.z-seat(d+1).z)*.45);
       v.style.transform=`translateX(${(q.x*p.m).toFixed(2)}%) translateZ(${p.z.toFixed(1)}px) rotateX(${(p.a+q.a*p.m).toFixed(2)}deg) rotateZ(${(q.z*p.m).toFixed(2)}deg) translateZ(${(-g).toFixed(1)}px)`;v.style.setProperty('--dk',Math.min(.3,Math.max(0,d-1)*.015).toFixed(3))}}
   // the tail starts where the next record past the drawn ones would stand; everything back there leans the same 13°
-  if(tailN){tailS||=nodes[0].offsetWidth;const d=cur+11-pos;tail.style.transform=`translate3d(0,${(-tailS*.9744).toFixed(1)}px,${(-BEHIND-(d-1)*GAP-tailS*.225).toFixed(1)}px) rotateX(-90deg)`}
+  if(tailN&&nodes[0]){tailS||=nodes[0].offsetWidth;const d=cur+11-pos;tail.style.transform=`translate3d(0,${(-tailS*.9744).toFixed(1)}px,${(-BEHIND-(d-1)*GAP-tailS*.225).toFixed(1)}px) rotateX(-90deg)`}
 }
 function tick(t){
   const dt=tick.t?Math.min(.032,(t-tick.t)/1000):1/60;tick.t=t;
@@ -2046,11 +2047,12 @@ function place(rest){
   if(!PHONE)queueNudge();
 }
 // the crate remembers its place for this tab without touching the address, so flipping leaves nothing in the browser's history
-const AT='crate-at'+location.search,plain=()=>location.pathname+location.search;
+const AT='crate-at'+location.pathname+location.search,plain=()=>location.pathname+location.search;
 const setHash=()=>{clearTimeout(setHash.t);setHash.t=setTimeout(()=>{try{sessionStorage.setItem(AT,order[cur].slug)}catch{}},250)};
 // an open record's address follows it once it settles, so arrows and the scrubber don't write one per record they pass
 const addr=()=>{clearTimeout(addr.t);addr.t=setTimeout(()=>{if(!open.hidden)history.replaceState(history.state,'','#record/'+order[cur].slug)},800)};
 function go(i,now){
+  if(!order.length){cur=0;aim=pos=vel=0;setFin(false);place(true);render();say();return}
   const n=order.length-1;i=Math.max(0,Math.min(n+(ends()?1:0),i));
   const j=Math.min(i,n),f=i>n; // one past the last record, every record is flipped and the last one stays cur
   if(now){cur=j;aim=pos=i;vel=0;setFin(f);place(true);render()}
@@ -2059,7 +2061,7 @@ function go(i,now){
   say();clearTimeout(go.t);go.t=setTimeout(preLiner,350);
 }
 // the record on top, for screen readers (after what changed, when a filter did)
-function say(pre){if(fin){$('#pos').textContent=finText();markAZ();return}const r=order[cur];$('#pos').textContent=`${pre?pre+' ':''}${r.title}, ${r.artist}${r.year?', '+r.year:''}. ${cur+1} of ${order.length}`;markAZ()}
+function say(pre){if(fin){$('#pos').textContent=finText();markAZ();return}const r=order[cur];if(!r){$('#pos').textContent='';markAZ();return}$('#pos').textContent=`${pre?pre+' ':''}${r.title}, ${r.artist}${r.year?', '+r.year:''}. ${cur+1} of ${order.length}`;markAZ()}
 // a letter jumps to its first record; from far off, the crate lands with the last record and a half still flipping, so you see it arrive
 function jump(i){
   if(i==null||i===cur&&!fin||!open.hidden)return;
@@ -2075,13 +2077,14 @@ const ends=()=>!filt&&order.length>1;
 const spot=()=>cur+(fin?1:0); // where the crate rests, counting the end as one more place
 const finText=()=>{const C=!visiting&&crateDef();if(C)return`That’s everything in ${C.name}.`;const nm=(visiting?crateBy:'Casey').trim();return nm?`That’s all of ${nm}${/s$/i.test(nm)?'’':'’s'} records.`:'That’s the whole crate.'};
 function setFin(f){
+  f&&=order.length>0; // an empty crate has no end to reach
   if(f===fin)return;fin=f;finEl.classList.toggle('on',f);finEl.inert=!f;
   finA?.cancel();finA=null;
   if(f){$('#finP').textContent=finText();if(!reduce)finA=$('.fin-mk svg',finEl).animate([{rotate:'0deg'},{rotate:'360deg'}],{duration:3600,delay:300,easing:'cubic-bezier(.2,.55,.35,1)'})} // one turn, slowing all the way, landing upright
   else if(finEl.contains(document.activeElement))crate.focus({preventScroll:true});
 }
 // it comes up as the last record falls, and goes as it stands back up
-function finFade(){const t=Math.max(0,Math.min(1,(pos-(order.length-1))*2-1));if(t===finFade.t)return;finFade.t=t;finEl.style.opacity=t;finEl.parentNode.style.setProperty('--fin',t);finEl.style.transform=t<1?`translateY(${((1-t)*8).toFixed(1)}px)`:''}
+function finFade(){const t=order.length?Math.max(0,Math.min(1,(pos-(order.length-1))*2-1)):0;if(t===finFade.t)return;finFade.t=t;finEl.style.opacity=t;finEl.parentNode.style.setProperty('--fin',t);finEl.style.transform=t<1?`translateY(${((1-t)*8).toFixed(1)}px)`:''}
 // back to the front: the first few records still standing up as it lands, the way a letter jumps
 function home(){
   if(!fin)return;const f=finEl.contains(document.activeElement);
@@ -2482,7 +2485,7 @@ $('#oinfo').addEventListener('click',e=>{
   closeRecord();
 });
 function openRecord(deep,pulled){
-  const r=order[cur];fill(r);
+  const r=order[cur];if(!r)return;fill(r);
   timers.forEach(clearTimeout);timers=[];
   open.hidden=false;open.scrollTop=0;lampOn();
   document.body.classList.add('reading'); // the grid or the list fades back behind it, however the record was opened (a row, search, a link)
