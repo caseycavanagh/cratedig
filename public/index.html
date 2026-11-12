@@ -617,6 +617,8 @@ html.phone .az button[aria-current=true]::before{display:none}
 .loading .bar{width:120px;background:var(--line);overflow:hidden}
 .loading .bar i{display:block;height:100%;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;transition:transform .3s}
 .ready .loading{opacity:0}
+body:not(.ready) .open{opacity:0;pointer-events:none} /* a record opened by its link waits behind the loading sleeve */
+.ready .open{transition:opacity .5s ease-out}
 .crate{opacity:0;transform:translateY(24px)}
 body:not(.ready) .crate,body:not(.ready) .cv,body:not(.ready) .tbl{pointer-events:none} /* nothing answers the pointer until the crate is in */
 .ready .crate{opacity:1;transform:none;transition:opacity .5s .15s,transform 1s var(--ease) .15s}
@@ -2490,7 +2492,8 @@ function openRecord(deep,pulled){
   // 1 click, 2 the rest of the crate dissolves, 3 the record lifts out, 4 the details slide out from under it
   const held=$('.rc.cur',stack);
   crate.classList.add('lifted');
-  if(reduce){held.classList.add('held');lift.style.transform='';setS();open.classList.add('in')}
+  // a link straight to a record: it's put in place without the lift, and the open view waits unseen behind the loading sleeve, then fades in with the page
+  if(reduce||deep&&!document.body.classList.contains('ready')){held.classList.add('held');lift.style.transform='';setS();open.classList.add('in')}
   else{
     busy=true;cancelAnimationFrame(flyF);lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');
     const ps=cratePose(held);
@@ -3490,10 +3493,12 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   start();if(!visiting)ownerInit();loadPose();addEventListener('resize',()=>requestAnimationFrame(loadPose));
   // hold the crate back until the covers on screen are in, baked and decoded, so it arrives whole and nothing on it changes
   // after; the rest load as you flip toward them. Only a stalled network lets it in sooner.
-  const imgs=[...nodes.filter((_,j)=>shown[j]).flatMap(n=>[...n.querySelectorAll('img[src]')]),...$$('img',open.hidden?document.createElement('i'):open)];let n=0;
+  // A link straight to a record waits only for that record and its neighbors' peeks: the crate is behind it, and the rest of the open view
+  // (more by the artist) comes in as it loads. Waiting on all of it kept the loading sleeve over the record on a slow phone.
+  const deep=!open.hidden,imgs=deep?$$('.sleeve img[src],.peek img[src]',open):nodes.filter((_,j)=>shown[j]).flatMap(n=>[...n.querySelectorAll('img[src]')]);let n=0;
   const tick=()=>{n++;$('#loading').style.setProperty('--p',(n/imgs.length).toFixed(3))};
   const loaded=i=>i.complete?Promise.resolve():new Promise(r=>{i.addEventListener('load',r,{once:true});i.addEventListener('error',r,{once:true})});
-  await Promise.race([Promise.all(imgs.map(i=>loaded(i).then(()=>bake(i,i.closest('.rc,.sleeve'))).then(()=>i.decode().catch(()=>{})).then(tick))),new Promise(r=>setTimeout(r,30000))]);
+  await Promise.race([Promise.all(imgs.map(i=>loaded(i).then(()=>bake(i,i.closest('.rc,.sleeve'))).then(()=>i.decode().catch(()=>{})).then(tick))),new Promise(r=>setTimeout(r,deep?6000:30000))]);
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
 });
 </script>
