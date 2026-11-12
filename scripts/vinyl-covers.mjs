@@ -9,6 +9,8 @@
 // - the Spotify album ID for the embed player (SPOTIFY_CLIENT_ID and
 //   SPOTIFY_CLIENT_SECRET from .env.local), and Apple Music and Deezer links
 //   by the album's UPC (from Spotify), no key needed
+// - the day each record came into the crate (added, YYYY-MM-DD): today, for a record
+//   covers.json doesn't know yet. It's kept through --force and --facts.
 // Records already fetched are skipped. A record whose release group is ambiguous
 // can name it in RECORDS with mb:'<MusicBrainz release group ID>'.
 // Run on a Mac: node scripts/vinyl-covers.mjs
@@ -177,11 +179,14 @@ const manifestPath = path.join(OUT, 'covers.json');
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8').catch(() => '{}'));
 const exists = f => access(f).then(() => true, () => false);
 const missing = [];
+// a record new to the crate came in today; the ones already here keep their day (covers.json, backfilled from git history)
+const today = new Date().toLocaleDateString('en-CA');
+for (const r of RECORDS) if (!manifest[r.slug]?.added) manifest[r.slug] = {...manifest[r.slug], added: today};
 
 for (const r of RECORDS) {
   const s = r.slug;
   if (only && !only.some(o => s.includes(o))) continue;
-  const e = force ? {} : {...manifest[s]};
+  const e = force ? {added: manifest[s].added} : {...manifest[s]};
   if (factsOnly) {
     if (!e.group) continue;
     const group = await mb(`release-group/${e.group}`);

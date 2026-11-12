@@ -32,6 +32,8 @@ export type Patch = {
   year?: string;
   label?: string;
   format?: string;
+  // the day it came into the crate, YYYY-MM-DD
+  added?: string;
   // where Play goes, by service; an empty string takes a wrong link away
   links?: Record<string, string>;
   // the liner notes, by hand, over what /api/liner found; an empty value (or list) hides that line
