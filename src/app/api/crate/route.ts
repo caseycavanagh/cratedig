@@ -2,10 +2,10 @@
 //   GET  /api/crate                     → { configured, editable, edits: { added, removed, patch } }
 //   POST /api/crate { op, ... }          → { edits }, signed in with Google (src/lib/auth.ts) or with CRATE_KEY in an X-Crate-Key header
 //     op "check"                         is the key right
-//     op "add"     record                a record: artist, title, year, label, format, front, back, spine, spotify, links
+//     op "add"     record                a record: artist, title, year, label, format, front, back, spine, spotify, links; added is today
 //     op "remove"  slug                  off the crate (kept, covers and all, so it can be put back)
 //     op "restore" slug                  back in the crate
-//     op "patch"   slug, set             { bg, front, back, spine, title, artist, sortAs, year, label, format, links, notes } for a
+//     op "patch"   slug, set             { bg, front, back, spine, title, artist, sortAs, year, label, format, added, links, notes } for a
 //                                         record; null clears one, back to the original. links: { service: url }, "" takes one away.
 //                                         notes: { about, producer, recorded, minutes, genres, players, sleeve } over the liner notes,
 //                                         each null to go back to what was found, or empty to hide it
@@ -81,7 +81,8 @@ function record(b: Record<string, unknown>): Rec | null {
     spine: color(b.spine),
     spotify: typeof b.spotify === "string" && /^\w{10,30}$/.test(b.spotify) ? b.spotify : undefined,
     links: Object.keys(links).length ? links : undefined,
-    added: new Date().toISOString().slice(0, 10),
+    // the day it came in, as the page sees it (Casey's own day, not the server's), else today on the server
+    added: typeof b.added === "string" && /^\d{4}-\d{2}-\d{2}$/.test(b.added) ? b.added : new Date().toISOString().slice(0, 10),
   };
   return JSON.parse(JSON.stringify(r)); // without the empty fields
 }
@@ -115,12 +116,13 @@ export async function POST(req: Request) {
       if (v) p[k] = v;
       else delete p[k];
     }
-    for (const k of ["title", "artist", "sortAs", "year", "label", "format"] as const) {
+    for (const k of ["title", "artist", "sortAs", "year", "label", "format", "added"] as const) {
       if (!(k in b.set)) continue;
       const v = b.set[k];
       if (v === null || typeof v !== "string") delete p[k];
       else if ((k === "title" || k === "artist") && !v.trim()) continue; // a record always has both
       else if (k === "year" && !/^(\d{4})?$/.test(v.trim())) continue;
+      else if (k === "added" && !/^(\d{4}-\d{2}-\d{2})?$/.test(v.trim())) continue; // a day, or empty for no day
       else p[k] = v.trim().slice(0, k === "format" ? 40 : 200);
     }
     if (b.set.links && typeof b.set.links === "object") {

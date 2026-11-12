@@ -543,6 +543,8 @@ html.phone body.reading .ebx{display:grid;align-content:center;min-width:44px;fl
 .rs-f .rf>span{font-size:var(--fs-1);color:var(--m)}
 .rs-f input,.rs-f textarea{box-sizing:border-box;width:100%;min-width:0;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--bg);color:var(--fg);font:inherit;font-size:var(--fs-3);line-height:1.45;transition:border-color .2s}
 .rs-f input{height:38px;padding-block:0}
+.rs-f input[type=date]{-webkit-appearance:none;appearance:none;text-align:left} /* iOS centers a day and lets an empty one collapse */
+.rs-f input[type=date]::-webkit-date-and-time-value{text-align:left}
 .rs-f textarea{resize:vertical;display:block}
 .rs-f input::placeholder,.rs-f textarea::placeholder{color:var(--t4)}
 .rs-f input:focus,.rs-f textarea:focus{outline:none;border-color:var(--m)}
@@ -781,7 +783,7 @@ body.walling .find .chip{display:none}
 .tiles{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px}
 .tiles{position:relative;margin:0 -2px 0 34px}
 .gms p{position:absolute;right:calc(100% + 8px);margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:500 var(--fs-2)/1 var(--sans);color:var(--t1);pointer-events:none}
-.gms .yr{font:400 var(--fs-1)/1 var(--mono);letter-spacing:-.03em;color:var(--t2)}
+.gms .yr{font:400 var(--fs-1)/1 var(--mono);letter-spacing:-.03em;color:var(--t2);white-space:nowrap;text-align:right}
 .gms i{width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
 @media (min-width:701px){.tiles{margin:0 48px}.gms p{right:calc(100% + 14px);font-size:var(--fs-3)}.gms .yr{font-size:var(--fs-2)}.gms i{width:22px;height:22px}}
 /* on a phone the group labels start where the logo does, and the covers end where the buttons at the top do */
@@ -833,6 +835,8 @@ html.phone{--S:min(calc(100vw - 48px),calc(100svh - 370px))}
 .kd-t{width:1px;height:12px;margin-left:-.5px;background:var(--t4);transform-origin:50% 100%}
 /* sorted by year the marks are years, in mono; by color, dots in each color */
 .kd[data-marks=years] .kd-l{width:58px;margin-left:-29px;font:400 var(--fs-3)/24px var(--mono);letter-spacing:-.02em}
+.kd[data-marks=months] .kd-l{width:76px;margin-left:-38px;font:400 var(--fs-3)/24px var(--mono);letter-spacing:-.02em;white-space:nowrap}
+.kd[data-marks=months] .kd-l.kd-nd{font-size:var(--fs-1)}
 .kd[data-marks=years] .kd-l.kd-nd{width:72px;margin-left:-36px;padding-left:22px;box-sizing:border-box;font-size:var(--fs-1)} /* nudged right, clear of the last year */
 .kd[data-marks=colors] .kd-l{display:grid;place-items:center}
 .kd[data-marks=colors] .kd-l i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px #ffffff1f}
@@ -1843,13 +1847,22 @@ const hue=r=>{const c=hsl(r);if(c.s<.18||c.l<.1||c.l>.92)return c.l>.6?12:c.l>.2
 const HUES=['Red','Orange','Amber','Yellow','Lime','Green','Teal','Cyan','Blue','Indigo','Violet','Pink','Light','Grey','Dark'];
 const hueInk=i=>i<12?`hsl(${i*30} 62% 52%)`:['#e6e3dc','#7d7c79','#2b2b2d'][i-12];
 const cmpS=(a,b)=>a.localeCompare(b,'en',{sensitivity:'base'});
+// the day each record came into the crate (added, YYYY-MM-DD): Casey's from covers.json (backfilled from when each went into the list)
+// or from the day it was added in edit mode; seq is the order they went in, for records that came in the same day.
+// A visitor's crate has no days (DATED false), only that order
+let DATED=true;
+const today=()=>new Date().toLocaleDateString('en-CA'),dayOf=r=>DATED&&/^\d{4}-\d{2}-\d{2}$/.test(r.added||'')?r.added:'';
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const SORTS={artist:{l:'Artist',by:byName},title:{l:'Title',by:(a,b)=>cmpS(ttl(a),ttl(b))||byName(a,b)},year:{l:'Year',by:(a,b)=>yr(a)-yr(b)||byName(a,b)},
+  added:{l:'Date added',by:(a,b)=>(dayOf(a)<dayOf(b)?-1:dayOf(a)>dayOf(b)?1:0)||(a.seq??0)-(b.seq??0)||byName(a,b)},
   label:{l:'Label',by:(a,b)=>cmpS(labelName(a.label),labelName(b.label))||byName(a,b)},color:{l:'Color',by:(a,b)=>hue(a)-hue(b)||hsl(b).l-hsl(a).l||byName(a,b)}};
 let SORT={k:'artist',d:1};try{const s=JSON.parse(localStorage.getItem('records-sort'));if(s&&SORTS[s.k])SORT={k:s.k,d:s.d<0?-1:1}}catch{}
-const unsorted=r=>SORT.k==='year'?!+r.year:SORT.k==='label'&&!r.label;
+const unsorted=r=>SORT.k==='year'?!+r.year:SORT.k==='label'?!r.label:SORT.k==='added'&&DATED&&!dayOf(r);
 const bySort=(a,b)=>unsorted(a)-unsorted(b)||SORTS[SORT.k].by(a,b)*SORT.d;
-// where a record falls in the sort: a letter, a year, or a color
-const group=r=>{const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='color'?String(hue(r)):letter(r)};
+// where a record falls in the sort: a letter, a year, the month it came in, or a color
+const group=r=>{const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='added'?(dayOf(r).slice(0,7)||'—'):k==='color'?String(hue(r)):letter(r)};
+// and how that reads: "Oct ’26" for a month
+const gName=g=>SORT.k==='color'?HUES[+g]:g==='—'?'No date':SORT.k==='added'?`${MON[+g.slice(5)-1]} ’${g.slice(2,4)}`:g;
 // Filters narrow the crate: names from a record's details or offered by the search (an artist, label, year, genre…), plus any
 // words kept from the search. Names of different kinds narrow together; two of one kind keep either. filt is null for the whole crate
 // a label as people know it: MusicBrainz writes some in lowercase, and adds "Records" to some and not others
@@ -3030,7 +3043,7 @@ const slugOf=(a,t)=>(a+' '+t).toLowerCase().replace(/[’']/g,'').replace(/[^a-z
 const rgbOf=c=>c?.[0]==='#'?[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)):(String(c).match(/\d+/g)||[216,211,202]).slice(0,3).map(Number);
 const hexOf=c=>'#'+rgbOf(c).map(v=>(+v).toString(16).padStart(2,'0')).join('');
 const inkOn=c=>{const [r,g,b]=rgbOf(c);return r*.299+g*.587+b*.114>150?'#1a1a1a':'#f4f2ee'}; // type on a jacket of that color
-const TEXT=['title','artist','sortAs','year','label','format']; // the details Casey can correct
+const TEXT=['title','artist','sortAs','year','label','format','added']; // the details Casey can correct
 const added=new Map(); // slug → record, the same object each time, so the crate keeps its node
 // Which crate this is: /casey/<crate>, or "all", the whole crate. The others are picked from the whole crate (records, by slug),
 // plus records only that crate holds (extra). Edits to a record show in every crate it's in.
@@ -3040,8 +3053,8 @@ const crateDef=()=>CRATE==='all'?null:(EDITS.crates?.list||[]).find(c=>c.slug===
 function applyEdits(){
   if(!BASE)return;
   const fresh=(a,more)=>{const r=added.get(a.slug)||{};added.set(a.slug,r);for(const k of Object.keys(r))delete r[k];r._o={pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...a,mine:true,...more};return r};
-  const mine=EDITS.added.map(a=>fresh(a)),C=crateDef(),owned=new Set([...BASE,...mine].map(r=>r.slug));
-  const extra=C?C.extra.filter(a=>!owned.has(a.slug)).map(a=>fresh(a,{extra:true})):[];
+  const mine=EDITS.added.map((a,i)=>fresh(a,{seq:1e4+i})),C=crateDef(),owned=new Set([...BASE,...mine].map(r=>r.slug));
+  const extra=C?C.extra.filter(a=>!owned.has(a.slug)).map((a,i)=>fresh(a,{extra:true,seq:2e4+i})):[];
   for(const r of [...BASE,...mine,...extra]){
     r._o||={front:r.front,back:r.back,spine:r.spine,pal:r.pal,...Object.fromEntries(TEXT.map(k=>[k,r[k]])),links:r.links,spotify:r.spotify,apple:r.apple};Object.assign(r,r._o);
     const p=EDITS.patch[r.slug];r.notes=p?.notes;if(!p)continue;
@@ -3310,11 +3323,11 @@ const NOTE={
 const FIELDS=[['title','Title'],['artist','Artist'],['sortAs','Sort as','Same as the artist'],['year','Year'],['label','Label'],['format','Format']];
 function rsHTML(r,l){
   const m=withNotes(r,l),ln=linksOf(r);
-  const box=(name,t,v,{ph='',area=0,num=0,half=0}={})=>`<label class="rf${half?' half':''}"><span>${t}</span>${area?`<textarea name="${name}" rows="${area}" placeholder="${esc(ph)}" spellcheck="${name==='about'}">${esc(v)}</textarea>`:`<input name="${name}" value="${esc(v)}" placeholder="${esc(ph)}" autocomplete="off" spellcheck="false"${name==='year'?' inputmode="numeric" maxlength="4"':num?' inputmode="numeric" maxlength="3"':''}>`}</label>`;
+  const box=(name,t,v,{ph='',area=0,num=0,half=0}={})=>`<label class="rf${half?' half':''}"><span>${t}</span>${area?`<textarea name="${name}" rows="${area}" placeholder="${esc(ph)}" spellcheck="${name==='about'}">${esc(v)}</textarea>`:`<input name="${name}"${name==='added'?' type="date"':''} value="${esc(v)}" placeholder="${esc(ph)}" autocomplete="off" spellcheck="false"${name==='year'?' inputmode="numeric" maxlength="4"':num?' inputmode="numeric" maxlength="3"':''}>`}</label>`;
   const cover=r.front?`<img alt="" src="${esc(img(r.thumb||r.front))}">`:`<i style="background:${spineBg(r)}"></i>`;
   return`<div class="rs-h"><span class="rs-c">${cover}</span><span class="rs-n"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><span class="rs-s" id="rsS" aria-live="polite"></span><button type="button" class="rs-x" id="rsX" aria-label="Close the details">${ebIc('x')}</button></div>
   <form class="rs-f" id="rsF" autocomplete="off">
-    <h3>Record</h3>${box('title','Title',r.title)}${box('artist','Artist',r.artist)}${box('sortAs','Sort as',r.sortAs,{ph:'Same as the artist'})}<div class="rrow">${box('year','Year',r.year,{half:1})}${box('format','Format',r.format,{half:1})}</div>${box('label','Label',r.label)}
+    <h3>Record</h3>${box('title','Title',r.title)}${box('artist','Artist',r.artist)}${box('sortAs','Sort as',r.sortAs,{ph:'Same as the artist'})}<div class="rrow">${box('year','Year',r.year,{half:1})}${box('format','Format',r.format,{half:1})}</div>${box('label','Label',r.label)}${box('added','Added',r.added)}
     <h3>About</h3>${box('n-about','About',NOTE.about.get(m),{area:5,ph:l?.about?.text?'':'A few lines about how it was made'})}
     <h3>Who made it</h3>${['producer','recorded'].map(k=>box('n-'+k,NOTE[k].t,NOTE[k].get(m),{ph:NOTE[k].ph||''})).join('')}<div class="rrow">${box('n-minutes','Length',NOTE.minutes.get(m),{num:1,ph:'Minutes',half:1})}${box('n-genres','Genre',NOTE.genres.get(m),{ph:'With commas between',half:2})}</div>${['players','sleeve'].map(k=>box('n-'+k,NOTE[k].t,NOTE[k].get(m),{area:NOTE[k].area,ph:NOTE[k].ph})).join('')}
     <h3>Links</h3>${LINKS.map(([k,t])=>box('l-'+k,t,ln[k]||'',{ph:'https://'})).join('')}
@@ -3347,6 +3360,7 @@ rs.addEventListener('change',async e=>{
     if(v===String(r[name]??''))return;
     if((name==='title'||name==='artist')&&!v){el.value=r[name];toast('A record needs a title and an artist');return}
     if(name==='year'&&v&&!/^\d{4}$/.test(v)){el.value=r.year||'';toast('A year is four numbers');return}
+    if(name==='added'&&v&&!/^\d{4}-\d{2}-\d{2}$/.test(v)){el.value=r.added||'';toast('That isn’t a day');return}
     set[name]=v===String(o[name]??'')?null:v;
   }else if(name.startsWith('l-')){
     const k=name.slice(2),now=linksOf(r)[k]??'',was=linksOf(o)[k]??'';if(v===now)return;
@@ -3432,7 +3446,7 @@ async function addFrom(x,btn){
     if(x.src==='m'){const d=await fetch('/api/musicbrainz?ids='+x.id).then(r=>r.ok?r.json():{}).catch(()=>({}));m={...x,...d.records?.[0]}}
     const keep=async u=>{if(!u)return'';try{const r=await fetch(u);return r.ok?await upload(await shrink(await r.blob())):''}catch{return''}};
     const [front,back]=await Promise.all([keep(m.front||(m.fallback||'').replace(/front-250$/,'front-1200')),keep(m.back)]);
-    await api({op:C?'crate-add':'add',crate:C?CRATE:undefined,record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined}});
+    await api({op:C?'crate-add':'add',crate:C?CRATE:undefined,record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined,added:today()}});
     const r=added.get(slugOf(m.artist,m.title));q.value='';qSync();arrange(null,r);q.blur();
     toast(`Added ${m.title}`);
   }catch(e){btn.disabled=false;btn.textContent='Add';toast(e.message)}
@@ -3462,9 +3476,9 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(signedHere?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
 const authQ=visiting?null:fetch('/api/auth').then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
-  if(v&&v.records.length){RECORDS.splice(0,RECORDS.length,...v.records);crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
+  if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
   else{
-    RECORDS.forEach(r=>Object.assign(r,{...m[r.slug],...r})); // a value written in RECORDS wins
+    RECORDS.forEach((r,i)=>Object.assign(r,{...m[r.slug],...r,seq:i})); // a value written in RECORDS wins
     BASE=[...RECORDS];
     if(ed){EDITS=ed.edits||EDITS;EDITABLE=!!(ed.configured&&ed.editable);applyEdits()}
     // a crate that isn't there (deleted, or a mistyped address): back to all of them
@@ -3575,7 +3589,9 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
       const row=Math.floor(i/n);if(!rows.has(row))rows.set(row,[]);rows.get(row).push(g)});
     const ts=tiles.querySelectorAll('.tile');
     if(innerWidth<700){marks.innerHTML='';return} // a phone has no margin to spare: just the wall, centered
-    marks.innerHTML=[...rows].map(([row,gs])=>`<p style="top:${ts[row*n]?.offsetTop||0}px">${gs.map(g=>SORT.k==='color'?`<i style="background:${hueInk(+g)}"></i>`:`<span${SORT.k==='year'?' class="yr"':''}>${SORT.k==='year'?(g==='—'?'No date':'’'+g.slice(2)+'s'):g}</span>`).join('')}</p>`).join('');
+    // a month is its name, with its year under it the first time and whenever the year turns
+    let y0='';const month=g=>{if(g==='—')return'No date';const y=g.slice(0,4),m=MON[+g.slice(5)-1];if(y===y0)return m;y0=y;return`${m}<br>’${y.slice(2)}`};
+    marks.innerHTML=[...rows].map(([row,gs])=>`<p style="top:${ts[row*n]?.offsetTop||0}px">${gs.map(g=>SORT.k==='color'?`<i style="background:${hueInk(+g)}"></i>`:`<span${SORT.k==='year'||SORT.k==='added'?' class="yr"':''}>${SORT.k==='year'?(g==='—'?'No date':'’'+g.slice(2)+'s'):SORT.k==='added'?month(g):g}</span>`).join('')}</p>`).join('');
   }
   new ResizeObserver(()=>placeMarks()).observe(tiles);
   function setView(v,focus,stay){
@@ -3802,14 +3818,14 @@ const apply=t=>{clearTimeout(lT);live(t);if(lite.p&&!open.hidden){lite.p=false;p
 
 function build(){
   // the marks follow the sort: every letter (the empty ones dim), or the years or colors the crate has, in the crate's order
-  const k=SORT.k,lettered=k!=='year'&&k!=='color';FIRST={};CNT={};
+  const k=SORT.k,lettered=k!=='year'&&k!=='color'&&k!=='added';FIRST={};CNT={};
   order.forEach((r,i)=>{const L=group(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
     X[i]=i*WR});
   X.length=order.length;
   if(lettered){AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];if(has('#'))AZ.push('#');if(SORT.d<0)AZ.reverse()}else AZ=Object.keys(FIRST).sort((a,b)=>FIRST[a]-FIRST[b]);
-  W=k==='year'?58:k==='color'?30:36;kd.dataset.marks=k==='year'?'years':k==='color'?'colors':'letters';
-  dl.setAttribute('aria-label',`Turn to ${k==='year'?'a year':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='color'?'colors':'letters'} and records.`);
-  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l${L==='—'?' kd-nd':''}" data-k="${j}">${k==='color'?`<i style="background:${hueInk(+L)}"></i>`:L==='—'?'No date':L}</span>`).join('');
+  W=k==='year'?58:k==='added'?76:k==='color'?30:36;kd.dataset.marks=k==='year'?'years':k==='added'?'months':k==='color'?'colors':'letters';
+  dl.setAttribute('aria-label',`Turn to ${k==='year'?'a year':k==='added'?'a month':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='added'?'months':k==='color'?'colors':'letters'} and records.`);
+  clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l${L==='—'?' kd-nd':''}" data-k="${j}">${k==='color'?`<i style="background:${hueInk(+L)}"></i>`:gName(L)}</span>`).join('');
   LT=[...clip.querySelectorAll('.kd-l')];TH=[...clip.querySelectorAll('.kd-t')];
   at=-1;rest('l');rest('r');render();label();
 }
@@ -3822,7 +3838,7 @@ function render(){
   // opened up to records, the marks sit over their first records, which can be closer than the marks are wide:
   // the one you're on stays, then each nearest one that has room, and the rest fade out
   const xs=AZ.map((L,j)=>lerp(j*W-cL,has(L)?X[FIRST[L]]-cR:j*W-cL,e)),room=new Set();
-  if(e>.01){const gap=(kd.dataset.marks==="years"?46:18)*e,kept=[],c=Math.max(0,AZ.indexOf(curL));
+  if(e>.01){const gap=(kd.dataset.marks==="years"?46:kd.dataset.marks==="months"?62:18)*e,kept=[],c=Math.max(0,AZ.indexOf(curL));
     AZ.map((L,j)=>j).filter(j=>has(AZ[j])).sort((a,b)=>(a!==c)-(b!==c)||Math.abs(xs[a])-Math.abs(xs[b])).forEach(j=>{if(kept.every(x=>Math.abs(x-xs[j])>=gap)){kept.push(xs[j]);room.add(j)}})}
   LT.forEach((s,j)=>{const L=AZ[j],ok=has(L),x=xs[j],d=Math.abs(j-lp);
     s.style.transform=`translate(${x}px,${-lerp(17,44,e)+bend(x)}px) rotate(${tilt(x)}deg) scale(${lerp(1+.35*Math.max(0,1-d),.72,e)})`;
@@ -3835,7 +3851,7 @@ function render(){
   else{const k=nearR(cR);if(k!==lastR){lastR=k;if(user){toRecord(k);buzz(2)}}}
   labC.style.opacity=clamp(1-e*1.8,0,1);labC.style.transform=`translateY(${-8*e}px)`;labA.style.opacity=clamp(e*1.8-.8,0,1);labA.style.transform=`translateY(${8*(1-e)}px)`;
 }
-function label(){const r=order[cur];if(!r)return;const g=group(r),L=SORT.k==='color'?HUES[+g]:g==='—'?'No date':g,n=CNT[g],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
+function label(){const r=order[cur];if(!r)return;const g=group(r),L=gName(g),n=CNT[g],same=order.filter(x=>x.artist===r.artist),k=same.indexOf(r)+1;
   labC.textContent=``;labA.textContent=r.artist;
   dl.setAttribute('aria-valuetext',mode()==='l'?`${L}, ${n} record${n>1?'s':''}`:`${r.title}, ${r.artist}`)}
 function loop(ts){
@@ -4000,12 +4016,13 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
     artist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"/></svg>',
     title:'<svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans);letter-spacing:-.02em">Aa</text></svg>',
     year:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>',
+    added:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>',
     label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
     color:'<i class="cw" aria-hidden="true"></i>'};
   const sb=document.createElement('button');sb.type='button';sb.className='fb lb sb';sb.setAttribute('aria-expanded','false');sb.setAttribute('aria-controls','sorts');
   fb.after(sb);
   const so=document.createElement('div');so.className='vw tray so';so.id='sorts';so.hidden=true;so.setAttribute('role','group');so.setAttribute('aria-label','Sort');
-  const dirOf=k=>SORT.d>0?'↑':'↓',dirSay=k=>k==='color'?(SORT.d>0?'reds first':'darks first'):k==='year'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
+  const dirOf=k=>SORT.d>0?'↑':'↓',dirSay=k=>k==='color'?(SORT.d>0?'reds first':'darks first'):k==='year'||k==='added'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
   const drawSort=()=>{
     sb.innerHTML=SICON[SORT.k];sb.dataset.k=SORT.k;sb.classList.toggle('on',SORT.k!=='artist'||SORT.d<0);sb.setAttribute('aria-label',`Sort: ${SORTS[SORT.k].l}${dirSay(SORT.k)?', '+dirSay(SORT.k):''}`);
     so.innerHTML=Object.entries(SORTS).map(([k,o])=>{const on=SORT.k===k;
@@ -4014,7 +4031,8 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   const sorts=on=>{so.hidden=!on;sb.setAttribute('aria-expanded',on);if(on){views(false);tray(false);const r=sb.getBoundingClientRect();so.style.right=Math.max(14,innerWidth-r.right)+'px'}};
   sb.onclick=()=>sorts(so.hidden);
   // one way to sort, for the menu and the table's headers: the lit one again flips it; a new one keeps the direction
-  window.setSort=k=>{SORT={k,d:SORT.k===k?-SORT.d:SORT.d};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
+  // date added starts with the newest, and the sort after it with A to Z
+  window.setSort=k=>{SORT={k,d:SORT.k===k?-SORT.d:k==='added'?-1:SORT.k==='added'?1:SORT.d};try{localStorage.setItem('records-sort',JSON.stringify(SORT))}catch{}
     drawSort();arrange(filt,null);$('#wall').scrollTop=0}; // a new sort starts from its front: the oldest record, the first letter, the reds
   so.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setSort(b.dataset.k);so.querySelector(`[data-k=${b.dataset.k}]`).focus({focusVisible:false})});
   so.addEventListener('keydown',e=>{if(e.key==='Escape'){sorts(false);sb.focus({focusVisible:false})}});
@@ -4268,8 +4286,8 @@ html.phone .ab-sh{margin-top:20px}
   const st=document.createElement('div');st.className='dst';st.hidden=true;st.setAttribute('role','menu');
   $('.find').after(dock,say,veil,st);
   const open=()=>qf.matches(':focus-within')||qf.classList.contains('has')||body.classList.contains('searching')?'q':'';
-  const dirSay=(k,d)=>k==='color'?(d>0?'Reds first':'Darks first'):k==='year'?(d>0?'Oldest first':'Newest first'):d>0?'A to Z':'Z to A';
-  const word=()=>{const n=SORTS[SORT.k].l;return SORT.k==='year'||SORT.k==='color'?dirSay(SORT.k,SORT.d):`${n}, ${dirSay(SORT.k,SORT.d)}`};
+  const dirSay=(k,d)=>k==='color'?(d>0?'Reds first':'Darks first'):k==='year'||k==='added'?(d>0?'Oldest first':'Newest first'):d>0?'A to Z':'Z to A';
+  const word=()=>{const n=SORTS[SORT.k].l,d=dirSay(SORT.k,SORT.d);return SORT.k==='year'||SORT.k==='color'?d:SORT.k==='added'?`${n}, ${d.toLowerCase()}`:`${n}, ${d}`};
   let was='';
   function draw(){
     so.style.right='';
