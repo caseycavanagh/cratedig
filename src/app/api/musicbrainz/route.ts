@@ -2,6 +2,7 @@
 // no key needed, so it's the source until DISCOGS_TOKEN is set. MusicBrainz asks for at most
 // one request a second, so the crate page loads every record in one search by ID.
 //   ?q=harvest        albums (release groups) matching a search
+//   ?barcode=<digits>  releases with that barcode, for scanning a record
 //   ?pick=<group id>  the album's best pressing: vinyl with a scanned back if there is one
 //   ?ids=<mbid>,...   those releases with label, format, front and back, and a Spotify ID
 //   ?img=<path>       a Cover Art Archive image, passed through so the crate can read its colors
@@ -87,6 +88,25 @@ export async function GET(request: NextRequest) {
         year: (g["first-release-date"] ?? "").slice(0, 4),
         thumb: img(`release-group/${g.id}/front-250`),
       }));
+    return Response.json({ results }, { headers: { "Cache-Control": "public, s-maxage=86400" } });
+  }
+
+  // a scanned barcode: the pressing itself. A UPC read as EAN-13 has a leading 0, and MusicBrainz may hold either
+  const code = p.get("barcode")?.replace(/\D/g, "");
+  if (code) {
+    if (code.length < 8 || code.length > 14) return Response.json({ results: [] }, { status: 400 });
+    const alt = code.length === 13 && code[0] === "0" ? code.slice(1) : code.length === 12 ? "0" + code : "";
+    const res = await mb(`release?query=${encodeURIComponent(`barcode:${code}${alt ? ` OR barcode:${alt}` : ""}`)}&limit=10`);
+    if (!res.ok) return Response.json({ results: [] }, { status: res.status === 503 ? 429 : 502 });
+    const list: MbRelease[] = (await res.json()).releases ?? [];
+    // vinyl first, since that's what's in hand
+    const results = [...list.filter(isVinyl), ...list.filter((r) => !isVinyl(r))].slice(0, 5).map((r) => ({
+      id: r.id,
+      artist: artistOf(r),
+      title: r.title,
+      year: (r.date ?? "").slice(0, 4),
+      thumb: r["release-group"] ? img(`release-group/${r["release-group"].id}/front-250`) : "",
+    }));
     return Response.json({ results }, { headers: { "Cache-Control": "public, s-maxage=86400" } });
   }
 

@@ -104,6 +104,9 @@ export async function POST(req: Request) {
     if (!r) return Response.json({ error: "a record needs an artist and a title" }, { status: 400 });
     e.added = [...e.added.filter((x) => x.slug !== r.slug), r];
     e.removed = e.removed.filter((s) => s !== r.slug);
+  } else if (b?.op === "unadd" && slug) {
+    // undo an add straight after it: the record goes, not just out of sight
+    e.added = e.added.filter((x) => x.slug !== slug);
   } else if (b?.op === "remove" && slug) {
     if (!e.removed.includes(slug)) e.removed.push(slug);
   } else if (b?.op === "restore" && slug) {

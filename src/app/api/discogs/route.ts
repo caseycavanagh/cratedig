@@ -2,6 +2,7 @@
 // the server; set DISCOGS_TOKEN in .env.local (and in Vercel for production), made at
 // discogs.com/settings/developers. Discogs allows 60 requests a minute per token.
 //   ?q=harvest        vinyl releases matching a search, one per album
+//   ?barcode=<digits> vinyl releases with that barcode, for scanning a record
 //   ?ids=1,2,3        those releases with label, format, front and back, and a Spotify ID
 //                     when SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are set
 //   ?img=<url>        a Discogs image, passed through so the crate can read its colors
@@ -88,8 +89,9 @@ export async function GET(request: NextRequest) {
   if (!process.env.DISCOGS_TOKEN) return Response.json({ configured: false }, { status: 503 });
 
   const q = p.get("q")?.trim();
-  if (q) {
-    const url = new URLSearchParams({ q, type: "release", format: "Vinyl", per_page: "50" });
+  const code = p.get("barcode")?.replace(/\D/g, "");
+  if (q || code) {
+    const url = new URLSearchParams({ ...(code ? { barcode: code } : { q: q! }), type: "release", format: "Vinyl", per_page: "50" });
     const res = await discogs(`/database/search?${url}`);
     if (!res.ok) return Response.json({ configured: true, results: [] }, { status: res.status === 429 ? 429 : 502 });
     const seen = new Set<number>();

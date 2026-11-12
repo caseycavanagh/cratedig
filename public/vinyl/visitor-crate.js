@@ -65,6 +65,23 @@
     if(!d?.id)throw new Error('no release');
     return {...r,id:d.id};
   }
+  // a scanned barcode: the pressing in hand, from Discogs when the server has a token, else MusicBrainz
+  async function barcode(code){
+    const q='barcode='+encodeURIComponent(code);
+    if(discogs!==false){
+      const d=await api('d',q).catch(e=>{if(discogs)throw e;discogs=false;return null});
+      if(d)return d.results.map(r=>({...r,src:'d',pal:PAL}));
+    }
+    const m=await api('m',q).catch(()=>null);
+    return (m?.results||[]).map(r=>({...r,src:'m',pal:PAL})); // already a pressing: no pick() needed
+  }
+  // everything about a search result that a record keeps: label, format, front and back, Spotify
+  async function details(r){
+    if(r.src==='a')return r;
+    const x=r.src==='m'&&r.group?await pick(r):r;
+    const d=await api(r.src,'ids='+x.id).catch(()=>null);
+    return {...x,...(d?.records?.[0]||{})};
+  }
   async function apiLookup(src,ids){
     if(!ids.length)return [];
     const d=await api(src,'ids='+ids.join(','));
@@ -107,7 +124,7 @@
   };
   const crateName=n=>n.trim()?n.trim()+(/s$/i.test(n.trim())?'’':'’s')+' crate':'My crate';
 
-  window.VisitorCrate={MAX,search,pick,fromAddress,link,crateName,};
+  window.VisitorCrate={MAX,search,pick,barcode,details,fromAddress,link,crateName,};
 
   // On the crate page: resolves to {name, records} when the address holds a crate, null for Casey's own
   const p=new URLSearchParams(location.search);
