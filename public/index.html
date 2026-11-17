@@ -2483,7 +2483,8 @@ function knowCrate(){
 // names just learned can link up on the open record: its details redrawn in place, its related covers fading in if it now has some
 function relink(){
   const r=order[cur];if(open.hidden||!r||!LDONE.has(r.slug))return;const l=withNotes(r,LDONE.get(r.slug));
-  const d=$('#odets');if(d&&!d.hidden)d.innerHTML=detsHTML(r,l);
+  // only when a name actually changed, and without the fade, so the rows don't blink each time the crate learns something
+  const d=$('#odets'),h0=detsHTML(r,l);if(d&&!d.hidden&&h0!==d._h){d.classList.remove('in');d.innerHTML=d._h=h0}
   const k=$('#olink'),h=linkHTML(r);if(k&&h&&k.hidden){k.hidden=false;k.className='near in';k.innerHTML=h;room(k,0,k.offsetHeight)}
 }
 // the record in front of you fetches its liner notes while you look at it, so they're usually in before you open it
@@ -2502,7 +2503,7 @@ function liner(r){
     // then who made it, as labeled rows, and other records in the crate that share a producer or a player
     for(const[id,html]of[['#odets',detsHTML(r,l)],['#olink',linkHTML(r)]]){
       const el=$(id);if(!html){el.hidden=true;continue}
-      el.hidden=false;el.className=el.id==='odets'?'dets in':'near in';el.innerHTML=html;if(late)room(el,0,el.offsetHeight)}
+      el.hidden=false;el.className=el.id==='odets'?'dets in':'near in';el.innerHTML=el._h=html;if(late)room(el,0,el.offsetHeight)}
     if(!r.back)requestAnimationFrame(()=>tracks(r,l?.sides||[]));
   };
   if(LDONE.has(r.slug)){show(LDONE.get(r.slug));return}
