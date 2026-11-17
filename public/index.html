@@ -1569,7 +1569,8 @@ html:has(.open:not([hidden])) .dock{z-index:var(--z-raised)}
 html.phone #oinfo #shareR{width:var(--pb,52px);height:var(--pb,52px)}
 #oinfo #shareR:hover{background:var(--soft)}
 /* on a laptop the link is a quiet mark at the end of the year and label line */
-html:not(.phone) #oinfo #shareR{width:28px;height:24px;margin-left:6px;border:0;background:none;color:var(--m);vertical-align:middle;flex:none}
+/* z-index:auto, or as a flex item in the facts line it keeps the 3 it has over the page and draws over the name that stays put while the rest scrolls under */
+html:not(.phone) #oinfo #shareR{z-index:auto;width:28px;height:24px;margin-left:6px;border:0;background:none;color:var(--m);vertical-align:middle;flex:none}
 html:not(.phone) #oinfo #shareR:hover{color:var(--fg);background:none}
 html:not(.phone) #oinfo #shareR svg{width:16px;height:16px}
 html:not(.phone) #oinfo .by:has(#shareR){display:flex;align-items:center}
@@ -2579,10 +2580,12 @@ const aimPeeks=()=>{const b=stage.getBoundingClientRect();open.style.setProperty
 // a details column taller than the record scrolls; it knows when it's scrolled and when there's more below, for its fades
 {const oi=$('#oinfo');let last='';
   const fit=()=>{oi.classList.toggle('scrolled',oi.scrollTop>2);// "more" from where the last block ends, not scrollHeight, which also counts the closed Play menu hanging below Play
-    const last=oi.lastElementChild;oi.classList.toggle('more',!!last&&last.getBoundingClientRect().bottom-oi.getBoundingClientRect().bottom>4)};
+    // the last block that's showing: a hidden one (no links to other records, say) measures 0 and would hide the fade
+    const end=[...oi.children].map(c=>c.classList.contains('o-head')?c.lastElementChild:c).reverse().find(c=>c&&!c.hidden&&c.offsetHeight);oi.classList.toggle('more',!!end&&end.getBoundingClientRect().bottom-oi.getBoundingClientRect().bottom>4)};
   oi.addEventListener('scroll',fit,{passive:true});addEventListener('resize',fit);
-  new MutationObserver(()=>{const id=$('#oTitle',oi);if(id&&id.textContent!==last){last=id.textContent;oi.scrollTop=0}requestAnimationFrame(fit)}).observe(oi,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
-  new ResizeObserver(fit).observe(oi)}
+  // the blocks are watched too: one arriving late grows on a spring after it's put in, and the column itself stays the same size
+  const ro=new ResizeObserver(fit);ro.observe(oi);
+  new MutationObserver(()=>{const id=$('#oTitle',oi);if(id&&id.textContent!==last){last=id.textContent;oi.scrollTop=0}for(const c of oi.children)ro.observe(c);requestAnimationFrame(fit)}).observe(oi,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']})}
 // arrows in the open view: the record slides away and the next one comes in from the crate's side
 function swap(dir,o=0){
   const j=Math.max(0,Math.min(order.length-1,cur+dir));
