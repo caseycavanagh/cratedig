@@ -626,9 +626,12 @@ body.bare .kd,body.bare .az,body.bare .dhint{visibility:hidden}
 .own.busy{opacity:.5;pointer-events:none}
 html.phone .own{margin-top:16px;padding-top:14px}
 /* a short note at the bottom, sometimes with an undo; it arrives on a spring and leaves on a quick fade */
-.toast{position:fixed;z-index:var(--z-toast);left:50%;bottom:calc(24px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;border-radius:var(--r-pill);background:var(--fg);color:var(--bg);font-size:var(--fs-3);
+.toast{position:fixed;z-index:var(--z-toast);left:50%;bottom:calc(24px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;width:max-content;max-width:calc(100vw - 32px);box-sizing:border-box;padding:8px 8px 8px 16px;border-radius:var(--r-pill);background:var(--fg);color:var(--bg);font-size:var(--fs-3);
   opacity:0;visibility:hidden;translate:-50% 12px;transition:opacity .15s,visibility 0s .15s,translate 0s .15s}
 .toast:not(:has(button)){padding-right:16px}
+/* always one line: a long title gives way, the button never does */
+.toast span{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.toast button{flex:none}
 .toast.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--ease)}
 .toast button{all:unset;cursor:pointer;height:28px;padding:0 12px;border-radius:var(--r-pill);border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);font-size:var(--fs-2);transition:transform .5s var(--ease)}
 .toast button:active{transform:scale(.99);transition-duration:.08s}
@@ -3154,7 +3157,7 @@ function applyEdits(){
     if(p.front)r.front=p.front;if(p.back)r.back=p.back;if(p.spine)r.spine=p.spine;
     if(p.bg){const t=inkOn(p.bg);r.spine=p.bg;r.pal=[p.bg,t,t]}
   }
-  const out=new Set(EDITS.removed);let list=[...BASE,...mine].filter(r=>!out.has(r.slug));
+  const out=new Set(EDITS.removed),seen=new Set();let list=[...BASE,...mine].filter(r=>!out.has(r.slug)&&!seen.has(r.slug)&&seen.add(r.slug));
   if(C){const picked=new Set(C.records);list=[...list.filter(r=>picked.has(r.slug)),...extra]}
   RECORDS.splice(0,RECORDS.length,...list);
   nameCrate();bare();
@@ -3216,6 +3219,8 @@ function toast(msg,act,fn){
   if(fn)toastEl.querySelector('button').onclick=()=>{toastEl.classList.remove('on');fn()};
   toastEl.classList.add('on');toastT=setTimeout(()=>toastEl.classList.remove('on'),act?7000:3500);
 }
+// a menu or sheet opening clears the note, so it never sits on top of one
+const hush=()=>{clearTimeout(toastT);toastEl.classList.remove('on')};
 const editB=$('#editB'),unlockD=$('#unlock'),eb=$('#eb');
 // Edit sits beside the crate's name wherever edit mode is set up (a device not signed in asks for the key first); while editing, the bar at the bottom holds the tools and Done
 function setEditing(on){
@@ -3273,7 +3278,7 @@ function wmDraw(){
   wm.innerHTML=(ph?'<i class="wgrab" aria-hidden="true"></i>':'')+`<div class="wl">${rows}</div>`+more;
 }
 function wmOpen(){
-  if(!menuful()||!wm.hidden)return;wmDraw();wm.hidden=false;wm.classList.toggle('sheet',PH());where.setAttribute('aria-expanded','true');document.body.classList.add('wm-on');
+  if(!menuful()||!wm.hidden)return;hush();wmDraw();wm.hidden=false;wm.classList.toggle('sheet',PH());where.setAttribute('aria-expanded','true');document.body.classList.add('wm-on');
   if(!reduce)wm.animate(PH()?[{transform:'translateY(100%)'},{transform:'none'}]:[{opacity:0,transform:'translateY(-6px) scale(.98)'},{opacity:1,transform:'none'}],{duration:PH()?420:260,easing:'cubic-bezier(.22,1,.36,1)'});
 }
 function wmShut(){if(wm.hidden)return;where.setAttribute('aria-expanded','false');document.body.classList.remove('wm-on');
@@ -3292,7 +3297,7 @@ wm.addEventListener('click',e=>{
 // This crate's name and words, or a new crate: the same small dialog. The whole crate takes words and a pin only
 const crateD=$('#crateD'),crateF=$('#crateF');let making=false;
 function crateOpen(fresh){
-  making=fresh;const C=crateDef(),cs=EDITS.crates||{};
+  hush();making=fresh;const C=crateDef(),cs=EDITS.crates||{};
   $('#crateH').textContent=fresh?'New crate':'This crate';$('#crateS').textContent=fresh?'Make it':'Save';
   $('#crateN').value=fresh?'':C?C.name:allName();$('#crateX').hidden=fresh||!C;$('.crate-d .pin').hidden=fresh;
   $('#crateA').value=fresh?'':(C?C.about:cs.all?.about)||'';$('#crateP').checked=!fresh&&cs.pinned===CRATE;
@@ -3347,7 +3352,7 @@ function ebShut(){if(ebp.hidden)return;ebp.hidden=true;eb.querySelectorAll('[ari
 // a small menu that grows up out of its tool
 function ebOpen(k,html){
   const b=ebBtn(k);if(!ebp.hidden&&b.getAttribute('aria-expanded')==='true'){ebShut();return}
-  ebShut();ebp.innerHTML=html;ebp.hidden=false;b.setAttribute('aria-expanded','true');
+  ebShut();hush();ebp.innerHTML=html;ebp.hidden=false;b.setAttribute('aria-expanded','true');
   const c=b.getBoundingClientRect(),W=ebp.offsetWidth,L=Math.max(12,Math.min(innerWidth-W-12,c.left+c.width/2-W/2));
   ebp.style.left=L+'px';ebp.style.bottom=(innerHeight-eb.getBoundingClientRect().top+10)+'px';
   if(!reduce)ebp.animate([{opacity:0,transform:'translateY(6px) scale(.98)'},{opacity:1,transform:'none'}],{duration:260,easing:'cubic-bezier(.22,1,.36,1)'});
@@ -3426,7 +3431,7 @@ function rsHTML(r,l){
 const rsBefore=()=>$$('.page,.kd,.open,.eb').map(el=>[el,getComputedStyle(el).translate]);
 const rsAfter=b=>{if(PH()||reduce)return;for(const[el,from]of b){const to=getComputedStyle(el).translate;if(from!==to)el.animate([{translate:from},{translate:to}],{duration:450,easing:'cubic-bezier(.22,1,.36,1)'})}};
 function rsOpen(r){
-  rsR=r;rsL=LDONE.get(r.slug)||null;rs.innerHTML=rsHTML(r,rsL);
+  hush();rsR=r;rsL=LDONE.get(r.slug)||null;rs.innerHTML=rsHTML(r,rsL);
   if(!LDONE.has(r.slug))fetchLiner(r).then(l=>{if(rsR!==r||rs.hidden)return;rsL=l;const f=$('#rsF'),m=withNotes(r,l);
     for(const k of Object.keys(NOTE)){const el=f.elements['n-'+k];if(el&&document.activeElement!==el&&!el.dataset.dirty)el.value=NOTE[k].get(m)}});
   const b4=rsBefore();rs.hidden=false;rsV.hidden=!PH();document.body.classList.add('rs-on');ebBtn('details').classList.add('on');rsAfter(b4);
@@ -3483,7 +3488,6 @@ upF.addEventListener('change',async()=>{
 // taking a record out: the record view fades, the crate closes up behind it, and an undo waits at the bottom
 // in another crate, it only leaves that crate: it stays in the whole crate (unless it was only ever in this one)
 async function takeOut(r){
-  if(RECORDS.length<2)return;
   const next=order[cur+1]||order[cur-1];ownBusy(true);
   try{await api(crateDef()?{op:'crate-take',crate:CRATE,slug:r.slug}:{op:'remove',slug:r.slug})}catch(e){toast(e.message);ownBusy(false);return}
   made.delete(r);rearrange(next);if(!open.hidden){vanish=true;closeRecord()}
@@ -3529,6 +3533,8 @@ async function putIn(r){
 async function addCore(x){
   const C=crateDef(),own=C&&[...BASE,...added.values()].find(r=>!r.extra&&!EDITS.removed.includes(r.slug)&&r.slug===slugOf(x.artist,x.title));
   if(own){await api({op:'crate-put',crate:CRATE,slug:own.slug});made.delete(own);return {r:own,how:'crate-put'}}
+  const gone=!C&&[...BASE,...added.values()].find(r=>!r.extra&&EDITS.removed.includes(r.slug)&&r.slug===slugOf(x.artist,x.title));
+  if(gone){await api({op:'restore',slug:gone.slug});made.delete(gone);return {r:gone,how:'restore'}}
   const m=await VisitorCrate.details(x).catch(()=>x);
   const keep=async u=>{if(!u)return'';try{const r=await fetch(u);return r.ok?await upload(await shrink(await r.blob())):''}catch{return''}};
   const [front,back]=await Promise.all([keep(m.front||(m.fallback||'').replace(/front-250$/,'front-1200')||(m.thumb||'').replace(/front-250$/,'front-1200')),keep(m.back)]);
@@ -3548,7 +3554,7 @@ const asBulkB=$('#asBulk'),asScanB=$('#asScan'),asDone=new Map();let asT=0,asN=0
 const have=x=>RECORDS.some(r=>r.slug===slugOf(x.artist,x.title));
 const asLine=(x,act,cls='',note)=>`<li class="hit ${cls}">${x.thumb||x.front?`<img src="${esc(x.thumb||img(x.front))}" alt="" loading="lazy">`:'<i class="ph"></i>'}<span><b>${esc(x.title)}</b><i>${note??esc(x.artist)+(x.year?' · '+esc(x.year):'')}</i></span>${act}</li>`;
 function asOpen(){
-  rsShut();const b4=rsBefore();as.hidden=false;rsV.hidden=!PH();document.body.classList.add('as-on');ebBtn('add')?.classList.add('on');rsAfter(b4);
+  rsShut();hush();const b4=rsBefore();as.hidden=false;rsV.hidden=!PH();document.body.classList.add('as-on');ebBtn('add')?.classList.add('on');rsAfter(b4);
   if(!reduce)as.animate(PH()?[{transform:'translateY(100%)'},{transform:'none'}]:[{opacity:0,transform:'translateX(24px)'},{opacity:1,transform:'none'}],{duration:PH()?460:420,easing:'cubic-bezier(.22,1,.36,1)'});
   (asF.classList.contains('bulk')?asL:asQ).focus({preventScroll:true});
 }
@@ -3582,7 +3588,7 @@ asA.addEventListener('click',async e=>{
   const u=e.target.closest('[data-u]'),f=e.target.closest('[data-fix]');
   if(f){const line=f.dataset.fix;f.closest('li').remove();asMode(false);asQ.value=line;asFind();asQ.focus();return}
   if(!u)return;const d=asDone.get(u.dataset.u);if(!d)return;u.disabled=true;
-  try{await api(d.how==='add'?{op:'unadd',slug:d.r.slug}:{op:'crate-take',crate:CRATE,slug:d.r.slug});asDone.delete(d.r.slug);
+  try{await api(d.how==='add'?{op:'unadd',slug:d.r.slug}:d.how==='restore'?{op:'remove',slug:d.r.slug}:{op:'crate-take',crate:CRATE,slug:d.r.slug});asDone.delete(d.r.slug);
     const li=u.closest('li');li.classList.add('out');u.outerHTML='<span class="as-s">Undone</span>';
     rearrange(order[cur]!==d.r?order[cur]:order[cur+1]||order[cur-1])}
   catch(err){u.disabled=false;toast(err.message)}
