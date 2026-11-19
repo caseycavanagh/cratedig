@@ -590,6 +590,81 @@ html.phone .rs-f{padding:4px max(16px,env(safe-area-inset-right)) calc(env(safe-
 .as-b[aria-pressed=true]{background:var(--sel);color:var(--fg)}
 .as-b:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
 .as-b svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* Casey's one panel: a white button at the end of the bar (the far right on a laptop) opens it. Over the crate it edits the crate
+   (Add records, its name and description); over an open record it edits the record. Each part folds open and shut */
+.dock .xb.op{display:none;background:var(--fg);border-color:var(--fg)}
+body.own .dock .xb.op{display:block}
+.dock .xb.op>button{all:unset;cursor:pointer;position:absolute;inset:0;border-radius:inherit;color:var(--on-fg);transition:transform .5s var(--ease)}
+.dock .xb.op>button:active{transform:scale(.96);transition-duration:.08s}
+.dock .xb.op>button:focus-visible{outline:1px solid var(--ring);outline-offset:3px}
+.op .ic{position:absolute;inset:0;display:grid;place-items:center;transition:opacity .25s,transform .45s var(--ease)}
+.op .ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.op .ic.pen{opacity:0;transform:rotate(-45deg) scale(.6)}
+.op.rec .ic.plus{opacity:0;transform:rotate(45deg) scale(.6)}
+.op.rec .ic.pen{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.op .ic{transition:opacity .15s}}
+html.phone body.own .dock{gap:10px}
+@media(max-width:369px){html.phone body.own .dock{gap:8px;--H:52px}}
+html:not(.phone) .dock .xb.op{position:fixed;right:max(24px,env(safe-area-inset-right));bottom:var(--db)}
+html:not(.phone) body:is(.as-on,.rs-on) .dock .xb.op{opacity:0;pointer-events:none}
+.as .rs-h{border-bottom:1px solid var(--line);padding-bottom:14px}
+.op-b{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 20px 28px}
+html.phone .op-b{padding:0 max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 28px) max(16px,env(safe-area-inset-left))}
+.op-s{border-top:1px solid var(--line)}
+.op-s:first-child{border-top:0}
+.op-s>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:52px;font-size:var(--fs-3);font-weight:500;color:var(--fg);-webkit-tap-highlight-color:transparent;border-radius:6px}
+.op-s>summary::-webkit-details-marker{display:none}
+.op-s>summary:focus{outline:none}
+.op-s>summary:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.op-s>summary .op-v{flex:1;min-width:0;text-align:right;font-weight:400;font-size:var(--fs-2);color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-s>summary svg{flex:none;width:16px;height:16px;fill:none;stroke:var(--t2);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .4s var(--ease)}
+.op-s[open]>summary svg{transform:rotate(180deg)}
+.op-s[open]>summary .op-v{opacity:0}
+.op-c{padding:0 0 18px}
+#rsF.op-b .op-c.rs-f{flex:none;overflow:visible;padding:0 0 18px}
+.op-c>.rf:first-child{margin-top:0}
+.as .op-b .as-in{padding:0 0 10px}
+.as .op-b .as-f{flex:none;overflow:visible;padding:0}
+.as .op-b .as-f h3:first-child{margin-top:12px}
+.op-f{display:grid;gap:5px}
+.op-f>span{font-size:var(--fs-1);color:var(--m)}
+.op-f input,.op-f textarea{box-sizing:border-box;width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--bg);color:var(--fg);font:inherit;font-size:var(--fs-3);line-height:1.45;transition:border-color .2s}
+html.phone .op-f input,html.phone .op-f textarea{font-size:var(--fs-4)}
+.op-f input{height:38px;padding-block:0}
+.op-f textarea{resize:vertical;display:block}
+.op-f input::placeholder,.op-f textarea::placeholder{color:var(--t4)}
+.op-f input:focus,.op-f textarea:focus{outline:none;border-color:var(--m)}
+.op-f+.op-f{margin-top:10px}
+.op-cv{display:grid;grid-template-columns:repeat(2,minmax(0,150px));gap:14px}
+.op-cv figure{margin:0;display:grid;gap:8px}
+.op-cv .t{aspect-ratio:1;border-radius:var(--r-cover);overflow:hidden;background:var(--soft);display:grid;place-items:center;color:var(--t3);font-size:var(--fs-2)}
+.op-cv .t img{width:100%;height:100%;object-fit:cover;display:block}
+.op-cv figcaption{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:var(--fs-2);color:var(--m)}
+.op-btn{all:unset;cursor:pointer;box-sizing:border-box;height:32px;padding:0 13px;border-radius:var(--r-pill);border:1px solid var(--line2);color:var(--fg);font-size:var(--fs-2);font-weight:500;display:inline-grid;place-items:center;white-space:nowrap;transition:background .2s}
+.op-btn:hover{background:var(--hov)}
+.op-btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.op-q{all:unset;cursor:pointer;font-size:var(--fs-2);color:var(--m);margin-top:12px;display:inline-block}
+.op-q:hover{color:var(--fg)}
+p.op-q{cursor:default}
+p.op-q:hover{color:var(--m)}
+.op-col{display:flex;align-items:center;gap:12px}
+.op-sw{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);flex:none;overflow:hidden}
+.op-sw input{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);opacity:0;cursor:pointer;border:0;padding:0}
+.op-col .hx{font:500 var(--fs-2)/1 var(--mono);color:var(--t1);text-transform:uppercase;flex:1}
+.op-col .op-q{margin:0}
+.op-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px}
+.op-cr{display:grid;gap:2px}
+.op-cr button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;margin:0 -10px;border-radius:var(--r-in);color:var(--t1);font-size:var(--fs-3)}
+.op-cr button:hover{background:var(--hov)}
+.op-cr button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.op-cr button[aria-disabled=true]{cursor:default;color:var(--m)}
+.op-cr button[aria-disabled=true]:hover{background:none}
+.op-cr .bx{flex:none;width:20px;height:20px;border-radius:6px;border:1px solid var(--line2);display:grid;place-items:center;transition:background .2s,border-color .2s}
+.op-cr .on .bx{background:var(--fg);border-color:var(--fg);color:var(--on-fg)}
+.op-cr .bx svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.op-cr .on .bx svg{opacity:1}
+.op-cr span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-end{border-top:1px solid var(--line);padding-top:18px;display:flex;gap:10px;flex-wrap:wrap}
 .as-go{all:unset;box-sizing:border-box;cursor:pointer;justify-self:start;height:36px;padding:0 16px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);font-size:var(--fs-2);font-weight:500;white-space:nowrap}
 .as-go[hidden]{display:none}
 .as-cam{position:relative;height:180px;border-radius:var(--r-in);overflow:hidden;background:#050505}
@@ -3289,8 +3364,9 @@ const hush=()=>{clearTimeout(toastT);toastEl.classList.remove('on')};
 const editB=$('#editB'),unlockD=$('#unlock'),eb=$('#eb');
 // Edit sits beside the crate's name wherever edit mode is set up (a device not signed in asks for the key first); while editing, the bar at the bottom holds the tools and Done
 function setEditing(on){
-  editing=!!(on&&OWNER&&EDITABLE);const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut();asShut()}
-  if(BASE)bare();editB.hidden=!(EDITABLE&&OWNER)||editing;eb.hidden=!editing;nameCrate();
+  editing=false; // the edit mode is folded into the one panel (opSync, below); signing in shows its button
+  const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut();asShut()}
+  if(BASE)bare();editB.hidden=true;eb.hidden=true;nameCrate();window.opSync?.();
   try{sessionStorage.setItem('records-editing',editing?'1':'')}catch{}
   if(!open.hidden)info(order[cur]);if(q.value.trim())search();
 }
@@ -3300,7 +3376,7 @@ function forget(){OWNER=null;signedHere=false;try{localStorage.removeItem('recor
 function lockOut(){forget();toast('You’re signed out. Sign in again from About')}
 // a device that isn't signed in can sign in from About (or by opening the page with ?edit): with Google where that's set up,
 // which comes back here editing, else with the key
-const signable=()=>{$('#abIn').hidden=!(EDITABLE&&!OWNER);$('#abOut').hidden=!(EDITABLE&&OWNER)};
+const signable=()=>{$('#abIn').hidden=!(EDITABLE&&!OWNER);$('#abOut').hidden=!(EDITABLE&&OWNER);window.opSync?.()};
 function signIn(){
   if(!GOOGLE){unlockD.showModal();return}
   const u=new URL(location.href);u.searchParams.delete('edit');u.searchParams.delete('signin');
@@ -3338,7 +3414,7 @@ const sortKey=r=>String(r.sortAs||r.artist||'').replace(/^the\s+/i,'').toLowerCa
 function wmDraw(){
   const own=OWNER&&EDITABLE,ph=PH();
   const rows=crateList().map(c=>`<a role="menuitemradio" aria-checked="${c.slug===CRATE}" href="/casey/${esc(c.slug)}" class="wr${c.slug===CRATE?' cur':''}"><span class="wcv">${crateCover(c)}</span><span class="wn">${esc(c.name)}</span>${c.slug===CRATE?`<span class="wck">${CHECK}</span>`:''}</a>`).join('');
-  const more=!own?'':ph?`<div class="wbtns"><button type="button" class="btn" data-w="new">${PLUS}New crate</button>${editing?`<button type="button" class="btn" data-w="name">${WORDS}Name and words</button>`:`<button type="button" class="btn w" data-w="edit">${PEN}Edit this crate</button>`}</div>`
+  const more=!own?'':ph?`<div class="wbtns"><button type="button" class="btn" data-w="new">${PLUS}New crate</button></div>`
     :`<hr><button type="button" role="menuitem" class="wr" data-w="new"><span class="wic">${PLUS}</span><span class="wn">New crate</span></button>${editing?`<button type="button" role="menuitem" class="wr" data-w="name"><span class="wic">${WORDS}</span><span class="wn">Name and words</span></button>`:''}`;
   wm.innerHTML=(ph?'<i class="wgrab" aria-hidden="true"></i>':'')+`<div class="wl">${rows}</div>`+more;
 }
@@ -4693,6 +4769,114 @@ html.phone .ab-sh{margin-top:20px}
   document.addEventListener('touchmove',e=>{if(pr)e.preventDefault()},{passive:false});
   dock.addEventListener('contextmenu',e=>{if(e.target.closest('.xb'))e.preventDefault()});
   draw();
+})();
+// ---------- Casey's one panel ----------
+// One white button at the end of the bar (on a laptop, the far right): a plus over the crate, a pencil over an open record.
+// It opens one panel, in parts that fold open and shut. Over the crate it edits the crate: Add records, its name and description,
+// a new crate. Over a record it edits that record: its facts, covers, jacket color, crates, liner notes, links, and taking it out.
+// Only a signed-in device sees it
+(()=>{
+  const CHEV='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  const TICK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  // which parts were left open, while the page is up
+  const OPEN={add:true,crate:false,record:true,covers:false,color:false,crates:false,about:false,who:false,links:false};
+  const sec=(k,t,body,v='')=>`<details class="op-s" data-s="${k}"${OPEN[k]?' open':''}><summary>${t}<span class="op-v">${v}</span>${CHEV}</summary><div class="op-c">${body}</div></details>`;
+  const watch=box=>box.querySelectorAll('.op-s').forEach(d=>d.addEventListener('toggle',()=>{OPEN[d.dataset.s]=d.open;
+    if(d.open&&!reduce)d.querySelector('.op-c').animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:320,easing:'cubic-bezier(.22,1,.36,1)'})}));
+
+  // the button
+  const dock=$('.dock'),sort=dock.querySelector('.xb[data-k=sort]'),x=document.createElement('div');x.className='xb op';
+  x.innerHTML=`<button type="button" aria-label="Edit the crate"><span class="ic plus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="ic pen">${PEN}</span></button>`;
+  dock.append(x);const btn=x.querySelector('button');
+  window.opSync=()=>{
+    const own=!!(OWNER&&EDITABLE),rec=!open.hidden;document.body.classList.toggle('own',own);
+    if(!own){asShut();rsShut()}
+    x.classList.toggle('rec',rec);btn.setAttribute('aria-label',rec?'Edit this record':'Edit the crate');
+    const h=sort.offsetHeight;if(h&&!PH())x.style.width=x.style.height=h+'px';else x.style.width=x.style.height='';
+    if(rec&&!as.hidden)asShut();if(!rec&&!rs.hidden)rsShut();
+  };
+  opSync();addEventListener('resize',opSync);new MutationObserver(opSync).observe(open,{attributes:true,attributeFilter:['hidden']});
+  btn.onclick=()=>{btn.blur();
+    if(!open.hidden){if(!rs.hidden){rsShut();return}asShut();const r=order[cur];if(r){rsOpen(r);recPanel(r)}return}
+    if(!as.hidden){asShut();return}cratePanel();asOpen()};
+
+  // over the crate: Add records, its name and description, a new crate
+  const asB=document.createElement('div');asB.className='op-b';
+  asB.innerHTML=sec('add','Add records','')+sec('crate','Name and description',`<label class="op-f"><span>Name</span><input id="opN" maxlength="60" autocomplete="off"></label><label class="op-f"><span>Description</span><textarea id="opA" maxlength="300" rows="3" placeholder="A line or two about it"></textarea></label>`);
+  const head=as.querySelector('.rs-h');head.after(asB);
+  asB.querySelector('[data-s=add] .op-c').append(as.querySelector('.as-in'),as.querySelector('.as-f'));
+  const crC=asB.querySelector('[data-s=crate] .op-c'),end=document.createElement('div');end.className='op-end';asB.append(end);
+  watch(asB);
+  const asXB=$('#asX');head.innerHTML='<span class="rs-c" id="opCv"></span><span class="rs-n"><b id="opT"></b><span>Your crate</span></span><span class="rs-s" id="opS" aria-live="polite"></span>';head.append(asXB);
+  as.setAttribute('aria-label','Edit the crate');
+  const say=t=>{const s=$('#opS');s.textContent=t;s.classList.toggle('on',!!t);if(t==='Saved')setTimeout(()=>{if(s.textContent==='Saved')say('')},1800)};
+  const crName=()=>{const C=crateDef();return C?C.name:allName()},crAbout=()=>{const C=crateDef();return(C?C.about:EDITS.crates?.all?.about)||''};
+  function cratePanel(){
+    const C=crateDef();$('#opT').textContent=crName();$('#opCv').innerHTML=crateCover(C||{slug:'all',records:null});
+    $('#opN').value=crName();$('#opA').value=crAbout();asB.querySelector('[data-s=crate] .op-v').textContent=crName();
+    end.innerHTML=`<button type="button" class="op-btn" data-x="new">New crate</button>${C?'<button type="button" class="op-btn" data-x="drop">Delete this crate</button>':''}`;
+  }
+  crC.addEventListener('change',async()=>{
+    const name=$('#opN').value.trim(),about=$('#opA').value.trim();
+    if(!name){$('#opN').value=crName();toast('A crate needs a name');return}
+    if(crName()===name&&crAbout()===about)return;
+    say('Saving…');try{await api({op:'crate-set',crate:CRATE,name,about});nameCrate();say('Saved');$('#opT').textContent=name;asB.querySelector('[data-s=crate] .op-v').textContent=name}catch(e){say('');toast(e.message)}
+  });
+  crC.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();e.target.blur()}});
+  end.addEventListener('click',async e=>{const b=e.target.closest('[data-x]');if(!b)return;
+    if(b.dataset.x==='new'){asShut();crateOpen(true);return}
+    if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Delete it for good';return}
+    try{await api({op:'crate-drop',crate:CRATE});location.href='/casey/all'}catch(e){toast(e.message)}});
+
+  // over a record: the Details sheet, folded into parts, with covers, color, crates and taking it out beside its fields
+  const PART={Record:'record',About:'about','Who made it':'who',Links:'links'};
+  function coversHTML(r){
+    const t=k=>r[k]?`<img alt="" src="${esc(img(k==='front'&&r.thumb?r.thumb:r[k]))}">`:'None yet',p=EDITS.patch[r.slug];
+    return `<div class="op-cv">${['front','back'].map(k=>`<figure><div class="t">${t(k)}</div><figcaption>${k==='front'?'Front':'Back'}<button type="button" class="op-btn" data-up="${k}">${r[k]?'Replace':'Add'}</button></figcaption></figure>`).join('')}</div>${p&&(p.front||p.back)?'<button type="button" class="op-q" data-up="reset">Back to the original covers</button>':''}`;
+  }
+  function cratesHTML(r){const cs=EDITS.crates?.list||[];
+    return `<div class="op-cr"><button type="button" class="on" aria-disabled="true" aria-pressed="true"><i class="bx">${TICK}</i><span>${esc(allName())}</span></button>${cs.map(c=>`<button type="button" class="${inCrate(c,r)?'on':''}" aria-pressed="${inCrate(c,r)}" data-crate="${esc(c.slug)}"><i class="bx">${TICK}</i><span>${esc(c.name)}</span></button>`).join('')}</div>${cs.length?'':'<p class="op-q">New crate is in the crate’s panel, with the plus.</p>'}`}
+  const inNames=r=>[allName(),...(EDITS.crates?.list||[]).filter(c=>inCrate(c,r)).map(c=>c.name)].join(', ');
+  const colorHTML=r=>`<div class="op-col"><span class="op-sw" id="opSw"><input type="color" id="opC" aria-label="Jacket color"></span><span class="hx" id="opHx"></span>${EDITS.patch[r.slug]?.bg?'<button type="button" class="op-q" data-up="reset-bg">Back to the original</button>':''}</div>`;
+  function paint(r){const c=hexOf(spineBg(r));$('#opC').value=c;$('#opSw').style.background=c;$('#opHx').textContent=c;
+    $('#rsF [data-s=color] .op-v').innerHTML=`<i class="op-dot" style="background:${c}"></i>`}
+  function recPanel(r){
+    const f=$('#rsF');if(!f)return;const parts=[];let at=null;
+    for(const n of [...f.children]){if(n.tagName==='H3'){at={t:n.textContent,nodes:[]};parts.push(at)}else if(at)at.nodes.push(n)}
+    f.classList.replace('rs-f','op-b');f.innerHTML='';
+    for(const p of parts){const k=PART[p.t]||p.t.toLowerCase();
+      f.insertAdjacentHTML('beforeend',sec(k,p.t,'',k==='record'?esc([r.year,r.label].filter(Boolean).join(', ')):''));f.lastElementChild.querySelector('.op-c').append(...p.nodes);
+      if(k==='record')f.insertAdjacentHTML('beforeend',sec('covers','Covers',coversHTML(r))+sec('color','Jacket color',colorHTML(r))+sec('crates','Crates',cratesHTML(r),esc(inNames(r))));
+    }
+    f.insertAdjacentHTML('beforeend',`<div class="op-end"><button type="button" class="op-btn" data-x="out">${crateDef()?'Take it out of this crate':'Take it out of the crate'}</button></div>`);
+    f.querySelectorAll('.op-c').forEach(c=>c.classList.add('rs-f')); // the Details sheet's field styles
+    paint(r);watch(f);
+  }
+  function redo(k){const r=order[cur],d=$(`#rsF [data-s=${k}]`);if(!r||!d||rs.hidden)return;
+    const c=d.querySelector('.op-c');c.innerHTML=k==='covers'?coversHTML(r):colorHTML(r);if(k==='color')paint(r)}
+  rs.addEventListener('click',async e=>{
+    const r=order[cur];if(!r||open.hidden)return;
+    const u=e.target.closest('[data-up]'),c=e.target.closest('[data-crate]'),o=e.target.closest('[data-x=out]');
+    if(u){const k=u.dataset.up;
+      if(k==='reset'){await patch(r,{front:null,back:null,spine:null},'Back to the original covers');redo('covers')}
+      else if(k==='reset-bg'){await patch(r,{bg:null,spine:null},'Back to the original color');redo('color')}
+      else{upF.dataset.side=k;upF.click()}return}
+    if(c){const cr=(EDITS.crates?.list||[]).find(z=>z.slug===c.dataset.crate),on=inCrate(cr,r);
+      if(on&&cr.slug===CRATE){rsShut();takeOut(r);return}
+      c.classList.toggle('on',!on);c.setAttribute('aria-pressed',!on);
+      try{await api(on?{op:'crate-take',crate:cr.slug,slug:r.slug}:{op:'crate-put',crate:cr.slug,slug:r.slug});toast(on?`Took it out of ${cr.name}`:`Added to ${cr.name}`);
+        $('#rsF [data-s=crates] .op-v').textContent=inNames(r)}catch(z){toast(z.message);c.classList.toggle('on',on);c.setAttribute('aria-pressed',on)}
+      return}
+    if(o){rsShut();takeOut(r)}
+  });
+  // a new cover shows in its part once it's saved
+  upF.addEventListener('change',()=>{const r=order[cur],was=r&&[r.front,r.back].join();
+    const t=setInterval(()=>{const n=order[cur];if(n&&[n.front,n.back].join()!==was){clearInterval(t);redo('covers')}},300);setTimeout(()=>clearInterval(t),20000)},true);
+  // the color goes through the bar's own picker, which shows it on the record as you pick and saves it when you're done
+  const ebC=$('#ebC');
+  rs.addEventListener('input',e=>{if(e.target.id!=='opC')return;e.stopPropagation();const v=e.target.value;$('#opSw').style.background=v;$('#opHx').textContent=v;
+    ebC.value=v;ebC.dispatchEvent(new Event('input'))},true);
+  rs.addEventListener('change',e=>{if(e.target.id!=='opC')return;e.stopPropagation();ebC.value=e.target.value;ebC.dispatchEvent(new Event('change'))},true);
 })();
 </script>
 <style>
