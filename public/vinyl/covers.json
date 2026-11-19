@@ -1818,5 +1818,19 @@
     "frontSource": "apple",
     "spine": "#ae9f91",
     "added": "2026-11-08"
+  },
+  "deer-tick-coin-o-matic": {
+    "added": "2026-11-19",
+    "year": 2026,
+    "label": "ATO Records",
+    "group": "6d15786f-e1bf-4ffc-ac97-068bbea50024",
+    "release": "91fd5a6b-2653-4ae9-b02d-74d61cbe56cc",
+    "spotify": "2ZamzVq4VCs4eoEd2upHnE",
+    "links": {
+      "deezer": "https://www.deezer.com/album/917406611"
+    },
+    "front": "deer-tick-coin-o-matic-front.webp",
+    "frontSource": "caa",
+    "spine": "#678d83"
   }
 }
