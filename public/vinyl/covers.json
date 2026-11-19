@@ -1832,5 +1832,19 @@
     "front": "deer-tick-coin-o-matic-front.webp",
     "frontSource": "caa",
     "spine": "#678d83"
+  },
+  "cory-wong-on-a-random-tuesday-live-at-the-blue-note": {
+    "added": "2026-11-19",
+    "year": 2026,
+    "label": "Roundwound Media",
+    "group": "72d4b586-a165-4d15-b4fd-dd94cad19474",
+    "release": "32d547f6-3ce4-471a-999c-f7623a2e408b",
+    "spotify": "2vRHWU3gH7U5JYi9FQ35tV",
+    "links": {
+      "deezer": "https://www.deezer.com/album/1035517342"
+    },
+    "front": "cory-wong-on-a-random-tuesday-live-at-the-blue-note-front.webp",
+    "frontSource": "caa",
+    "spine": "#42547f"
   }
 }
