@@ -2600,7 +2600,7 @@ function swap(dir,o=0){
   crate.classList.add('still');go(j,true);$('.rc.cur',stack).classList.add('held');
   const r=order[cur];
   addr();
-  if(reduce){fill(r);setS();return}
+  if(reduce){fill(r);setS();open.scrollTop=0;return}
   // the record travels out to the edge it came from and becomes the peek; the neighbor travels in from its edge
   busy=true;
   const T=PHONE?480:700,PK=PHONE?14:28;
@@ -2619,10 +2619,19 @@ function swap(dir,o=0){
   ghost.style.transition=`transform ${T}ms ${ease},opacity ${T}ms`;ghost.style.transform=edge(-dir);ghost.style.opacity='.45';
   gs.className='sleeve';gs.style.transition=`transform ${T}ms ${ease}`;gs.style.transform=`rotateX(0deg) rotateY(${flat}deg)`;
   lift.style.transition=`transform ${T}ms ${ease},opacity ${T*.7}ms`;lift.style.transform='';lift.style.opacity='';
-  base=REST;ry=base;rx=TILT;setS();
+  base=REST;ry=base;rx=TILT;setS();toTop(T);
   later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},T);
   later(()=>{lift.style.transition='';busy=false},T+60);
 }
+// the next record starts at the top of its details: the view scrolls home with the swap, so it never arrives half risen over the record
+let topF=0;
+function toTop(T,to=0){
+  cancelAnimationFrame(topF);cancelAnimationFrame(coastF);coastF=0;const y0=open.scrollTop;if(y0===to)return;
+  if(reduce){open.scrollTop=to;return}
+  const t0=performance.now(),f=t=>{const k=Math.min(1,(t-t0)/T),e=1-(1-k)**3;open.scrollTop=y0+(to-y0)*e;topF=k<1?requestAnimationFrame(f):0};
+  topF=requestAnimationFrame(f);
+}
+open.addEventListener('pointerdown',()=>{cancelAnimationFrame(topF);topF=0},true);
 // a record that isn't a neighbor: the one open fades back where it is, and the new one grows out of the cover that was tapped
 // (from: its box on screen), or, going Back, rises in place
 function hop(j,from){
@@ -2631,7 +2640,7 @@ function hop(j,from){
   $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));
   crate.classList.add('still');go(j,true);$('.rc.cur',stack).classList.add('held');
   const r=order[cur];
-  if(reduce){fill(r);setS();return}
+  if(reduce){fill(r);setS();open.scrollTop=0;return}
   busy=true;
   const T=PHONE?480:620,ease='cubic-bezier(.22,1,.36,1)';
   const ghost=lift.cloneNode(false),gs=sleeve.cloneNode(false);ghost.removeAttribute('id');gs.removeAttribute('id');gs.append(...sleeve.childNodes);ghost.append(gs);
@@ -2645,7 +2654,7 @@ function hop(j,from){
   snapS(0,0);void lift.offsetWidth;
   ghost.style.transition=`transform ${T*.6}ms ${ease},opacity 150ms`;ghost.style.transform='scale(.96)';ghost.style.opacity='0';
   lift.style.transition=`transform ${T}ms ${ease},opacity ${T*.5}ms`;lift.style.transform='';lift.style.opacity='';
-  base=REST;ry=base;rx=TILT;setS();
+  base=REST;ry=base;rx=TILT;setS();toTop(T);
   later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},T);
   later(()=>{lift.style.transition='';busy=false},T+60);
 }
@@ -2698,10 +2707,14 @@ stage.addEventListener('pointerdown',e=>{if(busy||!e.isPrimary)return;const now=
 function slide(e){
   const s=sdrag,dx=e.clientX-s.x,dy=e.clientY-s.y,now=performance.now(),dt=Math.max(8,now-s.lt);
   s.vx=.5*s.vx+.5*(e.clientX-s.lx)/dt;s.vy=.5*s.vy+.5*(e.clientY-s.ly)/dt;s.lt=now;s.lx=e.clientX;s.ly=e.clientY;
-  if(!s.ax){if(Math.hypot(dx,dy)<8)return;s.far=true;s.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';
-    if(s.ax==='y'&&(dy<0||open.scrollTop>0)){s.ax='s';s.st=open.scrollTop+dy;return} // up, or back down once scrolled: the details move and the record stays (with nothing to scroll, up does nothing: it never starts the pull back into the crate, which would bring the crate up behind the page)
+  // sideways wins anything flatter than about 60 degrees: a thumb sweeping across often starts on an upward arc
+  if(!s.ax){if(Math.hypot(dx,dy)<10)return;s.far=true;s.ax=Math.abs(dx)>=Math.abs(dy)*.6?'x':'y';
+    if(s.ax==='y'&&(dy<0||open.scrollTop>0)){s.ax='s';s.top=open.scrollTop;s.st=open.scrollTop+dy;return} // up, or back down once scrolled: the details move and the record stays (with nothing to scroll, up does nothing: it never starts the pull back into the crate, which would bring the crate up behind the page)
     lift.style.transition='none';cancelAnimationFrame(unpullF);unpullF=0;root.classList.add(s.ax==='x'?'sliding':'pulldown')}
+  // a scroll that turns into a sweep across, early on, becomes the swipe after all, and the details settle back where they were
+  if(s.ax==='s'&&Math.abs(dx)>28&&Math.abs(dx)>Math.abs(dy)&&Math.abs(s.top-open.scrollTop)<60){s.ax='x';s.back=s.top;lift.style.transition='none';root.classList.add('sliding')}
   if(s.ax==='s'){open.scrollTop=s.st-dy;return}
+  if(s.back!=null){const y=open.scrollTop;open.scrollTop=Math.abs(y-s.back)<1?s.back:y+(s.back-y)*.35;if(open.scrollTop===s.back)s.back=null}
   if(s.ax==='x'){
     s.dx=order[cur+(dx<0?1:-1)]?dx:dx*.25/(1+Math.abs(dx)/400); // nothing that way: it gives a little
     lift.style.transform=`translateX(${s.dx.toFixed(1)}px) rotate(${(s.dx/s.w*3).toFixed(2)}deg)`;open.style.setProperty('--dx',s.dx.toFixed(1)+'px');
@@ -2717,7 +2730,7 @@ function settle(s){
     const dir=s.dx<0?1:-1,fling=Math.abs(s.vx)>.4&&Math.sign(s.vx)===-dir;
     root.classList.remove('sliding');
     if(order[cur+dir]&&(Math.abs(s.dx)>s.w*.25||fling)){buzz();swap(dir,s.dx);return}
-    open.style.setProperty('--dx','0px');home();return;
+    open.style.setProperty('--dx','0px');if(s.back!=null)toTop(300,s.back);home();return;
   }
   if(s.dy>110||s.vy>.5&&s.dy>24){quick=true;closeRecord();return}
   unpull();home();
