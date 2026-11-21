@@ -1537,6 +1537,9 @@ html .dock .xb>.fb.dr{color:var(--t2)}
 .dsay{--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(var(--db) + var(--H,54px) + 14px);display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);box-sizing:border-box;height:40px;padding:0 16px 0 12px;margin:0;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);font-size:var(--fs-3);color:var(--fg);white-space:nowrap;pointer-events:none;
   opacity:0;visibility:hidden;translate:-50% 10px;transition:opacity .15s var(--out),visibility 0s .15s,translate 0s .15s}
 .dsay.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--ease)}
+/* a tap on it opens that circle's stack, the toast growing into it */
+.dsay.on{pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.dsay.go{opacity:0;visibility:hidden;translate:-50% 0;transition:opacity .16s var(--out),visibility 0s .16s}
 html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 .dsay>i{display:grid;color:var(--t2)}
 .dsay svg{width:18px;height:18px;display:block}
@@ -4543,10 +4546,16 @@ html.phone .ab-sh{margin-top:20px}
   dx.onclick=shut;
 
   // a toast above the bar names what changed, with the circle's new icon; a second tap crossfades it and starts its clock again
-  let sayT;const tell=(t,k)=>{const on=say.classList.contains('on'),g=rows(k).find(r=>r.on)?.g||'';
-    say.innerHTML=`${g?`<i>${g}</i>`:''}<span></span>`;say.lastChild.textContent=t;say.classList.add('on');
+  let sayT,sayK='';const sayOff=()=>say.classList.remove('on'),sayClock=()=>{clearTimeout(sayT);sayT=setTimeout(sayOff,1800)};
+  const tell=(t,k)=>{const on=say.classList.contains('on'),g=rows(k).find(r=>r.on)?.g||'';sayK=k;
+    say.innerHTML=`${g?`<i>${g}</i>`:''}<span></span>`;say.lastChild.textContent=t;say.classList.remove('go');say.classList.add('on');
     if(on&&!RM.matches)say.animate([{opacity:.2},{opacity:1}],{duration:200});
-    clearTimeout(sayT);sayT=setTimeout(()=>say.classList.remove('on'),1800)};
+    sayClock()};
+  // a tap on the toast opens the stack of the circle it speaks for, grown out of the toast; a pointer resting on it keeps it up
+  say.addEventListener('click',()=>{if(!say.classList.contains('on')||!sayK)return;clearTimeout(sayT);
+    const from=say.getBoundingClientRect();say.classList.add('go');sayOff();openStack(sayK,from)});
+  say.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&say.classList.contains('on'))clearTimeout(sayT)});
+  say.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&say.classList.contains('on'))sayClock()});
   // the new icon slides in from the side it comes from while the old one slides out
   const slide=(b,old,dir)=>{const nw=b.innerHTML;if(RM.matches||nw===old)return;
     b.innerHTML=`<span class="dic">${old}</span><span class="dic">${nw}</span>`;const [o,n]=b.children;
@@ -4575,15 +4584,20 @@ html.phone .ab-sh{margin-top:20px}
   // the stack grows up out of its circle, rows a beat apart, nearest first; a lit pill glides under the thumb
   let sk='',hi=null;
   const cellOf=k=>k==='sort'?cs:k==='view'?cv:cd,btnOf=k=>k==='sort'?sb:k==='view'?lb:dr;
-  function openStack(k){
+  function openStack(k,from){
     if(sk)shutStack(true);sk=k;hi=null;
     st.innerHTML='<i class="dhl"></i>'+rows(k).map(r=>`<button type="button" class="dsi${r.on?' cur':''}" role="menuitemradio" aria-checked="${r.on}" data-v="${r.v}"><span class="dsg">${r.g}</span><span class="dsn">${r.n}</span>${r.x?`<span class="dsx">${r.x}</span>`:''}</button>`).join('');
     st.setAttribute('aria-label',k==='sort'?'Sort':k==='view'?'Layout':'Order');
     st.hidden=false;body.classList.add('stacking');
-    const c=cellOf(k).getBoundingClientRect(),W=st.offsetWidth,cx=c.left+c.width/2,L=Math.max(14,Math.min(innerWidth-W-14,cx-W/2));
-    st.style.left=L+'px';st.style.bottom=(innerHeight-c.top+12)+'px';st.style.transformOrigin=`${cx-L}px 100%`;
+    const c=cellOf(k).getBoundingClientRect(),W=st.offsetWidth,cx=from?from.left+from.width/2:c.left+c.width/2,L=Math.max(14,Math.min(innerWidth-W-14,cx-W/2));
+    st.style.left=L+'px';st.style.bottom=(from?innerHeight-from.bottom:innerHeight-c.top+12)+'px';st.style.transformOrigin=`${cx-L}px 100%`;
     st.getAnimations().forEach(a=>a.cancel());
-    if(!RM.matches){st.animate([{transform:'translateY(10px) scale(.94)',opacity:0},{transform:'none',opacity:1}],{duration:420,easing:EASE});
+    if(from&&!RM.matches){ // from the toast: the panel opens out of the pill's own outline, the rows coming in as it clears them
+      const s=st.getBoundingClientRect(),r=getComputedStyle(st).borderTopLeftRadius,px=v=>Math.max(0,v).toFixed(1)+'px';
+      const pill=`inset(${px(from.top-s.top)} ${px(s.right-from.right)} ${px(s.bottom-from.bottom)} ${px(from.left-s.left)} round ${from.height/2}px)`;
+      st.animate([{clipPath:pill},{clipPath:`inset(0px 0px 0px 0px round ${r})`}],{duration:440,easing:EASE});
+      const rs=[...st.querySelectorAll('.dsi')];rs.forEach((r,i)=>r.animate([{transform:'translateY(6px)',opacity:0},{transform:'none',opacity:1}],{duration:360,easing:EASE,delay:80+(rs.length-1-i)*24,fill:'backwards'}))}
+    else if(!RM.matches){st.animate([{transform:'translateY(10px) scale(.94)',opacity:0},{transform:'none',opacity:1}],{duration:420,easing:EASE});
       const rs=[...st.querySelectorAll('.dsi')];rs.forEach((r,i)=>r.animate([{transform:'translateY(8px)',opacity:0},{transform:'none',opacity:1}],{duration:380,easing:EASE,delay:30+(rs.length-1-i)*22,fill:'backwards'}))}
   }
   function light(v){if(!sk||hi===v)return;hi=v;const hl=$('.dhl',st),m=v==null?null:st.querySelector(`.dsi[data-v="${v}"]`);
