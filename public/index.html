@@ -1461,6 +1461,9 @@ html:has(.crate.lifted) .find>.q{scale:1}
 /* the mark stays put over an open record too, above it, where it takes you back to the front */
 html:has(.open:not([hidden])) .find{z-index:var(--z-raised)}
 html:has(.open:not([hidden])) .find::before{display:none}
+/* phones: once About and the rest rise up the screen, the strip behind the mark comes back, solid where the mark sits, so words
+   scrolling under it go out of sight instead of running into it. It follows the rise, so it's gone while the record is at rest */
+html.phone:has(.open:not([hidden])) .find::before{display:block;height:calc(env(safe-area-inset-top) + 120px);background:#121212f2;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);opacity:var(--rise,0);transition:none}
 html:has(.open:not([hidden])) .find>.logo{opacity:1;visibility:visible;scale:1;pointer-events:auto;transition:none}
 #oq,.open.in #oq{opacity:0;transition:none}
 html:has(.crate.lifted) #oq{opacity:1}
@@ -2274,9 +2277,9 @@ addEventListener('pointerdown',e=>{if(!$('#cmenu').hidden&&!e.target.closest('#c
 // Pull a record out: big sleeve to turn over (drag, click, arrow keys), details and a Spotify link beside it
 // resting angle of a pulled-out sleeve: barely turned, unless you turn it
 let REST,TILT;const restFor=()=>{REST=PHONE?0:-3;TILT=PHONE?0:-1};restFor(); // on a phone it faces you square
-const open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage'),lift=$('#lift');
+const findBar=$('.find'),open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage'),lift=$('#lift');
 // phones: how far the details have risen over the record, for the record's dimming and the fade behind the words
-open.addEventListener('scroll',()=>{open.style.setProperty('--rise',PHONE?Math.min(1,open.scrollTop/120).toFixed(3):0);
+open.addEventListener('scroll',()=>{const rise=PHONE?Math.min(1,open.scrollTop/120).toFixed(3):0;open.style.setProperty('--rise',rise);findBar.style.setProperty('--rise',rise); // the strip behind the mark fades in with it
   // past the top, iOS can still pull the whole view down a way (a fling, or a drag that turned around); the record stays where it is
   const o=PHONE?Math.min(0,open.scrollTop):0;if(o||stage.style.translate)stage.style.translate=o?`0 ${o}px`:''},{passive:true});
 let base=REST,ry=base,rx=TILT,sdrag=null,busy=false,timers=[],flyF=0;
