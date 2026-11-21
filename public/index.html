@@ -1035,6 +1035,9 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
 .pic img.on{opacity:1}
 .tbl .held{opacity:0}
+/* back from a record opened in the table: the table rises in a little as the record fades back */
+.tbl.rise{animation:tblRise .38s var(--ease) .08s both}
+@keyframes tblRise{from{opacity:0;transform:translateY(10px)}}
 .tbl .m{display:none}
 @media (max-width:700px){
   .tbl{padding-left:8px;padding-right:8px}
@@ -2567,6 +2570,15 @@ function openRecord(deep,pulled){
   crate.classList.add('lifted');
   // a link straight to a record: it's put in place without the lift, and the open view waits unseen behind the loading sleeve, then fades in with the page
   if(reduce||deep&&!document.body.classList.contains('ready')){held.classList.add('held');lift.style.transform='';setS();open.classList.add('in')}
+  // from the table the record doesn't fly out of its row: the table fades back and the record grows in where it will sit
+  else if(window.inPlace?.()){
+    busy=true;cancelAnimationFrame(flyF);lift.className='lift';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';
+    held.classList.add('held');snapS(ry,rx);
+    lift.style.transition='none';lift.style.transform='scale(.94)';lift.style.opacity='0';void lift.offsetWidth;
+    later(()=>{lift.style.transition='transform .46s var(--ease),opacity .46s var(--ease)';lift.style.transform='';lift.style.opacity=''},80);
+    later(()=>open.classList.add('in'),200);
+    later(()=>{lift.style.transition='';busy=false},560);
+  }
   else{
     busy=true;cancelAnimationFrame(flyF);lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');
     const ps=cratePose(held);
@@ -2675,6 +2687,16 @@ function closeRecord(fromPop){
   open.classList.remove('in');crate.classList.remove('still');
   if(reduce){quick=false;vanish=false;done();return}
   if(vanish){vanish=quick=false;busy=true;open.style.transition='opacity .2s';open.style.opacity='0';later(()=>{open.style.transition=open.style.opacity='';done()},200);return}
+  // back to the table: the record fades back where it is and the table rises in under it, no flight home to its row
+  if(window.inPlace?.()){
+    busy=true;cancelAnimationFrame(flyF);cancelAnimationFrame(sraf);sraf=0;
+    if(quick){quick=false;crate.classList.remove('lifted');veil.style.transition='opacity .3s';veil.style.opacity='0'}
+    const t=getComputedStyle(lift).transform;lift.className='lift';
+    lift.style.transition='transform .22s ease-in,opacity .22s ease-in';lift.style.transform=(t==='none'?'':t+' ')+'scale(.96)';lift.style.opacity='0';
+    const tb=$('#tbl');tb.classList.remove('rise');void tb.offsetWidth;tb.classList.add('rise');tb.addEventListener('animationend',()=>tb.classList.remove('rise'),{once:true});
+    later(()=>{done();lift.style.transform=lift.style.opacity=''},230);
+    document.title=TITLE;return;
+  }
   // reverse: details tuck back under, the record drops back into the crate, the rest fades back in
   busy=true;
   // one tween carries the sleeve home, from wherever it is: position, size, lean and turn all land together on the record in the
@@ -3845,6 +3867,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     for(const n of document.querySelectorAll('.tile.held,.tbl .held'))if(n!==t)n.classList.remove('held');t.classList.add('held');
     const p={x:R.left+R.width/2-(S.left+S.width/2),y:R.top+R.height/2-(S.top+S.height/2),z:0,s:R.width/S.width,ax:0,az:0};
     return{...p,P:2600,ox:S.width/2,oy:S.height/2,tf:poseTf(p)}};
+  window.inPlace=()=>view==='table'; // the table opens and closes a record in place, without the flight from its row
   const cp0=cratePose;cratePose=function(...a){return window.tilePose?.()||cp0.apply(this,a)};
   const cr0=closeRecord;closeRecord=function(...a){document.body.classList.remove('reading');return cr0.apply(this,a)};
   tiles.addEventListener('click',e=>{const t=e.target.closest('.tile');if(t)pull(t.dataset.slug)});
