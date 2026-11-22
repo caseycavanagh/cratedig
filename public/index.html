@@ -121,18 +121,20 @@ img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:
 .rc .face:has(>img.art){background:var(--sp,#2c2c2e)}
 .rc img.art{transition:opacity .5s ease-out}
 .rc img.art:not(.on){opacity:0}
-/* a record with no cover (blankHTML): a die-cut jacket, the names up the spine edge. Below grid size only the hole shows */
+/* a record with no cover (blankHTML): a die-cut jacket, the names in a band across the top above a fold, the hole in the middle.
+   Below grid size only the hole shows */
 .blank{container-type:inline-size;overflow:hidden}
-.blank::before{content:"";position:absolute;left:15.5cqw;top:0;bottom:0;width:.35cqw;background:currentColor;opacity:.16}
-.blank .bl-sp{position:absolute;left:6cqw;bottom:6cqw;max-height:88cqw;writing-mode:vertical-rl;transform:rotate(180deg);font:400 5.2cqw/1.1 var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.blank .bl-sp b{font-weight:500}
-.blank .bl-sp i,.blank .bl-yr{font-style:normal;opacity:.62}
-.blank .bl-yr{position:absolute;right:6cqw;top:6cqw;font:400 4.4cqw/1 var(--sans)}
-.blank .bl-ho,.blank .bl-lb{position:absolute;left:58cqw;top:50cqw;border-radius:50%;transform:translate(-50%,-50%)}
-.blank .bl-ho{width:62cqw;height:62cqw;background:repeating-radial-gradient(circle,#161616 0 .55cqw,#1d1d1d .55cqw 1.1cqw);box-shadow:inset 0 0 0 .5cqw #0004,inset 0 1cqw 3cqw #0008}
-.blank .bl-lb{width:24cqw;height:24cqw;background:var(--lb)}
+.blank::before{content:"";position:absolute;left:0;right:0;top:19cqw;height:.35cqw;background:currentColor;opacity:.16}
+.blank .bl-bd{position:absolute;left:6cqw;right:6cqw;top:4.6cqw;display:grid;grid-template-columns:1fr auto;column-gap:4cqw;font:400 4.8cqw/1.2 var(--sans)}
+.blank .bl-bd b,.blank .bl-bd i{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:normal}
+.blank .bl-bd b{font-weight:500}
+.blank .bl-bd i{grid-column:1;opacity:.62}
+.blank .bl-bd em{grid-column:2;grid-row:1;font-style:normal;opacity:.62}
+.blank .bl-ho,.blank .bl-lb{position:absolute;left:50cqw;top:50cqw;border-radius:50%;transform:translate(-50%,-50%)}
+.blank .bl-ho{width:56cqw;height:56cqw;background:repeating-radial-gradient(circle,#161616 0 .55cqw,#1d1d1d .55cqw 1.1cqw);box-shadow:inset 0 0 0 .5cqw #0004,inset 0 1cqw 3cqw #0008}
+.blank .bl-lb{width:22cqw;height:22cqw;background:var(--jk)}
 .blank .bl-lb::after{content:"";position:absolute;left:50%;top:50%;width:1.6cqw;height:1.6cqw;margin:-.8cqw;border-radius:50%;background:#121212}
-@container (max-width:150px){.blank .bl-sp,.blank .bl-yr{display:none}.blank::before{display:none}.blank .bl-ho,.blank .bl-lb{left:50cqw}}
+@container (max-width:150px){.blank .bl-bd,.blank::before{display:none}}
 .back-in{position:absolute;inset:0;padding:8cqw;font:400 3.6cqw/1.6 var(--sans);display:flex;flex-direction:column;justify-content:space-between}
 .back-in b{display:block;font:500 5cqw/1.25 var(--sans);margin-bottom:3cqw}
 .back-in dl{display:grid;grid-template-columns:auto 1fr;gap:.6cqw 4cqw}
@@ -1890,15 +1892,15 @@ function fadeIn(i){
   if(!document.body.classList.contains('ready')){i.classList.add('on');return}
   i.decode().catch(()=>{}).then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.add('on'))));
 }
-// A record with no cover gets a die-cut jacket: a color of its own, the record showing through a round hole with a blank label
-// in a second color, and the artist and title up the spine edge, year in the corner. The colors are picked from the names, so
-// a record keeps them from visit to visit and any crate gets the same treatment; a color set by hand (Details) wins.
+// A record with no cover gets a die-cut jacket in a color of its own, the record showing through a round hole in the middle with
+// a label of the same color, and the artist and title in a band across the top, year at its end. The color is picked from the
+// artist's name, so a record keeps it from visit to visit and any crate gets the same treatment; a color set by hand (Details) wins.
 const JACKETS=['#d8d3ca','#c4b096','#8e9a86','#2e3a4c','#6e3b34','#38463a','#b79a46','#1e1e1f','#9aa3ab','#5a4a63','#b5553c','#3f6f73','#d9b8a6','#7a7f3a','#243b33','#c9c2e0','#e1c35a'];
-const LABELS=['#efe9df','#e9d7b0','#d9e0d3','#f0d0c0','#cfd9e4','#e7c94f','#c0412f','#7d8f6f','#e8b4a8'];
 const hashOf=s=>{let h=2166136261;for(const c of String(s).toLowerCase())h=Math.imul(h^c.charCodeAt(0),16777619);h=Math.imul(h^h>>>15,0x2c1b3c6d);return (h^h>>>13)>>>0}; // mixed at the end, so names that differ by a letter or two land far apart
 const jacketOf=r=>JACKETS[hashOf(r.artist)%JACKETS.length];
-const labelOf=r=>{const h=hashOf(r.artist+'|'+r.title),c=LABELS[h%LABELS.length];return c===spineBg(r)?LABELS[(h+1)%LABELS.length]:c};
-const blankHTML=r=>{const bg=spineBg(r),lb=labelOf(r);return `<div class="art blank" style="background-color:${bg};color:${inkOn(bg)};--lb:${lb}"><span class="bl-sp"><b>${esc(r.artist)}</b>\u2002<i>${esc(r.title)}</i></span>${+r.year?`<i class="bl-yr">${esc(r.year)}</i>`:''}<i class="bl-ho"></i><i class="bl-lb"></i></div>`};
+// a title that starts with its artist ("Chet Baker - Jazz & Blues") is shown without it under the artist's name
+const bareTitle=r=>{const a=String(r.artist||'').trim(),t=String(r.title||'');if(!a)return t;const m=t.slice(0,a.length).toLowerCase()===a.toLowerCase()&&t.slice(a.length).match(/^\s*[-–—:·|]\s*(.+)$/);return m?m[1]:t};
+const blankHTML=r=>{const bg=spineBg(r);return `<div class="art blank" style="background-color:${bg};color:${inkOn(bg)};--jk:${bg}"><span class="bl-bd"><b>${esc(r.artist)}</b><i>${esc(bareTitle(r))}</i>${+r.year?`<em>${esc(r.year)}</em>`:''}</span><i class="bl-ho"></i><i class="bl-lb"></i></div>`};
 const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):blankHTML(r);
 const spineBg=r=>r.spine||(r.front?r.pal[0]:jacketOf(r));
 // the edges wear the cover's own outermost pixels (the print wraps round the card), over the spine color until it loads
