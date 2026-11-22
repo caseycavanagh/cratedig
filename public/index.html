@@ -298,6 +298,7 @@ html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - 330px))}
 html.phone .o-page{display:flex;padding:calc(env(safe-area-inset-top) + 64px) 24px calc(env(safe-area-inset-bottom) + 20px)}
 html.phone .o-grid{flex:1;flex-direction:column;}
 html.phone .stage{touch-action:none}
+html.phone .open{touch-action:pan-y pinch-zoom} /* sideways is ours: a sweep across the details swipes records */
 html.phone .sleeve .sh{box-shadow:var(--rest)}
 html.phone[data-theme=dark] .sleeve .sh{box-shadow:var(--rest)}
 /* the details slide down from under the record */
@@ -2804,6 +2805,20 @@ const sEnd=()=>{if(!sdrag)return;const s=sdrag,tap=!sdrag.far&&performance.now()
   if(s.ax){settle(s);return}
   if(tap)sv.vy=0;base=tap?base+180:REST+180*Math.round((sv.ry+sv.vy*.12-REST)/180);ry=base;rx=TILT;setS()};
 stage.addEventListener('pointerup',sEnd);stage.addEventListener('pointercancel',sEnd);
+// phones: a sweep across anywhere below the record (title, buttons, About, the margins beside them) brings in the next record too;
+// it has to be clearly sideways, so up and down still scroll the details the way they always have, and a tap still lands
+{let eatT=0;
+  open.addEventListener('pointerdown',e=>{
+    if(!PHONE||busy||sdrag||!e.isPrimary||e.pointerType==='mouse'||playMenu()||e.target.closest('#stage,.peek,.play-m,input,textarea,select'))return;
+    const now=performance.now();sdrag={x:e.clientX,y:e.clientY,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,far:false,ax:null,ry:sv.ry,w:stage.offsetWidth,os:true}});
+  open.addEventListener('pointermove',e=>{const s=sdrag;if(!s||!s.os)return;
+    if(!s.ax){const dx=e.clientX-s.x,dy=e.clientY-s.y;if(Math.hypot(dx,dy)<10)return;
+      if(Math.abs(dx)<=Math.abs(dy)){sdrag=null;return} // up or down: the page scrolls, as ever
+      s.ax='x';s.far=true;lift.style.transition='none';cancelAnimationFrame(unpullF);unpullF=0;root.classList.add('sliding')}
+    slide(e)});
+  const oEnd=()=>{const s=sdrag;if(!s||!s.os)return;sdrag=null;if(s.ax){eatT=performance.now();settle(s)}};
+  open.addEventListener('pointerup',oEnd);open.addEventListener('pointercancel',oEnd);
+  open.addEventListener('click',e=>{if(performance.now()-eatT<400){e.preventDefault();e.stopPropagation()}},true)} // a swipe that started on Play doesn't press it
 stage.addEventListener('mouseleave',()=>{if(!sdrag&&!busy){ry=base;rx=TILT;setS()}});
 stage.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();turn()}});
 
