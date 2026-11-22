@@ -121,9 +121,18 @@ img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:
 .rc .face:has(>img.art){background:var(--sp,#2c2c2e)}
 .rc img.art{transition:opacity .5s ease-out}
 .rc img.art:not(.on){opacity:0}
-.cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
-.cover-type b{display:block;font:500 6cqw var(--sans)}
-.cover-type i{display:block;font:400 4.4cqw var(--sans);font-style:normal;opacity:.85;margin-top:1.2cqw}
+/* a record with no cover (blankHTML): a die-cut jacket, the names up the spine edge. Below grid size only the hole shows */
+.blank{container-type:inline-size;overflow:hidden}
+.blank::before{content:"";position:absolute;left:15.5cqw;top:0;bottom:0;width:.35cqw;background:currentColor;opacity:.16}
+.blank .bl-sp{position:absolute;left:6cqw;bottom:6cqw;max-height:88cqw;writing-mode:vertical-rl;transform:rotate(180deg);font:400 5.2cqw/1.1 var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blank .bl-sp b{font-weight:500}
+.blank .bl-sp i,.blank .bl-yr{font-style:normal;opacity:.62}
+.blank .bl-yr{position:absolute;right:6cqw;top:6cqw;font:400 4.4cqw/1 var(--sans)}
+.blank .bl-ho,.blank .bl-lb{position:absolute;left:58cqw;top:50cqw;border-radius:50%;transform:translate(-50%,-50%)}
+.blank .bl-ho{width:62cqw;height:62cqw;background:repeating-radial-gradient(circle,#161616 0 .55cqw,#1d1d1d .55cqw 1.1cqw);box-shadow:inset 0 0 0 .5cqw #0004,inset 0 1cqw 3cqw #0008}
+.blank .bl-lb{width:24cqw;height:24cqw;background:var(--lb)}
+.blank .bl-lb::after{content:"";position:absolute;left:50%;top:50%;width:1.6cqw;height:1.6cqw;margin:-.8cqw;border-radius:50%;background:#121212}
+@container (max-width:150px){.blank .bl-sp,.blank .bl-yr{display:none}.blank::before{display:none}.blank .bl-ho,.blank .bl-lb{left:50cqw}}
 .back-in{position:absolute;inset:0;padding:8cqw;font:400 3.6cqw/1.6 var(--sans);display:flex;flex-direction:column;justify-content:space-between}
 .back-in b{display:block;font:500 5cqw/1.25 var(--sans);margin-bottom:3cqw}
 .back-in dl{display:grid;grid-template-columns:auto 1fr;gap:.6cqw 4cqw}
@@ -199,7 +208,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:var(--rest)}
 /* the neighbors peek in from the page edges; hover pulls one out a little further */
 .peek{all:unset;position:fixed;top:50%;z-index:2;width:var(--O);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
   transition:transform .35s var(--ease),opacity .25s;box-shadow:var(--lift)}
-.peek img,.peek>div:not(.cover-type){position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.peek img,.peek>div{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
 .peek{container-type:inline-size;overflow:hidden} /* a record without art sets its name to the peek's width, not the page's */
 .peek.prev{left:0;--x:calc(-100% + 28px);--h:calc(-100% + 96px)}
 .peek.next{right:0;--x:calc(100% - 28px);--h:calc(100% - 96px)}
@@ -844,8 +853,6 @@ body.walling .find .chip{display:none}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
 .tile img.on{opacity:1}
-.tile .pl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:var(--fs-3);line-height:1.15}
-.tile .pl small{font-weight:400;opacity:.7;margin-top:2px}
 .tile .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,#000b);font-size:var(--fs-2);line-height:1.2;opacity:0;transition:opacity .2s}
 .tile .cap b{display:block;font-weight:500}.tile .cap span{color:var(--t1)}
 /* the grid names a record only when you tab to it; under a pointer, its cover comes a little off the page toward you instead */
@@ -990,6 +997,7 @@ html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:
 .sl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border-radius:var(--r-in)}
 .sl button:active{background:var(--prs)}
 .sl .sw,.sl .pic{width:46px;height:46px;flex:none;background:#2c2c2e}
+.sl .sw,.tbl .c0 .sw{position:relative;overflow:hidden}
 .sl b{display:block;font-weight:500;font-size:var(--fs-4);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span span{display:block;color:var(--m);font-size:var(--fs-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span{min-width:0}
@@ -1094,7 +1102,7 @@ html.phone .sx{padding:0 2px}
 .sl img:not([src]){visibility:visible}
 /* every record has the same slight corner, never a point: --rec, a hair rounder as the cover grows */
 .face>*,.face::after,.sleeve .sh,.rc .fr{border-radius:var(--rec)}
-.face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.sl .pic,.tbl .c0 .sw,.tbl .c0 .pic,.hit img,.hit .ph,.nb{border-radius:var(--rec)}
+.face,.rc .face,.sleeve .face,.tile,.tile img,.blank,.sl img,.sl .sw,.sl .pic,.tbl .c0 .sw,.tbl .c0 .pic,.hit img,.hit .ph,.nb{border-radius:var(--rec)}
 /* the cardboard edges stop where the corners start curving, so no square tab pokes past a round corner */
 .edge.l,.edge.r{top:var(--rec);height:calc(100% - 2*var(--rec))}
 .edge.t,.edge.b{left:var(--rec);width:calc(100% - 2*var(--rec))}
@@ -1862,18 +1870,6 @@ const RECORDS=[ // Casey's records (added: the day one joined the crate, for the
   {artist:'Various artists',title:'Woodstock: Music from the Original Soundtrack and More',sortAs:'Woodstock'},
 ].map(r=>({pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...r,slug:(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}));
 
-// Made-up cover art: one of a few patterns in each record's colors
-function art(r){
-  const [bg,fg,ac]=r.pal;let g='';
-  if(r.art==='sun'){g=`<circle cx="50" cy="60" r="21" fill="${ac}"/>`;for(let i=0;i<6;i++)g+=`<rect x="0" y="${72+i*5}" width="100" height="${1.2+i*.5}" fill="${fg}" opacity=".85"/>`}
-  if(r.art==='grid'){for(let x=0;x<6;x++)for(let y=0;y<5;y++)g+=`<circle cx="${17+x*13.2}" cy="${38+y*13}" r="${(x+y)%3?3.2:5.4}" fill="${(x*y)%4?fg:ac}"/>`}
-  if(r.art==='arch'){for(let i=0;i<5;i++){const w=78-i*14;g+=`<path d="M${50-w/2} 100V${62-i*0}a${w/2} ${w/2} 0 0 1 ${w} 0V100z" fill="${i%2?bg:(i?ac:fg)}"/>`}}
-  if(r.art==='type'){g=`<text x="7" y="96" font-family="system-ui,-apple-system,sans-serif" font-weight="500" font-size="54" fill="${ac}" letter-spacing="-3">${r.title[0]}</text><rect x="7" y="40" width="40" height="2" fill="${fg}"/>`}
-  if(r.art==='rings'){for(let i=6;i>0;i--)g+=`<circle cx="64" cy="66" r="${i*6}" fill="none" stroke="${i%2?ac:fg}" stroke-width="2.4"/>`}
-  if(r.art==='bands'){g=`<rect y="44" width="100" height="18" fill="${fg}"/><rect y="62" width="100" height="18" fill="${ac}"/><rect y="80" width="100" height="20" fill="${fg}" opacity=".6"/>`}
-  if(r.art==='stripes'){for(let i=-10;i<12;i++)g+=`<path d="M${i*10} 100L${i*10+60} 40" stroke="${i%3?fg:ac}" stroke-width="2.6"/>`;g+=`<rect width="100" height="40" fill="${bg}"/>`}
-  return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${g}</svg>`;
-}
 // local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
 const img=f=>/^(https?:|\/)/.test(f)?f:'/vinyl/'+f; // covers Casey uploads come from /api/crate/img
 // a smaller copy of a cover, where there is one: Casey's in vinyl/t/ (scripts/vinyl-thumbs.mjs), Casey's uploads from
@@ -1894,8 +1890,17 @@ function fadeIn(i){
   if(!document.body.classList.contains('ready')){i.classList.add('on');return}
   i.decode().catch(()=>{}).then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.add('on'))));
 }
-const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
-const spineBg=r=>r.spine||r.pal[0];
+// A record with no cover gets a die-cut jacket: a color of its own, the record showing through a round hole with a blank label
+// in a second color, and the artist and title up the spine edge, year in the corner. The colors are picked from the names, so
+// a record keeps them from visit to visit and any crate gets the same treatment; a color set by hand (Details) wins.
+const JACKETS=['#d8d3ca','#c4b096','#8e9a86','#2e3a4c','#6e3b34','#38463a','#b79a46','#1e1e1f','#9aa3ab','#5a4a63','#b5553c','#3f6f73','#d9b8a6','#7a7f3a','#243b33','#c9c2e0','#e1c35a'];
+const LABELS=['#efe9df','#e9d7b0','#d9e0d3','#f0d0c0','#cfd9e4','#e7c94f','#c0412f','#7d8f6f','#e8b4a8'];
+const hashOf=s=>{let h=2166136261;for(const c of String(s).toLowerCase())h=Math.imul(h^c.charCodeAt(0),16777619);h=Math.imul(h^h>>>15,0x2c1b3c6d);return (h^h>>>13)>>>0}; // mixed at the end, so names that differ by a letter or two land far apart
+const jacketOf=r=>JACKETS[hashOf(r.artist)%JACKETS.length];
+const labelOf=r=>{const h=hashOf(r.artist+'|'+r.title),c=LABELS[h%LABELS.length];return c===spineBg(r)?LABELS[(h+1)%LABELS.length]:c};
+const blankHTML=r=>{const bg=spineBg(r),lb=labelOf(r);return `<div class="art blank" style="background-color:${bg};color:${inkOn(bg)};--lb:${lb}"><span class="bl-sp"><b>${esc(r.artist)}</b>\u2002<i>${esc(r.title)}</i></span>${+r.year?`<i class="bl-yr">${esc(r.year)}</i>`:''}<i class="bl-ho"></i><i class="bl-lb"></i></div>`};
+const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):blankHTML(r);
+const spineBg=r=>r.spine||(r.front?r.pal[0]:jacketOf(r));
 // the edges wear the cover's own outermost pixels (the print wraps round the card), over the spine color until it loads
 const edgesHTML=(r,ks=['l','r','t','b','ctl','ctr','cbl','cbr'])=>ks.map(k=>`<div class="edge ${k}" style="background-color:${spineBg(r)}${r.front?`;--fimg:url('${img(r.front)}')`:''}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
@@ -3025,7 +3030,7 @@ function tone(el,f){
   const x=toneX,read=()=>{const d=x.getImageData(0,0,24,24).data;let m=0,v=0;for(let j=0;j<d.length;j+=4){const y=(.2126*d[j]+.7152*d[j+1]+.0722*d[j+2])/255;m+=y;v+=y*y}m/=576;return[m,Math.sqrt(Math.max(0,v/576-m*m))]};
   let m,v;
   if(ready&&(i.src.startsWith('blob:')||new URL(i.src).origin===location.origin))try{x.clearRect(0,0,24,24);x.drawImage(i,0,0,24,24);[m,v]=read()}catch{} // drawing another site's cover would taint this canvas for good
-  if(m==null){x.fillStyle='#000';x.fillStyle=sp;x.fillRect(0,0,24,24);[m]=read();v=ready?.12:f.querySelector('svg.art')?.06:0} // a cover we can't read is guessed as average; drawn art as fairly plain
+  if(m==null){x.fillStyle='#000';x.fillStyle=sp;x.fillRect(0,0,24,24);[m]=read();v=ready?.12:f.querySelector('svg.art,.art.blank')?.1:0} // a cover we can't read is guessed as average; drawn art as fairly plain
   const b=Math.min(1,Math.max(0,(m-.35)/.5)),bright=b*b*(3-2*b),busy=Math.min(1,v/.18);
   t={lit:(1-.6*bright)*(.4+.6*busy),dark:1-.6*bright};
   if(i&&!ready)return t; // the cover is still coming: measured again once it's here
@@ -3781,7 +3786,6 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   let tileSize='33vw';
   function sizeTiles(){const n=cols(),w=Math.ceil(((tiles.clientWidth||Math.min(innerWidth,1400))-(n-1)*8)/n);tileSize=w+'px';
     for(const t of keep.values()){const i=t.firstElementChild;if(i?.srcset)i.sizes=tileSize}}
-  const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
   const keep=new Map();
   // covers on the wall and the canvas are small copies, made one at a time as the page settles: 68 full-size covers
   // decoded at once is more memory than a phone keeps, and it starts dropping them
@@ -3807,8 +3811,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   function tileFor(r,store=keep){
     let n=store.get(r.slug);if(n)return n;
     n=document.createElement('button');n.type='button';n.className='tile';n.dataset.slug=r.slug;
-    const bg=r.spine||'#2c2c2e';
-    n.innerHTML=(r.front?`<img alt="" loading="lazy" decoding="async" width="360" height="360" onload="fadeIn(this)">`:`<span class="pl" style="background:${bg};color:${ink(bg)}">${r.title}<small>${r.artist}</small></span>`)+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
+    n.innerHTML=(r.front?`<img alt="" loading="lazy" decoding="async" width="360" height="360" onload="fadeIn(this)">`:blankHTML(r))+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
     n.setAttribute('aria-label',`${r.title} by ${r.artist}`);store.set(r.slug,n);
     if(r.front){
       // the tile wears the record's spine color until its cover is in; covers off screen wait until you scroll near them
@@ -3926,7 +3929,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     const rows=order,ts=SORT;
     $('thead',tbl).innerHTML=`<tr><th class="c0" aria-sort="${ts.k==='color'?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="color" aria-label="Sort by color"><i class="cw" aria-hidden="true"></i><b class="cn" aria-hidden="true">Color</b><i aria-hidden="true">${ts.k==='color'?(ts.d>0?'↑':'↓'):''}</i></button></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}">${SORTS[k]?`<button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`:`<span>${l}</span>`}</th>`).join('')}</tr>`;
     tkeep.clear();
-    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
+    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}" onload="fadeIn(this)"></i>`:`<i class="sw">${blankHTML(r)}</i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
     for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
   // on a phone the sort is one quiet line, "Sorted by Artist ↑"; it opens a small menu like the view menu
@@ -4397,7 +4400,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   }
   const PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
   const offerRow=(f,i)=>`<li><button type="button" class="of" data-o="${i}"><i class="ofp">${PLUS}</i><span><b>${escC(f.s)}</b></span><i class="ofk">${KIND[f.k]}</i></button></li>`;
-  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
+  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw">${blankHTML(r)}</i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
   function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
     sl.classList.toggle('idle',!v&&!ph()); // a laptop lists only what you've typed
     const os=sl.offers=seeking()?[]:offers(v); // with a record out, the search only finds records
