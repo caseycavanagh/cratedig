@@ -17,11 +17,14 @@
 //     op "crate-put"  crate, slug          one of Casey's records into a crate
 //     op "crate-add"  crate, record        a record Casey doesn't own, into that crate only
 //     op "crate-take" crate, slug          a record out of a crate (out of the whole crate is "remove")
+//     op "crate-rank" crate, slugs         a ranked crate's order, first to last (the same records, moved)
+//     crate-set takes ranked: true | false too: a top ten, ranked in the order it holds them (ten at most).
+//     Putting an eleventh into a top ten takes out the one at ten
 // Covers Casey uploads go to /api/crate/img first and come back as /api/crate/img/<id>.
 import { connection } from "next/server";
 import { kv } from "@/lib/kv";
 import { google } from "@/lib/auth";
-import { ALL, EDITS, type Crate, type Edits, type Notes, type Patch, type Rec, denied, imgKey, ownImg, owner, readEdits, slugOf, usedImgs } from "@/lib/crate";
+import { ALL, EDITS, type Crate, type Edits, type Notes, type Patch, type Rec, TOP, denied, dropFrom, imgKey, ownImg, owner, readEdits, reRank, slugOf, usedImgs } from "@/lib/crate";
 
 export async function GET() {
   await connection();
@@ -203,18 +206,41 @@ function crateEdit(e: Edits, b: Record<string, unknown>): string | undefined {
   if (b.op === "crate-set") {
     if ("name" in b) c.name = text(b.name, 60) ?? c.name;
     if ("about" in b) c.about = about(b.about);
+    if (b.ranked === false) delete c.rank;
+    else if (b.ranked === true && !c.rank) {
+      const n = c.records.length + c.extra.length;
+      if (n > TOP) return `a top ten holds ten records, and this crate has ${n}`;
+      c.rank = [];
+      reRank(c);
+    }
+  } else if (b.op === "crate-rank") {
+    if (!c.rank) return "this crate isn’t ranked";
+    const to = Array.isArray(b.slugs) ? b.slugs.filter((s): s is string => typeof s === "string") : [];
+    if (to.length !== c.rank.length || [...c.rank].sort().join("\n") !== [...to].sort().join("\n")) return "that list has changed; try again";
+    c.rank = to;
   } else if (b.op === "crate-drop") {
     cs.list = cs.list.filter((x) => x !== c);
     if (cs.pinned === id) delete cs.pinned;
   } else if (b.op === "crate-put" && slug) {
-    if (!c.records.includes(slug) && !c.extra.some((x) => x.slug === slug)) c.records.push(slug);
+    if (!c.records.includes(slug) && !c.extra.some((x) => x.slug === slug)) {
+      bump(c);
+      c.records.push(slug);
+    }
   } else if (b.op === "crate-add") {
     const r = record((b.record ?? {}) as Record<string, unknown>);
     if (!r) return "a record needs an artist and a title";
     if (c.records.includes(r.slug)) return;
+    if (!c.extra.some((x) => x.slug === r.slug)) bump(c);
     c.extra = [...c.extra.filter((x) => x.slug !== r.slug), r];
   } else if (b.op === "crate-take" && slug) {
-    c.records = c.records.filter((s) => s !== slug);
-    c.extra = c.extra.filter((x) => x.slug !== slug);
+    dropFrom(c, slug);
   } else return "unknown edit";
+  reRank(c);
+}
+
+// a top ten that's full makes room at the bottom for one more
+function bump(c: Crate) {
+  if (!c.rank) return;
+  reRank(c);
+  while (c.rank.length >= TOP) dropFrom(c, c.rank[c.rank.length - 1]);
 }
