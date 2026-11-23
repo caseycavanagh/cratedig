@@ -24,6 +24,18 @@
 <meta property="og:image:alt" content="Crate Dig: every record Casey owns, flipped through like a crate">
 <meta name="twitter:card" content="summary_large_image">
 <script>(function(){var u=new URL(location.href),r=u.searchParams.get('r');if(r){u.searchParams.delete('r');u.hash='record/'+r;history.replaceState(null,'',u)}})()</script>
+<script>
+// a list shared at /2026 wears the colors its maker picked (t=, and bg, fg, n for its own or its number one's): every color
+// token is drawn from its background and text, so the whole page follows. Night, the default, is the tokens as they are
+(function(){if(!/^\/2026\/?$/.test(location.pathname))return;var q=new URLSearchParams(location.search),t=q.get('t')||'a',hx=function(v){return /^[0-9a-f]{6}$/i.test(v||'')?'#'+v:null};
+  var P={b:['#f2ede2','#1f1b16','#1f1b16'],c:['#1f33c7','#ffffff','#ffffff'],d:['#e2462c','#fff6ea','#fff6ea'],e:['#16382a','#f1e9d2','#d8b968'],f:['#ffd3e3','#3a0d28','#c2185b'],g:['#f1c232','#1c1708','#1c1708']};
+  var c=P[t];if(t==='h'||t==='x'){var bg=hx(q.get('bg')),fg=hx(q.get('fg'));if(bg&&fg)c=[bg,fg,hx(q.get('n'))||fg]}
+  if(!c)return;var bg=c[0],fg=c[1],m=function(p){return'color-mix(in srgb,'+fg+' '+p+'%,'+bg+')'},a=function(p){return'color-mix(in srgb,'+fg+' '+p+'%,transparent)'};
+  var v={'--bg':bg,'--fg':fg,'--on-fg':bg,'--t1':m(85),'--t2':m(68),'--m':m(60),'--t3':m(46),'--t4':m(38),'--line':a(14),'--line2':a(22),'--soft':m(9),'--sheet':m(7),'--hov':a(6),'--prs':a(8),'--sel':a(12),'--ring':a(26),'--rank-n':c[2],
+    '--glass':'color-mix(in srgb,'+m(9)+' 72%,transparent)'};
+  var st=document.createElement('style');st.textContent=':root:root{'+Object.keys(v).map(function(k){return k+':'+v[k]}).join(';')+'}html,body{background:'+bg+'}';document.head.append(st);
+  document.documentElement.classList.add('themed');var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=bg})();
+</script>
 <script>var PHONE_Q='(max-width:700px),(pointer:coarse) and (max-height:500px)';document.documentElement.dataset.theme='dark';document.documentElement.classList.toggle('phone',matchMedia(PHONE_Q).matches)</script>
 <link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
@@ -627,6 +639,14 @@ html.phone .op-b{padding:0 max(16px,env(safe-area-inset-right)) calc(env(safe-ar
 .as .op-b .as-f{flex:none;overflow:visible;padding:0}
 .as .op-b .as-f h3:first-child{margin-top:12px}
 .op-f{display:grid;gap:5px}
+.op-tg{display:flex;align-items:flex-start;gap:12px;margin-top:16px;cursor:pointer}
+.op-tg[hidden]{display:none}
+.op-tg input{flex:none;width:20px;height:20px;margin:1px 0 0;accent-color:var(--fg)}
+.op-tg span{display:grid;gap:2px}
+.op-tg b{font-size:var(--fs-3);font-weight:500;color:var(--fg)}
+.op-tg i{font-style:normal;font-size:var(--fs-2);color:var(--m)}
+.op-s[hidden]{display:none}
+#opR{margin-top:-4px}
 .op-f>span{font-size:var(--fs-1);color:var(--m)}
 .op-f input,.op-f textarea{box-sizing:border-box;width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--bg);color:var(--fg);font:inherit;font-size:var(--fs-3);line-height:1.45;transition:border-color .2s}
 html.phone .op-f input,html.phone .op-f textarea{font-size:var(--fs-4)}
@@ -1091,6 +1111,30 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 /* the grid: pinch changes the columns, so the page itself doesn't zoom */
 .wall{touch-action:pan-y}
 /* the table: quiet rows, a cover, the facts; the headers sort */
+.vw button[hidden],.find .vw button[hidden],html.phone .find .vw button[hidden]{display:none}
+/* the top ten: big numbers down the side, each beside its cover, its name and who made it; number one at the top */
+.rk{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 72px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s var(--ease)}
+.rk[hidden]{display:none}
+.rk:focus{outline:none}
+.rk ol{list-style:none;margin:0 auto;padding:8px 0 0;max-width:820px;display:grid;gap:22px}
+.rk li button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:64px 96px minmax(0,1fr);gap:24px;align-items:center;border-radius:var(--r-in);-webkit-tap-highlight-color:transparent}
+.rk .n{font-size:var(--fs-6);font-weight:500;line-height:1;text-align:right;letter-spacing:-.02em;color:var(--rank-n,var(--fg))}
+.rk .pic{position:relative;display:block;width:96px;aspect-ratio:1;border-radius:var(--r-cover);overflow:hidden;box-shadow:var(--rest);transition:transform .5s var(--ease)}
+.rk .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rk .pic .sw{position:absolute;inset:0}
+.rk .tx{display:grid;gap:3px;min-width:0}
+.rk b{font-size:var(--fs-4);font-weight:500;color:var(--fg);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+.rk .a{font-size:var(--fs-3);color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk .m{font-size:var(--fs-2);color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(hover:hover){.rk li button:hover .pic{transform:translateY(-3px)}}
+.rk li button:focus-visible{outline:1px solid var(--ring);outline-offset:4px}
+.rk .held{visibility:hidden}
+@media(max-width:700px){.rk{scrollbar-width:none}.rk::-webkit-scrollbar{display:none}.rk ol{gap:18px}
+  .rk li button{grid-template-columns:36px 72px minmax(0,1fr);gap:14px}.rk .pic{width:72px}.rk .n{font-size:var(--fs-5)}
+  .rk b{font-size:var(--fs-3)}.rk .a{font-size:var(--fs-2)}.rk .m{display:none}}
+@media(prefers-reduced-motion:reduce){.rk .pic{transition:none}}
+body.fon .rk{padding-top:calc(env(safe-area-inset-top) + 72px + 44px)}
+body:not(.ready) .rk{pointer-events:none}
 .tbl{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s var(--ease)}
 .tbl[hidden]{display:none}
 .tbl:focus{outline:none}
@@ -1456,10 +1500,10 @@ html.phone .ab-name{margin-top:-6px!important;font-size:56px}
 html.phone .ab-body{font-size:var(--fs-4)}
 html.phone .ab-cr{margin-top:12px}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom; solid under the status bar so no edge of the pile peeks through there */
-.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(#121212 calc(env(safe-area-inset-top) + 16px),#121212e0 calc(env(safe-area-inset-top) + 44px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
-.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:#121212;opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 calc(50% - 92px));mask:linear-gradient(#0000,#000 calc(50% - 92px));pointer-events:none}
+.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 16px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 44px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
+.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:var(--bg);opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 calc(50% - 92px));mask:linear-gradient(#0000,#000 calc(50% - 92px));pointer-events:none}
 .kd.kd-on::after{opacity:calc(var(--kz,0)*.94);transition:opacity .2s} /* open on records, the dial darkens what's behind it, but only while you're turning it */
-.kd::before,.kd::before{top:-120px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:#121212f5;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line. It runs on past the bottom of the screen, so a swipe that stretches the page never shows what's under the bar */
+.kd::before,.kd::before{top:-120px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line. It runs on past the bottom of the screen, so a swipe that stretches the page never shows what's under the bar */
 html.phone body.searching .find::before{display:none}
 .find::before{transition:opacity .3s}
 body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
@@ -1552,7 +1596,7 @@ html:has(.open:not([hidden])) .find{z-index:var(--z-raised)}
 html:has(.open:not([hidden])) .find::before{display:none}
 /* phones: once About and the rest rise up the screen, the strip behind the mark comes back, solid where the mark sits, so words
    scrolling under it go out of sight instead of running into it. It follows the rise, so it's gone while the record is at rest */
-html.phone:has(.open:not([hidden])) .find::before{display:block;height:calc(env(safe-area-inset-top) + 120px);background:#121212f2;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);opacity:var(--rise,0);transition:none}
+html.phone:has(.open:not([hidden])) .find::before{display:block;height:calc(env(safe-area-inset-top) + 120px);background:color-mix(in srgb,var(--bg) 95%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);opacity:var(--rise,0);transition:none}
 html:has(.open:not([hidden])) .find>.logo{opacity:1;visibility:visible;scale:1;pointer-events:auto;transition:none}
 #oq,.open.in #oq{opacity:0;transition:none}
 html:has(.crate.lifted) #oq{opacity:1}
@@ -1689,7 +1733,7 @@ body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .x
 html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
 /* with the keyboard up, the list fits between the field and the status bar of what's actually on screen (iOS scrolls the page up under the status bar, so the full height isn't) */
 html.phone.kbup .sl{bottom:calc(var(--kb,0px) + 8px + 58px + 8px);max-height:calc(var(--vvh,100svh) - 8px - 58px - 8px - env(safe-area-inset-top) - 10px)}
-body.walling .dock::before,html:has(.open:not([hidden])) .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
+body.walling .dock::before,html:has(.open:not([hidden])) .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
 .wall,.tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 120px)}
 @media (max-width:700px){.tbl thead{display:none}} /* the bar's sort button sorts the table too, so the table's own "Sorted by" line goes */
 html:not(.phone) .sl{top:auto;right:auto;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 10px);width:min(440px,calc(100vw - 28px))}
@@ -1744,9 +1788,10 @@ html.phone .sx,html.phone body.searching .sx{display:none}
   </div>
   <nav class="az" id="az" aria-label="Jump to a letter"></nav>
   <div class="kd" id="kd"><p class="kd-b" aria-hidden="true"><span class="c"></span><span class="a"></span></p><div class="kd-d" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><div class="kd-c"></div></div></div>
-  <div class="vw" role="group" aria-label="View"><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
+  <div class="vw" role="group" aria-label="View"><button type="button" data-v="rank" aria-pressed="false" hidden>Top ten</button><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
 </main>
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
+<section class="rk" id="rk" hidden tabindex="-1" aria-label="The top ten"><ol></ol></section>
 <section class="tbl" id="tbl" hidden tabindex="-1" aria-label="Every record, as a table"><table><thead></thead><tbody></tbody></table></section>
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
 <div class="hv" id="hv" aria-hidden="true"></div>
@@ -1819,6 +1864,7 @@ html.phone .sx,html.phone body.searching .sx{display:none}
 </dialog>
 
 <script src="/vinyl/visitor-crate.js"></script>
+<script src="/vinyl/rank-rows.js"></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2016,11 +2062,22 @@ const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 const SORTS={artist:{l:'Artist',by:byName},title:{l:'Title',by:(a,b)=>cmpS(ttl(a),ttl(b))||byName(a,b)},year:{l:'Year',by:(a,b)=>yr(a)-yr(b)||byName(a,b)},
   added:{l:'Date added',by:(a,b)=>(dayOf(a)<dayOf(b)?-1:dayOf(a)>dayOf(b)?1:0)||(a.seq??0)-(b.seq??0)||byName(a,b)},
   label:{l:'Label',by:(a,b)=>cmpS(labelName(a.label),labelName(b.label))||byName(a,b)},color:{l:'Color',by:(a,b)=>hue(a)-hue(b)||hsl(b).l-hsl(a).l||byName(a,b)}};
+// A ranked crate (a top ten) knows each record's place, from 0 (RANK, by slug). It sorts by rank too, counting down from
+// its last place to number one in the crate, and it has a view of its own, the list (see "the top ten" below)
+let RANK=new Map(),RANKED=false;
+const rankOf=r=>RANK.has(r?.slug)?RANK.get(r.slug):99;
+function setRank(slugs){
+  const on=!!slugs,was=RANKED;RANKED=on;RANK=new Map((slugs||[]).map((x,i)=>[x,i]));document.documentElement.classList.toggle('ranked',on);
+  if(on&&!SORTS.rank){const o={...SORTS};for(const k in SORTS)delete SORTS[k];Object.assign(SORTS,{rank:{l:'Rank',by:(a,b)=>rankOf(a)-rankOf(b)}},o)}
+  if(!on&&SORTS.rank){delete SORTS.rank;if(SORT.k==='rank')SORT={k:'artist',d:1}}
+  if(on&&!was)SORT={k:'rank',d:-1}; // a top ten starts at ten
+  if(on!==was){window.rankSync?.();window.drawSort?.()}
+}
 let SORT={k:'artist',d:1};try{const s=JSON.parse(localStorage.getItem('records-sort'));if(s&&SORTS[s.k])SORT={k:s.k,d:s.d<0?-1:1}}catch{}
 const unsorted=r=>SORT.k==='year'?!+r.year:SORT.k==='label'?!r.label:SORT.k==='added'&&DATED&&!dayOf(r);
 const bySort=(a,b)=>unsorted(a)-unsorted(b)||SORTS[SORT.k].by(a,b)*SORT.d;
 // where a record falls in the sort: a letter, a year, the month it came in, or a color
-const group=r=>{if(!r)return'';const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='added'?(dayOf(r).slice(0,7)||'—'):k==='color'?String(hue(r)):letter(r)};
+const group=r=>{if(!r)return'';const k=SORT.k;return k==='rank'?String(rankOf(r)+1):k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='added'?(dayOf(r).slice(0,7)||'—'):k==='color'?String(hue(r)):letter(r)};
 // and how that reads: "Oct ’26" for a month
 const gName=g=>SORT.k==='color'?HUES[+g]:g==='—'?'No date':SORT.k==='added'?`${MON[+g.slice(5)-1]} ’${g.slice(2,4)}`:g;
 // Filters narrow the crate: names from a record's details or offered by the search (an artist, label, year, genre…), plus any
@@ -2979,7 +3036,7 @@ function aboutClose(){if(!about.open||about.closing)return;about.classList.remov
 function front(){menuOff();
   if(q.value){q.value='';qSync()}if(filt)arrange(null);q.blur();
   if(document.body.classList.contains('walling'))go(0,true);else if(cur)jump(0);
-  for(const p of [$('#wall'),$('#tbl')])if(!p.hidden)p.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}
+  for(const p of [$('#wall'),$('#tbl'),$('#rk')])if(!p.hidden)p.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}
 $('.logo').addEventListener('click',e=>{e.preventDefault();e.currentTarget.blur();
   if(open.hidden)return front();
   const mo=new MutationObserver(()=>{if(open.hidden){mo.disconnect();front()}});mo.observe(open,{attributes:true,attributeFilter:['hidden']});closeRecord()});
@@ -3336,6 +3393,7 @@ function applyEdits(){
   const out=new Set(EDITS.removed),seen=new Set();let list=[...BASE,...mine].filter(r=>!out.has(r.slug)&&!seen.has(r.slug)&&seen.add(r.slug));
   if(C){const picked=new Set(C.records);list=[...list.filter(r=>picked.has(r.slug)),...extra]}
   RECORDS.splice(0,RECORDS.length,...list);
+  setRank(C?.rank||null);
   nameCrate();bare();
 }
 // a crate with nothing in it yet says so; while editing, how to fill it
@@ -3355,13 +3413,30 @@ function nameCrate(){
 let apiQ=Promise.resolve();
 function api(body){
   const p=apiQ.then(async()=>{
+    const bump=RANKED&&(body.op==='crate-put'||body.op==='crate-add')&&body.crate===CRATE?[...RANK.keys()]:null,was=bump&&new Map(RECORDS.map(r=>[r.slug,r]));
     const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json',...keyH()},body:JSON.stringify(body)}).catch(()=>null);
     const d=await r?.json().catch(()=>({}));
     if(r?.status===401){lockOut();throw new Error('You’re signed out')}
     if(!r?.ok)throw new Error(d?.error?d.error[0].toUpperCase()+d.error.slice(1):'That didn’t save');
-    EDITS=d.edits;applyEdits();return d;
+    EDITS=d.edits;applyEdits();
+    if(bump){const nw=body.slug||slugOf(body.record.artist,body.record.title),out=bump.filter(x=>!RANK.has(x)&&x!==nw).map(x=>was.get(x)).filter(Boolean);
+      if(out.length)setTimeout(()=>toast(`${out[0].title} is out of the top ten`,'Undo',()=>unbump(nw,out,bump)),0)}
+    window.rankPanel?.();return d;
   });
   apiQ=p.catch(()=>{});return p;
+}
+// the record that made a full top ten drop its last place goes back out, and the one that dropped comes back to its place
+async function unbump(nw,out,rank){
+  try{await api({op:'crate-take',crate:CRATE,slug:nw});
+    for(const r of out){const {_o,mine,extra,...rec}={...r,...r._o};await api(r.extra?{op:'crate-add',crate:CRATE,record:rec}:{op:'crate-put',crate:CRATE,slug:r.slug});made.delete(r)}
+    await reRank(rank);toast(`${out[0].title} is back`)}catch(e){toast(e.message)}
+}
+// a top ten in a new order: the crate, the list and the panel follow at once, and it saves behind them
+async function reRank(slugs){
+  const have=[...RANK.keys()],to=slugs.filter(x=>RANK.has(x));for(const x of have)if(!to.includes(x))to.push(x);
+  if(to.join()===have.join())return;
+  setRank(to);arrange(filt,order[cur]);window.drawRank?.();window.rankPanel?.();
+  try{await api({op:'crate-rank',crate:CRATE,slugs:to})}catch(e){toast(e.message);applyEdits();arrange(filt,order[cur]);window.drawRank?.();window.rankPanel?.()}
 }
 async function upload(blob){
   const r=await fetch('/api/crate/img',{method:'POST',headers:{'Content-Type':blob.type,...keyH()},body:blob}).catch(()=>null);
@@ -3665,15 +3740,16 @@ upF.addEventListener('change',async()=>{
 // taking a record out: the record view fades, the crate closes up behind it, and an undo waits at the bottom
 // in another crate, it only leaves that crate: it stays in the whole crate (unless it was only ever in this one)
 async function takeOut(r){
-  const next=order[cur+1]||order[cur-1];ownBusy(true);
+  const next=order[cur+1]||order[cur-1],rank=RANKED&&crateDef()?[...RANK.keys()]:null;ownBusy(true);
   try{await api(crateDef()?{op:'crate-take',crate:CRATE,slug:r.slug}:{op:'remove',slug:r.slug})}catch(e){toast(e.message);ownBusy(false);return}
   made.delete(r);rearrange(next);if(!open.hidden){vanish=true;closeRecord()}
-  toast(`Took out ${r.title}`,'Undo',()=>putBack(r));
+  window.drawRank?.();
+  toast(`Took out ${r.title}`,'Undo',()=>putBack(r,rank));
 }
-async function putBack(r){
+async function putBack(r,rank){
   const C=crateDef(),{_o,mine,extra,...rec}={...r,...r._o};
   try{await api(!C?{op:'restore',slug:r.slug}:r.extra?{op:'crate-add',crate:CRATE,record:rec}:{op:'crate-put',crate:CRATE,slug:r.slug});
-    if(r.extra)r=added.get(r.slug)||r;made.delete(r);if(q.value){q.value='';qSync()}arrange(null,r);toast(`${r.title} is back`)}catch(e){toast(e.message)}
+    if(r.extra)r=added.get(r.slug)||r;made.delete(r);if(q.value){q.value='';qSync()}arrange(null,r);if(rank)await reRank(rank);window.drawRank?.();toast(`${r.title} is back`)}catch(e){toast(e.message)}
 }
 // Search, while editing: records taken out that match, and what MusicBrainz has, to add
 const hitHTML=(x,act)=>`<li class="hit">${x.thumb||x.front?`<img src="${esc(x.thumb||img(x.front))}"${x.fallback?` data-fb="${esc(x.fallback)}"`:''} alt="" loading="lazy">`:'<i class="ph"></i>'}<span><b>${esc(x.title)}</b><i>${esc(x.artist)}${x.year?' · '+esc(x.year):''}</i></span>${act}</li>`;
@@ -3860,7 +3936,9 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(signedHere?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
 const authQ=visiting?null:fetch('/api/auth').then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
-  if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
+  if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);
+    if(/[?&]top=1(&|$)/.test(location.search)||/^\/2026\/?$/.test(location.pathname))setRank(v.records.slice(0,10).map(r=>r.slug)); // a visitor's top ten (top=1, or a list shared at /2026) comes ranked, number one first
+    crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
   else{
     RECORDS.forEach((r,i)=>Object.assign(r,{...m[r.slug],...r,seq:i})); // a value written in RECORDS wins
     BASE=[...RECORDS];
@@ -3949,6 +4027,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   function draw(animate){
     if(view==='canvas'){drawPills();return lay()}
     if(view==='table'){drawPills();return drawTable()}
+    if(view==='rank'){drawPills();return drawRank()}
     if(view!=='wall')return drawPills();
     const before=new Map();
     if(animate&&!reduce)for(const [k,n] of keep)if(n.isConnected)before.set(k,n.getBoundingClientRect());
@@ -3980,10 +4059,12 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   new ResizeObserver(()=>placeMarks()).observe(tiles);
   function setView(v,focus,stay){
     if(v==='canvas')v='wall';
-    view=v;document.body.classList.toggle('under',(v==='wall'?wall:v==='table'?tbl:null)?.scrollTop>2);wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
+    if(v==='rank'&&!RANKED)v='crate';
+    view=v;document.body.classList.toggle('under',(v==='wall'?wall:v==='table'?tbl:v==='rank'?rk:null)?.scrollTop>2);wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';rk.hidden=v!=='rank';document.body.classList.toggle('walling',v!=='crate');
     vw.forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
-    try{localStorage.setItem('records-view',v)}catch{}
+    try{localStorage.setItem(RANKED?'records-view-top':'records-view',v)}catch{} // a top ten remembers its own
     if(v==='wall'){draw(false);if(focus)wall.focus({preventScroll:true})}
+    else if(v==='rank'){drawRank();if(focus)rk.focus({preventScroll:true})}
     else if(v==='table'){drawTable();if(focus)tbl.focus({preventScroll:true})}
     else if(v==='canvas'){lay(!stay);if(focus)cv.focus({preventScroll:true})}
     else{go(cur,true);if(focus)crate.focus({preventScroll:true})}
@@ -3995,11 +4076,11 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     if(!s.f||isOn(s.f))arrange(null);else arrange(s.f);wall.scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
   const pull=slug=>{const j=order.findIndex(r=>r.slug===slug);if(j<0)return;document.body.classList.add('reading');go(j,true);openRecord(false)};
   // the open record's tile, as a pose the lift can fly from and back to (brought on screen first if it isn't)
-  window.tilePose=()=>{if(view==='crate')return null;const r=order[cur];const t=(view==='wall'?keep:view==='table'?tkeep:ckeep).get(r?.slug);if(!t||!t.isConnected)return null;
+  window.tilePose=()=>{if(view==='crate')return null;const r=order[cur];const t=(view==='wall'?keep:view==='table'?tkeep:view==='rank'?rkeep:ckeep).get(r?.slug);if(!t||!t.isConnected)return null;
     let R=t.getBoundingClientRect();
     if(R.top<40||R.bottom>innerHeight-100||R.left<0||R.right>innerWidth){if(view!=='canvas')t.scrollIntoView({block:'center'});else cvCenter(t);R=t.getBoundingClientRect()}
     const S=stage.getBoundingClientRect();if(!S.width)return null;
-    for(const n of document.querySelectorAll('.tile.held,.tbl .held'))if(n!==t)n.classList.remove('held');t.classList.add('held');
+    for(const n of document.querySelectorAll('.tile.held,.tbl .held,.rk .held'))if(n!==t)n.classList.remove('held');t.classList.add('held');
     const p={x:R.left+R.width/2-(S.left+S.width/2),y:R.top+R.height/2-(S.top+S.height/2),z:0,s:R.width/S.width,ax:0,az:0};
     return{...p,P:2600,ox:S.width/2,oy:S.height/2,tf:poseTf(p)}};
   window.inPlace=()=>view==='table'; // the table opens and closes a record in place, without the flight from its row
@@ -4007,7 +4088,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   const cr0=closeRecord;closeRecord=function(...a){document.body.classList.remove('reading');return cr0.apply(this,a)};
   tiles.addEventListener('click',e=>{const t=e.target.closest('.tile');if(t)pull(t.dataset.slug)});
   // closing a record you opened from the wall or the canvas puts you back where you were
-  new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held,.tbl .held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
+  new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held,.tbl .held,.rk .held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
 
 
   // ---- the grid: pinch it (or ⌘- or ctrl-scroll, or + and −) and the columns change; the covers glide to their new places and
@@ -4035,6 +4116,17 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   wall.addEventListener('gestureend',e=>{e.preventDefault();gg=null});
   addEventListener('keydown',e=>{if(view!=='wall'||!open.hidden||e.target.closest('input'))return;if(/^[-+=]$/.test(e.key)){e.preventDefault();regrid(cols()+(e.key==='-'?1:-1),innerWidth/2,innerHeight/2)}});
 
+  // ---- the top ten: a ranked crate as a list, number one first, whatever the sort (a search or a filter still narrows it)
+  const rk=$('#rk'),rkeep=new Map();
+  function drawRank(){
+    const rows=[...order].sort((a,b)=>rankOf(a)-rankOf(b));rkeep.clear();
+    $('ol',rk).innerHTML=rows.map(r=>`<li><button type="button" data-slug="${esc(r.slug)}" aria-label="${rankOf(r)+1}. ${esc(r.title)} by ${esc(r.artist)}"><span class="n" aria-hidden="true">${rankOf(r)+1}</span><i class="pic" style="background:${spineBg(r)}">${r.front?`<img alt="" decoding="async" data-src="${esc(img(r.front))}" onload="fadeIn(this)">`:`<i class="sw">${blankHTML(r)}</i>`}</i><span class="tx"><b>${esc(r.title)}</b><span class="a">${esc(r.artist)}</span><span class="m">${esc([r.year,labelName(r.label)].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+    for(const b of $$('li button',rk)){rkeep.set(b.dataset.slug,$('.pic',b));const i=$('img',b);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
+  }
+  rk.addEventListener('click',e=>{const b=e.target.closest('button[data-slug]');if(b)pull(b.dataset.slug)});
+  // a crate turning ranked (or not) brings the view in (or takes it away)
+  window.rankSync=()=>{const b=$('.vw [data-v=rank]');if(b)b.hidden=!RANKED;if(!RANKED&&view==='rank')setView('crate');else if(view==='rank')drawRank()};
+  window.rankSync();window.drawRank=()=>{if(view==='rank')drawRank()};
   // ---- the table: every record in the crate (as narrowed) as a row; the headers sort it
   const tbl=$('#tbl'),tkeep=new Map();
   const COLS=[['title','Title',r=>r.title],['artist','Artist',r=>name(r)],['year','Year',r=>+r.year||9999],['label','Label',r=>r.label||'~'],['format','Format',r=>r.format||'~']];
@@ -4058,7 +4150,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   addEventListener('pointerdown',e=>{if(!tsm.hidden&&!tsm.contains(e.target)&&!e.target.closest('.tbl th button'))tsmOff()},true);
   addEventListener('keydown',e=>{if(e.key==='Escape'&&!tsm.hidden){tsmOff();$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.focus({focusVisible:false})}});
   tbl.addEventListener('scroll',tsmOff,{passive:true});narrow.addEventListener('change',tsmOff);addEventListener('resize',tsmOff);
-  for(const s of [wall,tbl])s.addEventListener('scroll',()=>document.body.classList.toggle('under',s.scrollTop>2),{passive:true});
+  for(const s of [wall,tbl,rk])s.addEventListener('scroll',()=>document.body.classList.toggle('under',s.scrollTop>2),{passive:true});
   tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){if(narrow.matches){tsm.hidden?tsmOn(h):tsmOff();return}sortBy(h.dataset.k);return}
     const tr=e.target.closest('tbody tr');if(tr)pull(tr.dataset.slug)});
   tbl.addEventListener('keydown',e=>{const tr=e.target.closest?.('tbody tr');if(!tr)return;
@@ -4162,7 +4254,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     if(/^(Arrow|Home$|End$|j$|k$)/.test(e.key)||((e.key==='Enter'||e.key===' ')&&!e.target.closest('button')))e.stopImmediatePropagation()},true);
   let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{tiles.style.setProperty('--cols',cols());if(view==='canvas')lay()},100)});
   // wait for the crate to fill, then open the view you used last
-  const ready=new MutationObserver(()=>{if(!document.body.classList.contains('ready'))return;ready.disconnect();let v='crate';try{v=localStorage.getItem('records-view')||'crate'}catch{}if((v==='wall'||v==='canvas'||v==='table')&&open.hidden)setView(v);else drawPills()});
+  const ready=new MutationObserver(()=>{if(!document.body.classList.contains('ready'))return;ready.disconnect();let v='crate';try{v=RANKED?localStorage.getItem('records-view-top')||'rank':localStorage.getItem('records-view')||'crate'}catch{}if((v==='wall'||v==='canvas'||v==='table'||v==='rank')&&open.hidden)setView(v);else drawPills()});
   ready.observe(document.body,{attributes:true,attributeFilter:['class']});
 })();
 </script>
@@ -4203,13 +4295,13 @@ const apply=t=>{clearTimeout(lT);live(t);if(lite.p&&!open.hidden){lite.p=false;p
 
 function build(){
   // the marks follow the sort: every letter (the empty ones dim), or the years or colors the crate has, in the crate's order
-  const k=SORT.k,lettered=k!=='year'&&k!=='color'&&k!=='added';FIRST={};CNT={};
+  const k=SORT.k,lettered=k!=='year'&&k!=='color'&&k!=='added'&&k!=='rank';FIRST={};CNT={};
   order.forEach((r,i)=>{const L=group(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
     X[i]=i*WR});
   X.length=order.length;
   if(lettered){AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];if(has('#'))AZ.push('#');if(SORT.d<0)AZ.reverse()}else AZ=Object.keys(FIRST).sort((a,b)=>FIRST[a]-FIRST[b]);
   W=k==='year'?58:k==='added'?76:k==='color'?30:36;kd.dataset.marks=k==='year'?'years':k==='added'?'months':k==='color'?'colors':'letters';
-  dl.setAttribute('aria-label',`Turn to ${k==='year'?'a year':k==='added'?'a month':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='added'?'months':k==='color'?'colors':'letters'} and records.`);
+  dl.setAttribute('aria-label',k==='rank'?'Turn to a place in the top ten.':`Turn to ${k==='year'?'a year':k==='added'?'a month':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='added'?'months':k==='color'?'colors':'letters'} and records.`);
   clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l${L==='—'?' kd-nd':''}" data-k="${j}">${k==='color'?`<i style="background:${hueInk(+L)}"></i>`:gName(L)}</span>`).join('');
   LT=[...clip.querySelectorAll('.kd-l')];TH=[...clip.querySelectorAll('.kd-t')];
   at=-1;rest('l');rest('r');render();label();
@@ -4383,7 +4475,8 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
 // above the bar (the wall's own pills, moved), and apply to every view.
 (()=>{
   const find=$('.find'),vwEl=$('.vw'),qf=$('#qf'),pills=$('#pills');
-  const ICON={crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
+  const ICON={rank:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6.5h10M10 12h10M10 17.5h10"/><path d="M4.6 5.2l1.3-.9v4.4"/><path d="M4.2 11.6c.4-.6 1-.8 1.6-.7.7.2 1 .8.8 1.4-.2.5-1.6 1.6-2.4 2.4h2.7"/></svg>',
+    crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
     wall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
     table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>'};
   $$('button',vwEl).forEach(b=>{const v=b.dataset.v,l=b.textContent;b.innerHTML=ICON[v]+`<span>${l}</span>`});
@@ -4403,16 +4496,17 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
     year:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>',
     added:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>',
     label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
-    color:'<i class="cw" aria-hidden="true"></i>'};
+    color:'<i class="cw" aria-hidden="true"></i>',
+    rank:'<svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans);letter-spacing:-.02em">#1</text></svg>'};
   const sb=document.createElement('button');sb.type='button';sb.className='fb lb sb';sb.setAttribute('aria-expanded','false');sb.setAttribute('aria-controls','sorts');
   fb.after(sb);
   const so=document.createElement('div');so.className='vw tray so';so.id='sorts';so.hidden=true;so.setAttribute('role','group');so.setAttribute('aria-label','Sort');
-  const dirOf=k=>SORT.d>0?'↑':'↓',dirSay=k=>k==='color'?(SORT.d>0?'reds first':'darks first'):k==='year'||k==='added'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
+  const dirOf=k=>SORT.d>0?'↑':'↓',dirSay=k=>k==='rank'?(SORT.d>0?'one first':'counting down'):k==='color'?(SORT.d>0?'reds first':'darks first'):k==='year'||k==='added'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
   const drawSort=()=>{
     sb.innerHTML=SICON[SORT.k];sb.dataset.k=SORT.k;sb.classList.toggle('on',SORT.k!=='artist'||SORT.d<0);sb.setAttribute('aria-label',`Sort: ${SORTS[SORT.k].l}${dirSay(SORT.k)?', '+dirSay(SORT.k):''}`);
     so.innerHTML=Object.entries(SORTS).map(([k,o])=>{const on=SORT.k===k;
       return`<button type="button" data-k="${k}" aria-pressed="${on}" aria-label="Sort by ${o.l.toLowerCase()}${on&&dirSay(k)?', '+dirSay(k):''}">${SICON[k]}<span>${o.l}</span>${on&&dirOf(k)?`<i aria-hidden="true">${dirOf(k)}</i>`:''}</button>`}).join('')};
-  drawSort();
+  drawSort();window.drawSort=drawSort;
   const sorts=on=>{so.hidden=!on;sb.setAttribute('aria-expanded',on);if(on){views(false);tray(false);const r=sb.getBoundingClientRect();so.style.right=Math.max(14,innerWidth-r.right)+'px'}};
   sb.onclick=()=>sorts(so.hidden);
   // one way to sort, for the menu and the table's headers: the lit one again flips it; a new one keeps the direction
@@ -4671,7 +4765,7 @@ html.phone .ab-sh{margin-top:20px}
   const st=document.createElement('div');st.className='dst';st.hidden=true;st.setAttribute('role','menu');
   $('.find').after(dock,say,veil,st);
   const open=()=>qf.matches(':focus-within')||qf.classList.contains('has')||body.classList.contains('searching')?'q':'';
-  const dirSay=(k,d)=>k==='color'?(d>0?'Reds first':'Darks first'):k==='year'||k==='added'?(d>0?'Oldest first':'Newest first'):d>0?'A to Z':'Z to A';
+  const dirSay=(k,d)=>k==='rank'?(d>0?'One first':'Counting down'):k==='color'?(d>0?'Reds first':'Darks first'):k==='year'||k==='added'?(d>0?'Oldest first':'Newest first'):d>0?'A to Z':'Z to A';
   const word=()=>{const n=SORTS[SORT.k].l,d=dirSay(SORT.k,SORT.d);return SORT.k==='year'||SORT.k==='color'?d:SORT.k==='added'?`${n}, ${d.toLowerCase()}`:`${n}, ${d}`};
   let was='';
   function draw(){
@@ -4718,7 +4812,7 @@ html.phone .ab-sh{margin-top:20px}
     n.animate([{transform:`translateX(${14*dir}px)`,opacity:0},{transform:'none',opacity:1}],{duration:420,easing:EASE}).onfinish=()=>{if(n.isConnected)b.innerHTML=nw}};
 
   // what each circle holds
-  const views=()=>[...vw.querySelectorAll('[data-v]')];
+  const views=()=>[...vw.querySelectorAll('[data-v]:not([hidden])')];
   const rows=k=>k==='sort'?[...so.querySelectorAll('[data-k]')].map(b=>({v:b.dataset.k,g:(b.querySelector('svg,.cw')||{}).outerHTML||'',n:b.querySelector('span')?.textContent||'',on:b.dataset.k===SORT.k,
       x:b.dataset.k===SORT.k?`${SORT.d>0?'↑':'↓'} ${dirSay(SORT.k,SORT.d).replace(/ first$/,'')}`:''}))
     :k==='view'?views().map(b=>({v:b.dataset.v,g:(b.querySelector('svg')||{}).outerHTML||'',n:b.querySelector('span')?.textContent||b.textContent,on:b.getAttribute('aria-pressed')==='true'}))
@@ -4815,7 +4909,7 @@ html.phone .ab-sh{margin-top:20px}
   const CHEV='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   const TICK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   // which parts were left open, while the page is up
-  const OPEN={add:true,crate:false,record:true,covers:false,color:false,crates:false,about:false,who:false,links:false};
+  const OPEN={rank:true,add:true,crate:false,record:true,covers:false,color:false,crates:false,about:false,who:false,links:false};
   const sec=(k,t,body,v='')=>`<details class="op-s" data-s="${k}"${OPEN[k]?' open':''}><summary>${t}<span class="op-v">${v}</span>${CHEV}</summary><div class="op-c">${body}</div></details>`;
   const watch=box=>box.querySelectorAll('.op-s').forEach(d=>d.addEventListener('toggle',()=>{OPEN[d.dataset.s]=d.open;
     if(d.open&&!reduce)d.querySelector('.op-c').animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:320,easing:'cubic-bezier(.22,1,.36,1)'})}));
@@ -4834,11 +4928,11 @@ html.phone .ab-sh{margin-top:20px}
   opSync();addEventListener('resize',opSync);new MutationObserver(opSync).observe(open,{attributes:true,attributeFilter:['hidden']});
   btn.onclick=()=>{btn.blur();
     if(!open.hidden){if(!rs.hidden){rsShut();return}asShut();const r=order[cur];if(r){rsOpen(r);recPanel(r)}return}
-    if(!as.hidden){asShut();return}cratePanel();asOpen()};
+    if(!as.hidden){asShut();return}cratePanel();asOpen();window.rankPanel()};
 
   // over the crate: Add records, its name and description, a new crate
   const asB=document.createElement('div');asB.className='op-b';
-  asB.innerHTML=sec('add','Add records','')+sec('crate','Name and description',`<label class="op-f"><span>Name</span><input id="opN" maxlength="60" autocomplete="off"></label><label class="op-f"><span>Description</span><textarea id="opA" maxlength="300" rows="3" placeholder="A line or two about it"></textarea></label>`);
+  asB.innerHTML=sec('rank','Top ten','<ol id="opR"></ol>')+sec('add','Add records','')+sec('crate','Name and description',`<label class="op-f"><span>Name</span><input id="opN" maxlength="60" autocomplete="off"></label><label class="op-f"><span>Description</span><textarea id="opA" maxlength="300" rows="3" placeholder="A line or two about it"></textarea></label><label class="op-tg" id="opTg"><input type="checkbox" id="opRk"><span><b>Top ten</b><i>Ranked, number one first. Ten records at most.</i></span></label>`);
   const head=as.querySelector('.rs-h');head.after(asB);
   asB.querySelector('[data-s=add] .op-c').append(as.querySelector('.as-in'),as.querySelector('.as-f'));
   const crC=asB.querySelector('[data-s=crate] .op-c'),end=document.createElement('div');end.className='op-end';asB.append(end);
@@ -4847,12 +4941,24 @@ html.phone .ab-sh{margin-top:20px}
   as.setAttribute('aria-label','Edit the crate');
   const say=t=>{const s=$('#opS');s.textContent=t;s.classList.toggle('on',!!t);if(t==='Saved')setTimeout(()=>{if(s.textContent==='Saved')say('')},1800)};
   const crName=()=>{const C=crateDef();return C?C.name:allName()},crAbout=()=>{const C=crateDef();return(C?C.about:EDITS.crates?.all?.about)||''};
+  // a top ten's records in order: drag to move one, × to take it out (rank-rows.js)
+  const rankD=asB.querySelector('[data-s=rank]'),rankL=$('#opR');
+  window.rankPanel=()=>{const C=crateDef();rankD.hidden=!(RANKED&&C);$('#opTg').hidden=!C;$('#opRk').checked=!!C?.rank;
+    if(rankD.hidden||as.hidden)return;
+    const list=[...RECORDS].sort((a,b)=>rankOf(a)-rankOf(b));rankD.querySelector('.op-v').textContent=list.length?`${list.length} of 10`:'';
+    rankRows(rankL,list,{cover:r=>r.front?smaller(img(r.front),360)||img(r.front):'',
+      move:(a,b)=>{const s=list.map(r=>r.slug),[x]=s.splice(a,1);s.splice(b,0,x);reRank(s)},
+      take:i=>takeOut(list[i])})};
+  $('#opRk').addEventListener('change',async e=>{const on=e.target.checked;
+    say('Saving…');try{await api({op:'crate-set',crate:CRATE,ranked:on});arrange(filt,order[cur]);say('Saved');if(on)setView0('rank')}catch(z){say('');e.target.checked=!on;toast(z.message)}});
+  const setView0=v=>$(`.vw [data-v=${v}]`)?.click();
   function cratePanel(){
-    const C=crateDef();$('#opT').textContent=crName();$('#opCv').innerHTML=crateCover(C||{slug:'all',records:null});
+    const C=crateDef();window.rankPanel();$('#opT').textContent=crName();$('#opCv').innerHTML=crateCover(C||{slug:'all',records:null});
     $('#opN').value=crName();$('#opA').value=crAbout();asB.querySelector('[data-s=crate] .op-v').textContent=crName();
     end.innerHTML=`<button type="button" class="op-btn" data-x="new">New crate</button>${C?'<button type="button" class="op-btn" data-x="drop">Delete this crate</button>':''}`;
   }
-  crC.addEventListener('change',async()=>{
+  crC.addEventListener('change',async e=>{
+    if(e.target.id==='opRk')return;
     const name=$('#opN').value.trim(),about=$('#opA').value.trim();
     if(!name){$('#opN').value=crName();toast('A crate needs a name');return}
     if(crName()===name&&crAbout()===about)return;
