@@ -168,3 +168,28 @@ export function titleCard({ title, sub, foot, host }: { title: string; sub: stri
     },
   );
 }
+
+// a shared top 10 (/og/2026): the title card in the list's own colors, its name big, the big numbers along the bottom
+export function top10Card({ title, bg, fg, n, host }: { title: string; bg: string; fg: string; n: string; host: string }) {
+  const size = title.length > 34 ? 76 : title.length > 24 ? 88 : 100;
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 96, background: bg, color: fg, fontFamily: "Instrument Sans" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <svg width="56" height="56" viewBox="0 0 350 350">
+            {MARK.map((d, i) => <path key={i} fill={fg} fillRule="evenodd" d={d} />)}
+          </svg>
+          <span style={{ fontSize: 34, fontWeight: 500 }}>Crate Dig</span>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ fontSize: size, fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1.05, lineClamp: 2, display: "block" }}>{title}</div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 64, fontFamily: MONO, fontSize: 40, color: n }}>
+            {Array.from({ length: 10 }, (_, i) => <span key={i}>{i + 1}</span>)}
+          </div>
+          <div style={{ display: "flex", marginTop: 28, fontFamily: MONO, fontSize: 26, opacity: 0.6 }}>{host}/2026</div>
+        </div>
+      </div>
+    ),
+    { width: 1200, height: 630, headers: { "Cache-Control": CACHE }, fonts: fonts() },
+  );
+}

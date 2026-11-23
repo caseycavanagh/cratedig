@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   // the link preview card (src/lib/og.tsx) reads its fonts from disk, and the two pages below read their HTML
-  outputFileTracingIncludes: { "/og": ["./assets/fonts/*.ttf"], "/og/make": ["./assets/fonts/*.ttf"], "/og/landing": ["./assets/fonts/*.ttf"], "/og/p/[kind]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/og/r/[slug]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/api/added": ["./public/index.html"], "/api/crate": ["./public/index.html", "./public/vinyl/covers.json"], "/home": ["./public/index.html", "./public/vinyl/covers.json"], "/crates": ["./public/crates.html", "./public/index.html", "./public/vinyl/covers.json"], "/make": ["./public/vinyl-make.html"], "/landing": ["./public/landing.html", "./public/index.html", "./public/vinyl/covers.json"] },
+  outputFileTracingIncludes: { "/og": ["./assets/fonts/*.ttf"], "/og/make": ["./assets/fonts/*.ttf"], "/og/landing": ["./assets/fonts/*.ttf"], "/og/p/[kind]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/og/r/[slug]": ["./assets/fonts/*.ttf", "./public/index.html", "./public/vinyl/covers.json", "./public/vinyl/*-front.webp"], "/api/added": ["./public/index.html"], "/api/crate": ["./public/index.html", "./public/vinyl/covers.json"], "/home": ["./public/index.html", "./public/vinyl/covers.json"], "/crates": ["./public/crates.html", "./public/index.html", "./public/vinyl/covers.json"], "/make": ["./public/vinyl-make.html"], "/top10": ["./public/top10.html"], "/top10/list": ["./public/index.html"], "/og/2026": ["./assets/fonts/*.ttf"], "/landing": ["./public/landing.html", "./public/index.html", "./public/vinyl/covers.json"] },
   // "/" would be the front door (public/landing.html) and /casey Casey's crates (public/crates.html), but both redirect to /casey/all for now (below), and each crate (public/index.html)
   // at /casey/<crate>, the whole crate at /casey/all.
   // They and the make page come through src/app/landing, src/app/home and src/app/make, which add the domain to their link preview tags (src/lib/page.ts)
@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
         { source: "/casey", destination: "/crates" },
         { source: "/casey/:crate([a-z0-9-]{1,80})", destination: "/home?crate=:crate" },
         { source: "/vinyl-make.html", destination: "/make" },
+        // a top 10 of 2026 (Casey, 2026-11-23): /2026 with a list in its address is that list on the crate page, ranked (public/index.html reads
+        // the path); bare, it's the maker (public/top10.html through src/app/top10)
+        ...["d", "m", "c"].map((key) => ({ source: "/2026", has: [{ type: "query" as const, key }], destination: "/top10/list" })),
+        { source: "/2026", destination: "/top10" },
       ],
       afterFiles: [],
       fallback: [],
