@@ -3038,27 +3038,62 @@ function bake(i,el){
 function draw(i,el){
   // a phone draws the record at the crate's size; a wider screen pulls it out bigger, so it keeps the file's own size
   const S=nodes.find(n=>n.offsetWidth)?.offsetWidth||480,nw=i.naturalWidth,nh=i.naturalHeight,f=PHONE?Math.min(1,S*Math.min(devicePixelRatio||1,3)/Math.max(nw,nh)):1;
-  const w=Math.round(nw*f),h=Math.round(nh*f),k=w/S,c=document.createElement('canvas');c.width=w;c.height=h;
-  const x=c.getContext('2d'),P=el.dataset.paper,wear=+el.dataset.wear||0;
+  const w=Math.round(nw*f),h=Math.round(nh*f),job={w,h,k:w/S,P:el.dataset.paper,wear:+el.dataset.wear||0};
+  const here=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;
+    if(!dressCover(c.getContext('2d'),i,job,{grain:TILES.grain&&soft(TILES.grain),tooth:soft(TILES.tooth)})){c.width=c.height=0;return null}
+    // JPEG: a cover has no transparency, and it writes and reads back twice as fast as WebP (Safari can't write WebP at all).
+    // The canvas is let go at once: Safari counts canvas memory
+    return new Promise(res=>c.toBlob(b=>{c.width=c.height=0;res(b&&URL.createObjectURL(b))},'image/jpeg',.9))};
+  const W=baker();if(!W)return here();
+  // the worker measures the baked cover for the lamp too (see tone), so the page never has to read it back
+  return W({...job,src:i.src}).then(({b,m,v})=>{if(!b)return null;const u=URL.createObjectURL(b);if(m!=null)TONE.set(u,toneOf(m,v));return u},()=>baker()?null:here());
+}
+// Draws a cover (an image, or the worker's bitmap of it) at w×h with its paper and wear (k: canvas pixels to one of the record's), and answers false if it came out
+// blank. Self-contained, so the baking worker runs this very function
+function dressCover(x,i,{w,h,k,P,wear},T){
   const fill=f=>{x.fillStyle=f;x.fillRect(0,0,w,h)};
   const lin=(deg,stops)=>{const a=deg*Math.PI/180,dx=Math.sin(a),dy=-Math.cos(a),L=Math.abs(w*dx)+Math.abs(h*dy),g=x.createLinearGradient(w/2-dx*L/2,h/2-dy*L/2,w/2+dx*L/2,h/2+dy*L/2);stops.forEach(([o,col])=>g.addColorStop(o,col));return g};
-  const pat=(t,n)=>{const p=x.createPattern(soft(t),'repeat');p.setTransform(new DOMMatrix().scale(k*n/t.width));return p};
+  const pat=(t,n,a)=>{const s=k*n/t.width;x.save();x.globalAlpha=a;x.scale(s,s);x.fillStyle=x.createPattern(t,'repeat');x.fillRect(0,0,w/s,h/s);x.restore()};
   const corner=(cx,cy,r,col)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r*Math.hypot(w,h));g.addColorStop(0,col);g.addColorStop(1,'#ffffff00');fill(g)};
   x.imageSmoothingQuality='high';x.drawImage(i,0,0,w,h);
   // iOS sometimes draws nothing here (most often when it's short on memory), and a blank canvas saved as JPEG is a black
   // square: a cover has no clear pixels, so if any of these are clear, the bake failed and the cover stays as it came
   const px=(a,b)=>x.getImageData(Math.min(w-1,a*w|0),Math.min(h-1,b*h|0),1,1).data[3];
-  if(!px(.5,.5)||!px(.2,.2)||!px(.8,.8)){c.width=c.height=0;return null}
-  if(P==='matte'&&TILES.grain){x.globalAlpha=.5;fill(pat(TILES.grain,128));x.globalAlpha=1}
-  if(P==='uncoated')fill(pat(TILES.tooth,96));
+  if(!px(.5,.5)||!px(.2,.2)||!px(.8,.8))return false;
+  if(P==='matte'&&T.grain)pat(T.grain,128,.5);
+  if(P==='uncoated'&&T.tooth)pat(T.tooth,96,1);
   if(P==='matte')fill('#ffffff06');
   if(P==='uncoated')fill('#f7efdc10');
   if(P==='gloss'){fill(lin(118,[[.3,'#ffffff00'],[.41,'#ffffff1e'],[.48,'#ffffff08'],[.56,'#ffffff00']]));fill(lin(180,[[0,'#ffffff0e'],[.35,'#ffffff00']]))}
   if(wear===1){corner(0,0,.035,'#ffffff24');corner(w,h,.03,'#ffffff1a')}
   if(wear===2){corner(0,0,.05,'#ffffff38');corner(w,h,.04,'#ffffff26');corner(w,0,.03,'#ffffff1c');fill('#f3e4c40f');x.strokeStyle='#ffffff26';x.lineWidth=2*k;x.strokeRect(0,0,w,h)}
-  // JPEG: a cover has no transparency, and it writes and reads back twice as fast as WebP (Safari can't write WebP at all).
-  // The canvas is let go at once: Safari counts canvas memory
-  return new Promise(res=>c.toBlob(b=>{c.width=c.height=0;res(b&&URL.createObjectURL(b))},'image/jpeg',.9));
+  return true;
+}
+// Baking happens off the page's thread where the browser can (a worker that reads the cover again, from the cache, and draws
+// it on its own canvas), so covers coming in never hold up a tap or a flick. baker() answers a function that bakes one cover there, or null where it can't, and the page bakes as before
+let bk;
+function baker(){
+  if(bk!==undefined)return bk;bk=null;
+  if(!window.Worker||!window.OffscreenCanvas||!OffscreenCanvas.prototype.convertToBlob||!window.createImageBitmap)return bk;
+  try{
+    const w=new Worker(URL.createObjectURL(new Blob([`${dressCover}
+let T={};const s=new OffscreenCanvas(24,24).getContext('2d',{willReadFrequently:true});
+onmessage=async({data:d})=>{if(d.T){T=d.T;return}let b=null,i=null,m=null,v=null;
+  try{i=await createImageBitmap(await (await fetch(d.src)).blob());const c=new OffscreenCanvas(d.w,d.h);
+    if(dressCover(c.getContext('2d'),i,d,T)){b=await c.convertToBlob({type:'image/jpeg',quality:.9});
+      s.clearRect(0,0,24,24);s.drawImage(c,0,0,24,24);const p=s.getImageData(0,0,24,24).data;m=v=0;
+      for(let j=0;j<p.length;j+=4){const y=(.2126*p[j]+.7152*p[j+1]+.0722*p[j+2])/255;m+=y;v+=y*y}m/=576;v=Math.sqrt(Math.max(0,v/576-m*m))}
+    c.width=c.height=0}catch{}
+  i?.close();postMessage({id:d.id,b,m,v})}`],{type:'text/javascript'})));
+    const jobs=new Map();let n=0;
+    const fail=()=>{bk=null;w.terminate();jobs.forEach(j=>j.no());jobs.clear()};
+    w.onmessage=({data:d})=>{jobs.get(d.id)?.ok(d);jobs.delete(d.id)};w.onerror=fail;
+    // the paper tiles go over once, softened here (a worker's canvas can't blur in every browser)
+    const tiles=Promise.all(['grain','tooth'].map(t=>TILES[t]?createImageBitmap(soft(TILES[t])):null))
+      .then(([grain,tooth])=>w.postMessage({T:{grain,tooth}},[grain,tooth].filter(Boolean)));
+    bk=job=>tiles.then(()=>new Promise((ok,no)=>{const id=++n;jobs.set(id,{ok,no});w.postMessage({...job,id})}));
+  }catch{bk=null}
+  return bk;
 }
 // a pulled-out record whose cover the crate hasn't baked yet bakes its own
 const bakeIn=el=>el.querySelectorAll('img.art').forEach(i=>i.complete&&i.naturalWidth?bake(i,el):i.addEventListener('load',()=>bake(i,el),{once:true}));
@@ -3099,6 +3134,8 @@ function lampTick(t){
 // smudge, and a plain face (a jacket with no back on file, a cover with no art) has nothing to break the spot up, so it reads as
 // a spotlight: both get less. Measured once per cover from a small copy (a cover from another site can't be read, so it goes
 // by its spine color), and a plain face by its color.
+// m and v: the face's mean lightness and how much it varies (0–1)
+function toneOf(m,v){const b=Math.min(1,Math.max(0,(m-.35)/.5)),bright=b*b*(3-2*b),busy=Math.min(1,v/.18);return{lit:(1-.6*bright)*(.4+.6*busy),dark:1-.6*bright}}
 const TONE=new Map(),toneX=(()=>{const c=document.createElement('canvas');c.width=c.height=24;return c.getContext('2d',{willReadFrequently:true})})();
 function tone(el,f){
   const i=f.querySelector('img.art'),ready=!!(i&&i.complete&&i.naturalWidth),sp=el.style.getPropertyValue('--sp').trim()||'#1d1d1f',
@@ -3108,8 +3145,7 @@ function tone(el,f){
   let m,v;
   if(ready&&(i.src.startsWith('blob:')||new URL(i.src).origin===location.origin))try{x.clearRect(0,0,24,24);x.drawImage(i,0,0,24,24);[m,v]=read()}catch{} // drawing another site's cover would taint this canvas for good
   if(m==null){x.fillStyle='#000';x.fillStyle=sp;x.fillRect(0,0,24,24);[m]=read();v=ready?.12:f.querySelector('svg.art,.art.blank')?.1:0} // a cover we can't read is guessed as average; drawn art as fairly plain
-  const b=Math.min(1,Math.max(0,(m-.35)/.5)),bright=b*b*(3-2*b),busy=Math.min(1,v/.18);
-  t={lit:(1-.6*bright)*(.4+.6*busy),dark:1-.6*bright};
+  t=toneOf(m,v);
   if(i&&!ready)return t; // the cover is still coming: measured again once it's here
   TONE.set(key,t);return t;
 }
