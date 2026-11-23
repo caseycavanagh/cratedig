@@ -1,6 +1,7 @@
 // Visitor crates: anyone can make a crate at vinyl-make.html and share it as a link,
 // vinyl-prototype.html?by=Sam&d=<ids>. d holds Discogs release IDs in base 36, joined by
-// dots, so the whole crate lives in the address: no account or database.
+// dots, so the whole crate lives in the address: no account or database. o keeps the order
+// when a crate mixes sources (a top 10 from /top10 is ranked by it).
 // Records come from Discogs through /api/discogs (vinyl pressings, with backs). Without a
 // DISCOGS_TOKEN they come from MusicBrainz and the Cover Art Archive through /api/musicbrainz
 // (m holds those release IDs), and if that fails, from Apple Music by JSONP (c).
@@ -115,12 +116,18 @@
     if(d.length)p.set('d',encode(d));
     if(m.length)p.set('m',encodeM(m));
     if(a.length)p.set('c',encode(a));
+    // the order across sources, one letter a record, when they're mixed: a ranked list needs it back exactly
+    const o=records.map(r=>r.src||'a').join('');if(new Set(o).size>1)p.set('o',o);
     u.search=p;u.hash='';return u.href;
   };
   // the crate in an address
   const fromAddress=async params=>{
     const all=await Promise.all([apiLookup('d',decode(params.get('d'))),apiLookup('m',decodeM(params.get('m'))),appleLookup(decode(params.get('c')))]);
-    return all.flat().slice(0,MAX);
+    const o=params.get('o');if(!o)return all.flat().slice(0,MAX);
+    // put mixed sources back in the order they were linked: o names each record's source, one letter each
+    const q={d:all[0].slice(),m:all[1].slice(),a:all[2].slice()},out=[];
+    for(const k of o){const r=q[k]?.shift();if(r)out.push(r)}
+    return [...out,...q.d,...q.m,...q.a].slice(0,MAX);
   };
   const crateName=n=>n.trim()?n.trim()+(/s$/i.test(n.trim())?'’':'’s')+' crate':'My crate';
 
