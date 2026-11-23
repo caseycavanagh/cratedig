@@ -593,7 +593,7 @@ html.phone .rs-f{padding:4px max(16px,env(safe-area-inset-right)) calc(env(safe-
 /* Casey's one panel: a white button at the end of the bar (the far right on a laptop) opens it. Over the crate it edits the crate
    (Add records, its name and description); over an open record it edits the record. Each part folds open and shut */
 .dock .xb.op{display:none;background:var(--fg);border-color:var(--fg)}
-body.own .dock .xb.op{display:block}
+body.op-own .dock .xb.op{display:block}
 .dock .xb.op>button{all:unset;cursor:pointer;position:absolute;inset:0;border-radius:inherit;color:var(--on-fg);transition:transform .5s var(--ease)}
 .dock .xb.op>button:active{transform:scale(.96);transition-duration:.08s}
 .dock .xb.op>button:focus-visible{outline:1px solid var(--ring);outline-offset:3px}
@@ -603,8 +603,8 @@ body.own .dock .xb.op{display:block}
 .op.rec .ic.plus{opacity:0;transform:rotate(45deg) scale(.6)}
 .op.rec .ic.pen{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.op .ic{transition:opacity .15s}}
-html.phone body.own .dock{gap:10px}
-@media(max-width:369px){html.phone body.own .dock{gap:8px;--H:52px}}
+html.phone body.op-own .dock{gap:10px}
+@media(max-width:369px){html.phone body.op-own .dock{gap:8px;--H:52px}}
 html:not(.phone) .dock .xb.op{position:fixed;right:max(24px,env(safe-area-inset-right));bottom:var(--db)}
 html:not(.phone) body:is(.as-on,.rs-on) .dock .xb.op{opacity:0;pointer-events:none}
 .as .rs-h{border-bottom:1px solid var(--line);padding-bottom:14px}
@@ -4789,7 +4789,7 @@ html.phone .ab-sh{margin-top:20px}
   x.innerHTML=`<button type="button" aria-label="Edit the crate"><span class="ic plus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="ic pen">${PEN}</span></button>`;
   dock.append(x);const btn=x.querySelector('button');
   window.opSync=()=>{
-    const own=!!(OWNER&&EDITABLE),rec=!open.hidden;document.body.classList.toggle('own',own);
+    const own=!!(OWNER&&EDITABLE),rec=!open.hidden;document.body.classList.toggle('op-own',own);
     if(!own){asShut();rsShut()}
     x.classList.toggle('rec',rec);btn.setAttribute('aria-label',rec?'Edit this record':'Edit the crate');
     const h=sort.offsetHeight;if(h&&!PH())x.style.width=x.style.height=h+'px';else x.style.width=x.style.height='';
