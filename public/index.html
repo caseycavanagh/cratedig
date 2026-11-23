@@ -3925,7 +3925,7 @@ const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/
 const authQ=visiting?null:fetch('/api/auth').then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
   if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);
-    if(/[?&]top=1(&|$)/.test(location.search))setRank(v.records.slice(0,10).map(r=>r.slug)); // a visitor's top ten comes ranked, number one first
+    if(/[?&]top=1(&|$)/.test(location.search)||/^\/2026\/?$/.test(location.pathname))setRank(v.records.slice(0,10).map(r=>r.slug)); // a visitor's top ten (top=1, or a list shared at /2026) comes ranked, number one first
     crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
   else{
     RECORDS.forEach((r,i)=>Object.assign(r,{...m[r.slug],...r,seq:i})); // a value written in RECORDS wins
