@@ -1818,5 +1818,33 @@
     "frontSource": "apple",
     "spine": "#ae9f91",
     "added": "2026-11-08"
+  },
+  "deer-tick-coin-o-matic": {
+    "added": "2026-11-19",
+    "year": 2026,
+    "label": "ATO Records",
+    "group": "6d15786f-e1bf-4ffc-ac97-068bbea50024",
+    "release": "91fd5a6b-2653-4ae9-b02d-74d61cbe56cc",
+    "spotify": "2ZamzVq4VCs4eoEd2upHnE",
+    "links": {
+      "deezer": "https://www.deezer.com/album/917406611"
+    },
+    "front": "deer-tick-coin-o-matic-front.webp",
+    "frontSource": "caa",
+    "spine": "#678d83"
+  },
+  "cory-wong-on-a-random-tuesday-live-at-the-blue-note": {
+    "added": "2026-11-19",
+    "year": 2026,
+    "label": "Roundwound Media",
+    "group": "72d4b586-a165-4d15-b4fd-dd94cad19474",
+    "release": "32d547f6-3ce4-471a-999c-f7623a2e408b",
+    "spotify": "2vRHWU3gH7U5JYi9FQ35tV",
+    "links": {
+      "deezer": "https://www.deezer.com/album/1035517342"
+    },
+    "front": "cory-wong-on-a-random-tuesday-live-at-the-blue-note-front.webp",
+    "frontSource": "caa",
+    "spine": "#42547f"
   }
 }

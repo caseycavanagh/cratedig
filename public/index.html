@@ -24,6 +24,18 @@
 <meta property="og:image:alt" content="Crate Dig: every record Casey owns, flipped through like a crate">
 <meta name="twitter:card" content="summary_large_image">
 <script>(function(){var u=new URL(location.href),r=u.searchParams.get('r');if(r){u.searchParams.delete('r');u.hash='record/'+r;history.replaceState(null,'',u)}})()</script>
+<script>
+// a list shared at /2026 wears the colors its maker picked (t=, and bg, fg, n for its own or its number one's): every color
+// token is drawn from its background and text, so the whole page follows. Night, the default, is the tokens as they are
+(function(){if(!/^\/2026\/?$/.test(location.pathname))return;var q=new URLSearchParams(location.search),t=q.get('t')||'a',hx=function(v){return /^[0-9a-f]{6}$/i.test(v||'')?'#'+v:null};
+  var P={b:['#f2ede2','#1f1b16','#1f1b16'],c:['#1f33c7','#ffffff','#ffffff'],d:['#e2462c','#fff6ea','#fff6ea'],e:['#16382a','#f1e9d2','#d8b968'],f:['#ffd3e3','#3a0d28','#c2185b'],g:['#f1c232','#1c1708','#1c1708']};
+  var c=P[t];if(t==='h'||t==='x'){var bg=hx(q.get('bg')),fg=hx(q.get('fg'));if(bg&&fg)c=[bg,fg,hx(q.get('n'))||fg]}
+  if(!c)return;var bg=c[0],fg=c[1],m=function(p){return'color-mix(in srgb,'+fg+' '+p+'%,'+bg+')'},a=function(p){return'color-mix(in srgb,'+fg+' '+p+'%,transparent)'};
+  var v={'--bg':bg,'--fg':fg,'--on-fg':bg,'--t1':m(85),'--t2':m(68),'--m':m(60),'--t3':m(46),'--t4':m(38),'--line':a(14),'--line2':a(22),'--soft':m(9),'--sheet':m(7),'--hov':a(6),'--prs':a(8),'--sel':a(12),'--ring':a(26),'--rank-n':c[2],
+    '--glass':'color-mix(in srgb,'+m(9)+' 72%,transparent)'};
+  var st=document.createElement('style');st.textContent=':root:root{'+Object.keys(v).map(function(k){return k+':'+v[k]}).join(';')+'}html,body{background:'+bg+'}';document.head.append(st);
+  document.documentElement.classList.add('themed');var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=bg})();
+</script>
 <script>var PHONE_Q='(max-width:700px),(pointer:coarse) and (max-height:500px)';document.documentElement.dataset.theme='dark';document.documentElement.classList.toggle('phone',matchMedia(PHONE_Q).matches)</script>
 <link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
@@ -121,9 +133,20 @@ img.art{object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:
 .rc .face:has(>img.art){background:var(--sp,#2c2c2e)}
 .rc img.art{transition:opacity .5s ease-out}
 .rc img.art:not(.on){opacity:0}
-.cover-type{position:absolute;left:7cqw;right:7cqw;top:6.5cqw;line-height:1.2}
-.cover-type b{display:block;font:500 6cqw var(--sans)}
-.cover-type i{display:block;font:400 4.4cqw var(--sans);font-style:normal;opacity:.85;margin-top:1.2cqw}
+/* a record with no cover (blankHTML): a die-cut jacket, the names in a band across the top above a fold, the hole in the middle.
+   Below grid size only the hole shows */
+.blank{container-type:inline-size;overflow:hidden}
+.blank::before{content:"";position:absolute;left:0;right:0;top:19cqw;height:.35cqw;background:currentColor;opacity:.16}
+.blank .bl-bd{position:absolute;left:6cqw;right:6cqw;top:4.6cqw;display:grid;grid-template-columns:1fr auto;column-gap:4cqw;font:400 4.8cqw/1.2 var(--sans)}
+.blank .bl-bd b,.blank .bl-bd i{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:normal}
+.blank .bl-bd b{font-weight:500}
+.blank .bl-bd i{grid-column:1;opacity:.62}
+.blank .bl-bd em{grid-column:2;grid-row:1;font-style:normal;opacity:.62}
+.blank .bl-ho,.blank .bl-lb{position:absolute;left:50cqw;top:50cqw;border-radius:50%;transform:translate(-50%,-50%)}
+.blank .bl-ho{width:56cqw;height:56cqw;background:repeating-radial-gradient(circle,#161616 0 .55cqw,#1d1d1d .55cqw 1.1cqw);box-shadow:inset 0 0 0 .5cqw #0004,inset 0 1cqw 3cqw #0008}
+.blank .bl-lb{width:22cqw;height:22cqw;background:var(--jk)}
+.blank .bl-lb::after{content:"";position:absolute;left:50%;top:50%;width:1.6cqw;height:1.6cqw;margin:-.8cqw;border-radius:50%;background:#121212}
+@container (max-width:150px){.blank .bl-bd,.blank::before{display:none}}
 .back-in{position:absolute;inset:0;padding:8cqw;font:400 3.6cqw/1.6 var(--sans);display:flex;flex-direction:column;justify-content:space-between}
 .back-in b{display:block;font:500 5cqw/1.25 var(--sans);margin-bottom:3cqw}
 .back-in dl{display:grid;grid-template-columns:auto 1fr;gap:.6cqw 4cqw}
@@ -199,7 +222,7 @@ html[data-theme=dark] .sleeve .sh{box-shadow:var(--rest)}
 /* the neighbors peek in from the page edges; hover pulls one out a little further */
 .peek{all:unset;position:fixed;top:50%;z-index:2;width:var(--O);aspect-ratio:1;cursor:pointer;opacity:0;pointer-events:none;
   transition:transform .35s var(--ease),opacity .25s;box-shadow:var(--lift)}
-.peek img,.peek>div:not(.cover-type){position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.peek img,.peek>div{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
 .peek{container-type:inline-size;overflow:hidden} /* a record without art sets its name to the peek's width, not the page's */
 .peek.prev{left:0;--x:calc(-100% + 28px);--h:calc(-100% + 96px)}
 .peek.next{right:0;--x:calc(100% - 28px);--h:calc(100% - 96px)}
@@ -298,6 +321,7 @@ html.phone .open{--O:min(calc(100vw - 48px),calc(100svh - 330px))}
 html.phone .o-page{display:flex;padding:calc(env(safe-area-inset-top) + 64px) 24px calc(env(safe-area-inset-bottom) + 20px)}
 html.phone .o-grid{flex:1;flex-direction:column;}
 html.phone .stage{touch-action:none}
+html.phone .open{touch-action:pan-y pinch-zoom} /* sideways is ours: a sweep across the details swipes records */
 html.phone .sleeve .sh{box-shadow:var(--rest)}
 html.phone[data-theme=dark] .sleeve .sh{box-shadow:var(--rest)}
 /* the details slide down from under the record */
@@ -578,6 +602,89 @@ html.phone .rs-f{padding:4px max(16px,env(safe-area-inset-right)) calc(env(safe-
 .as-b[aria-pressed=true]{background:var(--sel);color:var(--fg)}
 .as-b:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
 .as-b svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* Casey's one panel: a white button at the end of the bar (the far right on a laptop) opens it. Over the crate it edits the crate
+   (Add records, its name and description); over an open record it edits the record. Each part folds open and shut */
+.dock .xb.op{display:none;background:var(--fg);border-color:var(--fg)}
+body.op-own .dock .xb.op{display:block}
+.dock .xb.op>button{all:unset;cursor:pointer;position:absolute;inset:0;border-radius:inherit;color:var(--on-fg);transition:transform .5s var(--ease)}
+.dock .xb.op>button:active{transform:scale(.96);transition-duration:.08s}
+.dock .xb.op>button:focus-visible{outline:1px solid var(--ring);outline-offset:3px}
+.op .ic{position:absolute;inset:0;display:grid;place-items:center;transition:opacity .25s,transform .45s var(--ease)}
+.op .ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.op .ic.pen{opacity:0;transform:rotate(-45deg) scale(.6)}
+.op.rec .ic.plus{opacity:0;transform:rotate(45deg) scale(.6)}
+.op.rec .ic.pen{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.op .ic{transition:opacity .15s}}
+html.phone body.op-own .dock{gap:10px}
+@media(max-width:369px){html.phone body.op-own .dock{gap:8px;--H:52px}}
+html:not(.phone) .dock .xb.op{position:fixed;right:max(24px,env(safe-area-inset-right));bottom:var(--db)}
+html:not(.phone) body:is(.as-on,.rs-on) .dock .xb.op{opacity:0;pointer-events:none}
+.as .rs-h{border-bottom:1px solid var(--line);padding-bottom:14px}
+.op-b{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 20px 28px}
+html.phone .op-b{padding:0 max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 28px) max(16px,env(safe-area-inset-left))}
+.op-s{border-top:1px solid var(--line)}
+.op-s:first-child{border-top:0}
+.op-s>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:52px;font-size:var(--fs-3);font-weight:500;color:var(--fg);-webkit-tap-highlight-color:transparent;border-radius:6px}
+.op-s>summary::-webkit-details-marker{display:none}
+.op-s>summary:focus{outline:none}
+.op-s>summary:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.op-s>summary .op-v{flex:1;min-width:0;text-align:right;font-weight:400;font-size:var(--fs-2);color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-s>summary svg{flex:none;width:16px;height:16px;fill:none;stroke:var(--t2);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .4s var(--ease)}
+.op-s[open]>summary svg{transform:rotate(180deg)}
+.op-s[open]>summary .op-v{opacity:0}
+.op-c{padding:0 0 18px}
+#rsF.op-b .op-c.rs-f{flex:none;overflow:visible;padding:0 0 18px}
+.op-c>.rf:first-child{margin-top:0}
+.as .op-b .as-in{padding:0 0 10px}
+.as .op-b .as-f{flex:none;overflow:visible;padding:0}
+.as .op-b .as-f h3:first-child{margin-top:12px}
+.op-f{display:grid;gap:5px}
+.op-tg{display:flex;align-items:flex-start;gap:12px;margin-top:16px;cursor:pointer}
+.op-tg[hidden]{display:none}
+.op-tg input{flex:none;width:20px;height:20px;margin:1px 0 0;accent-color:var(--fg)}
+.op-tg span{display:grid;gap:2px}
+.op-tg b{font-size:var(--fs-3);font-weight:500;color:var(--fg)}
+.op-tg i{font-style:normal;font-size:var(--fs-2);color:var(--m)}
+.op-s[hidden]{display:none}
+#opR{margin-top:-4px}
+.op-f>span{font-size:var(--fs-1);color:var(--m)}
+.op-f input,.op-f textarea{box-sizing:border-box;width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--bg);color:var(--fg);font:inherit;font-size:var(--fs-3);line-height:1.45;transition:border-color .2s}
+html.phone .op-f input,html.phone .op-f textarea{font-size:var(--fs-4)}
+.op-f input{height:38px;padding-block:0}
+.op-f textarea{resize:vertical;display:block}
+.op-f input::placeholder,.op-f textarea::placeholder{color:var(--t4)}
+.op-f input:focus,.op-f textarea:focus{outline:none;border-color:var(--m)}
+.op-f+.op-f{margin-top:10px}
+.op-cv{display:grid;grid-template-columns:repeat(2,minmax(0,150px));gap:14px}
+.op-cv figure{margin:0;display:grid;gap:8px}
+.op-cv .t{aspect-ratio:1;border-radius:var(--r-cover);overflow:hidden;background:var(--soft);display:grid;place-items:center;color:var(--t3);font-size:var(--fs-2)}
+.op-cv .t img{width:100%;height:100%;object-fit:cover;display:block}
+.op-cv figcaption{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:var(--fs-2);color:var(--m)}
+.op-btn{all:unset;cursor:pointer;box-sizing:border-box;height:32px;padding:0 13px;border-radius:var(--r-pill);border:1px solid var(--line2);color:var(--fg);font-size:var(--fs-2);font-weight:500;display:inline-grid;place-items:center;white-space:nowrap;transition:background .2s}
+.op-btn:hover{background:var(--hov)}
+.op-btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.op-q{all:unset;cursor:pointer;font-size:var(--fs-2);color:var(--m);margin-top:12px;display:inline-block}
+.op-q:hover{color:var(--fg)}
+p.op-q{cursor:default}
+p.op-q:hover{color:var(--m)}
+.op-col{display:flex;align-items:center;gap:12px}
+.op-sw{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);flex:none;overflow:hidden}
+.op-sw input{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);opacity:0;cursor:pointer;border:0;padding:0}
+.op-col .hx{font:500 var(--fs-2)/1 var(--mono);color:var(--t1);text-transform:uppercase;flex:1}
+.op-col .op-q{margin:0}
+.op-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px}
+.op-cr{display:grid;gap:2px}
+.op-cr button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;margin:0 -10px;border-radius:var(--r-in);color:var(--t1);font-size:var(--fs-3)}
+.op-cr button:hover{background:var(--hov)}
+.op-cr button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.op-cr button[aria-disabled=true]{cursor:default;color:var(--m)}
+.op-cr button[aria-disabled=true]:hover{background:none}
+.op-cr .bx{flex:none;width:20px;height:20px;border-radius:6px;border:1px solid var(--line2);display:grid;place-items:center;transition:background .2s,border-color .2s}
+.op-cr .on .bx{background:var(--fg);border-color:var(--fg);color:var(--on-fg)}
+.op-cr .bx svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.op-cr .on .bx svg{opacity:1}
+.op-cr span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-end{border-top:1px solid var(--line);padding-top:18px;display:flex;gap:10px;flex-wrap:wrap}
 .as-go{all:unset;box-sizing:border-box;cursor:pointer;justify-self:start;height:36px;padding:0 16px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);font-size:var(--fs-2);font-weight:500;white-space:nowrap}
 .as-go[hidden]{display:none}
 .as-cam{position:relative;height:180px;border-radius:var(--r-in);overflow:hidden;background:#050505}
@@ -843,8 +950,6 @@ body.walling .find .chip{display:none}
 .tile:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
 .tile img.on{opacity:1}
-.tile .pl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-weight:500;font-size:var(--fs-3);line-height:1.15}
-.tile .pl small{font-weight:400;opacity:.7;margin-top:2px}
 .tile .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,#000b);font-size:var(--fs-2);line-height:1.2;opacity:0;transition:opacity .2s}
 .tile .cap b{display:block;font-weight:500}.tile .cap span{color:var(--t1)}
 /* the grid names a record only when you tab to it; under a pointer, its cover comes a little off the page toward you instead */
@@ -989,6 +1094,7 @@ html.phone body.searching .sl{opacity:1;visibility:visible;translate:none;scale:
 .sl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border-radius:var(--r-in)}
 .sl button:active{background:var(--prs)}
 .sl .sw,.sl .pic{width:46px;height:46px;flex:none;background:#2c2c2e}
+.sl .sw,.tbl .c0 .sw{position:relative;overflow:hidden}
 .sl b{display:block;font-weight:500;font-size:var(--fs-4);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span span{display:block;color:var(--m);font-size:var(--fs-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl span{min-width:0}
@@ -1005,6 +1111,30 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 /* the grid: pinch changes the columns, so the page itself doesn't zoom */
 .wall{touch-action:pan-y}
 /* the table: quiet rows, a cover, the facts; the headers sort */
+.vw button[hidden],.find .vw button[hidden],html.phone .find .vw button[hidden]{display:none}
+/* the top ten: big numbers down the side, each beside its cover, its name and who made it; number one at the top */
+.rk{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 72px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s var(--ease)}
+.rk[hidden]{display:none}
+.rk:focus{outline:none}
+.rk ol{list-style:none;margin:0 auto;padding:8px 0 0;max-width:820px;display:grid;gap:22px}
+.rk li button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:64px 96px minmax(0,1fr);gap:24px;align-items:center;border-radius:var(--r-in);-webkit-tap-highlight-color:transparent}
+.rk .n{font-size:var(--fs-6);font-weight:500;line-height:1;text-align:right;letter-spacing:-.02em;color:var(--rank-n,var(--fg))}
+.rk .pic{position:relative;display:block;width:96px;aspect-ratio:1;border-radius:var(--r-cover);overflow:hidden;box-shadow:var(--rest);transition:transform .5s var(--ease)}
+.rk .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rk .pic .sw{position:absolute;inset:0}
+.rk .tx{display:grid;gap:3px;min-width:0}
+.rk b{font-size:var(--fs-4);font-weight:500;color:var(--fg);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+.rk .a{font-size:var(--fs-3);color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk .m{font-size:var(--fs-2);color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(hover:hover){.rk li button:hover .pic{transform:translateY(-3px)}}
+.rk li button:focus-visible{outline:1px solid var(--ring);outline-offset:4px}
+.rk .held{visibility:hidden}
+@media(max-width:700px){.rk{scrollbar-width:none}.rk::-webkit-scrollbar{display:none}.rk ol{gap:18px}
+  .rk li button{grid-template-columns:36px 72px minmax(0,1fr);gap:14px}.rk .pic{width:72px}.rk .n{font-size:var(--fs-5)}
+  .rk b{font-size:var(--fs-3)}.rk .a{font-size:var(--fs-2)}.rk .m{display:none}}
+@media(prefers-reduced-motion:reduce){.rk .pic{transition:none}}
+body.fon .rk{padding-top:calc(env(safe-area-inset-top) + 72px + 44px)}
+body:not(.ready) .rk{pointer-events:none}
 .tbl{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s var(--ease)}
 .tbl[hidden]{display:none}
 .tbl:focus{outline:none}
@@ -1035,6 +1165,9 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease-out}
 .pic img.on{opacity:1}
 .tbl .held{opacity:0}
+/* back from a record opened in the table: the table rises in a little as the record fades back */
+.tbl.rise{animation:tblRise .38s var(--ease) .08s both}
+@keyframes tblRise{from{opacity:0;transform:translateY(10px)}}
 .tbl .m{display:none}
 @media (max-width:700px){
   .tbl{padding-left:8px;padding-right:8px}
@@ -1090,7 +1223,7 @@ html.phone .sx{padding:0 2px}
 .sl img:not([src]){visibility:visible}
 /* every record has the same slight corner, never a point: --rec, a hair rounder as the cover grows */
 .face>*,.face::after,.sleeve .sh,.rc .fr{border-radius:var(--rec)}
-.face,.rc .face,.sleeve .face,.tile,.tile img,.tile .pl,.sl img,.sl .sw,.sl .pic,.tbl .c0 .sw,.tbl .c0 .pic,.hit img,.hit .ph,.nb{border-radius:var(--rec)}
+.face,.rc .face,.sleeve .face,.tile,.tile img,.blank,.sl img,.sl .sw,.sl .pic,.tbl .c0 .sw,.tbl .c0 .pic,.hit img,.hit .ph,.nb{border-radius:var(--rec)}
 /* the cardboard edges stop where the corners start curving, so no square tab pokes past a round corner */
 .edge.l,.edge.r{top:var(--rec);height:calc(100% - 2*var(--rec))}
 .edge.t,.edge.b{left:var(--rec);width:calc(100% - 2*var(--rec))}
@@ -1366,11 +1499,11 @@ html.phone .ab-mk{width:64px;height:64px;margin-bottom:4px}
 html.phone .ab-name{margin-top:-6px!important;font-size:56px}
 html.phone .ab-body{font-size:var(--fs-4)}
 html.phone .ab-cr{margin-top:12px}
-/* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom */
-.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
-.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:#121212;opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 calc(50% - 92px));mask:linear-gradient(#0000,#000 calc(50% - 92px));pointer-events:none}
+/* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom; solid under the status bar so no edge of the pile peeks through there */
+.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 16px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 44px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
+.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:var(--bg);opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 calc(50% - 92px));mask:linear-gradient(#0000,#000 calc(50% - 92px));pointer-events:none}
 .kd.kd-on::after{opacity:calc(var(--kz,0)*.94);transition:opacity .2s} /* open on records, the dial darkens what's behind it, but only while you're turning it */
-.kd::before,.kd::before{top:-120px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:#121212f5;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line. It runs on past the bottom of the screen, so a swipe that stretches the page never shows what's under the bar */
+.kd::before,.kd::before{top:-120px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line. It runs on past the bottom of the screen, so a swipe that stretches the page never shows what's under the bar */
 html.phone body.searching .find::before{display:none}
 .find::before{transition:opacity .3s}
 body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
@@ -1461,6 +1594,9 @@ html:has(.crate.lifted) .find>.q{scale:1}
 /* the mark stays put over an open record too, above it, where it takes you back to the front */
 html:has(.open:not([hidden])) .find{z-index:var(--z-raised)}
 html:has(.open:not([hidden])) .find::before{display:none}
+/* phones: once About and the rest rise up the screen, the strip behind the mark comes back, solid where the mark sits, so words
+   scrolling under it go out of sight instead of running into it. It follows the rise, so it's gone while the record is at rest */
+html.phone:has(.open:not([hidden])) .find::before{display:block;height:calc(env(safe-area-inset-top) + 120px);background:color-mix(in srgb,var(--bg) 95%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);opacity:var(--rise,0);transition:none}
 html:has(.open:not([hidden])) .find>.logo{opacity:1;visibility:visible;scale:1;pointer-events:auto;transition:none}
 #oq,.open.in #oq{opacity:0;transition:none}
 html:has(.crate.lifted) #oq{opacity:1}
@@ -1534,6 +1670,9 @@ html .dock .xb>.fb.dr{color:var(--t2)}
 .dsay{--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(var(--db) + var(--H,54px) + 14px);display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);box-sizing:border-box;height:40px;padding:0 16px 0 12px;margin:0;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);font-size:var(--fs-3);color:var(--fg);white-space:nowrap;pointer-events:none;
   opacity:0;visibility:hidden;translate:-50% 10px;transition:opacity .15s var(--out),visibility 0s .15s,translate 0s .15s}
 .dsay.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--ease)}
+/* a tap on it opens that circle's stack, the toast growing into it */
+.dsay.on{pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.dsay.go{opacity:0;visibility:hidden;translate:-50% 0;transition:opacity .16s var(--out),visibility 0s .16s}
 html.phone .dsay{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
 .dsay>i{display:grid;color:var(--t2)}
 .dsay svg{width:18px;height:18px;display:block}
@@ -1594,7 +1733,7 @@ body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .x
 html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
 /* with the keyboard up, the list fits between the field and the status bar of what's actually on screen (iOS scrolls the page up under the status bar, so the full height isn't) */
 html.phone.kbup .sl{bottom:calc(var(--kb,0px) + 8px + 58px + 8px);max-height:calc(var(--vvh,100svh) - 8px - 58px - 8px - env(safe-area-inset-top) - 10px)}
-body.walling .dock::before,html:has(.open:not([hidden])) .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
+body.walling .dock::before,html:has(.open:not([hidden])) .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
 .wall,.tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 120px)}
 @media (max-width:700px){.tbl thead{display:none}} /* the bar's sort button sorts the table too, so the table's own "Sorted by" line goes */
 html:not(.phone) .sl{top:auto;right:auto;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 10px);width:min(440px,calc(100vw - 28px))}
@@ -1649,9 +1788,10 @@ html.phone .sx,html.phone body.searching .sx{display:none}
   </div>
   <nav class="az" id="az" aria-label="Jump to a letter"></nav>
   <div class="kd" id="kd"><p class="kd-b" aria-hidden="true"><span class="c"></span><span class="a"></span></p><div class="kd-d" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><div class="kd-c"></div></div></div>
-  <div class="vw" role="group" aria-label="View"><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
+  <div class="vw" role="group" aria-label="View"><button type="button" data-v="rank" aria-pressed="false" hidden>Top ten</button><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
 </main>
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
+<section class="rk" id="rk" hidden tabindex="-1" aria-label="The top ten"><ol></ol></section>
 <section class="tbl" id="tbl" hidden tabindex="-1" aria-label="Every record, as a table"><table><thead></thead><tbody></tbody></table></section>
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
 <div class="hv" id="hv" aria-hidden="true"></div>
@@ -1724,6 +1864,7 @@ html.phone .sx,html.phone body.searching .sx{display:none}
 </dialog>
 
 <script src="/vinyl/visitor-crate.js"></script>
+<script src="/vinyl/rank-rows.js"></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1750,6 +1891,7 @@ const RECORDS=[ // Casey's records (added: the day one joined the crate, for the
   {artist:'The Charlie Daniels Band',title:'Fire on the Mountain'},
   {artist:'Chris Stapleton',title:'Traveller'},
   {artist:'The Civil Wars',title:'Live at Eddie’s Attic'},
+  {artist:'Cory Wong',title:'On a Random Tuesday: Live at the Blue Note',added:'2026-11-19'},
   {artist:'Creedence Clearwater Revival',title:'Bayou Country'},
   {artist:'Creedence Clearwater Revival',title:'Green River'},
   {artist:'Creedence Clearwater Revival',title:'Willy and the Poor Boys'},
@@ -1759,6 +1901,7 @@ const RECORDS=[ // Casey's records (added: the day one joined the crate, for the
   {artist:'David Ramirez',title:'Fables'},
   {artist:'Dawes',title:'Nothing Is Wrong'},
   {artist:'Dawes',title:'All Your Favorite Bands'},
+  {artist:'Deer Tick',title:'Coin-O-Matic',added:'2026-11-19'},
   {artist:'The Doobie Brothers',title:'The Captain and Me'},
   {artist:'Eagles',title:'Their Greatest Hits 1971–1975'},
   {artist:'Edward Sharpe & the Magnetic Zeros',title:'Up from Below'},
@@ -1850,18 +1993,6 @@ const RECORDS=[ // Casey's records (added: the day one joined the crate, for the
   {artist:'Various artists',title:'Woodstock: Music from the Original Soundtrack and More',sortAs:'Woodstock'},
 ].map(r=>({pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...r,slug:(r.artist+' '+r.title).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}));
 
-// Made-up cover art: one of a few patterns in each record's colors
-function art(r){
-  const [bg,fg,ac]=r.pal;let g='';
-  if(r.art==='sun'){g=`<circle cx="50" cy="60" r="21" fill="${ac}"/>`;for(let i=0;i<6;i++)g+=`<rect x="0" y="${72+i*5}" width="100" height="${1.2+i*.5}" fill="${fg}" opacity=".85"/>`}
-  if(r.art==='grid'){for(let x=0;x<6;x++)for(let y=0;y<5;y++)g+=`<circle cx="${17+x*13.2}" cy="${38+y*13}" r="${(x+y)%3?3.2:5.4}" fill="${(x*y)%4?fg:ac}"/>`}
-  if(r.art==='arch'){for(let i=0;i<5;i++){const w=78-i*14;g+=`<path d="M${50-w/2} 100V${62-i*0}a${w/2} ${w/2} 0 0 1 ${w} 0V100z" fill="${i%2?bg:(i?ac:fg)}"/>`}}
-  if(r.art==='type'){g=`<text x="7" y="96" font-family="system-ui,-apple-system,sans-serif" font-weight="500" font-size="54" fill="${ac}" letter-spacing="-3">${r.title[0]}</text><rect x="7" y="40" width="40" height="2" fill="${fg}"/>`}
-  if(r.art==='rings'){for(let i=6;i>0;i--)g+=`<circle cx="64" cy="66" r="${i*6}" fill="none" stroke="${i%2?ac:fg}" stroke-width="2.4"/>`}
-  if(r.art==='bands'){g=`<rect y="44" width="100" height="18" fill="${fg}"/><rect y="62" width="100" height="18" fill="${ac}"/><rect y="80" width="100" height="20" fill="${fg}" opacity=".6"/>`}
-  if(r.art==='stripes'){for(let i=-10;i<12;i++)g+=`<path d="M${i*10} 100L${i*10+60} 40" stroke="${i%3?fg:ac}" stroke-width="2.6"/>`;g+=`<rect width="100" height="40" fill="${bg}"/>`}
-  return `<svg class="art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${g}</svg>`;
-}
 // local covers live in vinyl/; a visitor's crate uses Apple's artwork URLs
 const img=f=>/^(https?:|\/)/.test(f)?f:'/vinyl/'+f; // covers Casey uploads come from /api/crate/img
 // a smaller copy of a cover, where there is one: Casey's in vinyl/t/ (scripts/vinyl-thumbs.mjs), Casey's uploads from
@@ -1882,8 +2013,17 @@ function fadeIn(i){
   if(!document.body.classList.contains('ready')){i.classList.add('on');return}
   i.decode().catch(()=>{}).then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.add('on'))));
 }
-const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):`${art(r)}<div class="cover-type" style="color:${r.pal[1]}"><b>${r.artist}</b><i>${r.title}</i></div>`;
-const spineBg=r=>r.spine||r.pal[0];
+// A record with no cover gets a die-cut jacket in a color of its own, the record showing through a round hole in the middle with
+// a label of the same color, and the artist and title in a band across the top, year at its end. The color is picked from the
+// artist's name, so a record keeps it from visit to visit and any crate gets the same treatment; a color set by hand (Details) wins.
+const JACKETS=['#d8d3ca','#c4b096','#8e9a86','#2e3a4c','#6e3b34','#38463a','#b79a46','#1e1e1f','#9aa3ab','#5a4a63','#b5553c','#3f6f73','#d9b8a6','#7a7f3a','#243b33','#c9c2e0','#e1c35a'];
+const hashOf=s=>{let h=2166136261;for(const c of String(s).toLowerCase())h=Math.imul(h^c.charCodeAt(0),16777619);h=Math.imul(h^h>>>15,0x2c1b3c6d);return (h^h>>>13)>>>0}; // mixed at the end, so names that differ by a letter or two land far apart
+const jacketOf=r=>JACKETS[hashOf(r.artist)%JACKETS.length];
+// a title that starts with its artist ("Chet Baker - Jazz & Blues") is shown without it under the artist's name
+const bareTitle=r=>{const a=String(r.artist||'').trim(),t=String(r.title||'');if(!a)return t;const m=t.slice(0,a.length).toLowerCase()===a.toLowerCase()&&t.slice(a.length).match(/^\s*[-–—:·|]\s*(.+)$/);return m?m[1]:t};
+const blankHTML=r=>{const bg=spineBg(r);return `<div class="art blank" style="background-color:${bg};color:${inkOn(bg)};--jk:${bg}"><span class="bl-bd"><b>${esc(r.artist)}</b><i>${esc(bareTitle(r))}</i>${+r.year?`<em>${esc(r.year)}</em>`:''}</span><i class="bl-ho"></i><i class="bl-lb"></i></div>`};
+const coverHTML=(r,lazy)=>r.front?imgHTML(r.front,lazy):blankHTML(r);
+const spineBg=r=>r.spine||(r.front?r.pal[0]:jacketOf(r));
 // the edges wear the cover's own outermost pixels (the print wraps round the card), over the spine color until it loads
 const edgesHTML=(r,ks=['l','r','t','b','ctl','ctr','cbl','cbr'])=>ks.map(k=>`<div class="edge ${k}" style="background-color:${spineBg(r)}${r.front?`;--fimg:url('${img(r.front)}')`:''}"></div>`).join('');
 const spineHTML=r=>`<div class="spine-in" style="background:${r.pal[0]};color:${r.pal[1]}"><span><b>${r.artist}</b> <em>${r.title}</em></span><em>${r.year}</em></div>`;
@@ -1922,11 +2062,22 @@ const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 const SORTS={artist:{l:'Artist',by:byName},title:{l:'Title',by:(a,b)=>cmpS(ttl(a),ttl(b))||byName(a,b)},year:{l:'Year',by:(a,b)=>yr(a)-yr(b)||byName(a,b)},
   added:{l:'Date added',by:(a,b)=>(dayOf(a)<dayOf(b)?-1:dayOf(a)>dayOf(b)?1:0)||(a.seq??0)-(b.seq??0)||byName(a,b)},
   label:{l:'Label',by:(a,b)=>cmpS(labelName(a.label),labelName(b.label))||byName(a,b)},color:{l:'Color',by:(a,b)=>hue(a)-hue(b)||hsl(b).l-hsl(a).l||byName(a,b)}};
+// A ranked crate (a top ten) knows each record's place, from 0 (RANK, by slug). It sorts by rank too, counting down from
+// its last place to number one in the crate, and it has a view of its own, the list (see "the top ten" below)
+let RANK=new Map(),RANKED=false;
+const rankOf=r=>RANK.has(r?.slug)?RANK.get(r.slug):99;
+function setRank(slugs){
+  const on=!!slugs,was=RANKED;RANKED=on;RANK=new Map((slugs||[]).map((x,i)=>[x,i]));document.documentElement.classList.toggle('ranked',on);
+  if(on&&!SORTS.rank){const o={...SORTS};for(const k in SORTS)delete SORTS[k];Object.assign(SORTS,{rank:{l:'Rank',by:(a,b)=>rankOf(a)-rankOf(b)}},o)}
+  if(!on&&SORTS.rank){delete SORTS.rank;if(SORT.k==='rank')SORT={k:'artist',d:1}}
+  if(on&&!was)SORT={k:'rank',d:-1}; // a top ten starts at ten
+  if(on!==was){window.rankSync?.();window.drawSort?.()}
+}
 let SORT={k:'artist',d:1};try{const s=JSON.parse(localStorage.getItem('records-sort'));if(s&&SORTS[s.k])SORT={k:s.k,d:s.d<0?-1:1}}catch{}
 const unsorted=r=>SORT.k==='year'?!+r.year:SORT.k==='label'?!r.label:SORT.k==='added'&&DATED&&!dayOf(r);
 const bySort=(a,b)=>unsorted(a)-unsorted(b)||SORTS[SORT.k].by(a,b)*SORT.d;
 // where a record falls in the sort: a letter, a year, the month it came in, or a color
-const group=r=>{if(!r)return'';const k=SORT.k;return k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='added'?(dayOf(r).slice(0,7)||'—'):k==='color'?String(hue(r)):letter(r)};
+const group=r=>{if(!r)return'';const k=SORT.k;return k==='rank'?String(rankOf(r)+1):k==='title'?initial(ttl(r)):k==='label'?(r.label?initial(labelName(r.label)):'#'):k==='year'?(+r.year?String(r.year):'—'):k==='added'?(dayOf(r).slice(0,7)||'—'):k==='color'?String(hue(r)):letter(r)};
 // and how that reads: "Oct ’26" for a month
 const gName=g=>SORT.k==='color'?HUES[+g]:g==='—'?'No date':SORT.k==='added'?`${MON[+g.slice(5)-1]} ’${g.slice(2,4)}`:g;
 // Filters narrow the crate: names from a record's details or offered by the search (an artist, label, year, genre…), plus any
@@ -2272,9 +2423,9 @@ addEventListener('pointerdown',e=>{if(!$('#cmenu').hidden&&!e.target.closest('#c
 // Pull a record out: big sleeve to turn over (drag, click, arrow keys), details and a Spotify link beside it
 // resting angle of a pulled-out sleeve: barely turned, unless you turn it
 let REST,TILT;const restFor=()=>{REST=PHONE?0:-3;TILT=PHONE?0:-1};restFor(); // on a phone it faces you square
-const open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage'),lift=$('#lift');
+const findBar=$('.find'),open=$('#open'),sleeve=$('#sleeve'),stage=$('#stage'),lift=$('#lift');
 // phones: how far the details have risen over the record, for the record's dimming and the fade behind the words
-open.addEventListener('scroll',()=>{open.style.setProperty('--rise',PHONE?Math.min(1,open.scrollTop/120).toFixed(3):0);
+open.addEventListener('scroll',()=>{const rise=PHONE?Math.min(1,open.scrollTop/120).toFixed(3):0;open.style.setProperty('--rise',rise);findBar.style.setProperty('--rise',rise); // the strip behind the mark fades in with it
   // past the top, iOS can still pull the whole view down a way (a fling, or a drag that turned around); the record stays where it is
   const o=PHONE?Math.min(0,open.scrollTop):0;if(o||stage.style.translate)stage.style.translate=o?`0 ${o}px`:''},{passive:true});
 let base=REST,ry=base,rx=TILT,sdrag=null,busy=false,timers=[],flyF=0;
@@ -2562,6 +2713,15 @@ function openRecord(deep,pulled){
   crate.classList.add('lifted');
   // a link straight to a record: it's put in place without the lift, and the open view waits unseen behind the loading sleeve, then fades in with the page
   if(reduce||deep&&!document.body.classList.contains('ready')){held.classList.add('held');lift.style.transform='';setS();open.classList.add('in')}
+  // from the table the record doesn't fly out of its row: the table fades back and the record grows in where it will sit
+  else if(window.inPlace?.()){
+    busy=true;cancelAnimationFrame(flyF);lift.className='lift';sleeve.classList.remove('fade');stage.style.perspective=stage.style.perspectiveOrigin='';
+    held.classList.add('held');snapS(ry,rx);
+    lift.style.transition='none';lift.style.transform='scale(.94)';lift.style.opacity='0';void lift.offsetWidth;
+    later(()=>{lift.style.transition='transform .46s var(--ease),opacity .46s var(--ease)';lift.style.transform='';lift.style.opacity=''},80);
+    later(()=>open.classList.add('in'),200);
+    later(()=>{lift.style.transition='';busy=false},560);
+  }
   else{
     busy=true;cancelAnimationFrame(flyF);lift.className='lift';lift.style.transition='';sleeve.classList.remove('fade');
     const ps=cratePose(held);
@@ -2598,7 +2758,7 @@ function swap(dir,o=0){
   crate.classList.add('still');go(j,true);$('.rc.cur',stack).classList.add('held');
   const r=order[cur];
   addr();
-  if(reduce){fill(r);setS();return}
+  if(reduce){fill(r);setS();open.scrollTop=0;return}
   // the record travels out to the edge it came from and becomes the peek; the neighbor travels in from its edge
   busy=true;
   const T=PHONE?480:700,PK=PHONE?14:28;
@@ -2617,10 +2777,19 @@ function swap(dir,o=0){
   ghost.style.transition=`transform ${T}ms ${ease},opacity ${T}ms`;ghost.style.transform=edge(-dir);ghost.style.opacity='.45';
   gs.className='sleeve';gs.style.transition=`transform ${T}ms ${ease}`;gs.style.transform=`rotateX(0deg) rotateY(${flat}deg)`;
   lift.style.transition=`transform ${T}ms ${ease},opacity ${T*.7}ms`;lift.style.transform='';lift.style.opacity='';
-  base=REST;ry=base;rx=TILT;setS();
+  base=REST;ry=base;rx=TILT;setS();toTop(T);
   later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},T);
   later(()=>{lift.style.transition='';busy=false},T+60);
 }
+// the next record starts at the top of its details: the view scrolls home with the swap, so it never arrives half risen over the record
+let topF=0;
+function toTop(T,to=0){
+  cancelAnimationFrame(topF);cancelAnimationFrame(coastF);coastF=0;const y0=open.scrollTop;if(y0===to)return;
+  if(reduce){open.scrollTop=to;return}
+  const t0=performance.now(),f=t=>{const k=Math.min(1,(t-t0)/T),e=1-(1-k)**3;open.scrollTop=y0+(to-y0)*e;topF=k<1?requestAnimationFrame(f):0};
+  topF=requestAnimationFrame(f);
+}
+open.addEventListener('pointerdown',()=>{cancelAnimationFrame(topF);topF=0},true);
 // a record that isn't a neighbor: the one open fades back where it is, and the new one grows out of the cover that was tapped
 // (from: its box on screen), or, going Back, rises in place
 function hop(j,from){
@@ -2629,7 +2798,7 @@ function hop(j,from){
   $$('.rc.held',stack).forEach(n=>n.classList.remove('held'));
   crate.classList.add('still');go(j,true);$('.rc.cur',stack).classList.add('held');
   const r=order[cur];
-  if(reduce){fill(r);setS();return}
+  if(reduce){fill(r);setS();open.scrollTop=0;return}
   busy=true;
   const T=PHONE?480:620,ease='cubic-bezier(.22,1,.36,1)';
   const ghost=lift.cloneNode(false),gs=sleeve.cloneNode(false);ghost.removeAttribute('id');gs.removeAttribute('id');gs.append(...sleeve.childNodes);ghost.append(gs);
@@ -2643,7 +2812,7 @@ function hop(j,from){
   snapS(0,0);void lift.offsetWidth;
   ghost.style.transition=`transform ${T*.6}ms ${ease},opacity 150ms`;ghost.style.transform='scale(.96)';ghost.style.opacity='0';
   lift.style.transition=`transform ${T}ms ${ease},opacity ${T*.5}ms`;lift.style.transform='';lift.style.opacity='';
-  base=REST;ry=base;rx=TILT;setS();
+  base=REST;ry=base;rx=TILT;setS();toTop(T);
   later(()=>{ghost.remove();[prevP,nextP].forEach(b=>b.style.transition='none');open.classList.remove('swapping');void open.offsetWidth;[prevP,nextP].forEach(b=>b.style.transition='')},T);
   later(()=>{lift.style.transition='';busy=false},T+60);
 }
@@ -2661,6 +2830,16 @@ function closeRecord(fromPop){
   open.classList.remove('in');crate.classList.remove('still');
   if(reduce){quick=false;vanish=false;done();return}
   if(vanish){vanish=quick=false;busy=true;open.style.transition='opacity .2s';open.style.opacity='0';later(()=>{open.style.transition=open.style.opacity='';done()},200);return}
+  // back to the table: the record fades back where it is and the table rises in under it, no flight home to its row
+  if(window.inPlace?.()){
+    busy=true;cancelAnimationFrame(flyF);cancelAnimationFrame(sraf);sraf=0;
+    if(quick){quick=false;crate.classList.remove('lifted');veil.style.transition='opacity .3s';veil.style.opacity='0'}
+    const t=getComputedStyle(lift).transform;lift.className='lift';
+    lift.style.transition='transform .22s ease-in,opacity .22s ease-in';lift.style.transform=(t==='none'?'':t+' ')+'scale(.96)';lift.style.opacity='0';
+    const tb=$('#tbl');tb.classList.remove('rise');void tb.offsetWidth;tb.classList.add('rise');tb.addEventListener('animationend',()=>tb.classList.remove('rise'),{once:true});
+    later(()=>{done();lift.style.transform=lift.style.opacity=''},230);
+    document.title=TITLE;return;
+  }
   // reverse: details tuck back under, the record drops back into the crate, the rest fades back in
   busy=true;
   // one tween carries the sleeve home, from wherever it is: position, size, lean and turn all land together on the record in the
@@ -2696,10 +2875,14 @@ stage.addEventListener('pointerdown',e=>{if(busy||!e.isPrimary)return;const now=
 function slide(e){
   const s=sdrag,dx=e.clientX-s.x,dy=e.clientY-s.y,now=performance.now(),dt=Math.max(8,now-s.lt);
   s.vx=.5*s.vx+.5*(e.clientX-s.lx)/dt;s.vy=.5*s.vy+.5*(e.clientY-s.ly)/dt;s.lt=now;s.lx=e.clientX;s.ly=e.clientY;
-  if(!s.ax){if(Math.hypot(dx,dy)<8)return;s.far=true;s.ax=Math.abs(dx)>=Math.abs(dy)?'x':'y';
-    if(s.ax==='y'&&(dy<0||open.scrollTop>0)){s.ax='s';s.st=open.scrollTop+dy;return} // up, or back down once scrolled: the details move and the record stays (with nothing to scroll, up does nothing: it never starts the pull back into the crate, which would bring the crate up behind the page)
+  // sideways wins anything flatter than about 60 degrees: a thumb sweeping across often starts on an upward arc
+  if(!s.ax){if(Math.hypot(dx,dy)<10)return;s.far=true;s.ax=Math.abs(dx)>=Math.abs(dy)*.6?'x':'y';
+    if(s.ax==='y'&&(dy<0||open.scrollTop>0)){s.ax='s';s.top=open.scrollTop;s.st=open.scrollTop+dy;return} // up, or back down once scrolled: the details move and the record stays (with nothing to scroll, up does nothing: it never starts the pull back into the crate, which would bring the crate up behind the page)
     lift.style.transition='none';cancelAnimationFrame(unpullF);unpullF=0;root.classList.add(s.ax==='x'?'sliding':'pulldown')}
+  // a scroll that turns into a sweep across, early on, becomes the swipe after all, and the details settle back where they were
+  if(s.ax==='s'&&Math.abs(dx)>28&&Math.abs(dx)>Math.abs(dy)&&Math.abs(s.top-open.scrollTop)<60){s.ax='x';s.back=s.top;lift.style.transition='none';root.classList.add('sliding')}
   if(s.ax==='s'){open.scrollTop=s.st-dy;return}
+  if(s.back!=null){const y=open.scrollTop;open.scrollTop=Math.abs(y-s.back)<1?s.back:y+(s.back-y)*.35;if(open.scrollTop===s.back)s.back=null}
   if(s.ax==='x'){
     s.dx=order[cur+(dx<0?1:-1)]?dx:dx*.25/(1+Math.abs(dx)/400); // nothing that way: it gives a little
     lift.style.transform=`translateX(${s.dx.toFixed(1)}px) rotate(${(s.dx/s.w*3).toFixed(2)}deg)`;open.style.setProperty('--dx',s.dx.toFixed(1)+'px');
@@ -2715,7 +2898,7 @@ function settle(s){
     const dir=s.dx<0?1:-1,fling=Math.abs(s.vx)>.4&&Math.sign(s.vx)===-dir;
     root.classList.remove('sliding');
     if(order[cur+dir]&&(Math.abs(s.dx)>s.w*.25||fling)){buzz();swap(dir,s.dx);return}
-    open.style.setProperty('--dx','0px');home();return;
+    open.style.setProperty('--dx','0px');if(s.back!=null)toTop(300,s.back);home();return;
   }
   if(s.dy>110||s.vy>.5&&s.dy>24){quick=true;closeRecord();return}
   unpull();home();
@@ -2761,6 +2944,20 @@ const sEnd=()=>{if(!sdrag)return;const s=sdrag,tap=!sdrag.far&&performance.now()
   if(s.ax){settle(s);return}
   if(tap)sv.vy=0;base=tap?base+180:REST+180*Math.round((sv.ry+sv.vy*.12-REST)/180);ry=base;rx=TILT;setS()};
 stage.addEventListener('pointerup',sEnd);stage.addEventListener('pointercancel',sEnd);
+// phones: a sweep across anywhere below the record (title, buttons, About, the margins beside them) brings in the next record too;
+// it has to be clearly sideways, so up and down still scroll the details the way they always have, and a tap still lands
+{let eatT=0;
+  open.addEventListener('pointerdown',e=>{
+    if(!PHONE||busy||sdrag||!e.isPrimary||e.pointerType==='mouse'||playMenu()||e.target.closest('#stage,.peek,.play-m,input,textarea,select'))return;
+    const now=performance.now();sdrag={x:e.clientX,y:e.clientY,t:now,lt:now,lx:e.clientX,ly:e.clientY,vx:0,vy:0,far:false,ax:null,ry:sv.ry,w:stage.offsetWidth,os:true}});
+  open.addEventListener('pointermove',e=>{const s=sdrag;if(!s||!s.os)return;
+    if(!s.ax){const dx=e.clientX-s.x,dy=e.clientY-s.y;if(Math.hypot(dx,dy)<10)return;
+      if(Math.abs(dx)<=Math.abs(dy)){sdrag=null;return} // up or down: the page scrolls, as ever
+      s.ax='x';s.far=true;lift.style.transition='none';cancelAnimationFrame(unpullF);unpullF=0;root.classList.add('sliding')}
+    slide(e)});
+  const oEnd=()=>{const s=sdrag;if(!s||!s.os)return;sdrag=null;if(s.ax){eatT=performance.now();settle(s)}};
+  open.addEventListener('pointerup',oEnd);open.addEventListener('pointercancel',oEnd);
+  open.addEventListener('click',e=>{if(performance.now()-eatT<400){e.preventDefault();e.stopPropagation()}},true)} // a swipe that started on Play doesn't press it
 stage.addEventListener('mouseleave',()=>{if(!sdrag&&!busy){ry=base;rx=TILT;setS()}});
 stage.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();turn()}});
 
@@ -2839,7 +3036,7 @@ function aboutClose(){if(!about.open||about.closing)return;about.classList.remov
 function front(){menuOff();
   if(q.value){q.value='';qSync()}if(filt)arrange(null);q.blur();
   if(document.body.classList.contains('walling'))go(0,true);else if(cur)jump(0);
-  for(const p of [$('#wall'),$('#tbl')])if(!p.hidden)p.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}
+  for(const p of [$('#wall'),$('#tbl'),$('#rk')])if(!p.hidden)p.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}
 $('.logo').addEventListener('click',e=>{e.preventDefault();e.currentTarget.blur();
   if(open.hidden)return front();
   const mo=new MutationObserver(()=>{if(open.hidden){mo.disconnect();front()}});mo.observe(open,{attributes:true,attributeFilter:['hidden']});closeRecord()});
@@ -2898,27 +3095,62 @@ function bake(i,el){
 function draw(i,el){
   // a phone draws the record at the crate's size; a wider screen pulls it out bigger, so it keeps the file's own size
   const S=nodes.find(n=>n.offsetWidth)?.offsetWidth||480,nw=i.naturalWidth,nh=i.naturalHeight,f=PHONE?Math.min(1,S*Math.min(devicePixelRatio||1,3)/Math.max(nw,nh)):1;
-  const w=Math.round(nw*f),h=Math.round(nh*f),k=w/S,c=document.createElement('canvas');c.width=w;c.height=h;
-  const x=c.getContext('2d'),P=el.dataset.paper,wear=+el.dataset.wear||0;
+  const w=Math.round(nw*f),h=Math.round(nh*f),job={w,h,k:w/S,P:el.dataset.paper,wear:+el.dataset.wear||0};
+  const here=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;
+    if(!dressCover(c.getContext('2d'),i,job,{grain:TILES.grain&&soft(TILES.grain),tooth:soft(TILES.tooth)})){c.width=c.height=0;return null}
+    // JPEG: a cover has no transparency, and it writes and reads back twice as fast as WebP (Safari can't write WebP at all).
+    // The canvas is let go at once: Safari counts canvas memory
+    return new Promise(res=>c.toBlob(b=>{c.width=c.height=0;res(b&&URL.createObjectURL(b))},'image/jpeg',.9))};
+  const W=baker();if(!W)return here();
+  // the worker measures the baked cover for the lamp too (see tone), so the page never has to read it back
+  return W({...job,src:i.src}).then(({b,m,v})=>{if(!b)return null;const u=URL.createObjectURL(b);if(m!=null)TONE.set(u,toneOf(m,v));return u},()=>baker()?null:here());
+}
+// Draws a cover (an image, or the worker's bitmap of it) at w×h with its paper and wear (k: canvas pixels to one of the record's), and answers false if it came out
+// blank. Self-contained, so the baking worker runs this very function
+function dressCover(x,i,{w,h,k,P,wear},T){
   const fill=f=>{x.fillStyle=f;x.fillRect(0,0,w,h)};
   const lin=(deg,stops)=>{const a=deg*Math.PI/180,dx=Math.sin(a),dy=-Math.cos(a),L=Math.abs(w*dx)+Math.abs(h*dy),g=x.createLinearGradient(w/2-dx*L/2,h/2-dy*L/2,w/2+dx*L/2,h/2+dy*L/2);stops.forEach(([o,col])=>g.addColorStop(o,col));return g};
-  const pat=(t,n)=>{const p=x.createPattern(soft(t),'repeat');p.setTransform(new DOMMatrix().scale(k*n/t.width));return p};
+  const pat=(t,n,a)=>{const s=k*n/t.width;x.save();x.globalAlpha=a;x.scale(s,s);x.fillStyle=x.createPattern(t,'repeat');x.fillRect(0,0,w/s,h/s);x.restore()};
   const corner=(cx,cy,r,col)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r*Math.hypot(w,h));g.addColorStop(0,col);g.addColorStop(1,'#ffffff00');fill(g)};
   x.imageSmoothingQuality='high';x.drawImage(i,0,0,w,h);
   // iOS sometimes draws nothing here (most often when it's short on memory), and a blank canvas saved as JPEG is a black
   // square: a cover has no clear pixels, so if any of these are clear, the bake failed and the cover stays as it came
   const px=(a,b)=>x.getImageData(Math.min(w-1,a*w|0),Math.min(h-1,b*h|0),1,1).data[3];
-  if(!px(.5,.5)||!px(.2,.2)||!px(.8,.8)){c.width=c.height=0;return null}
-  if(P==='matte'&&TILES.grain){x.globalAlpha=.5;fill(pat(TILES.grain,128));x.globalAlpha=1}
-  if(P==='uncoated')fill(pat(TILES.tooth,96));
+  if(!px(.5,.5)||!px(.2,.2)||!px(.8,.8))return false;
+  if(P==='matte'&&T.grain)pat(T.grain,128,.5);
+  if(P==='uncoated'&&T.tooth)pat(T.tooth,96,1);
   if(P==='matte')fill('#ffffff06');
   if(P==='uncoated')fill('#f7efdc10');
   if(P==='gloss'){fill(lin(118,[[.3,'#ffffff00'],[.41,'#ffffff1e'],[.48,'#ffffff08'],[.56,'#ffffff00']]));fill(lin(180,[[0,'#ffffff0e'],[.35,'#ffffff00']]))}
   if(wear===1){corner(0,0,.035,'#ffffff24');corner(w,h,.03,'#ffffff1a')}
   if(wear===2){corner(0,0,.05,'#ffffff38');corner(w,h,.04,'#ffffff26');corner(w,0,.03,'#ffffff1c');fill('#f3e4c40f');x.strokeStyle='#ffffff26';x.lineWidth=2*k;x.strokeRect(0,0,w,h)}
-  // JPEG: a cover has no transparency, and it writes and reads back twice as fast as WebP (Safari can't write WebP at all).
-  // The canvas is let go at once: Safari counts canvas memory
-  return new Promise(res=>c.toBlob(b=>{c.width=c.height=0;res(b&&URL.createObjectURL(b))},'image/jpeg',.9));
+  return true;
+}
+// Baking happens off the page's thread where the browser can (a worker that reads the cover again, from the cache, and draws
+// it on its own canvas), so covers coming in never hold up a tap or a flick. baker() answers a function that bakes one cover there, or null where it can't, and the page bakes as before
+let bk;
+function baker(){
+  if(bk!==undefined)return bk;bk=null;
+  if(!window.Worker||!window.OffscreenCanvas||!OffscreenCanvas.prototype.convertToBlob||!window.createImageBitmap)return bk;
+  try{
+    const w=new Worker(URL.createObjectURL(new Blob([`${dressCover}
+let T={};const s=new OffscreenCanvas(24,24).getContext('2d',{willReadFrequently:true});
+onmessage=async({data:d})=>{if(d.T){T=d.T;return}let b=null,i=null,m=null,v=null;
+  try{i=await createImageBitmap(await (await fetch(d.src)).blob());const c=new OffscreenCanvas(d.w,d.h);
+    if(dressCover(c.getContext('2d'),i,d,T)){b=await c.convertToBlob({type:'image/jpeg',quality:.9});
+      s.clearRect(0,0,24,24);s.drawImage(c,0,0,24,24);const p=s.getImageData(0,0,24,24).data;m=v=0;
+      for(let j=0;j<p.length;j+=4){const y=(.2126*p[j]+.7152*p[j+1]+.0722*p[j+2])/255;m+=y;v+=y*y}m/=576;v=Math.sqrt(Math.max(0,v/576-m*m))}
+    c.width=c.height=0}catch{}
+  i?.close();postMessage({id:d.id,b,m,v})}`],{type:'text/javascript'})));
+    const jobs=new Map();let n=0;
+    const fail=()=>{bk=null;w.terminate();jobs.forEach(j=>j.no());jobs.clear()};
+    w.onmessage=({data:d})=>{jobs.get(d.id)?.ok(d);jobs.delete(d.id)};w.onerror=fail;
+    // the paper tiles go over once, softened here (a worker's canvas can't blur in every browser)
+    const tiles=Promise.all(['grain','tooth'].map(t=>TILES[t]?createImageBitmap(soft(TILES[t])):null))
+      .then(([grain,tooth])=>w.postMessage({T:{grain,tooth}},[grain,tooth].filter(Boolean)));
+    bk=job=>tiles.then(()=>new Promise((ok,no)=>{const id=++n;jobs.set(id,{ok,no});w.postMessage({...job,id})}));
+  }catch{bk=null}
+  return bk;
 }
 // a pulled-out record whose cover the crate hasn't baked yet bakes its own
 const bakeIn=el=>el.querySelectorAll('img.art').forEach(i=>i.complete&&i.naturalWidth?bake(i,el):i.addEventListener('load',()=>bake(i,el),{once:true}));
@@ -2959,6 +3191,8 @@ function lampTick(t){
 // smudge, and a plain face (a jacket with no back on file, a cover with no art) has nothing to break the spot up, so it reads as
 // a spotlight: both get less. Measured once per cover from a small copy (a cover from another site can't be read, so it goes
 // by its spine color), and a plain face by its color.
+// m and v: the face's mean lightness and how much it varies (0–1)
+function toneOf(m,v){const b=Math.min(1,Math.max(0,(m-.35)/.5)),bright=b*b*(3-2*b),busy=Math.min(1,v/.18);return{lit:(1-.6*bright)*(.4+.6*busy),dark:1-.6*bright}}
 const TONE=new Map(),toneX=(()=>{const c=document.createElement('canvas');c.width=c.height=24;return c.getContext('2d',{willReadFrequently:true})})();
 function tone(el,f){
   const i=f.querySelector('img.art'),ready=!!(i&&i.complete&&i.naturalWidth),sp=el.style.getPropertyValue('--sp').trim()||'#1d1d1f',
@@ -2967,9 +3201,8 @@ function tone(el,f){
   const x=toneX,read=()=>{const d=x.getImageData(0,0,24,24).data;let m=0,v=0;for(let j=0;j<d.length;j+=4){const y=(.2126*d[j]+.7152*d[j+1]+.0722*d[j+2])/255;m+=y;v+=y*y}m/=576;return[m,Math.sqrt(Math.max(0,v/576-m*m))]};
   let m,v;
   if(ready&&(i.src.startsWith('blob:')||new URL(i.src).origin===location.origin))try{x.clearRect(0,0,24,24);x.drawImage(i,0,0,24,24);[m,v]=read()}catch{} // drawing another site's cover would taint this canvas for good
-  if(m==null){x.fillStyle='#000';x.fillStyle=sp;x.fillRect(0,0,24,24);[m]=read();v=ready?.12:f.querySelector('svg.art')?.06:0} // a cover we can't read is guessed as average; drawn art as fairly plain
-  const b=Math.min(1,Math.max(0,(m-.35)/.5)),bright=b*b*(3-2*b),busy=Math.min(1,v/.18);
-  t={lit:(1-.6*bright)*(.4+.6*busy),dark:1-.6*bright};
+  if(m==null){x.fillStyle='#000';x.fillStyle=sp;x.fillRect(0,0,24,24);[m]=read();v=ready?.12:f.querySelector('svg.art,.art.blank')?.1:0} // a cover we can't read is guessed as average; drawn art as fairly plain
+  t=toneOf(m,v);
   if(i&&!ready)return t; // the cover is still coming: measured again once it's here
   TONE.set(key,t);return t;
 }
@@ -3160,6 +3393,7 @@ function applyEdits(){
   const out=new Set(EDITS.removed),seen=new Set();let list=[...BASE,...mine].filter(r=>!out.has(r.slug)&&!seen.has(r.slug)&&seen.add(r.slug));
   if(C){const picked=new Set(C.records);list=[...list.filter(r=>picked.has(r.slug)),...extra]}
   RECORDS.splice(0,RECORDS.length,...list);
+  setRank(C?.rank||null);
   nameCrate();bare();
 }
 // a crate with nothing in it yet says so; while editing, how to fill it
@@ -3179,13 +3413,30 @@ function nameCrate(){
 let apiQ=Promise.resolve();
 function api(body){
   const p=apiQ.then(async()=>{
+    const bump=RANKED&&(body.op==='crate-put'||body.op==='crate-add')&&body.crate===CRATE?[...RANK.keys()]:null,was=bump&&new Map(RECORDS.map(r=>[r.slug,r]));
     const r=await fetch('/api/crate',{method:'POST',headers:{'Content-Type':'application/json',...keyH()},body:JSON.stringify(body)}).catch(()=>null);
     const d=await r?.json().catch(()=>({}));
     if(r?.status===401){lockOut();throw new Error('You’re signed out')}
     if(!r?.ok)throw new Error(d?.error?d.error[0].toUpperCase()+d.error.slice(1):'That didn’t save');
-    EDITS=d.edits;applyEdits();return d;
+    EDITS=d.edits;applyEdits();
+    if(bump){const nw=body.slug||slugOf(body.record.artist,body.record.title),out=bump.filter(x=>!RANK.has(x)&&x!==nw).map(x=>was.get(x)).filter(Boolean);
+      if(out.length)setTimeout(()=>toast(`${out[0].title} is out of the top ten`,'Undo',()=>unbump(nw,out,bump)),0)}
+    window.rankPanel?.();return d;
   });
   apiQ=p.catch(()=>{});return p;
+}
+// the record that made a full top ten drop its last place goes back out, and the one that dropped comes back to its place
+async function unbump(nw,out,rank){
+  try{await api({op:'crate-take',crate:CRATE,slug:nw});
+    for(const r of out){const {_o,mine,extra,...rec}={...r,...r._o};await api(r.extra?{op:'crate-add',crate:CRATE,record:rec}:{op:'crate-put',crate:CRATE,slug:r.slug});made.delete(r)}
+    await reRank(rank);toast(`${out[0].title} is back`)}catch(e){toast(e.message)}
+}
+// a top ten in a new order: the crate, the list and the panel follow at once, and it saves behind them
+async function reRank(slugs){
+  const have=[...RANK.keys()],to=slugs.filter(x=>RANK.has(x));for(const x of have)if(!to.includes(x))to.push(x);
+  if(to.join()===have.join())return;
+  setRank(to);arrange(filt,order[cur]);window.drawRank?.();window.rankPanel?.();
+  try{await api({op:'crate-rank',crate:CRATE,slugs:to})}catch(e){toast(e.message);applyEdits();arrange(filt,order[cur]);window.drawRank?.();window.rankPanel?.()}
 }
 async function upload(blob){
   const r=await fetch('/api/crate/img',{method:'POST',headers:{'Content-Type':blob.type,...keyH()},body:blob}).catch(()=>null);
@@ -3224,8 +3475,9 @@ const hush=()=>{clearTimeout(toastT);toastEl.classList.remove('on')};
 const editB=$('#editB'),unlockD=$('#unlock'),eb=$('#eb');
 // Edit sits beside the crate's name wherever edit mode is set up (a device not signed in asks for the key first); while editing, the bar at the bottom holds the tools and Done
 function setEditing(on){
-  editing=!!(on&&OWNER&&EDITABLE);const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut();asShut()}
-  if(BASE)bare();editB.hidden=!(EDITABLE&&OWNER)||editing;eb.hidden=!editing;nameCrate();
+  editing=false; // the edit mode is folded into the one panel (opSync, below); signing in shows its button
+  const b=document.body;b.classList.toggle('editing-on',editing);if(!editing){b.classList.remove('adding');ebShut();rsShut();asShut()}
+  if(BASE)bare();editB.hidden=true;eb.hidden=true;nameCrate();window.opSync?.();
   try{sessionStorage.setItem('records-editing',editing?'1':'')}catch{}
   if(!open.hidden)info(order[cur]);if(q.value.trim())search();
 }
@@ -3235,7 +3487,7 @@ function forget(){OWNER=null;signedHere=false;try{localStorage.removeItem('recor
 function lockOut(){forget();toast('You’re signed out. Sign in again from About')}
 // a device that isn't signed in can sign in from About (or by opening the page with ?edit): with Google where that's set up,
 // which comes back here editing, else with the key
-const signable=()=>{$('#abIn').hidden=!(EDITABLE&&!OWNER);$('#abOut').hidden=!(EDITABLE&&OWNER)};
+const signable=()=>{$('#abIn').hidden=!(EDITABLE&&!OWNER);$('#abOut').hidden=!(EDITABLE&&OWNER);window.opSync?.()};
 function signIn(){
   if(!GOOGLE){unlockD.showModal();return}
   const u=new URL(location.href);u.searchParams.delete('edit');u.searchParams.delete('signin');
@@ -3273,7 +3525,7 @@ const sortKey=r=>String(r.sortAs||r.artist||'').replace(/^the\s+/i,'').toLowerCa
 function wmDraw(){
   const own=OWNER&&EDITABLE,ph=PH();
   const rows=crateList().map(c=>`<a role="menuitemradio" aria-checked="${c.slug===CRATE}" href="/casey/${esc(c.slug)}" class="wr${c.slug===CRATE?' cur':''}"><span class="wcv">${crateCover(c)}</span><span class="wn">${esc(c.name)}</span>${c.slug===CRATE?`<span class="wck">${CHECK}</span>`:''}</a>`).join('');
-  const more=!own?'':ph?`<div class="wbtns"><button type="button" class="btn" data-w="new">${PLUS}New crate</button>${editing?`<button type="button" class="btn" data-w="name">${WORDS}Name and words</button>`:`<button type="button" class="btn w" data-w="edit">${PEN}Edit this crate</button>`}</div>`
+  const more=!own?'':ph?`<div class="wbtns"><button type="button" class="btn" data-w="new">${PLUS}New crate</button></div>`
     :`<hr><button type="button" role="menuitem" class="wr" data-w="new"><span class="wic">${PLUS}</span><span class="wn">New crate</span></button>${editing?`<button type="button" role="menuitem" class="wr" data-w="name"><span class="wic">${WORDS}</span><span class="wn">Name and words</span></button>`:''}`;
   wm.innerHTML=(ph?'<i class="wgrab" aria-hidden="true"></i>':'')+`<div class="wl">${rows}</div>`+more;
 }
@@ -3488,15 +3740,16 @@ upF.addEventListener('change',async()=>{
 // taking a record out: the record view fades, the crate closes up behind it, and an undo waits at the bottom
 // in another crate, it only leaves that crate: it stays in the whole crate (unless it was only ever in this one)
 async function takeOut(r){
-  const next=order[cur+1]||order[cur-1];ownBusy(true);
+  const next=order[cur+1]||order[cur-1],rank=RANKED&&crateDef()?[...RANK.keys()]:null;ownBusy(true);
   try{await api(crateDef()?{op:'crate-take',crate:CRATE,slug:r.slug}:{op:'remove',slug:r.slug})}catch(e){toast(e.message);ownBusy(false);return}
   made.delete(r);rearrange(next);if(!open.hidden){vanish=true;closeRecord()}
-  toast(`Took out ${r.title}`,'Undo',()=>putBack(r));
+  window.drawRank?.();
+  toast(`Took out ${r.title}`,'Undo',()=>putBack(r,rank));
 }
-async function putBack(r){
+async function putBack(r,rank){
   const C=crateDef(),{_o,mine,extra,...rec}={...r,...r._o};
   try{await api(!C?{op:'restore',slug:r.slug}:r.extra?{op:'crate-add',crate:CRATE,record:rec}:{op:'crate-put',crate:CRATE,slug:r.slug});
-    if(r.extra)r=added.get(r.slug)||r;made.delete(r);if(q.value){q.value='';qSync()}arrange(null,r);toast(`${r.title} is back`)}catch(e){toast(e.message)}
+    if(r.extra)r=added.get(r.slug)||r;made.delete(r);if(q.value){q.value='';qSync()}arrange(null,r);if(rank)await reRank(rank);window.drawRank?.();toast(`${r.title} is back`)}catch(e){toast(e.message)}
 }
 // Search, while editing: records taken out that match, and what MusicBrainz has, to add
 const hitHTML=(x,act)=>`<li class="hit">${x.thumb||x.front?`<img src="${esc(x.thumb||img(x.front))}"${x.fallback?` data-fb="${esc(x.fallback)}"`:''} alt="" loading="lazy">`:'<i class="ph"></i>'}<span><b>${esc(x.title)}</b><i>${esc(x.artist)}${x.year?' · '+esc(x.year):''}</i></span>${act}</li>`;
@@ -3683,7 +3936,9 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(signedHere?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
 const authQ=visiting?null:fetch('/api/auth').then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
-  if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
+  if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);
+    if(/[?&]top=1(&|$)/.test(location.search)||/^\/2026\/?$/.test(location.pathname))setRank(v.records.slice(0,10).map(r=>r.slug)); // a visitor's top ten (top=1, or a list shared at /2026) comes ranked, number one first
+    crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
   else{
     // from the store (src/lib/store.ts), the crate's own records come with its edits, in place of the ones typed in above
     if(ed?.records?.length)RECORDS.splice(0,RECORDS.length,...ed.records.map(r=>({pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...r})));
@@ -3725,7 +3980,6 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   let tileSize='33vw';
   function sizeTiles(){const n=cols(),w=Math.ceil(((tiles.clientWidth||Math.min(innerWidth,1400))-(n-1)*8)/n);tileSize=w+'px';
     for(const t of keep.values()){const i=t.firstElementChild;if(i?.srcset)i.sizes=tileSize}}
-  const ink=hex=>{const n=parseInt((hex||'#333').slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255>.6?'#111':'#fff'};
   const keep=new Map();
   // covers on the wall and the canvas are small copies, made one at a time as the page settles: 68 full-size covers
   // decoded at once is more memory than a phone keeps, and it starts dropping them
@@ -3751,8 +4005,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   function tileFor(r,store=keep){
     let n=store.get(r.slug);if(n)return n;
     n=document.createElement('button');n.type='button';n.className='tile';n.dataset.slug=r.slug;
-    const bg=r.spine||'#2c2c2e';
-    n.innerHTML=(r.front?`<img alt="" loading="lazy" decoding="async" width="360" height="360" onload="fadeIn(this)">`:`<span class="pl" style="background:${bg};color:${ink(bg)}">${r.title}<small>${r.artist}</small></span>`)+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
+    n.innerHTML=(r.front?`<img alt="" loading="lazy" decoding="async" width="360" height="360" onload="fadeIn(this)">`:blankHTML(r))+`<span class="cap"><b>${r.title}</b><span>${r.artist}</span></span>`;
     n.setAttribute('aria-label',`${r.title} by ${r.artist}`);store.set(r.slug,n);
     if(r.front){
       // the tile wears the record's spine color until its cover is in; covers off screen wait until you scroll near them
@@ -3776,6 +4029,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   function draw(animate){
     if(view==='canvas'){drawPills();return lay()}
     if(view==='table'){drawPills();return drawTable()}
+    if(view==='rank'){drawPills();return drawRank()}
     if(view!=='wall')return drawPills();
     const before=new Map();
     if(animate&&!reduce)for(const [k,n] of keep)if(n.isConnected)before.set(k,n.getBoundingClientRect());
@@ -3807,10 +4061,12 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   new ResizeObserver(()=>placeMarks()).observe(tiles);
   function setView(v,focus,stay){
     if(v==='canvas')v='wall';
-    view=v;document.body.classList.toggle('under',(v==='wall'?wall:v==='table'?tbl:null)?.scrollTop>2);wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';document.body.classList.toggle('walling',v!=='crate');
+    if(v==='rank'&&!RANKED)v='crate';
+    view=v;document.body.classList.toggle('under',(v==='wall'?wall:v==='table'?tbl:v==='rank'?rk:null)?.scrollTop>2);wall.hidden=v!=='wall';cv.hidden=true;tbl.hidden=v!=='table';rk.hidden=v!=='rank';document.body.classList.toggle('walling',v!=='crate');
     vw.forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
-    try{localStorage.setItem('records-view',v)}catch{}
+    try{localStorage.setItem(RANKED?'records-view-top':'records-view',v)}catch{} // a top ten remembers its own
     if(v==='wall'){draw(false);if(focus)wall.focus({preventScroll:true})}
+    else if(v==='rank'){drawRank();if(focus)rk.focus({preventScroll:true})}
     else if(v==='table'){drawTable();if(focus)tbl.focus({preventScroll:true})}
     else if(v==='canvas'){lay(!stay);if(focus)cv.focus({preventScroll:true})}
     else{go(cur,true);if(focus)crate.focus({preventScroll:true})}
@@ -3822,18 +4078,19 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     if(!s.f||isOn(s.f))arrange(null);else arrange(s.f);wall.scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
   const pull=slug=>{const j=order.findIndex(r=>r.slug===slug);if(j<0)return;document.body.classList.add('reading');go(j,true);openRecord(false)};
   // the open record's tile, as a pose the lift can fly from and back to (brought on screen first if it isn't)
-  window.tilePose=()=>{if(view==='crate')return null;const r=order[cur];const t=(view==='wall'?keep:view==='table'?tkeep:ckeep).get(r?.slug);if(!t||!t.isConnected)return null;
+  window.tilePose=()=>{if(view==='crate')return null;const r=order[cur];const t=(view==='wall'?keep:view==='table'?tkeep:view==='rank'?rkeep:ckeep).get(r?.slug);if(!t||!t.isConnected)return null;
     let R=t.getBoundingClientRect();
     if(R.top<40||R.bottom>innerHeight-100||R.left<0||R.right>innerWidth){if(view!=='canvas')t.scrollIntoView({block:'center'});else cvCenter(t);R=t.getBoundingClientRect()}
     const S=stage.getBoundingClientRect();if(!S.width)return null;
-    for(const n of document.querySelectorAll('.tile.held,.tbl .held'))if(n!==t)n.classList.remove('held');t.classList.add('held');
+    for(const n of document.querySelectorAll('.tile.held,.tbl .held,.rk .held'))if(n!==t)n.classList.remove('held');t.classList.add('held');
     const p={x:R.left+R.width/2-(S.left+S.width/2),y:R.top+R.height/2-(S.top+S.height/2),z:0,s:R.width/S.width,ax:0,az:0};
     return{...p,P:2600,ox:S.width/2,oy:S.height/2,tf:poseTf(p)}};
+  window.inPlace=()=>view==='table'; // the table opens and closes a record in place, without the flight from its row
   const cp0=cratePose;cratePose=function(...a){return window.tilePose?.()||cp0.apply(this,a)};
   const cr0=closeRecord;closeRecord=function(...a){document.body.classList.remove('reading');return cr0.apply(this,a)};
   tiles.addEventListener('click',e=>{const t=e.target.closest('.tile');if(t)pull(t.dataset.slug)});
   // closing a record you opened from the wall or the canvas puts you back where you were
-  new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held,.tbl .held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
+  new MutationObserver(()=>{if(open.hidden){document.body.classList.remove('reading');for(const n of document.querySelectorAll('.tile.held,.tbl .held,.rk .held'))n.classList.remove('held')}if(open.hidden&&back){const v=back;back=false;setView(v,false,true)}}).observe(open,{attributes:true,attributeFilter:['hidden']});
 
 
   // ---- the grid: pinch it (or ⌘- or ctrl-scroll, or + and −) and the columns change; the covers glide to their new places and
@@ -3861,6 +4118,17 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   wall.addEventListener('gestureend',e=>{e.preventDefault();gg=null});
   addEventListener('keydown',e=>{if(view!=='wall'||!open.hidden||e.target.closest('input'))return;if(/^[-+=]$/.test(e.key)){e.preventDefault();regrid(cols()+(e.key==='-'?1:-1),innerWidth/2,innerHeight/2)}});
 
+  // ---- the top ten: a ranked crate as a list, number one first, whatever the sort (a search or a filter still narrows it)
+  const rk=$('#rk'),rkeep=new Map();
+  function drawRank(){
+    const rows=[...order].sort((a,b)=>rankOf(a)-rankOf(b));rkeep.clear();
+    $('ol',rk).innerHTML=rows.map(r=>`<li><button type="button" data-slug="${esc(r.slug)}" aria-label="${rankOf(r)+1}. ${esc(r.title)} by ${esc(r.artist)}"><span class="n" aria-hidden="true">${rankOf(r)+1}</span><i class="pic" style="background:${spineBg(r)}">${r.front?`<img alt="" decoding="async" data-src="${esc(img(r.front))}" onload="fadeIn(this)">`:`<i class="sw">${blankHTML(r)}</i>`}</i><span class="tx"><b>${esc(r.title)}</b><span class="a">${esc(r.artist)}</span><span class="m">${esc([r.year,labelName(r.label)].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+    for(const b of $$('li button',rk)){rkeep.set(b.dataset.slug,$('.pic',b));const i=$('img',b);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
+  }
+  rk.addEventListener('click',e=>{const b=e.target.closest('button[data-slug]');if(b)pull(b.dataset.slug)});
+  // a crate turning ranked (or not) brings the view in (or takes it away)
+  window.rankSync=()=>{const b=$('.vw [data-v=rank]');if(b)b.hidden=!RANKED;if(!RANKED&&view==='rank')setView('crate');else if(view==='rank')drawRank()};
+  window.rankSync();window.drawRank=()=>{if(view==='rank')drawRank()};
   // ---- the table: every record in the crate (as narrowed) as a row; the headers sort it
   const tbl=$('#tbl'),tkeep=new Map();
   const COLS=[['title','Title',r=>r.title],['artist','Artist',r=>name(r)],['year','Year',r=>+r.year||9999],['label','Label',r=>r.label||'~'],['format','Format',r=>r.format||'~']];
@@ -3869,7 +4137,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     const rows=order,ts=SORT;
     $('thead',tbl).innerHTML=`<tr><th class="c0" aria-sort="${ts.k==='color'?(ts.d>0?'ascending':'descending'):'none'}"><button type="button" data-k="color" aria-label="Sort by color"><i class="cw" aria-hidden="true"></i><b class="cn" aria-hidden="true">Color</b><i aria-hidden="true">${ts.k==='color'?(ts.d>0?'↑':'↓'):''}</i></button></th>${COLS.map(([k,l])=>`<th class="c-${k}" aria-sort="${ts.k===k?(ts.d>0?'ascending':'descending'):'none'}">${SORTS[k]?`<button type="button" data-k="${k}">${l}<i aria-hidden="true">${ts.k===k?(ts.d>0?'↑':'↓'):''}</i></button>`:`<span>${l}</span>`}</th>`).join('')}</tr>`;
     tkeep.clear();
-    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
+    $('tbody',tbl).innerHTML=rows.map(r=>`<tr data-slug="${r.slug}" tabindex="0"><td class="c0">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img alt="" loading="lazy" decoding="async" data-src="${img(r.front)}" onload="fadeIn(this)"></i>`:`<i class="sw">${blankHTML(r)}</i>`}</td><td class="c-title"><b>${r.title}</b><span class="m">${r.artist}</span></td><td class="c-artist">${r.artist}</td><td class="c-year">${r.year||''}</td><td class="c-label">${r.label||''}</td><td class="c-format">${r.format||''}</td></tr>`).join('');
     for(const tr of $$('tbody tr',tbl)){const c0=$('.c0>*',tr);tkeep.set(tr.dataset.slug,c0);const i=$('img',tr);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
   // on a phone the sort is one quiet line, "Sorted by Artist ↑"; it opens a small menu like the view menu
@@ -3884,7 +4152,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   addEventListener('pointerdown',e=>{if(!tsm.hidden&&!tsm.contains(e.target)&&!e.target.closest('.tbl th button'))tsmOff()},true);
   addEventListener('keydown',e=>{if(e.key==='Escape'&&!tsm.hidden){tsmOff();$('thead th[aria-sort]:not([aria-sort=none]) button',tbl)?.focus({focusVisible:false})}});
   tbl.addEventListener('scroll',tsmOff,{passive:true});narrow.addEventListener('change',tsmOff);addEventListener('resize',tsmOff);
-  for(const s of [wall,tbl])s.addEventListener('scroll',()=>document.body.classList.toggle('under',s.scrollTop>2),{passive:true});
+  for(const s of [wall,tbl,rk])s.addEventListener('scroll',()=>document.body.classList.toggle('under',s.scrollTop>2),{passive:true});
   tbl.addEventListener('click',e=>{const h=e.target.closest('th button');if(h){if(narrow.matches){tsm.hidden?tsmOn(h):tsmOff();return}sortBy(h.dataset.k);return}
     const tr=e.target.closest('tbody tr');if(tr)pull(tr.dataset.slug)});
   tbl.addEventListener('keydown',e=>{const tr=e.target.closest?.('tbody tr');if(!tr)return;
@@ -3988,7 +4256,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     if(/^(Arrow|Home$|End$|j$|k$)/.test(e.key)||((e.key==='Enter'||e.key===' ')&&!e.target.closest('button')))e.stopImmediatePropagation()},true);
   let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{tiles.style.setProperty('--cols',cols());if(view==='canvas')lay()},100)});
   // wait for the crate to fill, then open the view you used last
-  const ready=new MutationObserver(()=>{if(!document.body.classList.contains('ready'))return;ready.disconnect();let v='crate';try{v=localStorage.getItem('records-view')||'crate'}catch{}if((v==='wall'||v==='canvas'||v==='table')&&open.hidden)setView(v);else drawPills()});
+  const ready=new MutationObserver(()=>{if(!document.body.classList.contains('ready'))return;ready.disconnect();let v='crate';try{v=RANKED?localStorage.getItem('records-view-top')||'rank':localStorage.getItem('records-view')||'crate'}catch{}if((v==='wall'||v==='canvas'||v==='table'||v==='rank')&&open.hidden)setView(v);else drawPills()});
   ready.observe(document.body,{attributes:true,attributeFilter:['class']});
 })();
 </script>
@@ -4029,13 +4297,13 @@ const apply=t=>{clearTimeout(lT);live(t);if(lite.p&&!open.hidden){lite.p=false;p
 
 function build(){
   // the marks follow the sort: every letter (the empty ones dim), or the years or colors the crate has, in the crate's order
-  const k=SORT.k,lettered=k!=='year'&&k!=='color'&&k!=='added';FIRST={};CNT={};
+  const k=SORT.k,lettered=k!=='year'&&k!=='color'&&k!=='added'&&k!=='rank';FIRST={};CNT={};
   order.forEach((r,i)=>{const L=group(r);if(FIRST[L]==null)FIRST[L]=i;CNT[L]=(CNT[L]||0)+1;
     X[i]=i*WR});
   X.length=order.length;
   if(lettered){AZ=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];if(has('#'))AZ.push('#');if(SORT.d<0)AZ.reverse()}else AZ=Object.keys(FIRST).sort((a,b)=>FIRST[a]-FIRST[b]);
   W=k==='year'?58:k==='added'?76:k==='color'?30:36;kd.dataset.marks=k==='year'?'years':k==='added'?'months':k==='color'?'colors':'letters';
-  dl.setAttribute('aria-label',`Turn to ${k==='year'?'a year':k==='added'?'a month':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='added'?'months':k==='color'?'colors':'letters'} and records.`);
+  dl.setAttribute('aria-label',k==='rank'?'Turn to a place in the top ten.':`Turn to ${k==='year'?'a year':k==='added'?'a month':k==='color'?'a color':'a letter'}. Up and down change between ${k==='year'?'years':k==='added'?'months':k==='color'?'colors':'letters'} and records.`);
   clip.innerHTML=order.map((r,i)=>`<span class="kd-t" data-k="${i}"></span>`).join('')+AZ.map((L,j)=>`<span class="kd-l${L==='—'?' kd-nd':''}" data-k="${j}">${k==='color'?`<i style="background:${hueInk(+L)}"></i>`:gName(L)}</span>`).join('');
   LT=[...clip.querySelectorAll('.kd-l')];TH=[...clip.querySelectorAll('.kd-t')];
   at=-1;rest('l');rest('r');render();label();
@@ -4209,7 +4477,8 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
 // above the bar (the wall's own pills, moved), and apply to every view.
 (()=>{
   const find=$('.find'),vwEl=$('.vw'),qf=$('#qf'),pills=$('#pills');
-  const ICON={crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
+  const ICON={rank:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6.5h10M10 12h10M10 17.5h10"/><path d="M4.6 5.2l1.3-.9v4.4"/><path d="M4.2 11.6c.4-.6 1-.8 1.6-.7.7.2 1 .8.8 1.4-.2.5-1.6 1.6-2.4 2.4h2.7"/></svg>',
+    crate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M6 6.5h12M8 4h8"/></svg>',
     wall:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
     table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><rect x="3.5" y="4.5" width="3" height="3" rx=".5"/><rect x="3.5" y="10.5" width="3" height="3" rx=".5"/><rect x="3.5" y="16.5" width="3" height="3" rx=".5"/></svg>'};
   $$('button',vwEl).forEach(b=>{const v=b.dataset.v,l=b.textContent;b.innerHTML=ICON[v]+`<span>${l}</span>`});
@@ -4229,16 +4498,17 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
     year:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>',
     added:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>',
     label:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
-    color:'<i class="cw" aria-hidden="true"></i>'};
+    color:'<i class="cw" aria-hidden="true"></i>',
+    rank:'<svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="17" text-anchor="middle" fill="currentColor" style="font:500 14px var(--sans);letter-spacing:-.02em">#1</text></svg>'};
   const sb=document.createElement('button');sb.type='button';sb.className='fb lb sb';sb.setAttribute('aria-expanded','false');sb.setAttribute('aria-controls','sorts');
   fb.after(sb);
   const so=document.createElement('div');so.className='vw tray so';so.id='sorts';so.hidden=true;so.setAttribute('role','group');so.setAttribute('aria-label','Sort');
-  const dirOf=k=>SORT.d>0?'↑':'↓',dirSay=k=>k==='color'?(SORT.d>0?'reds first':'darks first'):k==='year'||k==='added'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
+  const dirOf=k=>SORT.d>0?'↑':'↓',dirSay=k=>k==='rank'?(SORT.d>0?'one first':'counting down'):k==='color'?(SORT.d>0?'reds first':'darks first'):k==='year'||k==='added'?(SORT.d>0?'oldest first':'newest first'):SORT.d>0?'A to Z':'Z to A';
   const drawSort=()=>{
     sb.innerHTML=SICON[SORT.k];sb.dataset.k=SORT.k;sb.classList.toggle('on',SORT.k!=='artist'||SORT.d<0);sb.setAttribute('aria-label',`Sort: ${SORTS[SORT.k].l}${dirSay(SORT.k)?', '+dirSay(SORT.k):''}`);
     so.innerHTML=Object.entries(SORTS).map(([k,o])=>{const on=SORT.k===k;
       return`<button type="button" data-k="${k}" aria-pressed="${on}" aria-label="Sort by ${o.l.toLowerCase()}${on&&dirSay(k)?', '+dirSay(k):''}">${SICON[k]}<span>${o.l}</span>${on&&dirOf(k)?`<i aria-hidden="true">${dirOf(k)}</i>`:''}</button>`}).join('')};
-  drawSort();
+  drawSort();window.drawSort=drawSort;
   const sorts=on=>{so.hidden=!on;sb.setAttribute('aria-expanded',on);if(on){views(false);tray(false);const r=sb.getBoundingClientRect();so.style.right=Math.max(14,innerWidth-r.right)+'px'}};
   sb.onclick=()=>sorts(so.hidden);
   // one way to sort, for the menu and the table's headers: the lit one again flips it; a new one keeps the direction
@@ -4340,7 +4610,7 @@ else{const mo=new MutationObserver(()=>{if(document.body.classList.contains('rea
   }
   const PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
   const offerRow=(f,i)=>`<li><button type="button" class="of" data-o="${i}"><i class="ofp">${PLUS}</i><span><b>${escC(f.s)}</b></span><i class="ofk">${KIND[f.k]}</i></button></li>`;
-  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw" style="background:${spineBg(r)}"></i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
+  const row=r=>`<li><button type="button" data-slug="${r.slug}">${r.front?`<i class="pic" style="background:${spineBg(r)}"><img data-src="${img(r.front)}" alt="" decoding="async" onload="fadeIn(this)"></i>`:`<i class="sw">${blankHTML(r)}</i>`}<span><b>${r.title}</b><span>${r.artist}${r.year?' · '+r.year:''}</span></span></button></li>`;
   function list(){const v=q.value.trim(),rs=all().filter(r=>!v||matchQ(r,v));
     sl.classList.toggle('idle',!v&&!ph()); // a laptop lists only what you've typed
     const os=sl.offers=seeking()?[]:offers(v); // with a record out, the search only finds records
@@ -4497,7 +4767,7 @@ html.phone .ab-sh{margin-top:20px}
   const st=document.createElement('div');st.className='dst';st.hidden=true;st.setAttribute('role','menu');
   $('.find').after(dock,say,veil,st);
   const open=()=>qf.matches(':focus-within')||qf.classList.contains('has')||body.classList.contains('searching')?'q':'';
-  const dirSay=(k,d)=>k==='color'?(d>0?'Reds first':'Darks first'):k==='year'||k==='added'?(d>0?'Oldest first':'Newest first'):d>0?'A to Z':'Z to A';
+  const dirSay=(k,d)=>k==='rank'?(d>0?'One first':'Counting down'):k==='color'?(d>0?'Reds first':'Darks first'):k==='year'||k==='added'?(d>0?'Oldest first':'Newest first'):d>0?'A to Z':'Z to A';
   const word=()=>{const n=SORTS[SORT.k].l,d=dirSay(SORT.k,SORT.d);return SORT.k==='year'||SORT.k==='color'?d:SORT.k==='added'?`${n}, ${d.toLowerCase()}`:`${n}, ${d}`};
   let was='';
   function draw(){
@@ -4527,10 +4797,16 @@ html.phone .ab-sh{margin-top:20px}
   dx.onclick=shut;
 
   // a toast above the bar names what changed, with the circle's new icon; a second tap crossfades it and starts its clock again
-  let sayT;const tell=(t,k)=>{const on=say.classList.contains('on'),g=rows(k).find(r=>r.on)?.g||'';
-    say.innerHTML=`${g?`<i>${g}</i>`:''}<span></span>`;say.lastChild.textContent=t;say.classList.add('on');
+  let sayT,sayK='';const sayOff=()=>say.classList.remove('on'),sayClock=()=>{clearTimeout(sayT);sayT=setTimeout(sayOff,1800)};
+  const tell=(t,k)=>{const on=say.classList.contains('on'),g=rows(k).find(r=>r.on)?.g||'';sayK=k;
+    say.innerHTML=`${g?`<i>${g}</i>`:''}<span></span>`;say.lastChild.textContent=t;say.classList.remove('go');say.classList.add('on');
     if(on&&!RM.matches)say.animate([{opacity:.2},{opacity:1}],{duration:200});
-    clearTimeout(sayT);sayT=setTimeout(()=>say.classList.remove('on'),1800)};
+    sayClock()};
+  // a tap on the toast opens the stack of the circle it speaks for, grown out of the toast; a pointer resting on it keeps it up
+  say.addEventListener('click',()=>{if(!say.classList.contains('on')||!sayK)return;clearTimeout(sayT);
+    const from=say.getBoundingClientRect();say.classList.add('go');sayOff();openStack(sayK,from)});
+  say.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&say.classList.contains('on'))clearTimeout(sayT)});
+  say.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&say.classList.contains('on'))sayClock()});
   // the new icon slides in from the side it comes from while the old one slides out
   const slide=(b,old,dir)=>{const nw=b.innerHTML;if(RM.matches||nw===old)return;
     b.innerHTML=`<span class="dic">${old}</span><span class="dic">${nw}</span>`;const [o,n]=b.children;
@@ -4538,7 +4814,7 @@ html.phone .ab-sh{margin-top:20px}
     n.animate([{transform:`translateX(${14*dir}px)`,opacity:0},{transform:'none',opacity:1}],{duration:420,easing:EASE}).onfinish=()=>{if(n.isConnected)b.innerHTML=nw}};
 
   // what each circle holds
-  const views=()=>[...vw.querySelectorAll('[data-v]')];
+  const views=()=>[...vw.querySelectorAll('[data-v]:not([hidden])')];
   const rows=k=>k==='sort'?[...so.querySelectorAll('[data-k]')].map(b=>({v:b.dataset.k,g:(b.querySelector('svg,.cw')||{}).outerHTML||'',n:b.querySelector('span')?.textContent||'',on:b.dataset.k===SORT.k,
       x:b.dataset.k===SORT.k?`${SORT.d>0?'↑':'↓'} ${dirSay(SORT.k,SORT.d).replace(/ first$/,'')}`:''}))
     :k==='view'?views().map(b=>({v:b.dataset.v,g:(b.querySelector('svg')||{}).outerHTML||'',n:b.querySelector('span')?.textContent||b.textContent,on:b.getAttribute('aria-pressed')==='true'}))
@@ -4559,15 +4835,20 @@ html.phone .ab-sh{margin-top:20px}
   // the stack grows up out of its circle, rows a beat apart, nearest first; a lit pill glides under the thumb
   let sk='',hi=null;
   const cellOf=k=>k==='sort'?cs:k==='view'?cv:cd,btnOf=k=>k==='sort'?sb:k==='view'?lb:dr;
-  function openStack(k){
+  function openStack(k,from){
     if(sk)shutStack(true);sk=k;hi=null;
     st.innerHTML='<i class="dhl"></i>'+rows(k).map(r=>`<button type="button" class="dsi${r.on?' cur':''}" role="menuitemradio" aria-checked="${r.on}" data-v="${r.v}"><span class="dsg">${r.g}</span><span class="dsn">${r.n}</span>${r.x?`<span class="dsx">${r.x}</span>`:''}</button>`).join('');
     st.setAttribute('aria-label',k==='sort'?'Sort':k==='view'?'Layout':'Order');
     st.hidden=false;body.classList.add('stacking');
-    const c=cellOf(k).getBoundingClientRect(),W=st.offsetWidth,cx=c.left+c.width/2,L=Math.max(14,Math.min(innerWidth-W-14,cx-W/2));
-    st.style.left=L+'px';st.style.bottom=(innerHeight-c.top+12)+'px';st.style.transformOrigin=`${cx-L}px 100%`;
+    const c=cellOf(k).getBoundingClientRect(),W=st.offsetWidth,cx=from?from.left+from.width/2:c.left+c.width/2,L=Math.max(14,Math.min(innerWidth-W-14,cx-W/2));
+    st.style.left=L+'px';st.style.bottom=(from?innerHeight-from.bottom:innerHeight-c.top+12)+'px';st.style.transformOrigin=`${cx-L}px 100%`;
     st.getAnimations().forEach(a=>a.cancel());
-    if(!RM.matches){st.animate([{transform:'translateY(10px) scale(.94)',opacity:0},{transform:'none',opacity:1}],{duration:420,easing:EASE});
+    if(from&&!RM.matches){ // from the toast: the panel opens out of the pill's own outline, the rows coming in as it clears them
+      const s=st.getBoundingClientRect(),r=getComputedStyle(st).borderTopLeftRadius,px=v=>Math.max(0,v).toFixed(1)+'px';
+      const pill=`inset(${px(from.top-s.top)} ${px(s.right-from.right)} ${px(s.bottom-from.bottom)} ${px(from.left-s.left)} round ${from.height/2}px)`;
+      st.animate([{clipPath:pill},{clipPath:`inset(0px 0px 0px 0px round ${r})`}],{duration:440,easing:EASE});
+      const rs=[...st.querySelectorAll('.dsi')];rs.forEach((r,i)=>r.animate([{transform:'translateY(6px)',opacity:0},{transform:'none',opacity:1}],{duration:360,easing:EASE,delay:80+(rs.length-1-i)*24,fill:'backwards'}))}
+    else if(!RM.matches){st.animate([{transform:'translateY(10px) scale(.94)',opacity:0},{transform:'none',opacity:1}],{duration:420,easing:EASE});
       const rs=[...st.querySelectorAll('.dsi')];rs.forEach((r,i)=>r.animate([{transform:'translateY(8px)',opacity:0},{transform:'none',opacity:1}],{duration:380,easing:EASE,delay:30+(rs.length-1-i)*22,fill:'backwards'}))}
   }
   function light(v){if(!sk||hi===v)return;hi=v;const hl=$('.dhl',st),m=v==null?null:st.querySelector(`.dsi[data-v="${v}"]`);
@@ -4620,6 +4901,126 @@ html.phone .ab-sh{margin-top:20px}
   document.addEventListener('touchmove',e=>{if(pr)e.preventDefault()},{passive:false});
   dock.addEventListener('contextmenu',e=>{if(e.target.closest('.xb'))e.preventDefault()});
   draw();
+})();
+// ---------- Casey's one panel ----------
+// One white button at the end of the bar (on a laptop, the far right): a plus over the crate, a pencil over an open record.
+// It opens one panel, in parts that fold open and shut. Over the crate it edits the crate: Add records, its name and description,
+// a new crate. Over a record it edits that record: its facts, covers, jacket color, crates, liner notes, links, and taking it out.
+// Only a signed-in device sees it
+(()=>{
+  const CHEV='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  const TICK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  // which parts were left open, while the page is up
+  const OPEN={rank:true,add:true,crate:false,record:true,covers:false,color:false,crates:false,about:false,who:false,links:false};
+  const sec=(k,t,body,v='')=>`<details class="op-s" data-s="${k}"${OPEN[k]?' open':''}><summary>${t}<span class="op-v">${v}</span>${CHEV}</summary><div class="op-c">${body}</div></details>`;
+  const watch=box=>box.querySelectorAll('.op-s').forEach(d=>d.addEventListener('toggle',()=>{OPEN[d.dataset.s]=d.open;
+    if(d.open&&!reduce)d.querySelector('.op-c').animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:320,easing:'cubic-bezier(.22,1,.36,1)'})}));
+
+  // the button
+  const dock=$('.dock'),sort=dock.querySelector('.xb[data-k=sort]'),x=document.createElement('div');x.className='xb op';
+  x.innerHTML=`<button type="button" aria-label="Edit the crate"><span class="ic plus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="ic pen">${PEN}</span></button>`;
+  dock.append(x);const btn=x.querySelector('button');
+  window.opSync=()=>{
+    const own=!!(OWNER&&EDITABLE),rec=!open.hidden;document.body.classList.toggle('op-own',own);
+    if(!own){asShut();rsShut()}
+    x.classList.toggle('rec',rec);btn.setAttribute('aria-label',rec?'Edit this record':'Edit the crate');
+    const h=sort.offsetHeight;if(h&&!PH())x.style.width=x.style.height=h+'px';else x.style.width=x.style.height='';
+    if(rec&&!as.hidden)asShut();if(!rec&&!rs.hidden)rsShut();
+  };
+  opSync();addEventListener('resize',opSync);new MutationObserver(opSync).observe(open,{attributes:true,attributeFilter:['hidden']});
+  btn.onclick=()=>{btn.blur();
+    if(!open.hidden){if(!rs.hidden){rsShut();return}asShut();const r=order[cur];if(r){rsOpen(r);recPanel(r)}return}
+    if(!as.hidden){asShut();return}cratePanel();asOpen();window.rankPanel()};
+
+  // over the crate: Add records, its name and description, a new crate
+  const asB=document.createElement('div');asB.className='op-b';
+  asB.innerHTML=sec('rank','Top ten','<ol id="opR"></ol>')+sec('add','Add records','')+sec('crate','Name and description',`<label class="op-f"><span>Name</span><input id="opN" maxlength="60" autocomplete="off"></label><label class="op-f"><span>Description</span><textarea id="opA" maxlength="300" rows="3" placeholder="A line or two about it"></textarea></label><label class="op-tg" id="opTg"><input type="checkbox" id="opRk"><span><b>Top ten</b><i>Ranked, number one first. Ten records at most.</i></span></label>`);
+  const head=as.querySelector('.rs-h');head.after(asB);
+  asB.querySelector('[data-s=add] .op-c').append(as.querySelector('.as-in'),as.querySelector('.as-f'));
+  const crC=asB.querySelector('[data-s=crate] .op-c'),end=document.createElement('div');end.className='op-end';asB.append(end);
+  watch(asB);
+  const asXB=$('#asX');head.innerHTML='<span class="rs-c" id="opCv"></span><span class="rs-n"><b id="opT"></b><span>Your crate</span></span><span class="rs-s" id="opS" aria-live="polite"></span>';head.append(asXB);
+  as.setAttribute('aria-label','Edit the crate');
+  const say=t=>{const s=$('#opS');s.textContent=t;s.classList.toggle('on',!!t);if(t==='Saved')setTimeout(()=>{if(s.textContent==='Saved')say('')},1800)};
+  const crName=()=>{const C=crateDef();return C?C.name:allName()},crAbout=()=>{const C=crateDef();return(C?C.about:EDITS.crates?.all?.about)||''};
+  // a top ten's records in order: drag to move one, × to take it out (rank-rows.js)
+  const rankD=asB.querySelector('[data-s=rank]'),rankL=$('#opR');
+  window.rankPanel=()=>{const C=crateDef();rankD.hidden=!(RANKED&&C);$('#opTg').hidden=!C;$('#opRk').checked=!!C?.rank;
+    if(rankD.hidden||as.hidden)return;
+    const list=[...RECORDS].sort((a,b)=>rankOf(a)-rankOf(b));rankD.querySelector('.op-v').textContent=list.length?`${list.length} of 10`:'';
+    rankRows(rankL,list,{cover:r=>r.front?smaller(img(r.front),360)||img(r.front):'',
+      move:(a,b)=>{const s=list.map(r=>r.slug),[x]=s.splice(a,1);s.splice(b,0,x);reRank(s)},
+      take:i=>takeOut(list[i])})};
+  $('#opRk').addEventListener('change',async e=>{const on=e.target.checked;
+    say('Saving…');try{await api({op:'crate-set',crate:CRATE,ranked:on});arrange(filt,order[cur]);say('Saved');if(on)setView0('rank')}catch(z){say('');e.target.checked=!on;toast(z.message)}});
+  const setView0=v=>$(`.vw [data-v=${v}]`)?.click();
+  function cratePanel(){
+    const C=crateDef();window.rankPanel();$('#opT').textContent=crName();$('#opCv').innerHTML=crateCover(C||{slug:'all',records:null});
+    $('#opN').value=crName();$('#opA').value=crAbout();asB.querySelector('[data-s=crate] .op-v').textContent=crName();
+    end.innerHTML=`<button type="button" class="op-btn" data-x="new">New crate</button>${C?'<button type="button" class="op-btn" data-x="drop">Delete this crate</button>':''}`;
+  }
+  crC.addEventListener('change',async e=>{
+    if(e.target.id==='opRk')return;
+    const name=$('#opN').value.trim(),about=$('#opA').value.trim();
+    if(!name){$('#opN').value=crName();toast('A crate needs a name');return}
+    if(crName()===name&&crAbout()===about)return;
+    say('Saving…');try{await api({op:'crate-set',crate:CRATE,name,about});nameCrate();say('Saved');$('#opT').textContent=name;asB.querySelector('[data-s=crate] .op-v').textContent=name}catch(e){say('');toast(e.message)}
+  });
+  crC.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();e.target.blur()}});
+  end.addEventListener('click',async e=>{const b=e.target.closest('[data-x]');if(!b)return;
+    if(b.dataset.x==='new'){asShut();crateOpen(true);return}
+    if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Delete it for good';return}
+    try{await api({op:'crate-drop',crate:CRATE});location.href='/casey/all'}catch(e){toast(e.message)}});
+
+  // over a record: the Details sheet, folded into parts, with covers, color, crates and taking it out beside its fields
+  const PART={Record:'record',About:'about','Who made it':'who',Links:'links'};
+  function coversHTML(r){
+    const t=k=>r[k]?`<img alt="" src="${esc(img(k==='front'&&r.thumb?r.thumb:r[k]))}">`:'None yet',p=EDITS.patch[r.slug];
+    return `<div class="op-cv">${['front','back'].map(k=>`<figure><div class="t">${t(k)}</div><figcaption>${k==='front'?'Front':'Back'}<button type="button" class="op-btn" data-up="${k}">${r[k]?'Replace':'Add'}</button></figcaption></figure>`).join('')}</div>${p&&(p.front||p.back)?'<button type="button" class="op-q" data-up="reset">Back to the original covers</button>':''}`;
+  }
+  function cratesHTML(r){const cs=EDITS.crates?.list||[];
+    return `<div class="op-cr"><button type="button" class="on" aria-disabled="true" aria-pressed="true"><i class="bx">${TICK}</i><span>${esc(allName())}</span></button>${cs.map(c=>`<button type="button" class="${inCrate(c,r)?'on':''}" aria-pressed="${inCrate(c,r)}" data-crate="${esc(c.slug)}"><i class="bx">${TICK}</i><span>${esc(c.name)}</span></button>`).join('')}</div>${cs.length?'':'<p class="op-q">New crate is in the crate’s panel, with the plus.</p>'}`}
+  const inNames=r=>[allName(),...(EDITS.crates?.list||[]).filter(c=>inCrate(c,r)).map(c=>c.name)].join(', ');
+  const colorHTML=r=>`<div class="op-col"><span class="op-sw" id="opSw"><input type="color" id="opC" aria-label="Jacket color"></span><span class="hx" id="opHx"></span>${EDITS.patch[r.slug]?.bg?'<button type="button" class="op-q" data-up="reset-bg">Back to the original</button>':''}</div>`;
+  function paint(r){const c=hexOf(spineBg(r));$('#opC').value=c;$('#opSw').style.background=c;$('#opHx').textContent=c;
+    $('#rsF [data-s=color] .op-v').innerHTML=`<i class="op-dot" style="background:${c}"></i>`}
+  function recPanel(r){
+    const f=$('#rsF');if(!f)return;const parts=[];let at=null;
+    for(const n of [...f.children]){if(n.tagName==='H3'){at={t:n.textContent,nodes:[]};parts.push(at)}else if(at)at.nodes.push(n)}
+    f.classList.replace('rs-f','op-b');f.innerHTML='';
+    for(const p of parts){const k=PART[p.t]||p.t.toLowerCase();
+      f.insertAdjacentHTML('beforeend',sec(k,p.t,'',k==='record'?esc([r.year,r.label].filter(Boolean).join(', ')):''));f.lastElementChild.querySelector('.op-c').append(...p.nodes);
+      if(k==='record')f.insertAdjacentHTML('beforeend',sec('covers','Covers',coversHTML(r))+sec('color','Jacket color',colorHTML(r))+sec('crates','Crates',cratesHTML(r),esc(inNames(r))));
+    }
+    f.insertAdjacentHTML('beforeend',`<div class="op-end"><button type="button" class="op-btn" data-x="out">${crateDef()?'Take it out of this crate':'Take it out of the crate'}</button></div>`);
+    f.querySelectorAll('.op-c').forEach(c=>c.classList.add('rs-f')); // the Details sheet's field styles
+    paint(r);watch(f);
+  }
+  function redo(k){const r=order[cur],d=$(`#rsF [data-s=${k}]`);if(!r||!d||rs.hidden)return;
+    const c=d.querySelector('.op-c');c.innerHTML=k==='covers'?coversHTML(r):colorHTML(r);if(k==='color')paint(r)}
+  rs.addEventListener('click',async e=>{
+    const r=order[cur];if(!r||open.hidden)return;
+    const u=e.target.closest('[data-up]'),c=e.target.closest('[data-crate]'),o=e.target.closest('[data-x=out]');
+    if(u){const k=u.dataset.up;
+      if(k==='reset'){await patch(r,{front:null,back:null,spine:null},'Back to the original covers');redo('covers')}
+      else if(k==='reset-bg'){await patch(r,{bg:null,spine:null},'Back to the original color');redo('color')}
+      else{upF.dataset.side=k;upF.click()}return}
+    if(c){const cr=(EDITS.crates?.list||[]).find(z=>z.slug===c.dataset.crate),on=inCrate(cr,r);
+      if(on&&cr.slug===CRATE){rsShut();takeOut(r);return}
+      c.classList.toggle('on',!on);c.setAttribute('aria-pressed',!on);
+      try{await api(on?{op:'crate-take',crate:cr.slug,slug:r.slug}:{op:'crate-put',crate:cr.slug,slug:r.slug});toast(on?`Took it out of ${cr.name}`:`Added to ${cr.name}`);
+        $('#rsF [data-s=crates] .op-v').textContent=inNames(r)}catch(z){toast(z.message);c.classList.toggle('on',on);c.setAttribute('aria-pressed',on)}
+      return}
+    if(o){rsShut();takeOut(r)}
+  });
+  // a new cover shows in its part once it's saved
+  upF.addEventListener('change',()=>{const r=order[cur],was=r&&[r.front,r.back].join();
+    const t=setInterval(()=>{const n=order[cur];if(n&&[n.front,n.back].join()!==was){clearInterval(t);redo('covers')}},300);setTimeout(()=>clearInterval(t),20000)},true);
+  // the color goes through the bar's own picker, which shows it on the record as you pick and saves it when you're done
+  const ebC=$('#ebC');
+  rs.addEventListener('input',e=>{if(e.target.id!=='opC')return;e.stopPropagation();const v=e.target.value;$('#opSw').style.background=v;$('#opHx').textContent=v;
+    ebC.value=v;ebC.dispatchEvent(new Event('input'))},true);
+  rs.addEventListener('change',e=>{if(e.target.id!=='opC')return;e.stopPropagation();ebC.value=e.target.value;ebC.dispatchEvent(new Event('change'))},true);
 })();
 </script>
 <style>

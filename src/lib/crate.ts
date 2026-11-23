@@ -54,7 +54,22 @@ export type Notes = {
 // More crates than the one: each is picked from Casey's records (records, by slug) and can hold records Casey doesn't own
 // (extra, which live only in that crate). "all" is the whole crate; it keeps a name and description here but never a list.
 // A crate's slug is its address (/casey/<slug>) and stays put when it's renamed, so shared links keep working.
-export type Crate = { slug: string; name: string; about?: string; records: string[]; extra: Rec[] };
+// A ranked crate (a top ten) also keeps rank: every record it holds, by slug, first to last. It holds ten at most.
+export type Crate = { slug: string; name: string; about?: string; records: string[]; extra: Rec[]; rank?: string[] };
+export const TOP = 10;
+// a ranked crate's order, kept true to what it holds: gone records drop out, new ones go last
+export function reRank(c: Crate) {
+  if (!c.rank) return;
+  const has = [...c.records, ...c.extra.map((x) => x.slug)], set = new Set(has);
+  const kept = c.rank.filter((s, i, a) => set.has(s) && a.indexOf(s) === i);
+  c.rank = [...kept, ...has.filter((s) => !kept.includes(s))];
+}
+// out of a crate, by slug
+export function dropFrom(c: Crate, slug: string) {
+  c.records = c.records.filter((s) => s !== slug);
+  c.extra = c.extra.filter((x) => x.slug !== slug);
+  if (c.rank) c.rank = c.rank.filter((s) => s !== slug);
+}
 export type Crates = { pinned?: string; all?: { name?: string; about?: string }; list: Crate[] };
 export type Edits = { added: Rec[]; removed: string[]; patch: Record<string, Patch>; crates?: Crates };
 export const ALL = "all";

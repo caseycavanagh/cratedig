@@ -49,6 +49,8 @@ create table if not exists patches (
 create table if not exists crates (
   id bigserial primary key, person_id bigint not null references people on delete cascade, slug text not null, name text not null,
   about text, seq int not null, unique (person_id, slug));
+-- a ranked crate's order (a top ten), slugs, number one first; null when the crate isn't ranked
+alter table crates add column if not exists rank jsonb;
 create table if not exists crate_records (
   crate_id bigint not null references crates on delete cascade, slug text not null, seq int not null, primary key (crate_id, slug));
 create table if not exists crate_extras (
@@ -162,7 +164,7 @@ export async function load(db: Pool | PoolClient, id: number): Promise<{ base: B
     () => db.query("select h.slug, h.kind, h.rec, r.facts from holdings h join releases r on r.id = h.release_id where h.person_id = $1 order by h.seq", [id]),
     () => db.query("select slug from taken_out where person_id = $1 order by at, slug", [id]),
     () => db.query("select slug, patch from patches where person_id = $1", [id]),
-    () => db.query("select id, slug, name, about from crates where person_id = $1 order by seq", [id]),
+    () => db.query("select id, slug, name, about, rank from crates where person_id = $1 order by seq", [id]),
     () => db.query("select cr.crate_id, cr.slug from crate_records cr join crates c on c.id = cr.crate_id where c.person_id = $1 order by cr.seq", [id]),
     () => db.query("select cx.crate_id, cx.rec from crate_extras cx join crates c on c.id = cx.crate_id where c.person_id = $1 order by cx.seq", [id]),
   ]);
@@ -176,6 +178,7 @@ export async function load(db: Pool | PoolClient, id: number): Promise<{ base: B
   const list: Crate[] = cs.rows.map((c) => {
     const k: Crate = { slug: c.slug, name: c.name, records: cr.rows.filter((x) => x.crate_id === c.id).map((x) => x.slug), extra: cx.rows.filter((x) => x.crate_id === c.id).map((x) => x.rec) };
     if (c.about) k.about = c.about;
+    if (Array.isArray(c.rank)) k.rank = c.rank;
     return k;
   });
   const crates: Edits["crates"] = { list };
@@ -216,9 +219,9 @@ async function write(c: PoolClient, id: number, was: Edits, now: Edits) {
     const o = old.get(k.slug);
     if (o && same(o, k) && wc.list.indexOf(o) === i) continue;
     const q = await c.query<{ id: string }>(
-      `insert into crates (person_id, slug, name, about, seq) values ($1, $2, $3, $4, $5)
-       on conflict (person_id, slug) do update set name = excluded.name, about = excluded.about, seq = excluded.seq returning id`,
-      [id, k.slug, k.name, k.about ?? null, i],
+      `insert into crates (person_id, slug, name, about, seq, rank) values ($1, $2, $3, $4, $5, $6)
+       on conflict (person_id, slug) do update set name = excluded.name, about = excluded.about, seq = excluded.seq, rank = excluded.rank returning id`,
+      [id, k.slug, k.name, k.about ?? null, i, k.rank ? JSON.stringify(k.rank) : null],
     );
     const cid = Number(q.rows[0].id);
     if (!o || !same(o.records, k.records)) {
