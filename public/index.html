@@ -24,6 +24,18 @@
 <meta property="og:image:alt" content="Crate Dig: every record Casey owns, flipped through like a crate">
 <meta name="twitter:card" content="summary_large_image">
 <script>(function(){var u=new URL(location.href),r=u.searchParams.get('r');if(r){u.searchParams.delete('r');u.hash='record/'+r;history.replaceState(null,'',u)}})()</script>
+<script>
+// a list shared at /2026 wears the colors its maker picked (t=, and bg, fg, n for its own or its number one's): every color
+// token is drawn from its background and text, so the whole page follows. Night, the default, is the tokens as they are
+(function(){if(!/^\/2026\/?$/.test(location.pathname))return;var q=new URLSearchParams(location.search),t=q.get('t')||'a',hx=function(v){return /^[0-9a-f]{6}$/i.test(v||'')?'#'+v:null};
+  var P={b:['#f2ede2','#1f1b16','#1f1b16'],c:['#1f33c7','#ffffff','#ffffff'],d:['#e2462c','#fff6ea','#fff6ea'],e:['#16382a','#f1e9d2','#d8b968'],f:['#ffd3e3','#3a0d28','#c2185b'],g:['#f1c232','#1c1708','#1c1708']};
+  var c=P[t];if(t==='h'||t==='x'){var bg=hx(q.get('bg')),fg=hx(q.get('fg'));if(bg&&fg)c=[bg,fg,hx(q.get('n'))||fg]}
+  if(!c)return;var bg=c[0],fg=c[1],m=function(p){return'color-mix(in srgb,'+fg+' '+p+'%,'+bg+')'},a=function(p){return'color-mix(in srgb,'+fg+' '+p+'%,transparent)'};
+  var v={'--bg':bg,'--fg':fg,'--on-fg':bg,'--t1':m(85),'--t2':m(68),'--m':m(60),'--t3':m(46),'--t4':m(38),'--line':a(14),'--line2':a(22),'--soft':m(9),'--sheet':m(7),'--hov':a(6),'--prs':a(8),'--sel':a(12),'--ring':a(26),'--rank-n':c[2],
+    '--glass':'color-mix(in srgb,'+m(9)+' 72%,transparent)'};
+  var st=document.createElement('style');st.textContent=':root:root{'+Object.keys(v).map(function(k){return k+':'+v[k]}).join(';')+'}html,body{background:'+bg+'}';document.head.append(st);
+  document.documentElement.classList.add('themed');var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=bg})();
+</script>
 <script>var PHONE_Q='(max-width:700px),(pointer:coarse) and (max-height:500px)';document.documentElement.dataset.theme='dark';document.documentElement.classList.toggle('phone',matchMedia(PHONE_Q).matches)</script>
 <link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
@@ -1106,7 +1118,7 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 .rk:focus{outline:none}
 .rk ol{list-style:none;margin:0 auto;padding:8px 0 0;max-width:820px;display:grid;gap:22px}
 .rk li button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:64px 96px minmax(0,1fr);gap:24px;align-items:center;border-radius:var(--r-in);-webkit-tap-highlight-color:transparent}
-.rk .n{font-size:var(--fs-6);font-weight:500;line-height:1;text-align:right;letter-spacing:-.02em;color:var(--fg)}
+.rk .n{font-size:var(--fs-6);font-weight:500;line-height:1;text-align:right;letter-spacing:-.02em;color:var(--rank-n,var(--fg))}
 .rk .pic{position:relative;display:block;width:96px;aspect-ratio:1;border-radius:var(--r-cover);overflow:hidden;box-shadow:var(--rest);transition:transform .5s var(--ease)}
 .rk .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .rk .pic .sw{position:absolute;inset:0}
@@ -1488,10 +1500,10 @@ html.phone .ab-name{margin-top:-6px!important;font-size:56px}
 html.phone .ab-body{font-size:var(--fs-4)}
 html.phone .ab-cr{margin-top:12px}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom; solid under the status bar so no edge of the pile peeks through there */
-.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(#121212 calc(env(safe-area-inset-top) + 16px),#121212e0 calc(env(safe-area-inset-top) + 44px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
-.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:#121212;opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 calc(50% - 92px));mask:linear-gradient(#0000,#000 calc(50% - 92px));pointer-events:none}
+.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 16px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 44px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
+.kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:var(--bg);opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 calc(50% - 92px));mask:linear-gradient(#0000,#000 calc(50% - 92px));pointer-events:none}
 .kd.kd-on::after{opacity:calc(var(--kz,0)*.94);transition:opacity .2s} /* open on records, the dial darkens what's behind it, but only while you're turning it */
-.kd::before,.kd::before{top:-120px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:#121212f5;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line. It runs on past the bottom of the screen, so a swipe that stretches the page never shows what's under the bar */
+.kd::before,.kd::before{top:-120px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line. It runs on past the bottom of the screen, so a swipe that stretches the page never shows what's under the bar */
 html.phone body.searching .find::before{display:none}
 .find::before{transition:opacity .3s}
 body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
@@ -1584,7 +1596,7 @@ html:has(.open:not([hidden])) .find{z-index:var(--z-raised)}
 html:has(.open:not([hidden])) .find::before{display:none}
 /* phones: once About and the rest rise up the screen, the strip behind the mark comes back, solid where the mark sits, so words
    scrolling under it go out of sight instead of running into it. It follows the rise, so it's gone while the record is at rest */
-html.phone:has(.open:not([hidden])) .find::before{display:block;height:calc(env(safe-area-inset-top) + 120px);background:#121212f2;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);opacity:var(--rise,0);transition:none}
+html.phone:has(.open:not([hidden])) .find::before{display:block;height:calc(env(safe-area-inset-top) + 120px);background:color-mix(in srgb,var(--bg) 95%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);opacity:var(--rise,0);transition:none}
 html:has(.open:not([hidden])) .find>.logo{opacity:1;visibility:visible;scale:1;pointer-events:auto;transition:none}
 #oq,.open.in #oq{opacity:0;transition:none}
 html:has(.crate.lifted) #oq{opacity:1}
@@ -1721,7 +1733,7 @@ body:has(.dock .q:focus-within) .kd,body:has(.dock .q.has) .kd,body:has(.dock .x
 html.phone .sl{top:auto;bottom:calc(var(--kb,0px) + 10px + 58px + 10px + env(safe-area-inset-bottom));max-height:calc(100svh - env(safe-area-inset-top) - 64px - var(--kb,0px) - 88px - env(safe-area-inset-bottom))} /* hugs its results, sitting on the field */
 /* with the keyboard up, the list fits between the field and the status bar of what's actually on screen (iOS scrolls the page up under the status bar, so the full height isn't) */
 html.phone.kbup .sl{bottom:calc(var(--kb,0px) + 8px + 58px + 8px);max-height:calc(var(--vvh,100svh) - 8px - 58px - 8px - env(safe-area-inset-top) - 10px)}
-body.walling .dock::before,html:has(.open:not([hidden])) .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:#121212e0;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
+body.walling .dock::before,html:has(.open:not([hidden])) .dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the grid and the table ease out under the bar, as they do under the top */
 .wall,.tbl{padding-bottom:calc(env(safe-area-inset-bottom) + 120px)}
 @media (max-width:700px){.tbl thead{display:none}} /* the bar's sort button sorts the table too, so the table's own "Sorted by" line goes */
 html:not(.phone) .sl{top:auto;right:auto;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom) + 18px + 54px + 10px);width:min(440px,calc(100vw - 28px))}
