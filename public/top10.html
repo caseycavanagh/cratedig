@@ -118,7 +118,8 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px}
 .btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* Start from a list: critics' year-end lists (vinyl/lists-2026.json). One tap fills the ten, with Undo */
-.from{display:grid;gap:8px}
+/* under the list, so the places never move when it comes and goes */
+.from{display:grid;gap:8px;margin-top:28px}
 .from[hidden]{display:none}
 .from .lab{font-size:var(--fs-2);color:var(--m)}
 .pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 4px}
@@ -133,6 +134,8 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px}
 @keyframes wait{to{opacity:.45}}
 /* the footer: who made it */
 .ft{margin-top:72px;font-size:var(--fs-2);color:var(--m)}
+/* on a laptop it sits in the bottom left corner, level with the bar; on a phone the bar needs the width, so it ends the page */
+@media(min-width:701px){.ft{position:fixed;z-index:var(--z-bar);margin:0;left:max(24px,env(safe-area-inset-left));bottom:calc(env(safe-area-inset-bottom) + 18px + 27px);translate:0 50%}}
 .ft a{color:var(--t1);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;transition:text-decoration-color .2s}
 @media(hover:hover){.ft a:hover{text-decoration-color:currentColor}}
 .ft a:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
@@ -225,12 +228,12 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 <div class="t" id="mk">
   <div class="side">
     <h1 id="h"><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
-    <div class="from" id="from" role="group" aria-labelledby="fromL" hidden><span class="lab" id="fromL">Start from a list</span><div class="pills"></div></div>
   </div>
   <main>
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
     <ul class="found" id="found" aria-live="polite"></ul>
   </main>
+  <div class="from" id="from" role="group" aria-labelledby="fromL" hidden><span class="lab" id="fromL">Start from a list</span><div class="pills"></div></div>
   <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
 </div>
 </div>
