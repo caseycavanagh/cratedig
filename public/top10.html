@@ -216,6 +216,9 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 @media(max-width:900px){
   .t{display:block;padding:calc(env(safe-area-inset-top) + 72px) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 150px) max(16px,env(safe-area-inset-left))}
   .dock,.note{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
+  /* searching: room below so even number 10 can rise to the top, and the bar and note step aside for the results */
+  body.searching .t{padding-bottom:100vh}
+  body.searching .dock,body.searching .note{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
   .side{position:static;gap:20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
   main{--nw:28px}
@@ -320,7 +323,7 @@ function draw(focus){
   }).join('');
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
   showFound();
-  document.body.classList.toggle('none',!filled().length);
+  document.body.classList.toggle('none',!filled().length);document.body.classList.toggle('searching',at>=0);
   drawBar();save();sampleCover();drawFrom();
 }
 // a pressing without its own cover borrows the album's; with neither, the square stays blank
@@ -340,6 +343,7 @@ function showFound(){
   if(!typed&&q.value.trim()){fd.innerHTML='';return}
   fd.style.top=(row.offsetTop+row.offsetHeight+6)+'px';
   if(typed&&status){fd.innerHTML=`<li class="st">${esc(status)}</li>`;return}
+  fitFound();
   fd.innerHTML=shown.slice(0,typed?8:25).map((r,i)=>{const k=key(r),on=slots.some(x=>x&&key(x)===k);
     return `<li><button class="hit" type="button" data-f="${i}"${on?' aria-disabled="true"':''}${busy.has(k)?' aria-busy="true"':''}>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}${r.year?' · '+esc(r.year):''}</span></span>${on?`<span class="add">${IC.check}</span>`:''}</button></li>`}).join('');
 }
@@ -371,7 +375,16 @@ ls.addEventListener('keydown',e=>{
 // the search closes on Esc or a press anywhere else
 function closeSearch(){if(at<0)return;at=-1;found=[];status='';const q=$('#q');if(q)q.value='';draw()}
 document.addEventListener('pointerdown',e=>{if(at>=0&&!e.target.closest('.row.q,#found,.row.e'))closeSearch()});
-function openAt(i){if(slots[i])return;at=i;found=[];status='';const q=$('#q');if(q)q.value='';draw(true)}
+function openAt(i){if(slots[i])return;at=i;found=[];status='';const q=$('#q');if(q)q.value='';draw(true);lift()}
+// on a phone the keyboard takes half the screen: the open place goes to the top, and its results fill what's left above the keyboard
+const phone=matchMedia('(max-width:700px)');
+function lift(){if(!phone.matches)return;const row=$('#q')?.closest('.row');if(!row)return;
+  const y=row.getBoundingClientRect().top-(visualViewport?.offsetTop||0)-12;if(Math.abs(y)>4)scrollBy({top:y,behavior:reduce?'auto':'smooth'})}
+function fitFound(){if(at<0)return;const bottom=visualViewport?visualViewport.offsetTop+visualViewport.height:innerHeight;
+  fd.style.maxHeight=phone.matches?Math.max(150,bottom-fd.getBoundingClientRect().top-10)+'px':''}
+// the keyboard coming up (or going) changes the visual viewport: place the row again once it settles
+let liftT=0;visualViewport?.addEventListener('resize',()=>{fitFound();clearTimeout(liftT);liftT=setTimeout(()=>{lift();setTimeout(fitFound,350)},120)});
+visualViewport?.addEventListener('scroll',fitFound);addEventListener('scroll',fitFound,{passive:true});
 fd.addEventListener('click',async e=>{
   const h=e.target.closest('.hit');if(!h||h.getAttribute('aria-disabled')==='true')return;
   let r=shown[+h.dataset.f];const k=key(r),i=at;if(busy.has(k)||i<0||slots[i])return;
