@@ -111,8 +111,13 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .btn:active{transform:scale(.97);transition-duration:.08s}
 .btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.go{align-self:flex-start;min-width:140px;transition:opacity .3s var(--ease),transform .5s var(--ease)}
+.go{margin-top:24px;min-width:140px;transition:opacity .3s var(--ease),transform .5s var(--ease)}
 body.none .go{visibility:hidden;opacity:0}
+/* the footer: who made it */
+.ft{margin-top:72px;font-size:var(--fs-2);color:var(--m)}
+.ft a{color:var(--t1);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;transition:text-decoration-color .2s}
+@media(hover:hover){.ft a:hover{text-decoration-color:currentColor}}
+.ft a:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
 
 /* ---- Share: the list as friends will see it, edited in place ---- */
 .sv{max-width:560px;margin:0 auto;padding:56px 0 180px}
@@ -183,18 +188,20 @@ body.none .go{visibility:hidden;opacity:0}
   <div class="side">
     <span class="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>Crate Dig</span>
     <h1 id="h">Your top 10 of 2026</h1>
-    <button class="btn go" id="go" type="button">Share</button>
   </div>
   <main>
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
     <ul class="found" id="found" aria-live="polite"></ul>
   </main>
+  <button class="btn go" id="go" type="button">Share</button>
+  <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
 </div>
 <div class="sv" id="sv" hidden>
   <button class="back" id="back" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Edit</button>
   <span class="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>Crate Dig</span>
   <h1 id="sh"><span class="nmw"><span class="mir" aria-hidden="true"></span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
   <ol class="pv" id="pv"></ol>
+  <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
   <div class="bar" id="bar"></div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span></span><button type="button">Undo</button></div>
