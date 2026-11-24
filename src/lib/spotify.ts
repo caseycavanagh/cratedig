@@ -83,12 +83,13 @@ async function sp(path: string): Promise<Response | null> {
 }
 export const spotifyReady = () => !!(process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET);
 
-// albums and EPs only: no singles or compilations. Spotify gives at most 10 a page to new apps, so two pages
+// albums and EPs only: no singles or compilations. Spotify's plain search mixes in anything with the word in it (wildlife sounds for "geese"),
+// so the artist's own albums come first, then album titles, then the rest. New apps get at most 10 a page
 export async function spotifySearch(term: string, year?: string): Promise<SpotifyRecord[] | null> {
-  const q = term.replace(/[:"]/g, " ").trim() + (year ? ` year:${year}` : "");
-  const page = (offset: number) => sp(`search?${new URLSearchParams({ q, type: "album", limit: "10", offset: String(offset), market: "US" })}`);
-  const pages = await Promise.all([page(0), page(10)]);
-  if (!pages[0]?.ok) return null;
+  const t = term.replace(/[:"]/g, " ").replace(/\s+/g, " ").trim(), y = year ? ` year:${year}` : "";
+  const ask = (q: string) => sp(`search?${new URLSearchParams({ q, type: "album", limit: "10", market: "US" })}`);
+  const pages = await Promise.all([ask(`artist:"${t}"${y}`), ask(`album:"${t}"${y}`), ask(t + y)]);
+  if (!pages.some((r) => r?.ok)) return null;
   const seen = new Set<string>(), out: SpotifyRecord[] = [];
   for (const res of pages) {
     if (!res?.ok) continue;
