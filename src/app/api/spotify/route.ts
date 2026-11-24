@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   if (p.get("new")) {
     const year = /^\d{4}$/.test(p.get("year") ?? "") ? (p.get("year") as string) : String(new Date().getFullYear());
     const list = LISTS[year]?.lists[0];
-    const [critics, more] = await Promise.all([list ? spotifyCritics(list.records, year, `sp:list:${year}:${list.id}:${list.asOf ?? ""}`) : [], spotifyNew(year)]);
+    const [critics, more] = await Promise.all([list ? spotifyCritics(list.records, year, `sp:list2:${year}:${list.id}:${list.asOf ?? ""}`) : [], spotifyNew(year)]);
     if (!critics.length && !more) return Response.json({ results: [] }, { status: 502 });
     const have = new Set(critics.map((r) => r.id)), seen = new Set(critics.map((r) => r.artist.toLowerCase()));
     const results = [...critics, ...(more ?? []).filter((r) => !have.has(r.id) && !seen.has(r.artist.toLowerCase()))].slice(0, 25);

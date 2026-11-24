@@ -148,7 +148,7 @@ export async function spotifyNew(year: string): Promise<SpotifyRecord[] | null> 
 }
 
 // a critic's list, matched to Spotify's albums in the list's order: same artist, and the same title or one that starts with it.
-// A line with no match is left out. Kept a week under its own key, since every visitor would otherwise ask for the same 17
+// A line with no match is left out. Kept under its own key, since every visitor would otherwise ask for the same 17
 const fold = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 export async function spotifyCritics(lines: { artist: string; title: string }[], year: string, key: string): Promise<SpotifyRecord[]> {
   const run = kv();
@@ -158,15 +158,18 @@ export async function spotifyCritics(lines: { artist: string; title: string }[],
   const work = async () => {
     for (let i; (i = next++) < lines.length;) {
       const c = lines[i], a = fold(c.artist), t = fold(c.title);
-      const res = await spotifySearch(`${c.artist} ${c.title}`, year);
-      if (!res) { misses++; continue; }
       const same = (r: SpotifyRecord) => { const x = fold(r.artist); return x === a || x.startsWith(a + " ") || a.startsWith(x + " "); };
-      found[i] = res.find((r) => same(r) && (fold(r.title) === t || fold(r.title).startsWith(t + " "))) ?? res.find((r) => same(r) && t.startsWith(fold(r.title) + " ")) ?? null;
+      const pick = (res: SpotifyRecord[]) => res.find((r) => same(r) && (fold(r.title) === t || fold(r.title).startsWith(t + " "))) ?? res.find((r) => same(r) && t.startsWith(fold(r.title) + " ")) ?? null;
+      // the whole line first; when that misses (a curly apostrophe, a long title), the artist's own albums that year
+      const res = await spotifySearch(`${c.artist} ${c.title}`.replace(/[’‘]/g, "'"), year);
+      found[i] = res && pick(res);
+      if (!found[i]) { const more = await spotifySearch(c.artist, year); if (more) found[i] = pick(more); }
+      if (!found[i]) misses++;
     }
   };
   await Promise.all([work(), work(), work()]);
   const out = found.filter((r): r is SpotifyRecord => !!r);
-  // a list Spotify partly failed on isn't kept, so the next visitor tries again
-  if (run && out.length && !misses) { try { await run([["SET", key, JSON.stringify(out), "EX", 60 * 60 * 24 * 7]]); } catch {} }
+  // a list with lines still missing is kept a day, so they get another try soon; a whole one a week
+  if (run && out.length) { try { await run([["SET", key, JSON.stringify(out), "EX", 60 * 60 * 24 * (misses ? 1 : 7)]]); } catch {} }
   return out;
 }
