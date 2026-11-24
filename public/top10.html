@@ -125,7 +125,7 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .pl[aria-pressed=true]{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
 .row.w .cv{animation:wait 1.2s var(--ease) infinite alternate}
 @keyframes wait{to{opacity:.45}}
-body.none /* the footer: who made it */
+/* the footer: who made it */
 .ft{margin-top:72px;font-size:var(--fs-2);color:var(--m)}
 .ft a{color:var(--t1);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;transition:text-decoration-color .2s}
 @media(hover:hover){.ft a:hover{text-decoration-color:currentColor}}
@@ -273,7 +273,7 @@ function draw(focus){
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
   showFound();
   document.body.classList.toggle('none',!filled().length);
-  drawBar();save();sampleCover();
+  drawBar();save();sampleCover();drawFrom();
 }
 // a pressing without its own cover borrows the album's; with neither, the square stays blank
 document.addEventListener('error',e=>{const i=e.target;if(i.dataset?.fallback){i.src=i.dataset.fallback;delete i.dataset.fallback}else if(i.tagName==='IMG')i.style.visibility='hidden'},true);
@@ -355,7 +355,7 @@ toast.lastElementChild.addEventListener('click',()=>{if(!undo)return;const fn=un
 let LISTS=[],fillSeq=0;
 const fromEl=$('#from');
 function drawFrom(){
-  fromEl.hidden=!LISTS.length;
+  fromEl.hidden=!LISTS.length||filled().length>0; // only while the list is empty; Undo brings it back
   fromEl.lastElementChild.innerHTML=LISTS.map(l=>`<button class="pl" type="button" data-l="${esc(l.id)}" aria-pressed="${from===l.id}" aria-label="${esc(l.title)}">${esc(l.name)}</button>`).join('');
 }
 // the best match for a critic's line: same artist and the same title (or one starting with it), else the same artist's first album
