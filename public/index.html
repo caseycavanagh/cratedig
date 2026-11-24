@@ -27,12 +27,15 @@
 <script>
 // a list shared at /2026 wears the colors its maker picked (t=, and bg, fg, n for its own or its number one's): every color
 // token is drawn from its background and text, so the whole page follows. Night, the default, is the tokens as they are
-(function(){if(!/^\/2026\/?$/.test(location.pathname))return;var q=new URLSearchParams(location.search),t=q.get('t')||'a',hx=function(v){return /^[0-9a-f]{6}$/i.test(v||'')?'#'+v:null};
+(function(){if(!/^\/2026\/?$/.test(location.pathname))return;document.documentElement.classList.add('y26');var q=new URLSearchParams(location.search),t=q.get('t')||'a',hx=function(v){return /^[0-9a-f]{6}$/i.test(v||'')?'#'+v:null};
   var P={b:['#f2ede2','#1f1b16','#1f1b16'],c:['#1f33c7','#ffffff','#ffffff'],d:['#e2462c','#fff6ea','#fff6ea'],e:['#16382a','#f1e9d2','#d8b968'],f:['#ffd3e3','#3a0d28','#c2185b'],g:['#f1c232','#1c1708','#1c1708']};
   var c=P[t];if(t==='h'||t==='x'){var bg=hx(q.get('bg')),fg=hx(q.get('fg'));if(bg&&fg)c=[bg,fg,hx(q.get('n'))||fg]}
   if(!c)return;var bg=c[0],fg=c[1],m=function(p){return'color-mix(in srgb,'+fg+' '+p+'%,'+bg+')'},a=function(p){return'color-mix(in srgb,'+fg+' '+p+'%,transparent)'};
   var v={'--bg':bg,'--fg':fg,'--on-fg':bg,'--t1':m(85),'--t2':m(68),'--m':m(60),'--t3':m(46),'--t4':m(38),'--line':a(14),'--line2':a(22),'--soft':m(9),'--sheet':m(7),'--hov':a(6),'--prs':a(8),'--sel':a(12),'--ring':a(26),'--rank-n':c[2],
     '--glass':'color-mix(in srgb,'+m(9)+' 72%,transparent)'};
+  // a light page (Paper, Bubblegum, Mustard) gets softer shadows: the crate's are tuned for near-black and look grey on cream
+  var lum=function(h){h=h.slice(1);return(.2126*parseInt(h.slice(0,2),16)+.7152*parseInt(h.slice(2,4),16)+.0722*parseInt(h.slice(4,6),16))/255};
+  if(lum(bg)>.6){v['--rest']='0 1px 2px #0002,0 18px 30px -16px #0003';v['--lift']='0 14px 28px -14px #0004,0 3px 8px -4px #0002';v['--float']='0 12px 32px #0002'}
   var st=document.createElement('style');st.textContent=':root:root{'+Object.keys(v).map(function(k){return k+':'+v[k]}).join(';')+'}html,body{background:'+bg+'}';document.head.append(st);
   document.documentElement.classList.add('themed');var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=bg})();
 </script>
@@ -1134,6 +1137,24 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
   .rk b{font-size:var(--fs-3)}.rk .a{font-size:var(--fs-2)}.rk .m{display:none}}
 @media(prefers-reduced-motion:reduce){.rk .pic{transition:none}}
 body.fon .rk{padding-top:calc(env(safe-area-inset-top) + 72px + 44px)}
+/* a top 10 shared at /2026: whose list it is above, a way to make your own below, one centered column */
+.rk-h,.rk-mk{display:none}
+.y26 .rk-h{display:grid;gap:14px;max-width:640px;margin:0 auto 28px;padding-left:88px}
+.y26 .rk-home{text-decoration:none;display:inline-flex;align-items:center;gap:10px;justify-self:start;font-size:var(--fs-3);font-weight:500;color:var(--t1)}
+.y26 .rk-home svg{width:22px;height:22px;color:inherit}
+.y26 .rk-h h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance;color:var(--fg);margin:0}
+.y26 .rk ol{max-width:640px}
+.y26 .rk-mk{display:flex;max-width:640px;margin:40px auto 0;padding-left:88px}
+.rk-go{all:unset;box-sizing:border-box;cursor:pointer;height:44px;padding:0 22px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);display:inline-flex;align-items:center;font-size:var(--fs-3);font-weight:500;white-space:nowrap;transition:transform .5s var(--ease)}
+.rk-go:active{transform:scale(.97);transition-duration:.08s}
+.rk-go:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.y26 .logo{display:none}
+.y26 .rk{padding-top:calc(env(safe-area-inset-top) + 48px)}
+.y26 .dock .xb[data-k=sort],.y26 .dock .xb[data-k=dir],.y26 .dock .xb[data-k=view]{display:none}
+.lerr{position:fixed;inset:0;z-index:var(--z-about);background:var(--bg);color:var(--fg);display:grid;place-content:center;justify-items:center;gap:18px;padding:24px;text-align:center;font-size:var(--fs-4)}
+.lerr p{margin:0}
+.lerr a{font-size:var(--fs-3);color:var(--m)}
+@media(max-width:700px){.y26 .rk-h{padding-left:50px;margin-bottom:22px}.y26 .rk-h h1{font-size:var(--fs-5)}.y26 .rk-mk{padding-left:50px;margin-top:32px}}
 body:not(.ready) .rk{pointer-events:none}
 .tbl{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s var(--ease)}
 .tbl[hidden]{display:none}
@@ -1788,10 +1809,10 @@ html.phone .sx,html.phone body.searching .sx{display:none}
   </div>
   <nav class="az" id="az" aria-label="Jump to a letter"></nav>
   <div class="kd" id="kd"><p class="kd-b" aria-hidden="true"><span class="c"></span><span class="a"></span></p><div class="kd-d" tabindex="0" role="slider" aria-label="Turn to a letter. Up and down change between letters and records."><div class="kd-c"></div></div></div>
-  <div class="vw" role="group" aria-label="View"><button type="button" data-v="rank" aria-pressed="false" hidden>Top ten</button><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
+  <div class="vw" role="group" aria-label="View"><button type="button" data-v="rank" aria-pressed="false" hidden>Top 10</button><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
 </main>
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
-<section class="rk" id="rk" hidden tabindex="-1" aria-label="The top ten"><ol></ol></section>
+<section class="rk" id="rk" hidden tabindex="-1" aria-label="The top 10"><header class="rk-h"><a class="rk-home" href="/2026"><svg aria-hidden="true"><use href="#mark"/></svg>Crate Dig</a><h1 id="rkT"></h1></header><ol></ol><p class="rk-mk"><a class="rk-go" href="/2026">Make your own</a></p></section>
 <section class="tbl" id="tbl" hidden tabindex="-1" aria-label="Every record, as a table"><table><thead></thead><tbody></tbody></table></section>
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
 <div class="hv" id="hv" aria-hidden="true"></div>
@@ -3933,12 +3954,23 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 // Casey's crate, or a visitor's crate when the address carries one (vinyl-make.html builds those links)
 // Casey's edits come too (fresh for Casey, a few seconds old for everyone else), unless they're slow: the crate doesn't wait long for them
 // The whole crate doesn't wait long for them; another crate needs them for its list, so it waits longer
+// a top 10 shared at /2026: its maker's name on top, "Make your own" at the end, and only search in the bar
+const Y26=document.documentElement.classList.contains('y26');
+const top26=n=>{n=(n||'').trim();return n?`${n}${/s$/i.test(n)?'’':'’s'} top 10 of 2026`:'A top 10 of 2026'};
+// the records in a shared address didn't come back (the lookup was busy or down): say so plainly, with a way to try again
+function loadFailed(){
+  const l=$('#loading');if(l)l.style.display='none';
+  const d=document.createElement('div');d.className='lerr';d.setAttribute('role','alert');
+  d.innerHTML=`<p>${Y26?'This top 10':'These records'} didn’t load.</p><button type="button" class="rk-go">Try again</button>${Y26?'<a href="/2026">Make your own</a>':''}`;
+  d.querySelector('button').onclick=()=>location.reload();document.body.append(d);d.querySelector('button').focus({preventScroll:true});
+}
 const visiting=/[?&](d|m|c)=/.test(location.search),edits=visiting?null:fetch('/api/crate'+(signedHere?'?t='+Date.now():'')).then(r=>r.ok?r.json():null).catch(()=>null);
 const authQ=visiting?null:fetch('/api/auth').then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
   if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);
     if(/[?&]top=1(&|$)/.test(location.search)||/^\/2026\/?$/.test(location.pathname))setRank(v.records.slice(0,10).map(r=>r.slug)); // a visitor's top ten (top=1, or a list shared at /2026) comes ranked, number one first
-    crateBy=v.name||'';document.title=TITLE=VisitorCrate.crateName(v.name)}
+    crateBy=v.name||'';document.title=TITLE=Y26?top26(v.name):VisitorCrate.crateName(v.name);if(Y26)$('#rkT').textContent=TITLE}
+  else if(visiting){loadFailed();return} // a list that didn't load says so: never Casey's crate in its place
   else{
     RECORDS.forEach((r,i)=>Object.assign(r,{...m[r.slug],...r,seq:i})); // a value written in RECORDS wins
     BASE=[...RECORDS];
@@ -4120,7 +4152,7 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
   const rk=$('#rk'),rkeep=new Map();
   function drawRank(){
     const rows=[...order].sort((a,b)=>rankOf(a)-rankOf(b));rkeep.clear();
-    $('ol',rk).innerHTML=rows.map(r=>`<li><button type="button" data-slug="${esc(r.slug)}" aria-label="${rankOf(r)+1}. ${esc(r.title)} by ${esc(r.artist)}"><span class="n" aria-hidden="true">${rankOf(r)+1}</span><i class="pic" style="background:${spineBg(r)}">${r.front?`<img alt="" decoding="async" data-src="${esc(img(r.front))}" onload="fadeIn(this)">`:`<i class="sw">${blankHTML(r)}</i>`}</i><span class="tx"><b>${esc(r.title)}</b><span class="a">${esc(r.artist)}</span><span class="m">${esc([r.year,labelName(r.label)].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+    $('ol',rk).innerHTML=rows.map(r=>`<li><button type="button" data-slug="${esc(r.slug)}" aria-label="${rankOf(r)+1}. ${esc(r.title)} by ${esc(r.artist)}"><span class="n" aria-hidden="true">${rankOf(r)+1}</span><i class="pic" style="background:${spineBg(r)}">${r.front?`<img alt="" decoding="async" data-src="${esc(img(r.front))}" onload="fadeIn(this)">`:`<i class="sw">${blankHTML(r)}</i>`}</i><span class="tx"><b>${esc(r.title)}</b><span class="a">${esc(r.artist)}</span><span class="m">${esc([r.year,Y26?'':labelName(r.label)].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
     for(const b of $$('li button',rk)){rkeep.set(b.dataset.slug,$('.pic',b));const i=$('img',b);if(i)thumb(i.dataset.src).then(u=>{i.src=u})}
   }
   rk.addEventListener('click',e=>{const b=e.target.closest('button[data-slug]');if(b)pull(b.dataset.slug)});
@@ -4932,7 +4964,7 @@ html.phone .ab-sh{margin-top:20px}
 
   // over the crate: Add records, its name and description, a new crate
   const asB=document.createElement('div');asB.className='op-b';
-  asB.innerHTML=sec('rank','Top ten','<ol id="opR"></ol>')+sec('add','Add records','')+sec('crate','Name and description',`<label class="op-f"><span>Name</span><input id="opN" maxlength="60" autocomplete="off"></label><label class="op-f"><span>Description</span><textarea id="opA" maxlength="300" rows="3" placeholder="A line or two about it"></textarea></label><label class="op-tg" id="opTg"><input type="checkbox" id="opRk"><span><b>Top ten</b><i>Ranked, number one first. Ten records at most.</i></span></label>`);
+  asB.innerHTML=sec('rank','Top 10','<ol id="opR"></ol>')+sec('add','Add records','')+sec('crate','Name and description',`<label class="op-f"><span>Name</span><input id="opN" maxlength="60" autocomplete="off"></label><label class="op-f"><span>Description</span><textarea id="opA" maxlength="300" rows="3" placeholder="A line or two about it"></textarea></label><label class="op-tg" id="opTg"><input type="checkbox" id="opRk"><span><b>Top 10</b><i>Ranked, number one first. Ten records at most.</i></span></label>`);
   const head=as.querySelector('.rs-h');head.after(asB);
   asB.querySelector('[data-s=add] .op-c').append(as.querySelector('.as-in'),as.querySelector('.as-f'));
   const crC=asB.querySelector('[data-s=crate] .op-c'),end=document.createElement('div');end.className='op-end';asB.append(end);

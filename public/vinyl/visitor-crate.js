@@ -49,16 +49,18 @@
     if(src==='d')discogs=true;
     return r.json();
   }
-  async function search(term){
-    const q='q='+encodeURIComponent(term);
+  // {albums:true} (the top 10 maker): whole studio albums and EPs, the artist's own first, no singles, live sets or tributes
+  async function search(term,{albums=false}={}){
+    const q='q='+encodeURIComponent(term)+(albums?'&albums=1':'');
     if(discogs!==false){
       const d=await api('d',q).catch(e=>{if(discogs)throw e;discogs=false;return null});
       if(d)return d.results.map(r=>({...r,src:'d',pal:PAL}));
     }
-    const m=await api('m',q).catch(()=>null);
+    // MusicBrainz asks for a second between searches: one busy answer gets one more try before Apple Music
+    const m=await api('m',q).catch(e=>e.message==='busy'?new Promise(r=>setTimeout(r,1200)).then(()=>api('m',q)).catch(()=>null):null);
     if(m)return m.results.map(r=>({...r,src:'m',group:r.id,pal:PAL})); // an album, until pick() chooses its pressing
     const d=await jsonp(ITUNES+'search?media=music&entity=album&limit=24&term='+encodeURIComponent(term));
-    return (d.results||[]).filter(a=>a.collectionType==='Album'&&a.artworkUrl100).map(toRecord);
+    return (d.results||[]).filter(a=>a.collectionType==='Album'&&a.artworkUrl100&&(!albums||!/ - (Single|EP)$|\((Live|Remix)/i.test(a.collectionName))).map(toRecord);
   }
   // the pressing to keep for a MusicBrainz album: its release ID
   async function pick(r){
@@ -85,7 +87,8 @@
   }
   async function apiLookup(src,ids){
     if(!ids.length)return [];
-    const d=await api(src,'ids='+ids.join(','));
+    // a busy moment upstream gets one more try before the crate gives up
+    const d=await api(src,'ids='+ids.join(',')).catch(()=>new Promise(r=>setTimeout(r,1500)).then(()=>api(src,'ids='+ids.join(','))));
     const byId={};(d?.records||[]).forEach(r=>byId[r.id]=fromApi(src)(r));
     return ids.map(id=>byId[id]).filter(Boolean);
   }
@@ -93,7 +96,7 @@
   async function appleLookup(ids){
     const byId={};
     for(let i=0;i<ids.length;i+=100){
-      const d=await jsonp(ITUNES+'lookup?entity=album&id='+ids.slice(i,i+100).join(','));
+      const url=ITUNES+'lookup?entity=album&id='+ids.slice(i,i+100).join(','),d=await jsonp(url).catch(()=>jsonp(url));
       (d.results||[]).filter(a=>a.wrapperType==='collection'&&a.artworkUrl100).forEach(a=>byId[a.collectionId]=toRecord(a));
     }
     return ids.map(id=>byId[id]).filter(Boolean);
