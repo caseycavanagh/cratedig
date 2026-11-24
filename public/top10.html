@@ -27,7 +27,8 @@
 /* A top 10 of 2026: ten numbered places, each a soft bar. Every place is quiet at rest; tap any number to search
    there instead, so a list can have gaps. Drag a row from anywhere on it (on a touch screen, hold it for a beat first): the other places,
    empty ones too, part under it as it passes, and it settles where you let go. × takes one out (with Undo).
-   Your name is typed into the title; a bar at the bottom holds the colors and Copy link, all on the list you are making. The list lives in its
+   Your name is typed into the title; a glass bar at the bottom holds three icons (colors, Copy link, Share) and changes shape for each;
+   a glass note over it says what last changed, with Undo, until the next change. The list lives in its
    link (vinyl/visitor-crate.js), gaps closed up, and the link opens it on the crate page, ranked. Tokens: /vinyl/tokens.css */
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
 html{background:var(--bg)}
@@ -40,22 +41,24 @@ a{color:inherit;text-decoration:none}
 [hidden]{display:none!important}
 
 /* one column, laptop and phone */
-.t{max-width:560px;margin:0 auto;padding:56px 0 160px;min-height:100vh;min-height:100dvh}
+.t{max-width:560px;margin:0 auto;padding:96px 0 160px;min-height:100vh;min-height:100dvh}
 .side{display:flex;flex-direction:column;gap:24px;min-width:0;margin-bottom:28px}
-.home{display:inline-flex;align-items:center;gap:10px;font-size:var(--fs-3);font-weight:500;color:var(--t1);align-self:flex-start}
-.home svg{width:22px;height:22px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
-main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
+main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px}
 
 /* the ten places: soft bars, a little apart, no lines. A bar's color is the page's with a touch of the text's, so every color scheme has them */
 .ls{--bar:color-mix(in srgb,var(--fg) 5%,var(--bg));--bar-e:color-mix(in srgb,var(--fg) 2.5%,var(--bg));
   list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0}
-.row{position:relative;display:flex;align-items:center;gap:var(--gap);min-height:64px;padding:0 10px 0 var(--pl);border-radius:var(--r-in);background:var(--bar);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* the number hangs outside the bar, in the margin; the bar starts at the cover */
+.row{--rb:var(--bar);position:relative;display:flex;align-items:center;gap:var(--gap);min-height:64px;padding:0 10px 0 0;border-radius:var(--r-in);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .n{flex:none;width:var(--nw);font-size:var(--fs-5);font-weight:500;line-height:1;letter-spacing:-.02em;text-align:left;color:var(--rank-n,var(--fg))}
-.row.e{background:var(--bar-e);cursor:pointer;transition:background-color .2s}
+.row::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;right:0;left:calc(var(--nw) + var(--gap) - var(--pl));border-radius:var(--r-in);background:var(--rb);transition:background-color .2s,box-shadow .2s var(--ease)}
+.row>.cv{margin-left:var(--pl)}
+.ls{position:relative;z-index:0}
+.row.e{--rb:var(--bar-e);cursor:pointer}
 .row.e .n{color:var(--t4);font-weight:400}
-@media(hover:hover){.row.e:hover{background:var(--bar)}}
-.row.e:active{background:var(--bar)}
+@media(hover:hover){.row.e:hover{--rb:var(--bar)}}
+.row.e:active{--rb:var(--bar)}
 .row.e:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
 .row.f{cursor:grab}
 .row.f:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
@@ -72,8 +75,10 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 /* on a laptop × waits for the pointer; on a touch screen it's always there */
 @media(hover:hover) and (pointer:fine){.row .x{opacity:0;transition:opacity .15s,color .2s,background-color .2s}.row:hover .x,.row .x:focus-visible{opacity:1}}
 /* a row in hand: the same bar, lifted. It grows a little and casts one soft shadow; the other places part under it as it passes */
-.row.drag{z-index:3;cursor:grabbing;box-shadow:var(--lift);scale:1.03;transition:scale .2s var(--ease),box-shadow .2s var(--ease)}
-.row.drag.land{scale:1;box-shadow:none;transition:transform .22s var(--ease),scale .22s var(--ease),box-shadow .22s var(--ease)}
+.row.drag{z-index:3;cursor:grabbing;scale:1.03;transition:scale .2s var(--ease)}
+.row.drag::before{box-shadow:var(--lift)}
+.row.drag.land{scale:1;transition:transform .22s var(--ease),scale .22s var(--ease)}
+.row.drag.land::before{box-shadow:none;transition:box-shadow .22s var(--ease)}
 .row.drag .x{visibility:hidden}
 .ls.dragging .row:not(.drag){transition:transform .32s var(--ease),background-color .2s}
 .ls.dragging .row.f:not(.drag){z-index:1}
@@ -85,11 +90,12 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .fld input:focus-visible{box-shadow:0 0 0 1px var(--ring)}
 .fld input::placeholder{color:var(--m)}
 .fld input::-webkit-search-cancel-button{display:none}
-.row.q{padding-right:10px;background:var(--bar);transition:box-shadow .2s}
+.row.q{padding-right:10px;--rb:var(--bar)}
+.row.q .fld{margin-left:var(--pl)}
 /* the open place is the field itself: no box inside the bar, and what you type starts where a cover would */
 .row.q .fld input{height:64px;margin-block:-1px;border-radius:0;background:none;padding:0 8px 0 0}
 .row.q .fld input:focus-visible{box-shadow:none}
-.row.q:focus-within{box-shadow:inset 0 0 0 1px var(--line2)}
+.row.q:focus-within::before{box-shadow:inset 0 0 0 1px var(--line2)}
 /* results float over the places below, so nothing moves */
 /* the whole way across, under the place it fills */
 .found{position:absolute;z-index:4;left:0;right:0;list-style:none;padding:6px;max-height:min(480px,60vh);max-height:min(480px,60dvh);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
@@ -140,12 +146,46 @@ h1{overflow-wrap:anywhere}
 .nmw input{all:unset;grid-area:1/1;width:0;min-width:100%;color:inherit;border-bottom:2px dashed color-mix(in srgb,var(--fg) 30%,transparent);transition:border-color .2s}
 .nmw input:focus{border-bottom-color:color-mix(in srgb,var(--fg) 60%,transparent)}
 .nmw input::placeholder{color:color-mix(in srgb,var(--fg) 38%,transparent)}
-/* the floating bar: colors, then the link. It comes in with the first record */
-body.none .bar{visibility:hidden;opacity:0;translate:-50% 12px}
-.bar{position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);translate:-50% 0;transition:opacity .3s var(--ease),translate .3s var(--ease),visibility 0s;display:flex;align-items:center;gap:16px;padding:8px 8px 8px 18px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);max-width:calc(100vw - 24px)}
+/* the header, as on the crate: the mark in its circle top left, what this is beside it, and Start over at the right */
+.hdr{position:absolute;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
+.logo{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--fg);transition:transform .5s var(--ease)}
+.logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s var(--ease)}
+@media(hover:hover){.logo:hover svg{transform:rotate(45deg)}}
+.logo:active{transform:scale(.96);transition-duration:.08s}
+.logo:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.where{display:flex;align-items:center;height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);white-space:nowrap}
+.rs{all:unset;cursor:pointer;margin-left:auto;display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);white-space:nowrap;transition:color .2s,background-color .2s,opacity .2s}
+@media(hover:hover){.rs:hover{color:var(--fg);background:var(--hov)}}
+.rs:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.rs svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rs[aria-disabled=true]{opacity:.35;pointer-events:none}
+
+/* the bar, always there: one glass bar (the crate's dock glass) with three icons. It changes shape for what you tap:
+   the colors stretch out of it (× or a tap outside closes them), Copy link becomes "Link copied" for a moment */
+.dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:var(--db);display:flex;justify-content:center;padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
+.one{pointer-events:auto;position:relative;flex:none;max-width:100%;height:var(--H);box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);overflow:hidden;transition:width .5s var(--ease)}
+.lay{position:absolute;top:0;bottom:0;left:0;display:flex;align-items:center;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
+.lay.on{opacity:1;visibility:visible;transition:opacity .25s .12s,visibility 0s}
+.icons{padding:0 3px}
+.fb{all:unset;cursor:pointer;width:calc(var(--H) - 4px);height:calc(var(--H) - 2px);display:grid;place-items:center;border-radius:50%;color:var(--t2);transition:color .2s,opacity .2s;touch-action:manipulation}
+@media(hover:hover){.fb:hover{color:var(--fg)}}
+.fb:focus-visible{outline:1px solid var(--ring);outline-offset:-4px}
+.fb svg{width:24px;height:24px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s var(--ease)}
+.fb:active svg{transform:scale(.86)}
+.fb[aria-disabled=true]{opacity:.35;pointer-events:none}
+.cols{gap:8px;padding:0 6px 0 13px;right:0}
+.cols .sc{display:flex;align-items:center;gap:8px;min-width:0;overflow-x:auto;scrollbar-width:none;padding:6px 4px;margin:-6px -4px}
+.cols .sc::-webkit-scrollbar{display:none}
+.cols .x{all:unset;cursor:pointer;flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--t2);transition:color .2s,background-color .2s}
+@media(hover:hover){.cols .x:hover{color:var(--fg);background:var(--hov)}}
+.cols .x:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.cols .x svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.done{gap:8px;padding:0 22px;font-weight:500}
+.done svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .dots{display:flex;gap:8px}
-.dot{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:28px;height:28px;border-radius:50%;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px var(--line2);transition:box-shadow .2s}
+.dot{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:28px;height:28px;border-radius:50%;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px var(--line2);transition:box-shadow .2s,transform .35s var(--ease)}
 .dot[aria-pressed=true]{box-shadow:inset 0 0 0 1px var(--line2),0 0 0 2px var(--soft),0 0 0 3.5px var(--fg)}
+.dot:active{transform:scale(.86)}
 .dot:focus-visible{outline:1px solid var(--ring);outline-offset:5px}
 .dot.mine{background:conic-gradient(#ff5a5a,#ffcc33,#4fd06a,#33c6ff,#6a6aff,#ff5ac8,#ff5a5a)}
 .pcs{display:flex;gap:8px}
@@ -154,40 +194,36 @@ body.none .bar{visibility:hidden;opacity:0;translate:-50% 12px}
 .pc input::-webkit-color-swatch-wrapper{padding:0}
 .pc input::-webkit-color-swatch{border:1px solid var(--t3);border-radius:50%}
 .pc input::-moz-color-swatch{border:1px solid var(--t3);border-radius:50%}
-.bar .btn{min-width:132px}
 
-/* Undo, after taking one out */
-.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);z-index:var(--z-toast);translate:-50% 0;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);height:48px;padding:0 8px 0 20px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);box-shadow:var(--float);font-size:var(--fs-3);transition:opacity .2s var(--ease),transform .2s var(--ease)}
-.toast[hidden]{display:flex!important;visibility:hidden;opacity:0;transform:translateY(8px);transition:opacity .15s var(--out),transform .15s var(--out),visibility 0s .15s}
-.toast span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.toast button{all:unset;cursor:pointer;flex:none;height:34px;padding:0 14px;border-radius:var(--r-pill);font-weight:500;background:color-mix(in srgb,var(--on-fg) 10%,transparent)}
-.toast button:focus-visible{outline:1px solid var(--on-fg);outline-offset:1px}
+/* the note: the crate's bar note (.dsay), glass over the glass bar. It stays until your next change, so Undo is always there */
+.note{position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(var(--db) + var(--H) + 14px);--db:calc(env(safe-area-inset-bottom) + 18px);--H:54px;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);box-sizing:border-box;height:40px;padding:0 6px 0 16px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);color:var(--fg);font-size:var(--fs-3);
+  opacity:0;visibility:hidden;translate:-50% 10px;transition:opacity .15s var(--out),visibility 0s .15s,translate 0s .15s}
+.note.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--ease)}
+.note span{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.note button{all:unset;flex:none;cursor:pointer;height:28px;padding:0 12px;border-radius:var(--r-pill);border:1px solid var(--line2);font-size:var(--fs-2);transition:transform .5s var(--ease)}
+.note button:active{transform:scale(.97);transition-duration:.08s}
+.note button:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 
-body:not(.none) .toast{bottom:calc(env(safe-area-inset-bottom) + 92px)}
 @media(max-width:900px){
-  .t{display:block;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 170px) max(16px,env(safe-area-inset-left))}
+  .t{display:block;padding:calc(env(safe-area-inset-top) + 72px) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 150px) max(16px,env(safe-area-inset-left))}
+  .dock,.note{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
   .side{position:static;gap:20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
-  main{--nw:30px}
+  main{--nw:28px}
   .n{font-size:22px}
   .fld input{font-size:var(--fs-4)}
-  /* Share waits at the bottom of the screen */
-  body:not(.none) .toast{bottom:calc(env(safe-area-inset-bottom) + 150px)}
-  body.none .bar{translate:0 12px}
-  .bar{left:12px;right:12px;translate:none;max-width:none;flex-direction:column;align-items:stretch;gap:14px;padding:14px;border-radius:var(--r-panel)}
-  .dots{justify-content:space-between}
-  .pcs .pc{flex:1;justify-content:space-between}
-  .bar .btn{width:100%}
 }
-@media(max-width:369px){main{--nw:24px;--gap:10px;--pl:12px}.n{font-size:20px}.cv{width:42px;height:42px}.dots{gap:4px}.dot{width:24px;height:24px}}
+@media(max-width:369px){main{--nw:26px;--gap:8px;--pl:8px}.n{font-size:20px}.cv{width:42px;height:42px}.cols .sc,.dots{gap:6px}.dot{width:26px;height:26px}}
 /* reduced motion: things fade, nothing moves */
-@media(prefers-reduced-motion:reduce){.btn,.btn:active,.pl:active{transform:none}.row.w .cv{animation:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.toast,.toast[hidden]{transform:none}}
+@media(prefers-reduced-motion:reduce){.btn,.btn:active,.pl:active{transform:none}.row.w .cv{animation:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.note,.note.on{translate:-50% 0;transition:opacity .2s}.one{transition:none}}
 </style>
 </head>
 <body class="none">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="0 0 350 350"><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:3" d="M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z" fill-rule="evenodd"/></symbol></svg>
+<header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><span class="where">Top 10 of 2026</span><button type="button" class="rs" id="rs" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3L4.5 9"/><path d="M4.5 4.5V9H9"/></svg>Start over</button></header>
 <div class="t" id="mk">
   <div class="side">
-    <span class="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>Crate Dig</span>
     <h1 id="h"><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
     <div class="from" id="from" role="group" aria-labelledby="fromL" hidden><span class="lab" id="fromL">Start from a list</span><div class="pills"></div></div>
   </div>
@@ -196,10 +232,14 @@ body:not(.none) .toast{bottom:calc(env(safe-area-inset-bottom) + 92px)}
     <ul class="found" id="found" aria-live="polite"></ul>
   </main>
   <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
-  <div class="bar" id="bar"></div>
 </div>
 </div>
-<div class="toast" id="toast" role="status" aria-live="polite" hidden><span></span><button type="button">Undo</button></div>
+<div class="dock"><div class="one" id="one">
+  <div class="lay icons on"><button class="fb" type="button" data-k="col" aria-label="Colors" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0 0 17c1 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.8.7-1.5 1.5-1.5h1.6a4.7 4.7 0 0 0 4.7-4.7c0-3.9-3.8-7.1-8.5-7.1z"/><circle cx="7.6" cy="11.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="10" cy="7.7" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.6" cy="7.7" r="1.1" fill="currentColor" stroke="none"/><circle cx="17" cy="11.4" r="1.1" fill="currentColor" stroke="none"/></svg></button><button class="fb" type="button" data-k="copy" aria-label="Copy link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></button><button class="fb" type="button" data-k="share" aria-label="Share"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M7 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H17"/></svg></button></div>
+  <div class="lay cols" id="cols" role="group"></div>
+  <div class="lay done" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Link copied</span></div>
+</div></div>
+<div class="note" id="note" role="status" aria-live="polite"><span></span><button type="button">Undo</button></div>
 <script src="/vinyl/visitor-crate.js"></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s);
@@ -329,7 +369,7 @@ fd.addEventListener('click',async e=>{
   let r=shown[+h.dataset.f];const k=key(r),i=at;if(busy.has(k)||i<0||slots[i])return;
   if(r.group){busy.add(k);showFound();try{r=await V.pick(r)}catch{busy.delete(k);status='';showFound();return}busy.delete(k)}
   if(slots.some(x=>x&&key(x)===k)||slots[i])return;
-  slots[i]=r;found=[];status='';const q=$('#q');if(q)q.value='';
+  slots[i]=r;found=[];status='';const q=$('#q');if(q)q.value='';hush();
   // done: the search closes, and every place is quiet again
   at=-1;draw();
   const li=ls.querySelector(`[data-i="${i}"]`);if(li)li.animate(reduce?[{opacity:0},{opacity:1}]:[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:200,easing:EASE});
@@ -341,14 +381,19 @@ ls.addEventListener('click',e=>{
   if(e.target.closest('.row.q'))$('#q')?.focus();
 });
 // × takes one out, with Undo for a few seconds; its place stays empty
-const toast=$('#toast');let undo=null,toastT=0;
+const note=$('#note');let undo=null;
 function takeOut(i){
   const r=slots[i];slots[i]=null;draw();
   ls.querySelector(`[data-e="${i}"]`)?.focus({preventScroll:true});
   tell(`Took out ${r.title}`,()=>{if(slots.some(x=>x&&key(x)===key(r)))return;const j=slots[i]?firstGap(i):i;if(j<0)return;slots[j]=r;draw()});
 }
-function tell(t,fn){undo=fn;toast.firstElementChild.textContent=t;toast.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{toast.hidden=true;undo=null},5000)}
-toast.lastElementChild.addEventListener('click',()=>{if(!undo)return;const fn=undo;undo=null;toast.hidden=true;clearTimeout(toastT);fn()});
+// the note says what just changed, with Undo, and stays until the next change
+function tell(t,fn){undo=fn;note.firstElementChild.textContent=t;note.classList.remove('on');void note.offsetWidth;note.classList.add('on')}
+const hush=()=>{undo=null;note.classList.remove('on')};
+note.lastElementChild.addEventListener('click',()=>{if(!undo)return;const fn=undo;hush();fn()});
+// Start over: the whole list goes, with Undo
+$('#rs').addEventListener('click',()=>{if(!filled().length)return;const was={slots:slots.slice(),from};fillSeq++;slots=Array(TEN).fill(null);from='';at=-1;draw();
+  tell('Cleared your list',()=>{slots=was.slots;from=was.from;draw()})});
 
 // ---- Start from a list: a critic's ten fill the places at once (each found by name, so it opens like one you searched for), with Undo ----
 // The lists are data, /vinyl/lists-2026.json: add a publication's list there the day it comes out
@@ -402,7 +447,7 @@ function startDrag(li,pid,y0){
     if(ev.type==='pointercancel')t=i;
     // settle: glide from where it was let go into its place, then lay the list out for real
     li.style.transform=`translateY(${tops[t]-tops[i]}px)`;li.classList.add('land');
-    setTimeout(()=>{const was=at;slots=reorder(slots,i,t);if(was>=0)at=reorder(order,i,t).indexOf(was);if(at>=0&&slots[at])at=-1;
+    setTimeout(()=>{const was=at;if(t!==i)hush();slots=reorder(slots,i,t);if(was>=0)at=reorder(order,i,t).indexOf(was);if(at>=0&&slots[at])at=-1;
       ls.classList.remove('dragging');draw()},reduce?0:220)};
   addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up);
 }
@@ -423,24 +468,43 @@ ls.addEventListener('contextmenu',e=>{if(e.target.closest('.row.f'))e.preventDef
 // ---- the name, typed into the title; colors and the link in a bar at the bottom ----
 const nm=$('#nm'),mir=$('.mir');
 const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;$('#suf').textContent=name.trim()?suffix():'’s top 10 of '+YEAR;document.title=whose()};
-const copyLabel=()=>{const n=filled().length;return n>1&&n<TEN?`Copy link to your top ${n}`:'Copy link'};
 const lookName=()=>SC[look.t]?.[0]||(look.t==='h'?'From your number one’s cover':'Your own');
+const one=$('#one'),cols=$('#cols'),lays=[...one.querySelectorAll('.lay')];
+let shape='icons',doneT=0;
+// the bar takes the width of what it shows, so it grows and shrinks between them
+const fit=()=>{const l=one.querySelector('.lay.on');if(!l)return;
+  // the colors scroll inside the bar when there are more than fit, so their full width is the row of dots, the × and the padding around them
+  const w=l===cols?cols.querySelector('.sc').scrollWidth-8+13+8+40+6:l.scrollWidth;one.style.width=Math.min(w+2,innerWidth-24)+'px'};
+function morph(k){shape=k;clearTimeout(doneT);lays.forEach(l=>l.classList.toggle('on',l.classList.contains(k)));
+  document.body.classList.toggle('colors',k==='cols');one.querySelector('[data-k=col]').setAttribute('aria-expanded',k==='cols');fit()}
 function drawBar(){
-  const c=colors(),one=filled()[0],bar=$('#bar');
-  const f=document.activeElement;if(f&&bar.contains(f)&&f.matches('.pc input'))return; // don't redraw a color picker while it's open
-  bar.innerHTML=`<div class="dots" role="group" aria-label="Colors: ${esc(lookName())}">${Object.entries(SC).map(([k,[n,bg]])=>`<button class="dot" type="button" data-t="${k}" aria-label="${n}" aria-pressed="${look.t===k}" style="background-color:${bg}"></button>`).join('')}${one?.thumb?`<button class="dot" type="button" data-t="h" aria-label="Colors from your number one’s cover" aria-pressed="${look.t==='h'}" style="background-image:url('${esc(one.thumb)}')"></button>`:''}<button class="dot mine" type="button" data-t="x" aria-label="Your own colors" aria-pressed="${look.t==='x'}"></button></div>${look.t==='x'?`<div class="pcs"><label class="pc">Text<input type="color" data-c="fg" value="${c.fg}"></label><label class="pc">Page<input type="color" data-c="bg" value="${c.bg}"></label></div>`:''}<button class="btn" type="button" data-copy>${IC.link}<span>${copyLabel()}</span></button>`;
-  if(f?.dataset?.t)bar.querySelector(`.dot[data-t="${f.dataset.t}"]`)?.focus({preventScroll:true});
+  const c=colors(),first=filled()[0],n=filled().length;
+  one.querySelectorAll('[data-k=copy],[data-k=share]').forEach(b=>b.setAttribute('aria-disabled',!n));
+  $('#rs').setAttribute('aria-disabled',!n);
+  const f=document.activeElement;if(f&&cols.contains(f)&&f.matches('.pc input'))return; // don't redraw a color picker while it's open
+  cols.setAttribute('aria-label',`Colors: ${lookName()}`);
+  cols.innerHTML=`<div class="sc">${Object.entries(SC).map(([k,[nm,bg]])=>`<button class="dot" type="button" data-t="${k}" aria-label="${nm}" aria-pressed="${look.t===k}" style="background-color:${bg}"></button>`).join('')}${first?.thumb?`<button class="dot" type="button" data-t="h" aria-label="Colors from your number one’s cover" aria-pressed="${look.t==='h'}" style="background-image:url('${esc(first.thumb)}')"></button>`:''}<button class="dot mine" type="button" data-t="x" aria-label="Your own colors" aria-pressed="${look.t==='x'}"></button>${look.t==='x'?`<div class="pcs"><label class="pc">Text<input type="color" data-c="fg" value="${c.fg}"></label><label class="pc">Page<input type="color" data-c="bg" value="${c.bg}"></label></div>`:''}</div><button class="x" type="button" data-k="close" aria-label="Done">${IC.x}</button>`;
+  if(f?.dataset?.t)cols.querySelector(`.dot[data-t="${f.dataset.t}"]`)?.focus({preventScroll:true});
+  if(shape==='cols')fit();
 }
 nm.addEventListener('input',()=>{name=nm.value;drawName();save()});
 nm.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nm.blur()}});
-// a color dot; your own opens text and page pickers, starting from the colors on screen
-$('#bar').addEventListener('click',async e=>{
+async function copied(){try{await navigator.clipboard.writeText(link())}catch{prompt('Copy this link',link());return}morph('done');doneT=setTimeout(()=>morph('icons'),1600)}
+one.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-k]'),k=b?.dataset.k;
+  if(k==='col'){morph('cols');cols.querySelector('.dot[aria-pressed=true]')?.focus({preventScroll:true});return}
+  if(k==='close'){morph('icons');one.querySelector('[data-k=col]').focus({preventScroll:true});return}
+  if(k==='copy'){copied();return}
+  if(k==='share'){if(navigator.share){try{await navigator.share({title:whose(),url:link()})}catch{}}else copied();return}
+  // a color dot; your own opens text and page pickers, starting from the colors on screen
   const d=e.target.closest('.dot');
-  if(d){const t=d.dataset.t;if(t===look.t&&t!=='x')return;const c=colors();look=t==='x'?{t,bg:c.bg,fg:c.fg}:t==='h'?{t,...c}:{t};hFor='';d.focus({preventScroll:true});paint();drawBar();save();sampleCover();return}
-  const b=e.target.closest('[data-copy]');if(!b)return;
-  const s=b.querySelector('span');try{await navigator.clipboard.writeText(link());b.firstElementChild.outerHTML=IC.check;s.textContent='Copied'}catch{prompt('Copy this link',link())}
-  setTimeout(()=>{if(b.isConnected){b.firstElementChild.outerHTML=IC.link;s.textContent=copyLabel()}},1600)});
-$('#bar').addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;look[k]=e.target.value;delete look.n;paint();save()});
+  if(d){const t=d.dataset.t;if(t===look.t&&t!=='x')return;const c=colors();look=t==='x'?{t,bg:c.bg,fg:c.fg}:t==='h'?{t,...c}:{t};hFor='';d.focus({preventScroll:true});paint();drawBar();save();sampleCover()}
+});
+cols.addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;look[k]=e.target.value;delete look.n;paint();save()});
+document.addEventListener('pointerdown',e=>{if(shape==='cols'&&!one.contains(e.target))morph('icons')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&shape==='cols'){morph('icons');one.querySelector('[data-k=col]').focus({preventScroll:true})}});
+addEventListener('resize',fit);
+requestAnimationFrame(fit);document.fonts?.ready.then(fit);
 
 // ---- start: a list in the address (to change it), else the one made on this device ----
 (async()=>{
