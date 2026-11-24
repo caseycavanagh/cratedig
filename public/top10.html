@@ -88,7 +88,12 @@ main{position:relative;min-width:0}
 .fld input:focus-visible{box-shadow:0 0 0 1px var(--ring)}
 .fld input::placeholder{color:var(--m)}
 .fld input::-webkit-search-cancel-button{display:none}
-.row.q{padding-right:10px;background:var(--bar)}
+.row.q{padding-right:10px;background:var(--bar);transition:box-shadow .2s}
+/* the open place is the field itself: no box inside the bar. The glass sits where a cover would, the words where a title would */
+.row.q .fld svg{left:15px;width:18px;height:18px}
+.row.q .fld input{height:64px;margin-block:-1px;border-radius:0;background:none;padding:0 8px 0 calc(48px + var(--gap))}
+.row.q .fld input:focus-visible{box-shadow:none}
+.row.q:focus-within{box-shadow:inset 0 0 0 1px var(--line2)}
 /* results float over the places below, so nothing moves */
 .found{position:absolute;z-index:4;left:calc(14px + var(--nw) + var(--gap));right:0;list-style:none;padding:6px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
 .found:empty{display:none}
@@ -170,7 +175,7 @@ body.none .go{visibility:hidden;opacity:0}
   .pcs .pc{flex:1;justify-content:space-between}
   .bar .btn{width:100%}
 }
-@media(max-width:369px){.ls{--nw:24px;--gap:10px}.row{padding-left:12px}.n{font-size:20px}.cv{width:42px;height:42px}.pv{--nw:24px}.dots{gap:4px}.dot{width:24px;height:24px}}
+@media(max-width:369px){.ls{--nw:24px;--gap:10px}.row{padding-left:12px}.n{font-size:20px}.cv{width:42px;height:42px}.pv{--nw:24px}.dots{gap:4px}.dot{width:24px;height:24px}.row.q .fld input{padding-left:calc(42px + var(--gap))}.row.q .fld svg{left:12px}}
 /* reduced motion: things fade, nothing moves */
 @media(prefers-reduced-motion:reduce){.btn,.btn:active{transform:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.toast,.toast[hidden]{transform:none}}
 </style>
