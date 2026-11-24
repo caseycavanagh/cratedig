@@ -1,0 +1,12 @@
+{
+  "about": "Critics' year-end lists for the 2026 maker's Start from a list (public/top10.html). Each list: id (short, for the address), name (the button), title (what it is, read aloud), url (the source), records in rank order, number one first, at most ten, as the publication names them. A list with no records doesn't show.",
+  "lists": [
+    {
+      "id": "aoty",
+      "name": "AOTY",
+      "title": "Album of the Year’s highest rated of 2026",
+      "url": "https://www.albumoftheyear.org/ratings/6-highest-rated/2026/1",
+      "records": []
+    }
+  ]
+}

@@ -111,6 +111,18 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .btn:active{transform:scale(.97);transition-duration:.08s}
 .btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* Start from a list: critics' year-end lists (vinyl/lists-2026.json). One tap fills the ten, with Undo */
+.from{display:grid;gap:8px}
+.from[hidden]{display:none}
+.from .lab{font-size:var(--fs-2);color:var(--m)}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pl{all:unset;box-sizing:border-box;cursor:pointer;height:36px;padding:0 14px;border-radius:var(--r-pill);box-shadow:inset 0 0 0 1px var(--line2);display:inline-flex;align-items:center;font-size:var(--fs-2);font-weight:500;color:var(--t1);white-space:nowrap;transition:background-color .2s,color .2s,box-shadow .2s}
+@media(hover:hover){.pl:hover{background:var(--hov);color:var(--fg)}}
+.pl:active{background:var(--prs)}
+.pl[aria-pressed=true]{background:var(--fg);color:var(--on-fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.pl:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.row.w .cv{animation:wait 1.2s var(--ease) infinite alternate}
+@keyframes wait{to{opacity:.45}}
 .go{margin-top:24px;min-width:140px;transition:opacity .3s var(--ease),transform .5s var(--ease)}
 body.none .go{visibility:hidden;opacity:0}
 /* the footer: who made it */
@@ -188,6 +200,7 @@ body.none .go{visibility:hidden;opacity:0}
   <div class="side">
     <span class="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>Crate Dig</span>
     <h1 id="h">Your top 10 of 2026</h1>
+    <div class="from" id="from" role="group" aria-labelledby="fromL" hidden><span class="lab" id="fromL">Start from a list</span><div class="pills"></div></div>
   </div>
   <main>
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
@@ -221,7 +234,7 @@ const IC={
   link:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>'
 };
 // slots: the ten places, a record or null. A list can have gaps while you make it; its link closes them up
-let slots=Array(TEN).fill(null),at=0,name='',look={t:'a'};
+let slots=Array(TEN).fill(null),at=0,name='',look={t:'a'},from='';
 const filled=()=>slots.filter(Boolean);
 const firstGap=(from=0)=>{for(let k=0;k<TEN;k++){const i=(from+k)%TEN;if(!slots[i])return i}return -1};
 // the presets: [name, background, text, numbers]. a is the crate's own colors. Keep in step with PRESETS in src/lib/top10.ts
@@ -258,9 +271,9 @@ async function sampleCover(){
 const suffix=()=>/s$/i.test(name.trim())?'’ top 10 of '+YEAR:'’s top 10 of '+YEAR;
 const whose=()=>name.trim()?`${name.trim()}${suffix()}`:`Your top 10 of ${YEAR}`;
 const cover=r=>`<span class="cv">${r.thumb?`<img src="${esc(r.thumb)}" alt="" draggable="false"${r.fallback?` data-fallback="${esc(r.fallback)}"`:''}>`:''}</span>`;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({name,slots,look}))}catch{}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({name,slots:slots.map(r=>r?.src==='w'?null:r),look,from}))}catch{}}
 // the link: the list in its address, gaps closed up, opened on the crate page, ranked
-function link(){const u=new URL(V.link(name,filled(),'/2026')),c=colors();
+function link(){const u=new URL(V.link(name,filled().filter(r=>r.src!=='w'),'/2026')),c=colors();
   if(look.t!=='a')u.searchParams.set('t',look.t);
   if(!SC[look.t]){u.searchParams.set('bg',c.bg.slice(1));u.searchParams.set('fg',c.fg.slice(1));if(c.n!==c.fg)u.searchParams.set('n',c.n.slice(1))}
   return u.href}
@@ -271,7 +284,7 @@ function draw(focus){
   const q=$('#q'),had=q?.value||'',was=document.activeElement===q;
   if(at>=0&&slots[at])at=-1;
   ls.innerHTML=slots.map((r,i)=>{
-    if(r)return `<li class="row f" data-i="${i}" tabindex="0" aria-label="${i+1}. ${esc(r.title)} by ${esc(r.artist)}. Up and down arrows move it"><span class="n" aria-hidden="true">${i+1}</span>${cover(r)}<span class="tx" aria-hidden="true"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button></li>`;
+    if(r)return `<li class="row f${r.src==='w'?' w':''}" data-i="${i}" tabindex="0" aria-label="${i+1}. ${esc(r.title)} by ${esc(r.artist)}. Up and down arrows move it"><span class="n" aria-hidden="true">${i+1}</span>${cover(r)}<span class="tx" aria-hidden="true"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button></li>`;
     if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><div class="fld"><label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
     return `<li class="row e" data-e="${i}" role="button" tabindex="0" aria-label="Add number ${i+1}"><span class="n" aria-hidden="true">${i+1}</span></li>`;
   }).join('');
@@ -350,10 +363,44 @@ const toast=$('#toast');let undo=null,toastT=0;
 function takeOut(i){
   const r=slots[i];slots[i]=null;draw();
   ls.querySelector(`[data-e="${i}"]`)?.focus({preventScroll:true});
-  undo={r,i};toast.firstElementChild.textContent=`Took out ${r.title}`;toast.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{toast.hidden=true;undo=null},5000);
+  tell(`Took out ${r.title}`,()=>{if(slots.some(x=>x&&key(x)===key(r)))return;const j=slots[i]?firstGap(i):i;if(j<0)return;slots[j]=r;draw()});
 }
-toast.lastElementChild.addEventListener('click',()=>{if(!undo)return;const {r,i}=undo;undo=null;toast.hidden=true;clearTimeout(toastT);
-  if(slots.some(x=>x&&key(x)===key(r)))return;const j=slots[i]?firstGap(i):i;if(j<0)return;slots[j]=r;draw()});
+function tell(t,fn){undo=fn;toast.firstElementChild.textContent=t;toast.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{toast.hidden=true;undo=null},5000)}
+toast.lastElementChild.addEventListener('click',()=>{if(!undo)return;const fn=undo;undo=null;toast.hidden=true;clearTimeout(toastT);fn()});
+
+// ---- Start from a list: a critic's ten fill the places at once (each found by name, so it opens like one you searched for), with Undo ----
+// The lists are data, /vinyl/lists-2026.json: add a publication's list there the day it comes out
+let LISTS=[],fillSeq=0;
+const fromEl=$('#from');
+function drawFrom(){
+  fromEl.hidden=!LISTS.length;
+  fromEl.lastElementChild.innerHTML=LISTS.map(l=>`<button class="pl" type="button" data-l="${esc(l.id)}" aria-pressed="${from===l.id}" aria-label="${esc(l.title)}">${esc(l.name)}</button>`).join('');
+}
+// the best match for a critic's line: same artist and the same title (or one starting with it), else the same artist's first album
+async function findOne(c){
+  const res=await V.search(`${c.artist} ${c.title}`,{albums:true,year:YEAR}).catch(()=>[]),a=fold(c.artist),t=fold(c.title);
+  const same=r=>{const x=fold(r.artist);return x===a||x.startsWith(a+' ')||a.startsWith(x+' ')};
+  let r=res.find(r=>same(r)&&(fold(r.title)===t||fold(r.title).startsWith(t+' ')))||res.find(r=>same(r)&&t.startsWith(fold(r.title)+' '));
+  if(r?.group)r=await V.pick(r).catch(()=>null);
+  return r||null;
+}
+async function fillFrom(id){
+  const l=LISTS.find(l=>l.id===id);if(!l)return;
+  const was={slots:slots.slice(),from,at},seq=++fillSeq;
+  from=id;slots=Array.from({length:TEN},(_,i)=>{const c=l.records[i];return c?{src:'w',id:id+i,title:c.title,artist:c.artist}:null});
+  at=-1;drawFrom();draw();
+  tell(`Filled from ${l.name}`,()=>{fillSeq++;slots=was.slots;from=was.from;at=was.at;drawFrom();draw()});
+  // three at a time; each place takes its record when it's found, unless it was moved or taken out meanwhile
+  const todo=slots.map((r,i)=>r&&{r,c:l.records[i]}).filter(Boolean);
+  const work=async()=>{for(let x;(x=todo.shift());){const r=await findOne(x.c);if(seq!==fillSeq)return;
+    const i=slots.indexOf(x.r);if(i<0)continue;
+    // not found under that name (or already on the list): the place is left empty, to search for by hand
+    if(!r||slots.some(y=>y&&y!==x.r&&key(y)===key(r))){slots[i]=null;draw();continue}
+    slots[i]=r;draw()}};
+  await Promise.all([work(),work(),work()]);
+}
+fromEl.addEventListener('click',e=>{const b=e.target.closest('[data-l]');if(b)fillFrom(b.dataset.l)});
+fetch('/vinyl/lists-'+YEAR+'.json').then(r=>r.ok?r.json():null).then(d=>{LISTS=(d?.lists||[]).filter(l=>l.id&&l.name&&l.records?.length);drawFrom()}).catch(()=>{});
 
 // ---- drag: from anywhere on a filled row. A mouse just presses and moves; a finger holds still for a beat first ----
 // The row follows exactly, and the other places (empty ones too) part under it as it passes, so the list is always in its
@@ -434,6 +481,7 @@ $('#bar').addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;
     look=SC[t]?{t}:(t==='h'||t==='x')&&HEX.test(bg||'')&&HEX.test(fg||'')?{t,bg:'#'+bg,fg:'#'+fg,...(HEX.test(n||'')?{n:'#'+n}:{})}:{t:'a'}}
   else try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s){name=s.name||'';
     if(Array.isArray(s.slots))slots=Array.from({length:TEN},(_,i)=>s.slots[i]||null);else list=(s.list||[]).slice(0,TEN); // lists saved before gaps
+    from=s.from||'';
     if(s.look&&(SC[s.look.t]||HEX.test((s.look.bg||'').slice(1))))look=s.look}}catch{}
   if(list)slots=Array.from({length:TEN},(_,i)=>list[i]||null);
   if(look.t==='h'){const one=filled()[0];hFor=one?key(one):''}
