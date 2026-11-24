@@ -95,7 +95,7 @@ export async function spotifySearch(term: string, year?: string): Promise<Spotif
     if (!res?.ok) continue;
     for (const a of ((await res.json())?.albums?.items ?? []) as (SpAlbum | null)[]) {
       if (!a || a.album_type !== "album" && !(a.album_type === "single" && (a.total_tracks ?? 0) >= 4)) continue;
-      if (/\b(live|karaoke|instrumental version|tribute|lullaby)\b/i.test(a.name)) continue;
+      if (/\b(live|en vivo|ao vivo|karaoke|instrumental version|tribute|lullaby|sleep sounds|nature sounds)\b/i.test(a.name)) continue;
       const r = spotifyRecord(a), k = `${r.artist}\u0000${r.title}`.toLowerCase();
       if (seen.has(k)) continue; // the clean and explicit editions are one album
       seen.add(k); out.push(r);

@@ -44,12 +44,12 @@ a{color:inherit;text-decoration:none}
 .home{display:inline-flex;align-items:center;gap:10px;font-size:var(--fs-3);font-weight:500;color:var(--t1);align-self:flex-start}
 .home svg{width:22px;height:22px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
-main{position:relative;min-width:0}
+main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 
 /* the ten places: soft bars, a little apart, no lines. A bar's color is the page's with a touch of the text's, so every color scheme has them */
-.ls{--nw:40px;--gap:12px;--bar:color-mix(in srgb,var(--fg) 5%,var(--bg));--bar-e:color-mix(in srgb,var(--fg) 2.5%,var(--bg));
+.ls{--bar:color-mix(in srgb,var(--fg) 5%,var(--bg));--bar-e:color-mix(in srgb,var(--fg) 2.5%,var(--bg));
   list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0}
-.row{position:relative;display:flex;align-items:center;gap:var(--gap);min-height:64px;padding:0 10px 0 14px;border-radius:var(--r-in);background:var(--bar);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.row{position:relative;display:flex;align-items:center;gap:var(--gap);min-height:64px;padding:0 10px 0 var(--pl);border-radius:var(--r-in);background:var(--bar);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .n{flex:none;width:var(--nw);font-size:var(--fs-5);font-weight:500;line-height:1;letter-spacing:-.02em;text-align:left;color:var(--rank-n,var(--fg))}
 .row.e{background:var(--bar-e);cursor:pointer;transition:background-color .2s}
 .row.e .n{color:var(--t4);font-weight:400}
@@ -89,24 +89,25 @@ main{position:relative;min-width:0}
 .fld input::placeholder{color:var(--m)}
 .fld input::-webkit-search-cancel-button{display:none}
 .row.q{padding-right:10px;background:var(--bar);transition:box-shadow .2s}
-/* the open place is the field itself: no box inside the bar. The glass sits where a cover would, the words where a title would */
-.row.q .fld svg{left:15px;width:18px;height:18px}
-.row.q .fld input{height:64px;margin-block:-1px;border-radius:0;background:none;padding:0 8px 0 calc(48px + var(--gap))}
+/* the open place is the field itself: no box inside the bar, and what you type starts where a cover would */
+.row.q .fld input{height:64px;margin-block:-1px;border-radius:0;background:none;padding:0 8px 0 0}
 .row.q .fld input:focus-visible{box-shadow:none}
 .row.q:focus-within{box-shadow:inset 0 0 0 1px var(--line2)}
 /* results float over the places below, so nothing moves */
-.found{position:absolute;z-index:4;left:calc(14px + var(--nw) + var(--gap));right:0;list-style:none;padding:6px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
+/* the panel's covers line up under what you type (its border, its padding and a result's padding come to 13px) */
+.found{position:absolute;z-index:4;left:calc(var(--pl) + var(--nw) + var(--gap) - 13px);right:0;list-style:none;padding:6px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
 .found:empty{display:none}
-.found .st{padding:10px;color:var(--m);font-size:var(--fs-2)}
+.found .st{padding:12px 6px;color:var(--m);font-size:var(--fs-3)}
 .hit{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:6px;border-radius:calc(var(--r-in) - 6px);transition:background-color .2s}
 @media(hover:hover){.hit:hover{background:var(--hov)}}
 .hit:active{background:var(--prs)}
 .hit:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
 .hit .cv{width:44px;height:44px}
-.hit .add{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;color:var(--fg)}
-.hit .add svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.hit .add{flex:none;width:36px;height:36px;display:grid;place-items:center;color:var(--t2)}
+.hit .add svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 .hit[aria-disabled=true]{cursor:default}
-.hit[aria-disabled=true] .add{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
+.hit[aria-disabled=true] .add{color:var(--fg)}
+.hit[aria-disabled=true] .tx{opacity:.5}
 .hit[aria-busy=true] .add{opacity:.5}
 
 .btn{all:unset;box-sizing:border-box;cursor:pointer;height:44px;padding:0 22px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:var(--fs-3);font-weight:500;white-space:nowrap;transition:transform .5s var(--ease),opacity .2s}
@@ -160,7 +161,7 @@ body.none .go{visibility:hidden;opacity:0}
   .t{display:block;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 110px) max(16px,env(safe-area-inset-left))}
   .side{position:static;gap:20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
-  .ls{--nw:30px}
+  main{--nw:30px}
   .n{font-size:22px}
   .fld input{font-size:var(--fs-4)}
   /* Share waits at the bottom of the screen */
@@ -175,7 +176,7 @@ body.none .go{visibility:hidden;opacity:0}
   .pcs .pc{flex:1;justify-content:space-between}
   .bar .btn{width:100%}
 }
-@media(max-width:369px){.ls{--nw:24px;--gap:10px}.row{padding-left:12px}.n{font-size:20px}.cv{width:42px;height:42px}.pv{--nw:24px}.dots{gap:4px}.dot{width:24px;height:24px}.row.q .fld input{padding-left:calc(42px + var(--gap))}.row.q .fld svg{left:12px}}
+@media(max-width:369px){main{--nw:24px;--gap:10px;--pl:12px}.n{font-size:20px}.cv{width:42px;height:42px}.pv{--nw:24px}.dots{gap:4px}.dot{width:24px;height:24px}}
 /* reduced motion: things fade, nothing moves */
 @media(prefers-reduced-motion:reduce){.btn,.btn:active{transform:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.toast,.toast[hidden]{transform:none}}
 </style>
@@ -267,7 +268,7 @@ function draw(focus){
   if(at>=0&&slots[at])at=firstGap(at);
   ls.innerHTML=slots.map((r,i)=>{
     if(r)return `<li class="row f" data-i="${i}" tabindex="0" aria-label="${i+1}. ${esc(r.title)} by ${esc(r.artist)}. Up and down arrows move it"><span class="n" aria-hidden="true">${i+1}</span>${cover(r)}<span class="tx" aria-hidden="true"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button></li>`;
-    if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><div class="fld">${IC.q}<label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
+    if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><div class="fld"><label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
     return `<li class="row e" data-e="${i}" role="button" tabindex="0" aria-label="Add number ${i+1}"><span class="n" aria-hidden="true">${i+1}</span><span class="plus" aria-hidden="true">${IC.plus}</span></li>`;
   }).join('');
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
@@ -283,7 +284,7 @@ let timer=0,seq=0,status='';const cache={};
 const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 function showFound(){
   const q=$('#q'),row=q?.closest('.row');
-  if(!row||!(q.value.trim().length>=2)){fd.innerHTML='';return}
+  if(!row||!(q.value.trim().length>=3)){fd.innerHTML='';return}
   fd.style.top=(row.offsetTop+row.offsetHeight+6)+'px';
   if(status){fd.innerHTML=`<li class="st">${esc(status)}</li>`;return}
   fd.innerHTML=found.slice(0,8).map((r,i)=>{const k=key(r),on=slots.some(x=>x&&key(x)===k);
@@ -296,7 +297,7 @@ function rank(res,term){
 }
 async function find(term){
   const id=++seq;
-  if(term.length<2){status='';found=[];showFound();return}
+  if(term.length<3){status='';found=[];showFound();return}
   if(cache[term]){status='';found=cache[term];showFound();return}
   try{
     const res=await V.search(term,{albums:true,year:YEAR});if(id!==seq)return;
@@ -306,7 +307,7 @@ async function find(term){
 }
 // the last search's results go as soon as you type, so a quick tap can't add the wrong record
 ls.addEventListener('input',e=>{if(e.target.id!=='q')return;clearTimeout(timer);seq++;const v=e.target.value.trim();
-  found=[];status=v.length>=2&&!cache[v]?'Searching…':'';showFound();timer=setTimeout(()=>find(v),250)});
+  found=[];status=v.length>=3&&!cache[v]?'Searching…':'';showFound();timer=setTimeout(()=>find(v),250)});
 ls.addEventListener('keydown',e=>{
   if(e.target.id==='q'){if(e.key==='Enter'){e.preventDefault();$('#found .hit:not([aria-disabled])')?.click()}else if(e.key==='Escape'&&e.target.value){e.target.value='';found=[];status='';showFound()}return}
   // an empty place: Enter or space opens the search there
