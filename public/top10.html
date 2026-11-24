@@ -39,8 +39,9 @@ a{color:inherit;text-decoration:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
 [hidden]{display:none!important}
 
-.t{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:64px;max-width:1120px;margin:0 auto;padding:56px max(56px,env(safe-area-inset-right)) 160px max(56px,env(safe-area-inset-left));min-height:100vh;min-height:100dvh}
-.side{position:sticky;top:56px;align-self:start;display:flex;flex-direction:column;gap:28px;min-width:0}
+/* one column on a laptop too, like the share view */
+.t{max-width:560px;margin:0 auto;padding:56px 0 160px;min-height:100vh;min-height:100dvh}
+.side{display:flex;flex-direction:column;gap:24px;min-width:0;margin-bottom:28px}
 .home{display:inline-flex;align-items:center;gap:10px;font-size:var(--fs-3);font-weight:500;color:var(--t1);align-self:flex-start}
 .home svg{width:22px;height:22px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
