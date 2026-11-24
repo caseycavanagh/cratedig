@@ -115,12 +115,14 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .from{display:grid;gap:8px}
 .from[hidden]{display:none}
 .from .lab{font-size:var(--fs-2);color:var(--m)}
-.pills{display:flex;flex-wrap:wrap;gap:8px}
-.pl{all:unset;box-sizing:border-box;cursor:pointer;height:36px;padding:0 14px;border-radius:var(--r-pill);box-shadow:inset 0 0 0 1px var(--line2);display:inline-flex;align-items:center;font-size:var(--fs-2);font-weight:500;color:var(--t1);white-space:nowrap;transition:background-color .2s,color .2s,box-shadow .2s}
-@media(hover:hover){.pl:hover{background:var(--hov);color:var(--fg)}}
-.pl:active{background:var(--prs)}
-.pl[aria-pressed=true]{background:var(--fg);color:var(--on-fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 4px}
+.pills::-webkit-scrollbar{display:none}
+/* the same pills as the crate's wall (index.html .wall .pills) */
+.pl{all:unset;cursor:pointer;flex:none;height:40px;padding:0 18px;border-radius:var(--r-pill);border:1px solid var(--line);font-size:var(--fs-3);color:var(--t1);white-space:nowrap;display:inline-flex;align-items:center;gap:8px;transition:transform .5s var(--ease),background-color .2s}
+@media(hover:hover){.pl:hover{background:var(--soft)}}
+.pl:active{transform:scale(.97);transition-duration:.08s}
 .pl:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.pl[aria-pressed=true]{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
 .row.w .cv{animation:wait 1.2s var(--ease) infinite alternate}
 @keyframes wait{to{opacity:.45}}
 .go{margin-top:24px;min-width:140px;transition:opacity .3s var(--ease),transform .5s var(--ease)}
@@ -192,7 +194,7 @@ body.none .go{visibility:hidden;opacity:0}
 }
 @media(max-width:369px){main{--nw:24px;--gap:10px;--pl:12px}.n{font-size:20px}.cv{width:42px;height:42px}.pv{--nw:24px}.dots{gap:4px}.dot{width:24px;height:24px}}
 /* reduced motion: things fade, nothing moves */
-@media(prefers-reduced-motion:reduce){.btn,.btn:active{transform:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.toast,.toast[hidden]{transform:none}}
+@media(prefers-reduced-motion:reduce){.btn,.btn:active,.pl:active{transform:none}.row.w .cv{animation:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.toast,.toast[hidden]{transform:none}}
 </style>
 </head>
 <body class="none">
