@@ -1,0 +1,99 @@
+{
+  "about": "Critics' year-end lists for the 2026 maker's Start from a list (public/top10.html). Each list: id (short), name (the pill), title (what it is, read aloud), url (the source), asOf (the day it was copied), records in rank order, number one first, as the publication names them, up to 25, each with the publication's own rank. Start from a list fills the ten places with the first ten. A list with no records doesn't show.",
+  "lists": [
+    {
+      "id": "aoty",
+      "name": "AOTY",
+      "title": "Album of the Year’s highest rated of 2026",
+      "url": "https://www.albumoftheyear.org/ratings/6-highest-rated/2026/1",
+      "asOf": "2026-11-24",
+      "records": [
+        {
+          "rank": 1,
+          "artist": "Phoebe Bridgers",
+          "title": "Lost Weekend"
+        },
+        {
+          "rank": 2,
+          "artist": "PISS",
+          "title": "you made me / skin on linen"
+        },
+        {
+          "rank": 3,
+          "artist": "Neurosis",
+          "title": "An Undying Love for a Burning World"
+        },
+        {
+          "rank": 4,
+          "artist": "underscores",
+          "title": "U"
+        },
+        {
+          "rank": 5,
+          "artist": "Converge",
+          "title": "Love Is Not Enough"
+        },
+        {
+          "rank": 7,
+          "artist": "The Twilight Sad",
+          "title": "IT’S THE LONG GOODBYE"
+        },
+        {
+          "rank": 8,
+          "artist": "Gilla Band",
+          "title": "Pugnello"
+        },
+        {
+          "rank": 9,
+          "artist": "Mitski",
+          "title": "Nothing’s About to Happen to Me"
+        },
+        {
+          "rank": 12,
+          "artist": "Radie Peat",
+          "title": "No Human Tongue Can Tell"
+        },
+        {
+          "rank": 13,
+          "artist": "Mandy, Indiana",
+          "title": "URGH"
+        },
+        {
+          "rank": 17,
+          "artist": "Fontaines D.C.",
+          "title": "Dopamine Chamber"
+        },
+        {
+          "rank": 20,
+          "artist": "My New Band Believe",
+          "title": "My New Band Believe"
+        },
+        {
+          "rank": 21,
+          "artist": "Westside Cowboy",
+          "title": "It Goes On"
+        },
+        {
+          "rank": 22,
+          "artist": "Green Lung",
+          "title": "Necropolitan"
+        },
+        {
+          "rank": 23,
+          "artist": "Aldous Harding",
+          "title": "Train on the Island"
+        },
+        {
+          "rank": 24,
+          "artist": "Warning",
+          "title": "Rituals of Shame"
+        },
+        {
+          "rank": 25,
+          "artist": "The Mary Wallopers",
+          "title": "Paddywhackery"
+        }
+      ]
+    }
+  ]
+}
