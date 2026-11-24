@@ -1,3 +1,4 @@
+import { spotifyAlbums } from "@/lib/spotify";
 // A top 10 of 2026's colors, as its link carries them: t=<preset letter>, or t=h (from the number one's cover) / t=x (your own)
 // with bg, fg and maybe n (the numbers) as six hex digits. Keep the presets in step with SC in public/top10.html.
 export const PRESETS: Record<string, [name: string, bg: string, fg: string, n: string]> = {
@@ -29,13 +30,13 @@ export function whose(by: string | null) {
 export function cardQuery(q: URLSearchParams) {
   const out = new URLSearchParams();
   for (const k of ["by", "t", "bg", "fg", "n"]) { const v = q.get(k); if (v) out.set(k, v.slice(0, 40)); }
-  for (const k of ["d", "m", "c", "o"]) { const v = q.get(k); if (v) out.set(k, v.slice(0, 400)); }
+  for (const k of ["d", "m", "c", "s", "o"]) { const v = q.get(k); if (v) out.set(k, v.slice(0, 400)); }
   return out.toString();
 }
 
 // the ten covers for the link picture, in the list's order: MusicBrainz releases from the Cover Art Archive, Apple Music albums from
 // iTunes. Each comes back as a data URL (or null), so one slow or missing cover leaves a blank square instead of breaking the picture.
-// Discogs records (d) need a token and stay blank. Mirrors decode/decodeM/fromAddress in public/vinyl/visitor-crate.js.
+// Spotify albums (s) from Spotify. Discogs records (d) need a token and stay blank. Mirrors decode/decodeM/fromAddress in public/vinyl/visitor-crate.js.
 const b36 = (c: string | null) => [...new Set((c || "").split(".").map((s) => parseInt(s, 36)).filter((n) => n > 0))];
 const mbids = (c: string | null) =>
   [...new Set((c || "").split(".").filter((s) => /^[0-9a-z]{1,25}$/.test(s)).map((s) => {
@@ -58,6 +59,9 @@ async function dataURL(url: string) {
 }
 export async function covers(q: URLSearchParams): Promise<(string | null)[]> {
   const d = b36(q.get("d")).slice(0, 10), m = mbids(q.get("m")).slice(0, 10), c = b36(q.get("c")).slice(0, 10);
+  const s = [...new Set((q.get("s") || "").split(".").filter((x) => /^[0-9A-Za-z]{22}$/.test(x)))].slice(0, 10);
+  const spotify: Record<string, string> = {};
+  if (s.length) { try { for (const r of await spotifyAlbums(s)) spotify[r.id] = r.thumb; } catch {} }
   const apple: Record<string, string> = {};
   if (c.length) {
     try {
@@ -69,9 +73,10 @@ export async function covers(q: URLSearchParams): Promise<(string | null)[]> {
     d: d.map(() => ""),
     m: m.map((id) => `https://coverartarchive.org/release/${id}/front-250`),
     a: c.map((id) => apple[id] || ""),
+    s: s.map((id) => spotify[id] || ""),
   };
   const o = q.get("o"), order: string[] = [];
-  if (o) { const k = { d: [...urls.d], m: [...urls.m], a: [...urls.a] } as Record<string, string[]>; for (const ch of o) { const u = k[ch]?.shift(); if (u !== undefined) order.push(u); } }
-  else order.push(...urls.d, ...urls.m, ...urls.a);
+  if (o) { const k = { d: [...urls.d], m: [...urls.m], a: [...urls.a], s: [...urls.s] } as Record<string, string[]>; for (const ch of o) { const u = k[ch]?.shift(); if (u !== undefined) order.push(u); } }
+  else order.push(...urls.d, ...urls.m, ...urls.a, ...urls.s);
   return Promise.all(order.slice(0, 10).map((u) => (u ? dataURL(u) : null)));
 }
