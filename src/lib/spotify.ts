@@ -125,3 +125,18 @@ export async function spotifyAlbums(ids: string[]): Promise<SpotifyRecord[]> {
   if (run && fresh.length) { try { await run(fresh.map((r) => ["SET", `sp:alb:${r.id}`, JSON.stringify(r), "EX", 60 * 60 * 24 * 30])); } catch {} }
   return ids.map((id) => full.get(id)).filter((r): r is SpotifyRecord => !!r);
 }
+
+// what the maker shows before you type: Spotify's newest albums out that year, ten pages' worth at most
+export async function spotifyNew(year: string): Promise<SpotifyRecord[] | null> {
+  const pages = await Promise.all([0, 20].map((offset) => sp(`browse/new-releases?${new URLSearchParams({ limit: "20", offset: String(offset), country: "US" })}`)));
+  if (!pages.some((r) => r?.ok)) return null;
+  const out: SpotifyRecord[] = [], seen = new Set<string>();
+  for (const res of pages) {
+    if (!res?.ok) continue;
+    for (const a of ((await res.json())?.albums?.items ?? []) as (SpAlbum | null)[]) {
+      if (!a || a.album_type !== "album" || !(a.release_date ?? "").startsWith(year) || seen.has(a.id)) continue;
+      seen.add(a.id); out.push(spotifyRecord(a));
+    }
+  }
+  return out;
+}

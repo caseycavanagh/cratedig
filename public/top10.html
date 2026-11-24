@@ -24,7 +24,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
-/* A top 10 of 2026: ten numbered places, each a soft bar. The search starts open in the first empty place; tap any number to search
+/* A top 10 of 2026: ten numbered places, each a soft bar. Every place is quiet at rest; tap any number to search
    there instead, so a list can have gaps. Drag a row from anywhere on it (on a touch screen, hold it for a beat first): the other places,
    empty ones too, part under it as it passes, and it settles where you let go. × takes one out (with Undo).
    Share opens the list as friends will see it: type your name into its title, pick its colors, copy the link. The list lives in its
@@ -269,7 +269,7 @@ function link(){const u=new URL(V.link(name,filled(),'/2026')),c=colors();
 const ls=$('#ls'),fd=$('#found');let found=[],busy=new Set();
 function draw(focus){
   const q=$('#q'),had=q?.value||'',was=document.activeElement===q;
-  if(at>=0&&slots[at])at=firstGap(at);
+  if(at>=0&&slots[at])at=-1;
   ls.innerHTML=slots.map((r,i)=>{
     if(r)return `<li class="row f" data-i="${i}" tabindex="0" aria-label="${i+1}. ${esc(r.title)} by ${esc(r.artist)}. Up and down arrows move it"><span class="n" aria-hidden="true">${i+1}</span>${cover(r)}<span class="tx" aria-hidden="true"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button></li>`;
     if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><div class="fld"><label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
@@ -284,14 +284,20 @@ function draw(focus){
 document.addEventListener('error',e=>{const i=e.target;if(i.dataset?.fallback){i.src=i.dataset.fallback;delete i.dataset.fallback}else if(i.tagName==='IMG')i.style.visibility='hidden'},true);
 
 // ---- search: only albums out this year, the artist's own first ----
-let timer=0,seq=0,status='';const cache={};
+let timer=0,seq=0,status='',shown=[],suggestions=[];const cache={};
+// suggestions: Spotify's newest albums out this year, asked for once
+fetch(`/api/spotify?new=1&year=${YEAR}`).then(r=>r.ok?r.json():null).then(d=>{suggestions=(d?.results||[]).map(r=>({...r,src:'s'}));showFound()}).catch(()=>{});
 const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 function showFound(){
   const q=$('#q'),row=q?.closest('.row');
-  if(!row||!(q.value.trim().length>=3)){fd.innerHTML='';return}
+  if(!row){fd.innerHTML='';return}
+  const typed=q.value.trim().length>=3;
+  // before you type: this year's new albums, the ones not in your list yet
+  shown=typed?found:suggestions.filter(r=>!slots.some(x=>x&&key(x)===key(r)));
+  if(!typed&&q.value.trim()){fd.innerHTML='';return}
   fd.style.top=(row.offsetTop+row.offsetHeight+6)+'px';
-  if(status){fd.innerHTML=`<li class="st">${esc(status)}</li>`;return}
-  fd.innerHTML=found.slice(0,8).map((r,i)=>{const k=key(r),on=slots.some(x=>x&&key(x)===k);
+  if(typed&&status){fd.innerHTML=`<li class="st">${esc(status)}</li>`;return}
+  fd.innerHTML=shown.slice(0,8).map((r,i)=>{const k=key(r),on=slots.some(x=>x&&key(x)===k);
     return `<li><button class="hit" type="button" data-f="${i}"${on?' aria-disabled="true"':''}${busy.has(k)?' aria-busy="true"':''}>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}${r.year?' · '+esc(r.year):''}</span></span>${on?`<span class="add">${IC.check}</span>`:''}</button></li>`}).join('');
 }
 // "Bad Bunny" or "rosalia lux": the artist's own records first (newest first), then this year's, then the rest as they came
@@ -313,21 +319,24 @@ async function find(term){
 ls.addEventListener('input',e=>{if(e.target.id!=='q')return;clearTimeout(timer);seq++;const v=e.target.value.trim();
   found=[];status=v.length>=3&&!cache[v]?'Searching…':'';showFound();timer=setTimeout(()=>find(v),250)});
 ls.addEventListener('keydown',e=>{
-  if(e.target.id==='q'){if(e.key==='Enter'){e.preventDefault();$('#found .hit:not([aria-disabled])')?.click()}else if(e.key==='Escape'&&e.target.value){e.target.value='';found=[];status='';showFound()}return}
+  if(e.target.id==='q'){if(e.key==='Enter'){e.preventDefault();$('#found .hit:not([aria-disabled])')?.click()}else if(e.key==='Escape'){if(e.target.value){e.target.value='';found=[];status='';showFound()}else{const i=at;closeSearch();ls.querySelector(`[data-e="${i}"]`)?.focus()}}return}
   // an empty place: Enter or space opens the search there
   const em=e.target.closest('.row.e');if(em&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openAt(+em.dataset.e);return}
   // a filled place: up and down move it, one place at a time (into a gap, or trading with the record there)
   const f=e.target.closest('.row.f');if(!f||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();
   const i=+f.dataset.i,j=i+(e.key==='ArrowUp'?-1:1);if(j<0||j>=TEN)return;[slots[i],slots[j]]=[slots[j],slots[i]];if(at===j)at=i;draw();ls.querySelector(`[data-i="${j}"]`).focus()});
+// the search closes on Esc or a press anywhere else
+function closeSearch(){if(at<0)return;at=-1;found=[];status='';const q=$('#q');if(q)q.value='';draw()}
+document.addEventListener('pointerdown',e=>{if(at>=0&&!e.target.closest('.row.q,#found,.row.e'))closeSearch()});
 function openAt(i){if(slots[i])return;at=i;found=[];status='';const q=$('#q');if(q)q.value='';draw(true)}
 fd.addEventListener('click',async e=>{
   const h=e.target.closest('.hit');if(!h||h.getAttribute('aria-disabled')==='true')return;
-  let r=found[+h.dataset.f];const k=key(r),i=at;if(busy.has(k)||i<0||slots[i])return;
+  let r=shown[+h.dataset.f];const k=key(r),i=at;if(busy.has(k)||i<0||slots[i])return;
   if(r.group){busy.add(k);showFound();try{r=await V.pick(r)}catch{busy.delete(k);status='';showFound();return}busy.delete(k)}
   if(slots.some(x=>x&&key(x)===k)||slots[i])return;
   slots[i]=r;found=[];status='';const q=$('#q');if(q)q.value='';
-  // the search moves on to the next empty place below, else the first one
-  at=firstGap(i);draw(at>=0);
+  // done: the search closes, and every place is quiet again
+  at=-1;draw();
   const li=ls.querySelector(`[data-i="${i}"]`);if(li)li.animate(reduce?[{opacity:0},{opacity:1}]:[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:200,easing:EASE});
 });
 ls.addEventListener('click',e=>{
@@ -339,7 +348,7 @@ ls.addEventListener('click',e=>{
 // × takes one out, with Undo for a few seconds; its place stays empty
 const toast=$('#toast');let undo=null,toastT=0;
 function takeOut(i){
-  const r=slots[i];slots[i]=null;if(at<0)at=i;draw();
+  const r=slots[i];slots[i]=null;draw();
   ls.querySelector(`[data-e="${i}"]`)?.focus({preventScroll:true});
   undo={r,i};toast.firstElementChild.textContent=`Took out ${r.title}`;toast.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{toast.hidden=true;undo=null},5000);
 }
@@ -364,7 +373,7 @@ function startDrag(li,pid,y0){
     if(ev.type==='pointercancel')t=i;
     // settle: glide from where it was let go into its place, then lay the list out for real
     li.style.transform=`translateY(${tops[t]-tops[i]}px)`;li.classList.add('land');
-    setTimeout(()=>{const was=at;slots=reorder(slots,i,t);if(was>=0)at=reorder(order,i,t).indexOf(was);if(at>=0&&slots[at])at=firstGap(at);if(at<0)at=firstGap();
+    setTimeout(()=>{const was=at;slots=reorder(slots,i,t);if(was>=0)at=reorder(order,i,t).indexOf(was);if(at>=0&&slots[at])at=-1;
       ls.classList.remove('dragging');draw()},reduce?0:220)};
   addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up);
 }
@@ -428,9 +437,9 @@ $('#bar').addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;
     if(s.look&&(SC[s.look.t]||HEX.test((s.look.bg||'').slice(1))))look=s.look}}catch{}
   if(list)slots=Array.from({length:TEN},(_,i)=>list[i]||null);
   if(look.t==='h'){const one=filled()[0];hFor=one?key(one):''}
-  at=firstGap();paint();
+  at=-1;paint();
   if(location.hash==='#share'&&filled().length){history.replaceState({share:1},'');show(true)}
-  else{if(location.hash)history.replaceState(null,'',location.pathname+location.search);draw(fine)}
+  else{if(location.hash)history.replaceState(null,'',location.pathname+location.search);draw()}
 })();
 </script>
 </body>
