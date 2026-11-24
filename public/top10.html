@@ -280,7 +280,7 @@ document.addEventListener('error',e=>{const i=e.target;if(i.dataset?.fallback){i
 
 // ---- search: only albums out this year, the artist's own first ----
 let timer=0,seq=0,status='',shown=[],suggestions=[];const cache={};
-// suggestions: Spotify's newest albums out this year, asked for once
+// suggestions: the critics' list for the year (AOTY) in its order, then Spotify's own albums out this year; asked for once
 fetch(`/api/spotify?new=1&year=${YEAR}`).then(r=>r.ok?r.json():null).then(d=>{suggestions=(d?.results||[]).map(r=>({...r,src:'s'}));showFound()}).catch(()=>{});
 const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 function showFound(){
