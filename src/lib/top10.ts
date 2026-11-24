@@ -25,9 +25,53 @@ export function whose(by: string | null) {
   return n ? `${n}${/s$/i.test(n) ? "’" : "’s"} top 10 of 2026` : "A top 10 of 2026";
 }
 
-// the address's colors and name, the only parts the link picture needs
+// the address's colors, name and records: what the link picture needs
 export function cardQuery(q: URLSearchParams) {
   const out = new URLSearchParams();
   for (const k of ["by", "t", "bg", "fg", "n"]) { const v = q.get(k); if (v) out.set(k, v.slice(0, 40)); }
+  for (const k of ["d", "m", "c", "o"]) { const v = q.get(k); if (v) out.set(k, v.slice(0, 400)); }
   return out.toString();
+}
+
+// the ten covers for the link picture, in the list's order: MusicBrainz releases from the Cover Art Archive, Apple Music albums from
+// iTunes. Each comes back as a data URL (or null), so one slow or missing cover leaves a blank square instead of breaking the picture.
+// Discogs records (d) need a token and stay blank. Mirrors decode/decodeM/fromAddress in public/vinyl/visitor-crate.js.
+const b36 = (c: string | null) => [...new Set((c || "").split(".").map((s) => parseInt(s, 36)).filter((n) => n > 0))];
+const mbids = (c: string | null) =>
+  [...new Set((c || "").split(".").filter((s) => /^[0-9a-z]{1,25}$/.test(s)).map((s) => {
+    let n = BigInt(0);
+    for (const ch of s) n = n * BigInt(36) + BigInt(parseInt(ch, 36));
+    const h = n.toString(16).padStart(32, "0");
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  }))];
+const UA = "cratedig/1.0 (https://cratedig-demo.vercel.app)";
+async function dataURL(url: string) {
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(4000) });
+    if (!res.ok) return null;
+    const type = res.headers.get("Content-Type") || "image/jpeg";
+    if (!/^image\/(jpeg|png)/.test(type)) return null;
+    return `data:${type};base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+export async function covers(q: URLSearchParams): Promise<(string | null)[]> {
+  const d = b36(q.get("d")).slice(0, 10), m = mbids(q.get("m")).slice(0, 10), c = b36(q.get("c")).slice(0, 10);
+  const apple: Record<string, string> = {};
+  if (c.length) {
+    try {
+      const res = await fetch(`https://itunes.apple.com/lookup?entity=album&id=${c.join(",")}`, { signal: AbortSignal.timeout(4000) });
+      for (const a of (await res.json()).results ?? []) if (a.wrapperType === "collection" && a.artworkUrl100) apple[a.collectionId] = a.artworkUrl100.replace(/\/\d+x\d+bb\./, "/300x300bb.");
+    } catch {}
+  }
+  const urls = {
+    d: d.map(() => ""),
+    m: m.map((id) => `https://coverartarchive.org/release/${id}/front-250`),
+    a: c.map((id) => apple[id] || ""),
+  };
+  const o = q.get("o"), order: string[] = [];
+  if (o) { const k = { d: [...urls.d], m: [...urls.m], a: [...urls.a] } as Record<string, string[]>; for (const ch of o) { const u = k[ch]?.shift(); if (u !== undefined) order.push(u); } }
+  else order.push(...urls.d, ...urls.m, ...urls.a);
+  return Promise.all(order.slice(0, 10).map((u) => (u ? dataURL(u) : null)));
 }

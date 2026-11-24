@@ -169,24 +169,45 @@ export function titleCard({ title, sub, foot, host }: { title: string; sub: stri
   );
 }
 
-// a shared top 10 (/og/2026): the title card in the list's own colors, its name big, the big numbers along the bottom
-export function top10Card({ title, bg, fg, n, host }: { title: string; bg: string; fg: string; n: string; host: string }) {
-  const size = title.length > 34 ? 76 : title.length > 24 ? 88 : 100;
+// a shared top 10 (/og/2026): the title card in the list's own colors, its name, then its ten covers in a row with their numbers under them.
+// Without covers (an old link) the numbers stand alone. A missing cover is a soft square
+export function top10Card({ title, bg, fg, n, host, covers = [] }: { title: string; bg: string; fg: string; n: string; host: string; covers?: (string | null)[] }) {
+  const any = covers.some(Boolean);
+  const size = any ? (title.length > 34 ? 64 : title.length > 24 ? 74 : 84) : title.length > 34 ? 76 : title.length > 24 ? 88 : 100;
+  // a tenth of the text color over the background (satori has no color-mix)
+  const ch = (h: string, i: number) => parseInt(h.slice(1 + i * 2, 3 + i * 2), 16) || 0;
+  const soft = `rgb(${[0, 1, 2].map((i) => Math.round(ch(fg, i) * 0.1 + ch(bg, i) * 0.9)).join(",")})`;
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 96, background: bg, color: fg, fontFamily: "Instrument Sans" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <svg width="56" height="56" viewBox="0 0 350 350">
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: any ? "64px 72px" : 96, background: bg, color: fg, fontFamily: "Instrument Sans" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <svg width="48" height="48" viewBox="0 0 350 350">
             {MARK.map((d, i) => <path key={i} fill={fg} fillRule="evenodd" d={d} />)}
           </svg>
-          <span style={{ fontSize: 34, fontWeight: 500 }}>Crate Dig</span>
+          <span style={{ fontSize: 30, fontWeight: 500 }}>Crate Dig</span>
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: size, fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1.05, lineClamp: 2, display: "block" }}>{title}</div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 64, fontFamily: MONO, fontSize: 40, color: n }}>
-            {Array.from({ length: 10 }, (_, i) => <span key={i}>{i + 1}</span>)}
-          </div>
-          <div style={{ display: "flex", marginTop: 28, fontFamily: MONO, fontSize: 26, opacity: 0.6 }}>{host}/2026</div>
+          {any ? (
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 44 }}>
+              {Array.from({ length: 10 }, (_, i) => (
+                <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+                  {covers[i] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={covers[i] as string} width={98} height={98} alt="" style={{ borderRadius: 3, objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ width: 98, height: 98, borderRadius: 3, background: soft }} />
+                  )}
+                  <span style={{ fontSize: 30, fontWeight: 500, color: n }}>{i + 1}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 64, fontSize: 40, fontWeight: 500, color: n }}>
+              {Array.from({ length: 10 }, (_, i) => <span key={i}>{i + 1}</span>)}
+            </div>
+          )}
+          <div style={{ display: "flex", marginTop: any ? 22 : 28, fontFamily: MONO, fontSize: 24, opacity: 0.6 }}>{host}/2026</div>
         </div>
       </div>
     ),
