@@ -94,8 +94,8 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .row.q .fld input:focus-visible{box-shadow:none}
 .row.q:focus-within{box-shadow:inset 0 0 0 1px var(--line2)}
 /* results float over the places below, so nothing moves */
-/* the panel's covers line up under what you type (its border, its padding and a result's padding come to 13px) */
-.found{position:absolute;z-index:4;left:calc(var(--pl) + var(--nw) + var(--gap) - 13px);right:0;list-style:none;padding:6px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
+/* the whole way across, under the place it fills */
+.found{position:absolute;z-index:4;left:0;right:0;list-style:none;padding:6px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
 .found:empty{display:none}
 .found .st{padding:12px 6px;color:var(--m);font-size:var(--fs-3)}
 .hit{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:6px;border-radius:calc(var(--r-in) - 6px);transition:background-color .2s}
