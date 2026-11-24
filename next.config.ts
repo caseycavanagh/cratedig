@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
         { source: "/vinyl-make.html", destination: "/make" },
         // a top 10 of 2026 (Casey, 2026-11-23): /2026 with a list in its address is that list on the crate page, ranked (public/index.html reads
         // the path); bare, it's the maker (public/top10.html through src/app/top10)
-        ...["d", "m", "c"].map((key) => ({ source: "/2026", has: [{ type: "query" as const, key }], destination: "/top10/list" })),
+        ...["d", "m", "c", "s"].map((key) => ({ source: "/2026", has: [{ type: "query" as const, key }], destination: "/top10/list" })),
         { source: "/2026", destination: "/top10" },
       ],
       afterFiles: [],

@@ -5,6 +5,7 @@
 // Records come from Discogs through /api/discogs (vinyl pressings, with backs). Without a
 // DISCOGS_TOKEN they come from MusicBrainz and the Cover Art Archive through /api/musicbrainz
 // (m holds those release IDs), and if that fails, from Apple Music by JSONP (c).
+// The top 10 maker searches Spotify first (/api/spotify, s holds those album IDs as they are).
 (()=>{
   const MAX=100;
   const ITUNES='https://itunes.apple.com/';
@@ -43,15 +44,18 @@
   // Discogs when the server has a token, then MusicBrainz, then Apple Music
   let discogs=null;
   async function api(src,q){
-    const r=await fetch(`/api/${src==='d'?'discogs':'musicbrainz'}?`+q);
+    const r=await fetch(`/api/${{d:'discogs',s:'spotify'}[src]||'musicbrainz'}?`+q);
+    if(src==='s'&&(r.status===503||r.status===404))return null;
     if(src==='d'&&(r.status===503||r.status===404)){discogs=false;return null}
     if(!r.ok)throw new Error(r.status===429?'busy':'failed');
     if(src==='d')discogs=true;
     return r.json();
   }
-  // {albums:true} (the top 10 maker): whole studio albums and EPs, the artist's own first, no singles, live sets or tributes
-  async function search(term,{albums=false}={}){
-    const q='q='+encodeURIComponent(term)+(albums?'&albums=1':'');
+  // {albums:true} (the top 10 maker): whole studio albums and EPs, the artist's own first, no singles, live sets or tributes; {year:'2026'} only that year's
+  async function search(term,{albums=false,year=''}={}){
+    const q='q='+encodeURIComponent(term)+(albums?'&albums=1':'')+(year?'&year='+year:'');
+    // the top 10 maker: Spotify, which knows this year's albums first; nothing there (or no keys) falls through to the rest
+    if(albums){const s=await api('s',q).catch(()=>null);if(s?.results?.length)return s.results.map(r=>({...r,src:'s',pal:PAL}))}
     if(discogs!==false){
       const d=await api('d',q).catch(e=>{if(discogs)throw e;discogs=false;return null});
       if(d)return d.results.map(r=>({...r,src:'d',pal:PAL}));
@@ -60,7 +64,7 @@
     const m=await api('m',q).catch(e=>e.message==='busy'?new Promise(r=>setTimeout(r,1200)).then(()=>api('m',q)).catch(()=>null):null);
     if(m)return m.results.map(r=>({...r,src:'m',group:r.id,pal:PAL})); // an album, until pick() chooses its pressing
     const d=await jsonp(ITUNES+'search?media=music&entity=album&limit=24&term='+encodeURIComponent(term));
-    return (d.results||[]).filter(a=>a.collectionType==='Album'&&a.artworkUrl100&&(!albums||!/ - (Single|EP)$|\((Live|Remix)/i.test(a.collectionName))).map(toRecord);
+    return (d.results||[]).filter(a=>a.collectionType==='Album'&&a.artworkUrl100&&(!albums||!/ - (Single|EP)$|\((Live|Remix)/i.test(a.collectionName))&&(!year||String(a.releaseDate||'').startsWith(year))).map(toRecord);
   }
   // the pressing to keep for a MusicBrainz album: its release ID
   async function pick(r){
@@ -110,27 +114,30 @@
     let n=0n;for(const ch of s)n=n*36n+BigInt(parseInt(ch,36));
     const h=n.toString(16).padStart(32,'0');return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
   }))].slice(0,MAX);
-  // records: [{src:'d'|'a', id}]
+  // Spotify album IDs are already short (22 letters and digits)
+  const decodeS=c=>[...new Set((c||'').split('.').filter(s=>/^[0-9A-Za-z]{22}$/.test(s)))].slice(0,20);
+  // records: [{src:'d'|'m'|'a'|'s', id}]
   const link=(name,records,page='vinyl-prototype.html')=>{
     const u=new URL(page,location.href),p=new URLSearchParams();
     if(name.trim())p.set('by',name.trim());
     const of=k=>records.filter(r=>(r.src||'a')===k).map(r=>r.id);
-    const d=of('d'),m=of('m'),a=of('a');
+    const d=of('d'),m=of('m'),a=of('a'),s=of('s');
     if(d.length)p.set('d',encode(d));
     if(m.length)p.set('m',encodeM(m));
     if(a.length)p.set('c',encode(a));
+    if(s.length)p.set('s',s.join('.'));
     // the order across sources, one letter a record, when they're mixed: a ranked list needs it back exactly
     const o=records.map(r=>r.src||'a').join('');if(new Set(o).size>1)p.set('o',o);
     u.search=p;u.hash='';return u.href;
   };
   // the crate in an address
   const fromAddress=async params=>{
-    const all=await Promise.all([apiLookup('d',decode(params.get('d'))),apiLookup('m',decodeM(params.get('m'))),appleLookup(decode(params.get('c')))]);
+    const all=await Promise.all([apiLookup('d',decode(params.get('d'))),apiLookup('m',decodeM(params.get('m'))),appleLookup(decode(params.get('c'))),apiLookup('s',decodeS(params.get('s')))]);
     const o=params.get('o');if(!o)return all.flat().slice(0,MAX);
     // put mixed sources back in the order they were linked: o names each record's source, one letter each
-    const q={d:all[0].slice(),m:all[1].slice(),a:all[2].slice()},out=[];
+    const q={d:all[0].slice(),m:all[1].slice(),a:all[2].slice(),s:all[3].slice()},out=[];
     for(const k of o){const r=q[k]?.shift();if(r)out.push(r)}
-    return [...out,...q.d,...q.m,...q.a].slice(0,MAX);
+    return [...out,...q.d,...q.m,...q.a,...q.s].slice(0,MAX);
   };
   const crateName=n=>n.trim()?n.trim()+(/s$/i.test(n.trim())?'’':'’s')+' crate':'My crate';
 
@@ -138,5 +145,5 @@
 
   // On the crate page: resolves to {name, records} when the address holds a crate, null for Casey's own
   const p=new URLSearchParams(location.search);
-  window.visitorCrate=p.get('d')||p.get('m')||p.get('c')?fromAddress(p).then(records=>({name:(p.get('by')||'').slice(0,40),records})):Promise.resolve(null);
+  window.visitorCrate=p.get('d')||p.get('m')||p.get('c')||p.get('s')?fromAddress(p).then(records=>({name:(p.get('by')||'').slice(0,40),records})):Promise.resolve(null);
 })();

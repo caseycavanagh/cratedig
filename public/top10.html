@@ -24,9 +24,11 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
-/* A top 10 of 2026: ten numbered places. The first empty place is the search; a pick lands there and the search moves down.
-   Drag a row by its handle (or hold it, on a phone) to reorder, × to take one out (with Undo). A name, colors, then Copy link: the
-   list lives in its link (vinyl/visitor-crate.js), and the link opens it on the crate page, laid out like this list. Tokens: /vinyl/tokens.css */
+/* A top 10 of 2026: ten numbered places, each a soft bar. Every place is quiet at rest; tap any number to search
+   there instead, so a list can have gaps. Drag a row from anywhere on it (on a touch screen, hold it for a beat first): the other places,
+   empty ones too, part under it as it passes, and it settles where you let go. × takes one out (with Undo).
+   Your name is typed into the title; a bar at the bottom holds the colors and Copy link, all on the list you are making. The list lives in its
+   link (vinyl/visitor-crate.js), gaps closed up, and the link opens it on the crate page, ranked. Tokens: /vinyl/tokens.css */
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
 html{background:var(--bg)}
 body{font-family:var(--sans);font-size:var(--fs-3);line-height:1.45;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
@@ -35,21 +37,30 @@ a{color:inherit;text-decoration:none}
 :focus{outline:none}
 :focus-visible{outline:1px solid var(--ring);outline-offset:3px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
+[hidden]{display:none!important}
 
-.t{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:64px;max-width:1120px;margin:0 auto;padding:56px max(56px,env(safe-area-inset-right)) 120px max(56px,env(safe-area-inset-left));min-height:100vh;min-height:100dvh}
-.side{position:sticky;top:56px;align-self:start;display:flex;flex-direction:column;gap:28px;min-width:0}
+/* one column, laptop and phone */
+.t{max-width:560px;margin:0 auto;padding:56px 0 160px;min-height:100vh;min-height:100dvh}
+.side{display:flex;flex-direction:column;gap:24px;min-width:0;margin-bottom:28px}
 .home{display:inline-flex;align-items:center;gap:10px;font-size:var(--fs-3);font-weight:500;color:var(--t1);align-self:flex-start}
 .home svg{width:22px;height:22px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
+main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 
-/* the list: ten places. Numbers sit on the page's edge, in the crate's own type; a row's controls sit together on the right */
-.ls{--nw:40px;--gap:12px;list-style:none;padding:0;display:flex;flex-direction:column;min-width:0}
-.row{position:relative;display:flex;align-items:center;gap:var(--gap);min-height:64px;background:var(--bg);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.row+.row{border-top:1px solid color-mix(in srgb,var(--fg) 6%,transparent)}
-.n{flex:none;width:var(--nw);font-size:var(--fs-5);font-weight:500;line-height:1;letter-spacing:-.02em;text-align:right;color:var(--rank-n,var(--fg))}
+/* the ten places: soft bars, a little apart, no lines. A bar's color is the page's with a touch of the text's, so every color scheme has them */
+.ls{--bar:color-mix(in srgb,var(--fg) 5%,var(--bg));--bar-e:color-mix(in srgb,var(--fg) 2.5%,var(--bg));
+  list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.row{position:relative;display:flex;align-items:center;gap:var(--gap);min-height:64px;padding:0 10px 0 var(--pl);border-radius:var(--r-in);background:var(--bar);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.n{flex:none;width:var(--nw);font-size:var(--fs-5);font-weight:500;line-height:1;letter-spacing:-.02em;text-align:left;color:var(--rank-n,var(--fg))}
+.row.e{background:var(--bar-e);cursor:pointer;transition:background-color .2s}
 .row.e .n{color:var(--t4);font-weight:400}
+@media(hover:hover){.row.e:hover{background:var(--bar)}}
+.row.e:active{background:var(--bar)}
+.row.e:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
+.row.f{cursor:grab}
+.row.f:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
 .cv{flex:none;width:48px;height:48px;border-radius:var(--r-cover);overflow:hidden;background:var(--soft)}
-.cv img{display:block;width:100%;height:100%;object-fit:cover}
+.cv img{display:block;width:100%;height:100%;object-fit:cover;-webkit-user-drag:none}
 .tx{flex:1;min-width:0;display:grid;line-height:1.25}
 .tx b{font-weight:500;font-size:var(--fs-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx span{font-size:var(--fs-2);color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -57,101 +68,121 @@ h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;t
 @media(hover:hover){.ib:hover{color:var(--fg);background:var(--hov)}}
 .ib:active{background:var(--prs);color:var(--fg)}
 .ib:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
-.ib svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.acts{flex:none;display:flex;margin-right:-8px}
-.grip{cursor:grab;touch-action:none;color:var(--t3)}
+.ib svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* on a laptop × waits for the pointer; on a touch screen it's always there */
 @media(hover:hover) and (pointer:fine){.row .x{opacity:0;transition:opacity .15s,color .2s,background-color .2s}.row:hover .x,.row .x:focus-visible{opacity:1}}
-.row.drag{z-index:3;background:var(--sheet);border-radius:var(--r-in);box-shadow:var(--lift);cursor:grabbing}
-.row.drag+.row{border-top-color:transparent}
-.ls.dragging .row{transition:transform .2s var(--ease)}
-.ls.dragging .row.drag{transition:none}
-.row.e{cursor:pointer}
+/* a row in hand: the same bar, lifted. It grows a little and casts one soft shadow; the other places part under it as it passes */
+.row.drag{z-index:3;cursor:grabbing;box-shadow:var(--lift);scale:1.03;transition:scale .2s var(--ease),box-shadow .2s var(--ease)}
+.row.drag.land{scale:1;box-shadow:none;transition:transform .22s var(--ease),scale .22s var(--ease),box-shadow .22s var(--ease)}
+.row.drag .x{visibility:hidden}
+.ls.dragging .row:not(.drag){transition:transform .32s var(--ease),background-color .2s}
+.ls.dragging .row.f:not(.drag){z-index:1}
 
-/* the next empty place is the search */
+/* the open place is the search */
 .fld{flex:1;min-width:0;position:relative}
 .fld svg{position:absolute;left:14px;top:50%;translate:0 -50%;width:17px;height:17px;color:var(--m);pointer-events:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-.fld input,.who input{display:block;width:100%;height:44px;border:0;border-radius:var(--r-pill);background:var(--soft);font-size:var(--fs-3);outline:none;transition:box-shadow .2s}
-.fld input{padding:0 16px 0 40px}
-.fld input:focus-visible,.who input:focus-visible{box-shadow:0 0 0 1px var(--ring)}
-.fld input::placeholder,.who input::placeholder{color:var(--m)}
+.fld input{display:block;width:100%;height:44px;border:0;border-radius:var(--r-pill);background:var(--soft);font-size:var(--fs-3);outline:none;padding:0 16px 0 40px;transition:box-shadow .2s}
+.fld input:focus-visible{box-shadow:0 0 0 1px var(--ring)}
+.fld input::placeholder{color:var(--m)}
 .fld input::-webkit-search-cancel-button{display:none}
-.found{list-style:none;padding:6px;margin:4px 0 8px calc(var(--nw) + var(--gap));border:1px solid var(--line);border-radius:var(--r-in);display:grid}
+.row.q{padding-right:10px;background:var(--bar);transition:box-shadow .2s}
+/* the open place is the field itself: no box inside the bar, and what you type starts where a cover would */
+.row.q .fld input{height:64px;margin-block:-1px;border-radius:0;background:none;padding:0 8px 0 0}
+.row.q .fld input:focus-visible{box-shadow:none}
+.row.q:focus-within{box-shadow:inset 0 0 0 1px var(--line2)}
+/* results float over the places below, so nothing moves */
+/* the whole way across, under the place it fills */
+.found{position:absolute;z-index:4;left:0;right:0;list-style:none;padding:6px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
 .found:empty{display:none}
-.found .st{padding:10px;color:var(--m);font-size:var(--fs-2)}
+.found .st{padding:12px 6px;color:var(--m);font-size:var(--fs-3)}
 .hit{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:6px;border-radius:calc(var(--r-in) - 6px);transition:background-color .2s}
 @media(hover:hover){.hit:hover{background:var(--hov)}}
 .hit:active{background:var(--prs)}
 .hit:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
 .hit .cv{width:44px;height:44px}
-.hit .add{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;color:var(--fg)}
-.hit .add svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.hit .add{flex:none;width:36px;height:36px;display:grid;place-items:center;color:var(--t2)}
+.hit .add svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 .hit[aria-disabled=true]{cursor:default}
-.hit[aria-disabled=true] .add{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
+.hit[aria-disabled=true] .add{color:var(--fg)}
+.hit[aria-disabled=true] .tx{opacity:.5}
 .hit[aria-busy=true] .add{opacity:.5}
 
-/* a name, colors, then the link: they come in once there's a first pick */
-.share{display:flex;flex-direction:column;gap:20px;align-items:flex-start;transition:opacity .3s var(--ease)}
-body.none .share{visibility:hidden;opacity:0}
-.who{display:grid;gap:8px;width:100%}
-.who label,.col .lab{font-size:var(--fs-2);color:var(--m)}
-.who input{padding:0 18px;font-size:var(--fs-4)}
-.btn{all:unset;box-sizing:border-box;cursor:pointer;height:44px;padding:0 20px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:var(--fs-3);font-weight:500;white-space:nowrap;transition:transform .5s var(--ease),opacity .2s}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;height:44px;padding:0 22px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:var(--fs-3);font-weight:500;white-space:nowrap;transition:transform .5s var(--ease),opacity .2s}
 .btn:active{transform:scale(.97);transition-duration:.08s}
 .btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.share .btn{min-width:160px}
-.bottom{display:none}
-/* colors: seven presets, your number one's cover, and your own; the page recolors as you pick, and the colors ride in the link */
-.col{display:grid;gap:8px;width:100%}
-.dots{display:grid;grid-template-columns:repeat(9,minmax(0,36px));gap:6px}
-.dot{all:unset;box-sizing:border-box;cursor:pointer;aspect-ratio:1;border-radius:50%;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px var(--line2);transition:box-shadow .2s}
-.dot[aria-pressed=true]{box-shadow:inset 0 0 0 1px var(--line2),0 0 0 2px var(--bg),0 0 0 3.5px var(--fg)}
+/* the footer: who made it */
+.ft{margin-top:72px;font-size:var(--fs-2);color:var(--m)}
+.ft a{color:var(--t1);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;transition:text-decoration-color .2s}
+@media(hover:hover){.ft a:hover{text-decoration-color:currentColor}}
+.ft a:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
+
+/* ---- Share: the list as friends will see it, edited in place ---- */
+h1{overflow-wrap:anywhere}
+/* the name is typed into the title: an input as wide as what's in it (a hidden copy of the words sets the width) */
+.nmw{display:inline-grid;vertical-align:top;max-width:100%}
+.nmw>*{grid-area:1/1;font:inherit;letter-spacing:inherit;min-width:2ch}
+.nmw .mir{visibility:hidden;white-space:pre;overflow:hidden;padding-bottom:4px}
+.nmw input{all:unset;grid-area:1/1;width:0;min-width:100%;color:inherit;border-bottom:2px dashed color-mix(in srgb,var(--fg) 30%,transparent);transition:border-color .2s}
+.nmw input:focus{border-bottom-color:color-mix(in srgb,var(--fg) 60%,transparent)}
+.nmw input::placeholder{color:color-mix(in srgb,var(--fg) 38%,transparent)}
+/* the floating bar: colors, then the link. It comes in with the first record */
+body.none .bar{visibility:hidden;opacity:0;translate:-50% 12px}
+.bar{position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);translate:-50% 0;transition:opacity .3s var(--ease),translate .3s var(--ease),visibility 0s;display:flex;align-items:center;gap:16px;padding:8px 8px 8px 18px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);max-width:calc(100vw - 24px)}
+.dots{display:flex;gap:8px}
+.dot{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:28px;height:28px;border-radius:50%;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px var(--line2);transition:box-shadow .2s}
+.dot[aria-pressed=true]{box-shadow:inset 0 0 0 1px var(--line2),0 0 0 2px var(--soft),0 0 0 3.5px var(--fg)}
 .dot:focus-visible{outline:1px solid var(--ring);outline-offset:5px}
 .dot.mine{background:conic-gradient(#ff5a5a,#ffcc33,#4fd06a,#33c6ff,#6a6aff,#ff5ac8,#ff5a5a)}
-.dot[hidden]{display:none}
-.pcs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.pc{display:flex;align-items:center;gap:8px;height:44px;padding:0 7px 0 18px;border-radius:var(--r-pill);background:var(--soft);font-size:var(--fs-3);cursor:pointer;white-space:nowrap;min-width:0}
-.pc input{margin-left:auto;flex:none;width:30px;height:30px;border:0;padding:0;background:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+.pcs{display:flex;gap:8px}
+.pc{display:flex;align-items:center;gap:8px;height:36px;padding:0 4px 0 14px;border-radius:var(--r-pill);background:var(--soft);font-size:var(--fs-2);cursor:pointer;white-space:nowrap}
+.pc input{flex:none;width:28px;height:28px;border:0;padding:0;background:none;cursor:pointer;-webkit-appearance:none;appearance:none}
 .pc input::-webkit-color-swatch-wrapper{padding:0}
 .pc input::-webkit-color-swatch{border:1px solid var(--t3);border-radius:50%}
 .pc input::-moz-color-swatch{border:1px solid var(--t3);border-radius:50%}
+.bar .btn{min-width:132px}
 
 /* Undo, after taking one out */
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);z-index:var(--z-toast);translate:-50% 0;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);height:48px;padding:0 8px 0 20px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);box-shadow:var(--float);font-size:var(--fs-3);transition:opacity .2s var(--ease),transform .2s var(--ease)}
-.toast[hidden]{display:flex;visibility:hidden;opacity:0;transform:translateY(8px);transition:opacity .15s var(--out),transform .15s var(--out),visibility 0s .15s}
+.toast[hidden]{display:flex!important;visibility:hidden;opacity:0;transform:translateY(8px);transition:opacity .15s var(--out),transform .15s var(--out),visibility 0s .15s}
 .toast span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .toast button{all:unset;cursor:pointer;flex:none;height:34px;padding:0 14px;border-radius:var(--r-pill);font-weight:500;background:color-mix(in srgb,var(--on-fg) 10%,transparent)}
 .toast button:focus-visible{outline:1px solid var(--on-fg);outline-offset:1px}
 
+body:not(.none) .toast{bottom:calc(env(safe-area-inset-bottom) + 92px)}
 @media(max-width:900px){
-  .t{display:block;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 40px) max(16px,env(safe-area-inset-left))}
-  .side{position:static;gap:20px;margin-bottom:12px}
-  .side .share{display:none}
+  .t{display:block;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 170px) max(16px,env(safe-area-inset-left))}
+  .side{position:static;gap:20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
-  .ls{--nw:30px}
+  main{--nw:30px}
   .n{font-size:22px}
   .fld input{font-size:var(--fs-4)}
-  .bottom{display:flex;margin-top:28px;align-items:stretch}
-  .bottom .btn{width:100%}
-  body.none .bottom{display:none}
+  /* Share waits at the bottom of the screen */
+  body:not(.none) .toast{bottom:calc(env(safe-area-inset-bottom) + 150px)}
+  body.none .bar{translate:0 12px}
+  .bar{left:12px;right:12px;translate:none;max-width:none;flex-direction:column;align-items:stretch;gap:14px;padding:14px;border-radius:var(--r-panel)}
+  .dots{justify-content:space-between}
+  .pcs .pc{flex:1;justify-content:space-between}
+  .bar .btn{width:100%}
 }
-@media(max-width:369px){.ls{--nw:24px;--gap:10px}.n{font-size:20px}.cv{width:42px;height:42px}}
+@media(max-width:369px){main{--nw:24px;--gap:10px;--pl:12px}.n{font-size:20px}.cv{width:42px;height:42px}.dots{gap:4px}.dot{width:24px;height:24px}}
 /* reduced motion: things fade, nothing moves */
-@media(prefers-reduced-motion:reduce){.btn,.btn:active{transform:none}.ls.dragging .row{transition:none}.toast,.toast[hidden]{transform:none}}
+@media(prefers-reduced-motion:reduce){.btn,.btn:active{transform:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.toast,.toast[hidden]{transform:none}}
 </style>
 </head>
 <body class="none">
-<div class="t">
+<div class="t" id="mk">
   <div class="side">
     <span class="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>Crate Dig</span>
-    <h1 id="h">Your top 10 of 2026</h1>
-    <div class="share" id="shareA"></div>
+    <h1 id="h"><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
   </div>
   <main>
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
-    <div class="share bottom" id="shareB"></div>
+    <ul class="found" id="found" aria-live="polite"></ul>
   </main>
+  <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
+  <div class="bar" id="bar"></div>
+</div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span></span><button type="button">Undo</button></div>
 <script src="/vinyl/visitor-crate.js"></script>
@@ -160,37 +191,39 @@ const $=(s,r=document)=>r.querySelector(s);
 const V=window.VisitorCrate,KEY='top10-2026',TEN=10,YEAR='2026';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const key=r=>r.src==='m'&&r.group?'g'+r.group:(r.src||'a')+r.id; // one per album
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,fine=matchMedia('(pointer:fine)').matches;
 const EASE='cubic-bezier(.22,1,.36,1)';
 const IC={
   q:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>',
   plus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   x:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>',
-  grip:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>',
   link:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>'
 };
-let list=[],name='',look={t:'a'};
+// slots: the ten places, a record or null. A list can have gaps while you make it; its link closes them up
+let slots=Array(TEN).fill(null),at=0,name='',look={t:'a'};
+const filled=()=>slots.filter(Boolean);
+const firstGap=(from=0)=>{for(let k=0;k<TEN;k++){const i=(from+k)%TEN;if(!slots[i])return i}return -1};
 // the presets: [name, background, text, numbers]. a is the crate's own colors. Keep in step with PRESETS in src/lib/top10.ts
 const SC={a:['Night','#121212','#ffffff','#ffffff'],b:['Paper','#f2ede2','#1f1b16','#1f1b16'],c:['Cobalt','#1f33c7','#ffffff','#ffffff'],d:['Tomato','#e2462c','#fff6ea','#fff6ea'],
   e:['Forest','#16382a','#f1e9d2','#d8b968'],f:['Bubblegum','#ffd3e3','#3a0d28','#c2185b'],g:['Mustard','#f1c232','#1c1708','#1c1708']};
 const HEX=/^[0-9a-f]{6}$/i;
 const colors=()=>SC[look.t]?{bg:SC[look.t][1],fg:SC[look.t][2],n:SC[look.t][3]}:{bg:look.bg,fg:look.fg,n:look.n||look.fg};
 // every other token comes from the two colors, mixed; Night keeps tokens.css as it is. A light page gets softer shadows
-const TOK=['--bg','--fg','--on-fg','--t1','--t2','--m','--t3','--t4','--line','--line2','--soft','--sheet','--hov','--prs','--sel','--ring','--rank-n','--lift','--float'];
+const TOK=['--glass','--bg','--fg','--on-fg','--t1','--t2','--m','--t3','--t4','--line','--line2','--soft','--sheet','--hov','--prs','--sel','--ring','--rank-n','--lift','--float'];
 const light=h=>{h=h.slice(1);return(.2126*parseInt(h.slice(0,2),16)+.7152*parseInt(h.slice(2,4),16)+.0722*parseInt(h.slice(4,6),16))/255>.6};
 function paint(){
   const st=document.documentElement.style,c=colors();
   if(look.t==='a'){TOK.forEach(k=>st.removeProperty(k))}
   else{const mix=p=>`color-mix(in srgb,${c.fg} ${p}%,${c.bg})`,a=p=>`color-mix(in srgb,${c.fg} ${p}%,transparent)`;
-    Object.entries({'--bg':c.bg,'--fg':c.fg,'--on-fg':c.bg,'--t1':mix(85),'--t2':mix(68),'--m':mix(60),'--t3':mix(46),'--t4':mix(38),'--line':a(14),'--line2':a(22),'--soft':mix(9),'--sheet':mix(7),'--hov':a(6),'--prs':a(8),'--sel':a(12),'--ring':a(26),'--rank-n':c.n}).forEach(([k,v])=>st.setProperty(k,v));
-    if(light(c.bg)){st.setProperty('--lift','0 14px 28px -14px #0004,0 3px 8px -4px #0002');st.setProperty('--float','0 12px 32px #0002')}else{st.removeProperty('--lift');st.removeProperty('--float')}}
+    Object.entries({'--bg':c.bg,'--fg':c.fg,'--on-fg':c.bg,'--t1':mix(85),'--t2':mix(68),'--m':mix(60),'--t3':mix(46),'--t4':mix(38),'--line':a(14),'--line2':a(22),'--soft':mix(9),'--sheet':mix(7),'--hov':a(6),'--prs':a(8),'--sel':a(12),'--ring':a(26),'--rank-n':c.n,'--glass':`color-mix(in srgb,${mix(9)} 72%,transparent)`}).forEach(([k,v])=>st.setProperty(k,v));
+    if(light(c.bg)){st.setProperty('--lift','0 12px 24px -12px #0003,0 2px 6px -2px #0002');st.setProperty('--float','0 12px 32px #0002')}else{st.removeProperty('--lift');st.removeProperty('--float')}}
   document.querySelector('meta[name=theme-color]').content=c.bg;
 }
 // H: colors from number one's cover, a darkened average for the page and a brightened one for the numbers
 let hFor='';
 async function fromCover(){
-  const r=list[0];if(!r?.thumb)return null;
+  const r=filled()[0];if(!r?.thumb)return null;
   const im=new Image();im.crossOrigin='anonymous';im.src=r.thumb;await im.decode();
   const cv=document.createElement('canvas');cv.width=cv.height=8;const x=cv.getContext('2d');x.drawImage(im,0,0,8,8);
   const d=x.getImageData(0,0,8,8).data;let s=[0,0,0];for(let i=0;i<d.length;i+=4)for(let j=0;j<3;j++)s[j]+=d[i+j];
@@ -198,46 +231,54 @@ async function fromCover(){
   return {bg:'#'+hex(avg.map(v=>v*.5)),fg:'#ffffff',n:'#'+hex(avg.map(v=>v*235/top))};
 }
 async function sampleCover(){
-  const k=list[0]?key(list[0]):'';if(look.t!=='h'||hFor===k)return;hFor=k;
-  if(!k){look={t:'a'};paint();drawShare();save();return}
-  try{const c=await fromCover();if(c&&look.t==='h'&&hFor===k){Object.assign(look,c);paint();drawShare();save()}}catch{hFor='';if(look.t==='h'){look={t:'a'};paint();drawShare();save()}}
+  const one=filled()[0],k=one?key(one):'';if(look.t!=='h'||hFor===k)return;hFor=k;
+  if(!k){look={t:'a'};paint();drawBar();save();return}
+  try{const c=await fromCover();if(c&&look.t==='h'&&hFor===k){Object.assign(look,c);paint();drawBar();save()}}catch{hFor='';if(look.t==='h'){look={t:'a'};paint();drawBar();save()}}
 }
-const whose=()=>name.trim()?`${name.trim()}${/s$/i.test(name.trim())?'’':'’s'} top 10 of ${YEAR}`:`Your top 10 of ${YEAR}`;
-const cover=r=>`<span class="cv">${r.thumb?`<img src="${esc(r.thumb)}" alt=""${r.fallback?` data-fallback="${esc(r.fallback)}"`:''}>`:''}</span>`;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({name,list,look}))}catch{}}
-// the link: the list in its address, opened on the crate page, ranked
-function link(){const u=new URL(V.link(name,list,'/2026')),c=colors();
+const suffix=()=>/s$/i.test(name.trim())?'’ top 10 of '+YEAR:'’s top 10 of '+YEAR;
+const whose=()=>name.trim()?`${name.trim()}${suffix()}`:`Your top 10 of ${YEAR}`;
+const cover=r=>`<span class="cv">${r.thumb?`<img src="${esc(r.thumb)}" alt="" draggable="false"${r.fallback?` data-fallback="${esc(r.fallback)}"`:''}>`:''}</span>`;
+function save(){try{localStorage.setItem(KEY,JSON.stringify({name,slots,look}))}catch{}}
+// the link: the list in its address, gaps closed up, opened on the crate page, ranked
+function link(){const u=new URL(V.link(name,filled(),'/2026')),c=colors();
   if(look.t!=='a')u.searchParams.set('t',look.t);
   if(!SC[look.t]){u.searchParams.set('bg',c.bg.slice(1));u.searchParams.set('fg',c.fg.slice(1));if(c.n!==c.fg)u.searchParams.set('n',c.n.slice(1))}
   return u.href}
 
 // ---- the ten places ----
-const ls=$('#ls');let found=[],busy=new Set();
+const ls=$('#ls'),fd=$('#found');let found=[],busy=new Set();
 function draw(focus){
   const q=$('#q'),had=q?.value||'',was=document.activeElement===q;
-  ls.innerHTML=Array.from({length:TEN},(_,i)=>{
-    const r=list[i];
-    if(r)return `<li class="row" data-i="${i}"><span class="n">${i+1}</span>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><span class="acts"><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button><button class="ib grip" type="button" aria-label="Move ${esc(r.title)}. Up and down arrows move it">${IC.grip}</button></span></li>`;
-    if(i===list.length)return `<li class="row q"><span class="n">${i+1}</span><div class="fld">${IC.q}<label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li><li class="found-w" style="list-style:none"><ul class="found" id="found" aria-live="polite"></ul></li>`;
-    return `<li class="row e" data-e><span class="n">${i+1}</span></li>`;
+  if(at>=0&&slots[at])at=-1;
+  ls.innerHTML=slots.map((r,i)=>{
+    if(r)return `<li class="row f" data-i="${i}" tabindex="0" aria-label="${i+1}. ${esc(r.title)} by ${esc(r.artist)}. Up and down arrows move it"><span class="n" aria-hidden="true">${i+1}</span>${cover(r)}<span class="tx" aria-hidden="true"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button></li>`;
+    if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><div class="fld"><label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
+    return `<li class="row e" data-e="${i}" role="button" tabindex="0" aria-label="Add number ${i+1}"><span class="n" aria-hidden="true">${i+1}</span></li>`;
   }).join('');
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
-  if(nq&&had)showFound();
-  document.body.classList.toggle('none',!list.length);
-  $('#h').textContent=whose();document.title=whose();
-  drawShare();save();sampleCover();
+  showFound();
+  document.body.classList.toggle('none',!filled().length);
+  drawBar();save();sampleCover();
 }
 // a pressing without its own cover borrows the album's; with neither, the square stays blank
 document.addEventListener('error',e=>{const i=e.target;if(i.dataset?.fallback){i.src=i.dataset.fallback;delete i.dataset.fallback}else if(i.tagName==='IMG')i.style.visibility='hidden'},true);
 
-// ---- search: the artist's own albums first, then this year's ----
-let timer=0,seq=0,status='';const cache={};
+// ---- search: only albums out this year, the artist's own first ----
+let timer=0,seq=0,status='',shown=[],suggestions=[];const cache={};
+// suggestions: Spotify's newest albums out this year, asked for once
+fetch(`/api/spotify?new=1&year=${YEAR}`).then(r=>r.ok?r.json():null).then(d=>{suggestions=(d?.results||[]).map(r=>({...r,src:'s'}));showFound()}).catch(()=>{});
 const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 function showFound(){
-  const f=$('#found');if(!f)return;
-  if(status){f.innerHTML=`<li class="st">${esc(status)}</li>`;return}
-  f.innerHTML=found.slice(0,8).map((r,i)=>{const k=key(r),on=list.some(x=>key(x)===k);
-    return `<li><button class="hit" type="button" data-f="${i}"${on?' aria-disabled="true"':''}${busy.has(k)?' aria-busy="true"':''}>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}${r.year?' · '+esc(r.year):''}</span></span><span class="add">${on?IC.check:IC.plus}</span></button></li>`}).join('');
+  const q=$('#q'),row=q?.closest('.row');
+  if(!row){fd.innerHTML='';return}
+  const typed=q.value.trim().length>=3;
+  // before you type: this year's new albums, the ones not in your list yet
+  shown=typed?found:suggestions.filter(r=>!slots.some(x=>x&&key(x)===key(r)));
+  if(!typed&&q.value.trim()){fd.innerHTML='';return}
+  fd.style.top=(row.offsetTop+row.offsetHeight+6)+'px';
+  if(typed&&status){fd.innerHTML=`<li class="st">${esc(status)}</li>`;return}
+  fd.innerHTML=shown.slice(0,8).map((r,i)=>{const k=key(r),on=slots.some(x=>x&&key(x)===k);
+    return `<li><button class="hit" type="button" data-f="${i}"${on?' aria-disabled="true"':''}${busy.has(k)?' aria-busy="true"':''}>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}${r.year?' · '+esc(r.year):''}</span></span>${on?`<span class="add">${IC.check}</span>`:''}</button></li>`}).join('');
 }
 // "Bad Bunny" or "rosalia lux": the artist's own records first (newest first), then this year's, then the rest as they came
 function rank(res,term){
@@ -246,111 +287,124 @@ function rank(res,term){
 }
 async function find(term){
   const id=++seq;
-  if(term.length<2){status='';found=[];showFound();return}
+  if(term.length<3){status='';found=[];showFound();return}
   if(cache[term]){status='';found=cache[term];showFound();return}
   try{
-    const res=await V.search(term,{albums:true});if(id!==seq)return;
+    const res=await V.search(term,{albums:true,year:YEAR});if(id!==seq)return;
     found=cache[term]=rank(res,term);
-    status=found.length?'':'Nothing found. Try the artist’s name.';showFound();
+    status=found.length?'':'Nothing from 2026 by that name. Try the artist or the album.';showFound();
   }catch{if(id===seq){status='Search isn’t answering. Try again in a minute.';showFound()}}
 }
 // the last search's results go as soon as you type, so a quick tap can't add the wrong record
 ls.addEventListener('input',e=>{if(e.target.id!=='q')return;clearTimeout(timer);seq++;const v=e.target.value.trim();
-  found=[];status=v.length>=2&&!cache[v]?'Searching…':'';showFound();timer=setTimeout(()=>find(v),250)});
-ls.addEventListener('keydown',e=>{if(e.target.id==='q'&&e.key==='Enter'){e.preventDefault();const b=$('#found .hit:not([aria-disabled])');if(b)b.click()}});
-ls.addEventListener('click',async e=>{
-  const h=e.target.closest('.hit');
-  if(h){if(h.getAttribute('aria-disabled')==='true')return;let r=found[+h.dataset.f];const k=key(r);if(busy.has(k)||list.length>=TEN)return;
-    if(r.group){busy.add(k);showFound();try{r=await V.pick(r)}catch{busy.delete(k);status='';showFound();return}busy.delete(k)}
-    if(list.some(x=>key(x)===k)||list.length>=TEN)return;
-    list.push(r);found=[];status='';const q=$('#q');if(q)q.value='';draw(list.length<TEN);
-    const li=ls.children[list.length-1];if(li)li.animate(reduce?[{opacity:0},{opacity:1}]:[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:200,easing:EASE});
-    // ten: the name, colors and link are next
-    if(list.length===TEN&&$('#shareB').offsetParent)$('#shareB').scrollIntoView({behavior:reduce?'auto':'smooth',block:'end'});
-    return}
-  const x=e.target.closest('[data-x]');
-  if(x){const i=+x.closest('[data-i]').dataset.i;takeOut(i);return}
-  if(e.target.closest('[data-e]'))$('#q')?.focus();
+  found=[];status=v.length>=3&&!cache[v]?'Searching…':'';showFound();timer=setTimeout(()=>find(v),250)});
+ls.addEventListener('keydown',e=>{
+  if(e.target.id==='q'){if(e.key==='Enter'){e.preventDefault();$('#found .hit:not([aria-disabled])')?.click()}else if(e.key==='Escape'){if(e.target.value){e.target.value='';found=[];status='';showFound()}else{const i=at;closeSearch();ls.querySelector(`[data-e="${i}"]`)?.focus()}}return}
+  // an empty place: Enter or space opens the search there
+  const em=e.target.closest('.row.e');if(em&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openAt(+em.dataset.e);return}
+  // a filled place: up and down move it, one place at a time (into a gap, or trading with the record there)
+  const f=e.target.closest('.row.f');if(!f||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();
+  const i=+f.dataset.i,j=i+(e.key==='ArrowUp'?-1:1);if(j<0||j>=TEN)return;[slots[i],slots[j]]=[slots[j],slots[i]];if(at===j)at=i;draw();ls.querySelector(`[data-i="${j}"]`).focus()});
+// the search closes on Esc or a press anywhere else
+function closeSearch(){if(at<0)return;at=-1;found=[];status='';const q=$('#q');if(q)q.value='';draw()}
+document.addEventListener('pointerdown',e=>{if(at>=0&&!e.target.closest('.row.q,#found,.row.e'))closeSearch()});
+function openAt(i){if(slots[i])return;at=i;found=[];status='';const q=$('#q');if(q)q.value='';draw(true)}
+fd.addEventListener('click',async e=>{
+  const h=e.target.closest('.hit');if(!h||h.getAttribute('aria-disabled')==='true')return;
+  let r=shown[+h.dataset.f];const k=key(r),i=at;if(busy.has(k)||i<0||slots[i])return;
+  if(r.group){busy.add(k);showFound();try{r=await V.pick(r)}catch{busy.delete(k);status='';showFound();return}busy.delete(k)}
+  if(slots.some(x=>x&&key(x)===k)||slots[i])return;
+  slots[i]=r;found=[];status='';const q=$('#q');if(q)q.value='';
+  // done: the search closes, and every place is quiet again
+  at=-1;draw();
+  const li=ls.querySelector(`[data-i="${i}"]`);if(li)li.animate(reduce?[{opacity:0},{opacity:1}]:[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:200,easing:EASE});
 });
-// × takes one out, with Undo for a few seconds
+ls.addEventListener('click',e=>{
+  if(justDragged)return;
+  const x=e.target.closest('[data-x]');if(x){takeOut(+x.closest('[data-i]').dataset.i);return}
+  const em=e.target.closest('.row.e');if(em){openAt(+em.dataset.e);return}
+  if(e.target.closest('.row.q'))$('#q')?.focus();
+});
+// × takes one out, with Undo for a few seconds; its place stays empty
 const toast=$('#toast');let undo=null,toastT=0;
 function takeOut(i){
-  const [r]=list.slice(i,i+1);flip(()=>{list.splice(i,1);draw()});
-  const n=ls.querySelector(`[data-i="${Math.min(i,list.length-1)}"] [data-x]`);(n||$('#q'))?.focus({preventScroll:true});
+  const r=slots[i];slots[i]=null;draw();
+  ls.querySelector(`[data-e="${i}"]`)?.focus({preventScroll:true});
   undo={r,i};toast.firstElementChild.textContent=`Took out ${r.title}`;toast.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{toast.hidden=true;undo=null},5000);
 }
 toast.lastElementChild.addEventListener('click',()=>{if(!undo)return;const {r,i}=undo;undo=null;toast.hidden=true;clearTimeout(toastT);
-  if(list.length>=TEN||list.some(x=>key(x)===key(r)))return;flip(()=>{list.splice(Math.min(i,list.length),0,r);draw()})});
-// the rows that move slide to their new places (a press, not the keyboard)
-function flip(fn){
-  const was=new Map([...ls.querySelectorAll('[data-i]')].map(li=>[li.querySelector('.tx b').textContent,li.getBoundingClientRect().top]));fn();
-  if(reduce)return;ls.querySelectorAll('[data-i]').forEach(li=>{const a=was.get(li.querySelector('.tx b').textContent);if(a==null)return;const d=a-li.getBoundingClientRect().top;if(d)li.animate([{transform:`translateY(${d}px)`},{transform:'none'}],{duration:200,easing:EASE})});
+  if(slots.some(x=>x&&key(x)===key(r)))return;const j=slots[i]?firstGap(i):i;if(j<0)return;slots[j]=r;draw()});
+
+// ---- drag: from anywhere on a filled row. A mouse just presses and moves; a finger holds still for a beat first ----
+// The row follows exactly, and the other places (empty ones too) part under it as it passes, so the list is always in its
+// after-the-drop order. Letting go settles it into the open place.
+const reorder=(s,i,t)=>{s=s.slice();const [r]=s.splice(i,1);s.splice(t,0,r);return s};
+let dragging=false,justDragged=false;
+function startDrag(li,pid,y0){
+  const i=+li.dataset.i,rows=[...ls.children],tops=rows.map(r=>r.offsetTop);let t=i;dragging=true;
+  const order=slots.map((_,k)=>k); // which row sits in each place
+  li.classList.add('drag');ls.classList.add('dragging');fd.innerHTML='';
+  const mv=ev=>{if(ev.pointerId!==pid)return;
+    const y=Math.max(tops[0]-24,Math.min(tops[TEN-1]+24,tops[i]+ev.clientY-y0));li.style.transform=`translateY(${y-tops[i]}px)`;
+    const nt=tops.reduce((b,v,k)=>Math.abs(v-y)<Math.abs(tops[b]-y)?k:b,0);if(nt===t)return;t=nt;
+    reorder(order,i,t).forEach((k,p)=>{const r=rows[k];r.querySelector('.n').textContent=p+1;if(k!==i)r.style.transform=p!==k?`translateY(${tops[p]-tops[k]}px)`:''})};
+  const up=ev=>{if(ev.pointerId!==pid)return;removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);dragging=false;
+    justDragged=true;setTimeout(()=>justDragged=false,0);
+    if(ev.type==='pointercancel')t=i;
+    // settle: glide from where it was let go into its place, then lay the list out for real
+    li.style.transform=`translateY(${tops[t]-tops[i]}px)`;li.classList.add('land');
+    setTimeout(()=>{const was=at;slots=reorder(slots,i,t);if(was>=0)at=reorder(order,i,t).indexOf(was);if(at>=0&&slots[at])at=-1;
+      ls.classList.remove('dragging');draw()},reduce?0:220)};
+  addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up);
 }
-const move=(from,to)=>{if(from===to)return;const [r]=list.splice(from,1);list.splice(to,0,r)};
-// drag: by the handle, or on a touch screen hold a row still for a moment; the others make room as it passes
-let dragging=false;
-function startDrag(li,pid,y0,el){
-  const i=+li.dataset.i,rows=[...ls.querySelectorAll('[data-i]')],h=li.getBoundingClientRect().height;let to=i;dragging=true;
-  li.classList.add('drag');ls.classList.add('dragging');try{el.setPointerCapture(pid)}catch{}
-  const mv=ev=>{if(ev.pointerId!==pid)return;const dy=ev.clientY-y0;li.style.transform=`translateY(${dy}px)`;to=Math.max(0,Math.min(rows.length-1,i+Math.round(dy/h)));
-    rows.forEach((r,j)=>{if(r!==li)r.style.transform=j>i&&j<=to?`translateY(${-h}px)`:j<i&&j>=to?`translateY(${h}px)`:''})};
-  const up=ev=>{if(ev.pointerId!==pid)return;el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);dragging=false;
-    const top=li.getBoundingClientRect().top;ls.classList.remove('dragging');rows.forEach(r=>r.style.transform='');move(i,to);draw();
-    const now=ls.children[to];if(!reduce&&now){now.classList.add('drag');now.animate([{transform:`translateY(${top-now.getBoundingClientRect().top}px)`},{transform:'none'}],{duration:200,easing:EASE}).onfinish=()=>now.classList.remove('drag')}};
-  el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
-}
-let hold=null;
 ls.addEventListener('pointerdown',e=>{
-  if(e.button>0)return;const g=e.target.closest('.grip');
-  if(g){e.preventDefault();startDrag(g.closest('[data-i]'),e.pointerId,e.clientY,g);return}
-  const li=e.target.closest('[data-i]');if(!li||e.pointerType!=='touch'||e.target.closest('button'))return;
-  const y0=e.clientY,x0=e.clientX,pid=e.pointerId;
-  const off=()=>{clearTimeout(hold?.t);hold=null;removeEventListener('pointermove',watch);removeEventListener('pointerup',off);removeEventListener('pointercancel',off)};
-  const watch=ev=>{if(ev.pointerId===pid&&Math.hypot(ev.clientX-x0,ev.clientY-y0)>8)off()};
-  hold={t:setTimeout(()=>{off();navigator.vibrate?.(8);startDrag(li,pid,y0,li)},380)};
+  if(e.button>0)return;const li=e.target.closest('.row.f');if(!li||e.target.closest('button'))return;
+  const y0=e.clientY,x0=e.clientX,pid=e.pointerId;let t=0;
+  const off=()=>{clearTimeout(t);removeEventListener('pointermove',watch);removeEventListener('pointerup',off);removeEventListener('pointercancel',off)};
+  const watch=ev=>{if(ev.pointerId!==pid)return;const d=Math.hypot(ev.clientX-x0,ev.clientY-y0);
+    if(e.pointerType==='touch'){if(d>8)off()}else if(d>4){off();startDrag(li,pid,y0)}};
+  if(e.pointerType==='touch')t=setTimeout(()=>{off();navigator.vibrate?.(6);startDrag(li,pid,y0)},180);
+  else e.preventDefault(); // no text selection while pressing
   addEventListener('pointermove',watch);addEventListener('pointerup',off);addEventListener('pointercancel',off);
 });
 // while a row is held, the page doesn't scroll under it
-ls.addEventListener('touchmove',e=>{if(dragging)e.preventDefault()},{passive:false});
-ls.addEventListener('contextmenu',e=>{if(e.target.closest('[data-i]'))e.preventDefault()});
-// or with the keyboard: up and down on the handle, no animation
-ls.addEventListener('keydown',e=>{const g=e.target.closest('.grip');if(!g||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();
-  const i=+g.closest('[data-i]').dataset.i,j=i+(e.key==='ArrowUp'?-1:1);if(j<0||j>=list.length)return;move(i,j);draw();ls.querySelector(`[data-i="${j}"] .grip`).focus()});
+addEventListener('touchmove',e=>{if(dragging)e.preventDefault()},{passive:false});
+ls.addEventListener('contextmenu',e=>{if(e.target.closest('.row.f'))e.preventDefault()});
 
-// ---- a name, colors, then the link ----
-const lookName=()=>SC[look.t]?.[0]||(look.t==='h'?'From your number one':'Your own');
-function dotsHTML(){
-  const c=colors(),one=list[0];
-  return `<div class="col"><span class="lab">Colors: ${lookName()}</span><div class="dots" role="group" aria-label="Colors">${Object.entries(SC).map(([k,[n,bg]])=>`<button class="dot" type="button" data-t="${k}" aria-label="${n}" aria-pressed="${look.t===k}" style="background-color:${bg}"></button>`).join('')}<button class="dot" type="button" data-t="h" aria-label="Colors from your number one’s cover" aria-pressed="${look.t==='h'}"${one?.thumb?` style="background-image:url('${esc(one.thumb)}')"`:' hidden'}></button><button class="dot mine" type="button" data-t="x" aria-label="Your own" aria-pressed="${look.t==='x'}"></button></div>${look.t==='x'?`<div class="pcs"><label class="pc">Text<input type="color" data-c="fg" value="${c.fg}"></label><label class="pc">Background<input type="color" data-c="bg" value="${c.bg}"></label></div>`:''}</div>`;
+// ---- the name, typed into the title; colors and the link in a bar at the bottom ----
+const nm=$('#nm'),mir=$('.mir');
+const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;$('#suf').textContent=name.trim()?suffix():'’s top 10 of '+YEAR;document.title=whose()};
+const copyLabel=()=>{const n=filled().length;return n>1&&n<TEN?`Copy link to your top ${n}`:'Copy link'};
+const lookName=()=>SC[look.t]?.[0]||(look.t==='h'?'From your number one’s cover':'Your own');
+function drawBar(){
+  const c=colors(),one=filled()[0],bar=$('#bar');
+  const f=document.activeElement;if(f&&bar.contains(f)&&f.matches('.pc input'))return; // don't redraw a color picker while it's open
+  bar.innerHTML=`<div class="dots" role="group" aria-label="Colors: ${esc(lookName())}">${Object.entries(SC).map(([k,[n,bg]])=>`<button class="dot" type="button" data-t="${k}" aria-label="${n}" aria-pressed="${look.t===k}" style="background-color:${bg}"></button>`).join('')}${one?.thumb?`<button class="dot" type="button" data-t="h" aria-label="Colors from your number one’s cover" aria-pressed="${look.t==='h'}" style="background-image:url('${esc(one.thumb)}')"></button>`:''}<button class="dot mine" type="button" data-t="x" aria-label="Your own colors" aria-pressed="${look.t==='x'}"></button></div>${look.t==='x'?`<div class="pcs"><label class="pc">Text<input type="color" data-c="fg" value="${c.fg}"></label><label class="pc">Page<input type="color" data-c="bg" value="${c.bg}"></label></div>`:''}<button class="btn" type="button" data-copy>${IC.link}<span>${copyLabel()}</span></button>`;
+  if(f?.dataset?.t)bar.querySelector(`.dot[data-t="${f.dataset.t}"]`)?.focus({preventScroll:true});
 }
-const copyLabel=()=>list.length>1&&list.length<TEN?`Copy link to your top ${list.length}`:'Copy link';
-function drawShare(){
-  const html=`<div class="who"><label for="nm-SIDE">Whose top 10 is it?</label><input id="nm-SIDE" class="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" value="${esc(name)}"></div>${dotsHTML()}<button class="btn" type="button" data-copy>${IC.link}<span>${copyLabel()}</span></button>`;
-  for(const [id,s] of [['shareA','a'],['shareB','b']]){const el=$('#'+id),f=document.activeElement?.closest?.('#'+id);
-    if(f&&document.activeElement.classList.contains('nm')){const sp=el.querySelector('[data-copy] span');if(sp)sp.textContent=copyLabel();continue}
-    el.innerHTML=html.replaceAll('SIDE',s)}
-}
-// a color dot; your own opens text and background pickers, starting from the colors on screen
-document.addEventListener('click',e=>{const d=e.target.closest('.dot');if(!d)return;const t=d.dataset.t;if(t===look.t&&t!=='x')return;
-  const c=colors();look=t==='x'?{t,bg:c.bg,fg:c.fg}:t==='h'?{t,...c}:{t};hFor='';paint();drawShare();save();sampleCover();
-  document.querySelectorAll(`.dot[data-t="${t}"]`).forEach(b=>{if(b.closest('.share').offsetParent)b.focus({preventScroll:true})})});
-document.addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;look[k]=e.target.value;delete look.n;paint();save();
-  document.querySelectorAll(`.pc input[data-c="${k}"]`).forEach(i=>{if(i!==e.target)i.value=e.target.value})});
-document.addEventListener('input',e=>{if(!e.target.classList.contains('nm'))return;name=e.target.value;$('#h').textContent=whose();document.title=whose();
-  document.querySelectorAll('.nm').forEach(n=>{if(n!==e.target)n.value=name});save()});
-document.addEventListener('click',async e=>{const b=e.target.closest('[data-copy]');if(!b||!list.length)return;
+nm.addEventListener('input',()=>{name=nm.value;drawName();save()});
+nm.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nm.blur()}});
+// a color dot; your own opens text and page pickers, starting from the colors on screen
+$('#bar').addEventListener('click',async e=>{
+  const d=e.target.closest('.dot');
+  if(d){const t=d.dataset.t;if(t===look.t&&t!=='x')return;const c=colors();look=t==='x'?{t,bg:c.bg,fg:c.fg}:t==='h'?{t,...c}:{t};hFor='';d.focus({preventScroll:true});paint();drawBar();save();sampleCover();return}
+  const b=e.target.closest('[data-copy]');if(!b)return;
   const s=b.querySelector('span');try{await navigator.clipboard.writeText(link());b.firstElementChild.outerHTML=IC.check;s.textContent='Copied'}catch{prompt('Copy this link',link())}
   setTimeout(()=>{if(b.isConnected){b.firstElementChild.outerHTML=IC.link;s.textContent=copyLabel()}},1600)});
+$('#bar').addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;look[k]=e.target.value;delete look.n;paint();save()});
 
 // ---- start: a list in the address (to change it), else the one made on this device ----
 (async()=>{
-  const p=new URLSearchParams(location.search);
-  if(p.get('d')||p.get('m')||p.get('c')){name=(p.get('by')||'').slice(0,40);try{list=(await V.fromAddress(p)).slice(0,TEN)}catch{}
+  const p=new URLSearchParams(location.search);let list=null;
+  if(p.get('d')||p.get('m')||p.get('c')||p.get('s')){name=(p.get('by')||'').slice(0,40);try{list=(await V.fromAddress(p)).slice(0,TEN)}catch{}
     const t=p.get('t')||'a',bg=p.get('bg'),fg=p.get('fg'),n=p.get('n');
-    look=SC[t]?{t}:(t==='h'||t==='x')&&HEX.test(bg||'')&&HEX.test(fg||'')?{t,bg:'#'+bg,fg:'#'+fg,...(HEX.test(n||'')?{n:'#'+n}:{})}:{t:'a'};
-    if(look.t==='h')hFor=list[0]?key(list[0]):''}
-  else try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s){name=s.name||'';list=(s.list||[]).slice(0,TEN);if(s.look&&(SC[s.look.t]||HEX.test((s.look.bg||'').slice(1))))look=s.look;if(look.t==='h')hFor=list[0]?key(list[0]):''}}catch{}
-  paint();draw();
+    look=SC[t]?{t}:(t==='h'||t==='x')&&HEX.test(bg||'')&&HEX.test(fg||'')?{t,bg:'#'+bg,fg:'#'+fg,...(HEX.test(n||'')?{n:'#'+n}:{})}:{t:'a'}}
+  else try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s){name=s.name||'';
+    if(Array.isArray(s.slots))slots=Array.from({length:TEN},(_,i)=>s.slots[i]||null);else list=(s.list||[]).slice(0,TEN); // lists saved before gaps
+    if(s.look&&(SC[s.look.t]||HEX.test((s.look.bg||'').slice(1))))look=s.look}}catch{}
+  if(list)slots=Array.from({length:TEN},(_,i)=>list[i]||null);
+  if(look.t==='h'){const one=filled()[0];hFor=one?key(one):''}
+  at=-1;paint();drawName();draw();
 })();
 </script>
 </body>

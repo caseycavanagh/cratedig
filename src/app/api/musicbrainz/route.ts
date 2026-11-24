@@ -3,6 +3,7 @@
 // one request a second, so the crate page loads every record in one search by ID.
 //   ?q=harvest        albums (release groups) matching a search
 //   &albums=1         (the top 10 maker) studio albums and EPs only, the artist's own first and newest first
+//   &year=2026        with albums=1: only albums first released that year
 //   ?barcode=<digits>  releases with that barcode, for scanning a record
 //   ?pick=<group id>  the album's best pressing: vinyl with a scanned back if there is one
 //   ?ids=<mbid>,...   those releases with label, format, front and back, and a Spotify ID
@@ -73,8 +74,9 @@ const fold = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").t
 const words = (q: string) => q.replace(/[+\-&|!(){}[\]^"~*?:\\/]/g, " ").split(/\s+/).filter(Boolean).slice(0, 8).map((w) => w.toLowerCase());
 // studio albums and EPs: no live sets, best-ofs, soundtracks, remixes, mixtapes or tributes
 const NOT = "live OR compilation OR soundtrack OR remix OR dj-mix OR mixtape/street OR interview OR spokenword OR demo OR audiobook OR audio drama";
-const albumsQuery = (t: string[]) =>
-  `(artist:"${t.join(" ")}"^4 OR releasegroup:"${t.join(" ")}"^2 OR (${t.map((w) => `(artist:${w} OR releasegroup:${w})`).join(" AND ")})) AND primarytype:(album OR ep) AND NOT secondarytype:(${NOT.split(" OR ").map((x) => `"${x}"`).join(" OR ")})`;
+// year: only albums first out that year (the top 10 of 2026 searches 2026 alone)
+const albumsQuery = (t: string[], year?: string) =>
+  `(artist:"${t.join(" ")}"^4 OR releasegroup:"${t.join(" ")}"^2 OR (${t.map((w) => `(artist:${w} OR releasegroup:${w})`).join(" AND ")})) AND primarytype:(album OR ep) AND NOT secondarytype:(${NOT.split(" OR ").map((x) => `"${x}"`).join(" OR ")})${year ? ` AND firstreleasedate:[${year} TO ${year}-12-31]` : ""}`;
 
 const artistOf = (r: MbRelease | MbGroup) => (r["artist-credit"] ?? []).map((a) => a.name + (a.joinphrase ?? "")).join("");
 const isVinyl = (r: MbRelease) => (r.media ?? []).some((m) => /vinyl/i.test(m.format ?? ""));
@@ -108,7 +110,8 @@ export async function GET(request: NextRequest) {
     // the top 10 maker: "Bad Bunny" should bring up Bad Bunny's albums, newest first, not every title with the words in it
     const t = words(q);
     if (!t.length) return Response.json({ results: [] });
-    const res = await mb(`release-group?query=${encodeURIComponent(albumsQuery(t))}&limit=60`);
+    const year = /^\d{4}$/.test(p.get("year") ?? "") ? (p.get("year") as string) : undefined;
+    const res = await mb(`release-group?query=${encodeURIComponent(albumsQuery(t, year))}&limit=60`);
     if (!res.ok) return Response.json({ results: [] }, { status: res.status === 503 ? 429 : 502 });
     const want = fold(q);
     const groups: MbGroup[] = (await res.json())["release-groups"] ?? [];

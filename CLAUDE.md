@@ -24,7 +24,7 @@ Casey's record crate: every record Casey owns, flipped through like a crate. It 
 
 ## Settings
 
-Env vars (never print them): GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and CRATE_OWNER_EMAIL (Google sign-in for edit mode; redirect URI `https://<domain>/api/auth/google/callback`), CRATE_KEY (the older way in, still accepted), KV_REST_API_URL and KV_REST_API_TOKEN (the same Upstash database as caseycavanagh.com's likes), SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET (Play links for visitor crates), DISCOGS_TOKEN (optional), ANTHROPIC_API_KEY (writes each record's About from its Wikipedia article in `src/lib/about.ts`; without it the page shows the article's Background paragraph).
+Env vars (never print them): GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and CRATE_OWNER_EMAIL (Google sign-in for edit mode; redirect URI `https://<domain>/api/auth/google/callback`), CRATE_KEY (the older way in, still accepted), KV_REST_API_URL and KV_REST_API_TOKEN (the same Upstash database as caseycavanagh.com's likes), SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET (Play links for visitor crates, and the 2026 maker's search through `/api/spotify`; a list's Spotify albums ride in its link as `s=`), DISCOGS_TOKEN (optional), ANTHROPIC_API_KEY (writes each record's About from its Wikipedia article in `src/lib/about.ts`; without it the page shows the article's Background paragraph).
 
 ## Design
 

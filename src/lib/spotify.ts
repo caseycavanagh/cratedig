@@ -2,6 +2,8 @@
 // token (client credentials) from SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET.
 // Without them every match is null and the crate leaves out its Play button.
 
+import { kv } from "@/lib/kv";
+
 let token: { value: string; expires: number } | null = null;
 const albums = new Map<string, string | null>();
 
@@ -37,4 +39,107 @@ export async function spotifyAlbum(title: string, artist: string): Promise<strin
   const id: string | null = (await res.json())?.albums?.items?.[0]?.id ?? null;
   albums.set(key, id);
   return id;
+}
+
+// The top 10 maker's search (api/spotify): Spotify's albums, with a year filter, so "2026" means out in 2026.
+// A search result is the album's simple face (no label); albums() asks for each in full, kept in Redis like MusicBrainz releases.
+type SpImage = { url: string; width: number };
+type SpAlbum = {
+  id: string;
+  name: string;
+  album_type: string;
+  release_date?: string;
+  images?: SpImage[];
+  artists?: { name: string }[];
+  label?: string;
+  total_tracks?: number;
+};
+const near = (imgs: SpImage[] = [], w: number) => [...imgs].sort((a, b) => Math.abs(a.width - w) - Math.abs(b.width - w))[0]?.url ?? "";
+export const spotifyRecord = (a: SpAlbum) => ({
+  id: a.id,
+  artist: (a.artists ?? []).map((x) => x.name).join(", "),
+  title: a.name,
+  year: (a.release_date ?? "").slice(0, 4),
+  label: a.label ?? "",
+  format: "",
+  front: near(a.images, 640),
+  thumb: near(a.images, 300),
+  back: "",
+  spotify: a.id,
+});
+export type SpotifyRecord = ReturnType<typeof spotifyRecord>;
+
+async function sp(path: string): Promise<Response | null> {
+  const auth = await spotifyToken();
+  if (!auth) return null;
+  const go = () => fetch(`https://api.spotify.com/v1/${path}`, { headers: { Authorization: `Bearer ${auth}` }, cache: "no-store", signal: AbortSignal.timeout(6000) }).catch(() => null);
+  let res = await go();
+  // a rate limit says how long to wait: one more try if it's short
+  if (res?.status === 429) {
+    const s = +(res.headers.get("Retry-After") ?? "1");
+    if (s <= 2) { await new Promise((r) => setTimeout(r, s * 1000)); res = await go(); }
+  }
+  return res;
+}
+export const spotifyReady = () => !!(process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET);
+
+// albums and EPs only: no singles or compilations. Spotify's plain search mixes in anything with the word in it (wildlife sounds for "geese"),
+// so the artist's own albums come first, then album titles, then the rest. New apps get at most 10 a page
+export async function spotifySearch(term: string, year?: string): Promise<SpotifyRecord[] | null> {
+  const t = term.replace(/[:"]/g, " ").replace(/\s+/g, " ").trim(), y = year ? ` year:${year}` : "";
+  const ask = (q: string) => sp(`search?${new URLSearchParams({ q, type: "album", limit: "10", market: "US" })}`);
+  const pages = await Promise.all([ask(`artist:"${t}"${y}`), ask(`album:"${t}"${y}`), ask(t + y)]);
+  if (!pages.some((r) => r?.ok)) return null;
+  const seen = new Set<string>(), out: SpotifyRecord[] = [];
+  for (const res of pages) {
+    if (!res?.ok) continue;
+    for (const a of ((await res.json())?.albums?.items ?? []) as (SpAlbum | null)[]) {
+      if (!a || a.album_type !== "album" && !(a.album_type === "single" && (a.total_tracks ?? 0) >= 4)) continue;
+      if (/\b(live|en vivo|ao vivo|karaoke|instrumental version|tribute|lullaby|sleep sounds|nature sounds)\b/i.test(a.name)) continue;
+      const r = spotifyRecord(a), k = `${r.artist}\u0000${r.title}`.toLowerCase();
+      if (seen.has(k)) continue; // the clean and explicit editions are one album
+      seen.add(k); out.push(r);
+    }
+  }
+  return out;
+}
+
+const full = new Map<string, SpotifyRecord>();
+export async function spotifyAlbums(ids: string[]): Promise<SpotifyRecord[]> {
+  const run = kv();
+  const want = ids.filter((id) => !full.has(id));
+  if (run && want.length) {
+    try {
+      const got = (await run([["MGET", ...want.map((id) => `sp:alb:${id}`)]]))[0] as (string | null)[];
+      got.forEach((v, i) => { if (v) full.set(want[i], JSON.parse(v)); });
+    } catch {}
+  }
+  const missing = ids.filter((id) => !full.has(id));
+  const fresh: SpotifyRecord[] = [];
+  await Promise.all(missing.map(async (id) => {
+    const res = await sp(`albums/${id}?market=US`);
+    if (!res?.ok) return;
+    const r = spotifyRecord(await res.json());
+    full.set(id, r); fresh.push(r);
+  }));
+  if (run && fresh.length) { try { await run(fresh.map((r) => ["SET", `sp:alb:${r.id}`, JSON.stringify(r), "EX", 60 * 60 * 24 * 30])); } catch {} }
+  return ids.map((id) => full.get(id)).filter((r): r is SpotifyRecord => !!r);
+}
+
+// what the maker shows before you type: Spotify's albums out that year, in its own order (its best known first). Its new-releases
+// list isn't open to this app, so this is a search for the year alone
+export async function spotifyNew(year: string): Promise<SpotifyRecord[] | null> {
+  const pages = await Promise.all([0, 10, 20].map((offset) => sp(`search?${new URLSearchParams({ q: `year:${year}`, type: "album", limit: "10", offset: String(offset), market: "US" })}`)));
+  if (!pages.some((r) => r?.ok)) return null;
+  const out: SpotifyRecord[] = [], seen = new Set<string>();
+  for (const res of pages) {
+    if (!res?.ok) continue;
+    for (const a of ((await res.json())?.albums?.items ?? []) as (SpAlbum | null)[]) {
+      if (!a || a.album_type !== "album" || !(a.release_date ?? "").startsWith(year)) continue;
+      const r = spotifyRecord(a), k = `${r.artist}\u0000${r.title}`.toLowerCase();
+      if (seen.has(k) || /\b(live|en vivo|karaoke|tribute|lullaby)\b/i.test(a.name)) continue;
+      seen.add(k); out.push(r);
+    }
+  }
+  return out;
 }
