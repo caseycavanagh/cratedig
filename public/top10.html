@@ -25,8 +25,8 @@
 <link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
 /* A top 10 of 2026: ten numbered places, each a soft bar. The search starts open in the first empty place; tap any number to search
-   there instead, so a list can have gaps. Drag a row from anywhere on it (on a touch screen, hold it first) to any place: an empty one
-   takes it, a filled one makes room by pushing the rows below down to the next gap. × takes one out (with Undo).
+   there instead, so a list can have gaps. Drag a row from anywhere on it (on a touch screen, hold it for a beat first): the other places,
+   empty ones too, part under it as it passes, and it settles where you let go. × takes one out (with Undo).
    Share opens the list as friends will see it: type your name into its title, pick its colors, copy the link. The list lives in its
    link (vinyl/visitor-crate.js), gaps closed up, and the link opens it on the crate page, ranked. Tokens: /vinyl/tokens.css */
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
@@ -71,13 +71,12 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .ib svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* on a laptop × waits for the pointer; on a touch screen it's always there */
 @media(hover:hover) and (pointer:fine){.row .x{opacity:0;transition:opacity .15s,color .2s,background-color .2s}.row:hover .x,.row .x:focus-visible{opacity:1}}
-/* a row in hand: the same bar, lifted. It grows a little and casts one soft shadow; the rows it would push make room */
-.row.drag{z-index:3;cursor:grabbing;box-shadow:var(--lift);scale:1.02;transition:scale .2s var(--ease),box-shadow .2s var(--ease)}
+/* a row in hand: the same bar, lifted. It grows a little and casts one soft shadow; the other places part under it as it passes */
+.row.drag{z-index:3;cursor:grabbing;box-shadow:var(--lift);scale:1.03;transition:scale .2s var(--ease),box-shadow .2s var(--ease)}
+.row.drag.land{scale:1;box-shadow:none;transition:transform .22s var(--ease),scale .22s var(--ease),box-shadow .22s var(--ease)}
 .row.drag .x{visibility:hidden}
-.ls.dragging .row:not(.drag){transition:transform .2s var(--ease),background-color .2s}
+.ls.dragging .row:not(.drag){transition:transform .32s var(--ease),background-color .2s}
 .ls.dragging .row.f:not(.drag){z-index:1}
-.row.to{background:var(--bar)}
-.row.to .n{color:var(--fg)}
 
 /* the open place is the search */
 .fld{flex:1;min-width:0;position:relative}
@@ -340,33 +339,26 @@ function takeOut(i){
 toast.lastElementChild.addEventListener('click',()=>{if(!undo)return;const {r,i}=undo;undo=null;toast.hidden=true;clearTimeout(toastT);
   if(slots.some(x=>x&&key(x)===key(r)))return;const j=slots[i]?firstGap(i):i;if(j<0)return;slots[j]=r;draw()});
 
-// ---- drag: from anywhere on a filled row. A mouse just presses and moves; a finger holds still for a moment first ----
-// Dropped on an empty place, the record goes there. Dropped on a filled one, it takes that place and the rows below it move down,
-// as far as the next gap (with no gap below, the last of them goes to the first gap above)
-function place(s,i,t){
-  s=s.slice();const r=s[i];s[i]=null;if(!s[t]){s[t]=r;return s}
-  let g=-1;for(let k=t+1;k<TEN;k++)if(!s[k]){g=k;break}
-  if(g>=0){for(let k=g;k>t;k--)s[k]=s[k-1];s[t]=r;return s}
-  const out=s[TEN-1];for(let k=TEN-1;k>t;k--)s[k]=s[k-1];s[t]=r;s[s.indexOf(null)]=out;return s;
-}
+// ---- drag: from anywhere on a filled row. A mouse just presses and moves; a finger holds still for a beat first ----
+// The row follows exactly, and the other places (empty ones too) part under it as it passes, so the list is always in its
+// after-the-drop order. Letting go settles it into the open place.
+const reorder=(s,i,t)=>{s=s.slice();const [r]=s.splice(i,1);s.splice(t,0,r);return s};
 let dragging=false,justDragged=false;
 function startDrag(li,pid,y0){
-  const i=+li.dataset.i,rows=[...ls.children],tops=rows.map(r=>r.offsetTop),h=li.offsetHeight;let t=i;dragging=true;
+  const i=+li.dataset.i,rows=[...ls.children],tops=rows.map(r=>r.offsetTop);let t=i;dragging=true;
+  const order=slots.map((_,k)=>k); // which row sits in each place
   li.classList.add('drag');ls.classList.add('dragging');fd.innerHTML='';
-  const mv=ev=>{if(ev.pointerId!==pid)return;const dy=ev.clientY-y0;li.style.transform=`translateY(${dy}px)`;
-    const y=tops[i]+dy;t=tops.reduce((b,v,k)=>Math.abs(v-y)<Math.abs(tops[b]-y)?k:b,0);
-    // preview: where everything would be after the drop
-    const after=place(slots,i,t);
-    rows.forEach((r,k)=>{if(k===i)return;const rec=slots[k];r.classList.toggle('to',k===t&&!slots[t]);
-      if(!rec){r.style.transform='';return}const nk=after.indexOf(rec);r.style.transform=nk!==k?`translateY(${tops[nk]-tops[k]}px)`:'';r.querySelector('.n').textContent=nk+1});
-    li.querySelector('.n').textContent=t+1};
+  const mv=ev=>{if(ev.pointerId!==pid)return;
+    const y=Math.max(tops[0]-24,Math.min(tops[TEN-1]+24,tops[i]+ev.clientY-y0));li.style.transform=`translateY(${y-tops[i]}px)`;
+    const nt=tops.reduce((b,v,k)=>Math.abs(v-y)<Math.abs(tops[b]-y)?k:b,0);if(nt===t)return;t=nt;
+    reorder(order,i,t).forEach((k,p)=>{const r=rows[k];r.querySelector('.n').textContent=p+1;if(k!==i)r.style.transform=p!==k?`translateY(${tops[p]-tops[k]}px)`:''})};
   const up=ev=>{if(ev.pointerId!==pid)return;removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);dragging=false;
     justDragged=true;setTimeout(()=>justDragged=false,0);
-    const top=li.getBoundingClientRect().top,rec=slots[i];
-    if(ev.type!=='pointercancel'&&t!==i){slots=place(slots,i,t);if(at>=0&&slots[at])at=firstGap(at);if(at<0)at=firstGap()}
-    ls.classList.remove('dragging');draw();
-    const now=ls.querySelector(`[data-i="${slots.indexOf(rec)}"]`);
-    if(!reduce&&now){now.classList.add('drag');now.animate([{transform:`translateY(${top-now.getBoundingClientRect().top}px)`,scale:1.02},{transform:'none',scale:1}],{duration:200,easing:EASE}).onfinish=()=>now.classList.remove('drag')}};
+    if(ev.type==='pointercancel')t=i;
+    // settle: glide from where it was let go into its place, then lay the list out for real
+    li.style.transform=`translateY(${tops[t]-tops[i]}px)`;li.classList.add('land');
+    setTimeout(()=>{const was=at;slots=reorder(slots,i,t);if(was>=0)at=reorder(order,i,t).indexOf(was);if(at>=0&&slots[at])at=firstGap(at);if(at<0)at=firstGap();
+      ls.classList.remove('dragging');draw()},reduce?0:220)};
   addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up);
 }
 ls.addEventListener('pointerdown',e=>{
@@ -375,7 +367,7 @@ ls.addEventListener('pointerdown',e=>{
   const off=()=>{clearTimeout(t);removeEventListener('pointermove',watch);removeEventListener('pointerup',off);removeEventListener('pointercancel',off)};
   const watch=ev=>{if(ev.pointerId!==pid)return;const d=Math.hypot(ev.clientX-x0,ev.clientY-y0);
     if(e.pointerType==='touch'){if(d>8)off()}else if(d>4){off();startDrag(li,pid,y0)}};
-  if(e.pointerType==='touch')t=setTimeout(()=>{off();navigator.vibrate?.(8);startDrag(li,pid,y0)},380);
+  if(e.pointerType==='touch')t=setTimeout(()=>{off();navigator.vibrate?.(6);startDrag(li,pid,y0)},180);
   else e.preventDefault(); // no text selection while pressing
   addEventListener('pointermove',watch);addEventListener('pointerup',off);addEventListener('pointercancel',off);
 });
