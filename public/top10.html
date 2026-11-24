@@ -27,7 +27,7 @@
 /* A top 10 of 2026: ten numbered places, each a soft bar. Every place is quiet at rest; tap any number to search
    there instead, so a list can have gaps. Drag a row from anywhere on it (on a touch screen, hold it for a beat first): the other places,
    empty ones too, part under it as it passes, and it settles where you let go. × takes one out (with Undo).
-   Share opens the list as friends will see it: type your name into its title, pick its colors, copy the link. The list lives in its
+   Your name is typed into the title; a bar at the bottom holds the colors and Copy link, all on the list you are making. The list lives in its
    link (vinyl/visitor-crate.js), gaps closed up, and the link opens it on the crate page, ranked. Tokens: /vinyl/tokens.css */
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
 html{background:var(--bg)}
@@ -39,7 +39,7 @@ a{color:inherit;text-decoration:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:inset(50%);white-space:nowrap}
 [hidden]{display:none!important}
 
-/* one column on a laptop too, like the share view */
+/* one column, laptop and phone */
 .t{max-width:560px;margin:0 auto;padding:56px 0 160px;min-height:100vh;min-height:100dvh}
 .side{display:flex;flex-direction:column;gap:24px;min-width:0;margin-bottom:28px}
 .home{display:inline-flex;align-items:center;gap:10px;font-size:var(--fs-3);font-weight:500;color:var(--t1);align-self:flex-start}
@@ -68,7 +68,7 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 @media(hover:hover){.ib:hover{color:var(--fg);background:var(--hov)}}
 .ib:active{background:var(--prs);color:var(--fg)}
 .ib:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
-.ib svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ib svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* on a laptop × waits for the pointer; on a touch screen it's always there */
 @media(hover:hover) and (pointer:fine){.row .x{opacity:0;transition:opacity .15s,color .2s,background-color .2s}.row:hover .x,.row .x:focus-visible{opacity:1}}
 /* a row in hand: the same bar, lifted. It grows a little and casts one soft shadow; the other places part under it as it passes */
@@ -111,8 +111,6 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .btn:active{transform:scale(.97);transition-duration:.08s}
 .btn:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.go{margin-top:24px;min-width:140px;transition:opacity .3s var(--ease),transform .5s var(--ease)}
-body.none .go{visibility:hidden;opacity:0}
 /* the footer: who made it */
 .ft{margin-top:72px;font-size:var(--fs-2);color:var(--m)}
 .ft a{color:var(--t1);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;transition:text-decoration-color .2s}
@@ -120,12 +118,7 @@ body.none .go{visibility:hidden;opacity:0}
 .ft a:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
 
 /* ---- Share: the list as friends will see it, edited in place ---- */
-.sv{max-width:560px;margin:0 auto;padding:56px 0 180px}
-.back{all:unset;cursor:pointer;position:fixed;z-index:var(--z-bar);top:24px;left:max(24px,env(safe-area-inset-left));display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 10px;border-radius:var(--r-pill);background:var(--soft);font-size:var(--fs-3);transition:background-color .2s}
-@media(hover:hover){.back:hover{background:color-mix(in srgb,var(--fg) 14%,var(--bg))}}
-.back:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.back svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.sv h1{margin:28px 0 22px;overflow-wrap:anywhere}
+h1{overflow-wrap:anywhere}
 /* the name is typed into the title: an input as wide as what's in it (a hidden copy of the words sets the width) */
 .nmw{display:inline-grid;vertical-align:top;max-width:100%}
 .nmw>*{grid-area:1/1;font:inherit;letter-spacing:inherit;min-width:2ch}
@@ -133,15 +126,12 @@ body.none .go{visibility:hidden;opacity:0}
 .nmw input{all:unset;grid-area:1/1;width:0;min-width:100%;color:inherit;border-bottom:2px dashed color-mix(in srgb,var(--fg) 30%,transparent);transition:border-color .2s}
 .nmw input:focus{border-bottom-color:color-mix(in srgb,var(--fg) 60%,transparent)}
 .nmw input::placeholder{color:color-mix(in srgb,var(--fg) 38%,transparent)}
-.pv{list-style:none;padding:0;display:grid;--nw:40px}
-.pv li{display:flex;align-items:center;gap:12px;min-height:64px}
-.pv li+li{border-top:1px solid color-mix(in srgb,var(--fg) 8%,transparent)}
-.pv .n{width:var(--nw)}
-/* the floating bar: colors, then the link */
-.bar{position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);translate:-50% 0;display:flex;align-items:center;gap:16px;padding:8px 8px 8px 18px;border-radius:var(--r-pill);background:var(--sheet);box-shadow:var(--float),inset 0 0 0 1px var(--line);max-width:calc(100vw - 24px)}
+/* the floating bar: colors, then the link. It comes in with the first record */
+body.none .bar{visibility:hidden;opacity:0;translate:-50% 12px}
+.bar{position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);translate:-50% 0;transition:opacity .3s var(--ease),translate .3s var(--ease),visibility 0s;display:flex;align-items:center;gap:16px;padding:8px 8px 8px 18px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);max-width:calc(100vw - 24px)}
 .dots{display:flex;gap:8px}
 .dot{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:28px;height:28px;border-radius:50%;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px var(--line2);transition:box-shadow .2s}
-.dot[aria-pressed=true]{box-shadow:inset 0 0 0 1px var(--line2),0 0 0 2px var(--sheet),0 0 0 3.5px var(--fg)}
+.dot[aria-pressed=true]{box-shadow:inset 0 0 0 1px var(--line2),0 0 0 2px var(--soft),0 0 0 3.5px var(--fg)}
 .dot:focus-visible{outline:1px solid var(--ring);outline-offset:5px}
 .dot.mine{background:conic-gradient(#ff5a5a,#ffcc33,#4fd06a,#33c6ff,#6a6aff,#ff5ac8,#ff5a5a)}
 .pcs{display:flex;gap:8px}
@@ -159,26 +149,23 @@ body.none .go{visibility:hidden;opacity:0}
 .toast button{all:unset;cursor:pointer;flex:none;height:34px;padding:0 14px;border-radius:var(--r-pill);font-weight:500;background:color-mix(in srgb,var(--on-fg) 10%,transparent)}
 .toast button:focus-visible{outline:1px solid var(--on-fg);outline-offset:1px}
 
+body:not(.none) .toast{bottom:calc(env(safe-area-inset-bottom) + 92px)}
 @media(max-width:900px){
-  .t{display:block;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 110px) max(16px,env(safe-area-inset-left))}
+  .t{display:block;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 170px) max(16px,env(safe-area-inset-left))}
   .side{position:static;gap:20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
   main{--nw:30px}
   .n{font-size:22px}
   .fld input{font-size:var(--fs-4)}
   /* Share waits at the bottom of the screen */
-  .go{position:fixed;z-index:var(--z-bar);left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 16px);box-shadow:var(--float)}
-  body:not(.none) .toast{bottom:calc(env(safe-area-inset-bottom) + 76px)}
-  .sv{padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 200px) max(16px,env(safe-area-inset-left))}
-  .back{top:max(16px,env(safe-area-inset-top));left:auto;right:max(16px,env(safe-area-inset-right))}
-  .sv h1{margin:20px 0 16px}
-  .pv{--nw:30px}
+  body:not(.none) .toast{bottom:calc(env(safe-area-inset-bottom) + 150px)}
+  body.none .bar{translate:0 12px}
   .bar{left:12px;right:12px;translate:none;max-width:none;flex-direction:column;align-items:stretch;gap:14px;padding:14px;border-radius:var(--r-panel)}
   .dots{justify-content:space-between}
   .pcs .pc{flex:1;justify-content:space-between}
   .bar .btn{width:100%}
 }
-@media(max-width:369px){main{--nw:24px;--gap:10px;--pl:12px}.n{font-size:20px}.cv{width:42px;height:42px}.pv{--nw:24px}.dots{gap:4px}.dot{width:24px;height:24px}}
+@media(max-width:369px){main{--nw:24px;--gap:10px;--pl:12px}.n{font-size:20px}.cv{width:42px;height:42px}.dots{gap:4px}.dot{width:24px;height:24px}}
 /* reduced motion: things fade, nothing moves */
 @media(prefers-reduced-motion:reduce){.btn,.btn:active{transform:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.toast,.toast[hidden]{transform:none}}
 </style>
@@ -187,22 +174,15 @@ body.none .go{visibility:hidden;opacity:0}
 <div class="t" id="mk">
   <div class="side">
     <span class="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>Crate Dig</span>
-    <h1 id="h">Your top 10 of 2026</h1>
+    <h1 id="h"><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
   </div>
   <main>
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
     <ul class="found" id="found" aria-live="polite"></ul>
   </main>
-  <button class="btn go" id="go" type="button">Share</button>
-  <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
-</div>
-<div class="sv" id="sv" hidden>
-  <button class="back" id="back" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Edit</button>
-  <span class="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>Crate Dig</span>
-  <h1 id="sh"><span class="nmw"><span class="mir" aria-hidden="true"></span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
-  <ol class="pv" id="pv"></ol>
   <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
   <div class="bar" id="bar"></div>
+</div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span></span><button type="button">Undo</button></div>
 <script src="/vinyl/visitor-crate.js"></script>
@@ -230,13 +210,13 @@ const SC={a:['Night','#121212','#ffffff','#ffffff'],b:['Paper','#f2ede2','#1f1b1
 const HEX=/^[0-9a-f]{6}$/i;
 const colors=()=>SC[look.t]?{bg:SC[look.t][1],fg:SC[look.t][2],n:SC[look.t][3]}:{bg:look.bg,fg:look.fg,n:look.n||look.fg};
 // every other token comes from the two colors, mixed; Night keeps tokens.css as it is. A light page gets softer shadows
-const TOK=['--bg','--fg','--on-fg','--t1','--t2','--m','--t3','--t4','--line','--line2','--soft','--sheet','--hov','--prs','--sel','--ring','--rank-n','--lift','--float'];
+const TOK=['--glass','--bg','--fg','--on-fg','--t1','--t2','--m','--t3','--t4','--line','--line2','--soft','--sheet','--hov','--prs','--sel','--ring','--rank-n','--lift','--float'];
 const light=h=>{h=h.slice(1);return(.2126*parseInt(h.slice(0,2),16)+.7152*parseInt(h.slice(2,4),16)+.0722*parseInt(h.slice(4,6),16))/255>.6};
 function paint(){
   const st=document.documentElement.style,c=colors();
   if(look.t==='a'){TOK.forEach(k=>st.removeProperty(k))}
   else{const mix=p=>`color-mix(in srgb,${c.fg} ${p}%,${c.bg})`,a=p=>`color-mix(in srgb,${c.fg} ${p}%,transparent)`;
-    Object.entries({'--bg':c.bg,'--fg':c.fg,'--on-fg':c.bg,'--t1':mix(85),'--t2':mix(68),'--m':mix(60),'--t3':mix(46),'--t4':mix(38),'--line':a(14),'--line2':a(22),'--soft':mix(9),'--sheet':mix(7),'--hov':a(6),'--prs':a(8),'--sel':a(12),'--ring':a(26),'--rank-n':c.n}).forEach(([k,v])=>st.setProperty(k,v));
+    Object.entries({'--bg':c.bg,'--fg':c.fg,'--on-fg':c.bg,'--t1':mix(85),'--t2':mix(68),'--m':mix(60),'--t3':mix(46),'--t4':mix(38),'--line':a(14),'--line2':a(22),'--soft':mix(9),'--sheet':mix(7),'--hov':a(6),'--prs':a(8),'--sel':a(12),'--ring':a(26),'--rank-n':c.n,'--glass':`color-mix(in srgb,${mix(9)} 72%,transparent)`}).forEach(([k,v])=>st.setProperty(k,v));
     if(light(c.bg)){st.setProperty('--lift','0 12px 24px -12px #0003,0 2px 6px -2px #0002');st.setProperty('--float','0 12px 32px #0002')}else{st.removeProperty('--lift');st.removeProperty('--float')}}
   document.querySelector('meta[name=theme-color]').content=c.bg;
 }
@@ -278,7 +258,7 @@ function draw(focus){
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
   showFound();
   document.body.classList.toggle('none',!filled().length);
-  save();sampleCover();
+  drawBar();save();sampleCover();
 }
 // a pressing without its own cover borrows the album's; with neither, the square stays blank
 document.addEventListener('error',e=>{const i=e.target;if(i.dataset?.fallback){i.src=i.dataset.fallback;delete i.dataset.fallback}else if(i.tagName==='IMG')i.style.visibility='hidden'},true);
@@ -391,31 +371,18 @@ ls.addEventListener('pointerdown',e=>{
 addEventListener('touchmove',e=>{if(dragging)e.preventDefault()},{passive:false});
 ls.addEventListener('contextmenu',e=>{if(e.target.closest('.row.f'))e.preventDefault()});
 
-// ---- Share: the list as friends will see it, with the name typed into its title and colors and the link in a bar ----
-const mk=$('#mk'),sv=$('#sv'),nm=$('#nm'),mir=$('.mir');
-function drawPreview(){
-  $('#pv').innerHTML=filled().map((r,i)=>`<li><span class="n">${i+1}</span>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span></li>`).join('');
-  nm.value=name;mir.textContent=name||nm.placeholder;$('#suf').textContent=name.trim()?suffix():'’s top 10 of '+YEAR;
-  document.title=whose();drawBar();
-}
+// ---- the name, typed into the title; colors and the link in a bar at the bottom ----
+const nm=$('#nm'),mir=$('.mir');
+const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;$('#suf').textContent=name.trim()?suffix():'’s top 10 of '+YEAR;document.title=whose()};
 const copyLabel=()=>{const n=filled().length;return n>1&&n<TEN?`Copy link to your top ${n}`:'Copy link'};
 const lookName=()=>SC[look.t]?.[0]||(look.t==='h'?'From your number one’s cover':'Your own');
 function drawBar(){
-  const c=colors(),one=filled()[0],bar=$('#bar');if(sv.hidden)return;
+  const c=colors(),one=filled()[0],bar=$('#bar');
   const f=document.activeElement;if(f&&bar.contains(f)&&f.matches('.pc input'))return; // don't redraw a color picker while it's open
   bar.innerHTML=`<div class="dots" role="group" aria-label="Colors: ${esc(lookName())}">${Object.entries(SC).map(([k,[n,bg]])=>`<button class="dot" type="button" data-t="${k}" aria-label="${n}" aria-pressed="${look.t===k}" style="background-color:${bg}"></button>`).join('')}${one?.thumb?`<button class="dot" type="button" data-t="h" aria-label="Colors from your number one’s cover" aria-pressed="${look.t==='h'}" style="background-image:url('${esc(one.thumb)}')"></button>`:''}<button class="dot mine" type="button" data-t="x" aria-label="Your own colors" aria-pressed="${look.t==='x'}"></button></div>${look.t==='x'?`<div class="pcs"><label class="pc">Text<input type="color" data-c="fg" value="${c.fg}"></label><label class="pc">Page<input type="color" data-c="bg" value="${c.bg}"></label></div>`:''}<button class="btn" type="button" data-copy>${IC.link}<span>${copyLabel()}</span></button>`;
   if(f?.dataset?.t)bar.querySelector(`.dot[data-t="${f.dataset.t}"]`)?.focus({preventScroll:true});
 }
-function show(share){
-  if(share&&!filled().length)share=false;
-  mk.hidden=!!share;sv.hidden=!share;toast.hidden=true;
-  if(share){drawPreview();scrollTo(0,0)}else{document.title=`Your top 10 of ${YEAR}`;draw()}
-}
-$('#go').addEventListener('click',()=>{if(!filled().length)return;history.pushState({share:1},'','#share');show(true);if(fine&&!name)nm.focus({preventScroll:true})});
-$('#back').addEventListener('click',()=>history.state?.share?history.back():(history.replaceState(null,'',location.pathname+location.search),show(false)));
-addEventListener('popstate',()=>show(location.hash==='#share'));
-addEventListener('keydown',e=>{if(e.key==='Escape'&&!sv.hidden&&!e.target.matches('input[type=color]'))$('#back').click()});
-nm.addEventListener('input',()=>{name=nm.value;mir.textContent=name||nm.placeholder;$('#suf').textContent=name.trim()?suffix():'’s top 10 of '+YEAR;document.title=whose();save()});
+nm.addEventListener('input',()=>{name=nm.value;drawName();save()});
 nm.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nm.blur()}});
 // a color dot; your own opens text and page pickers, starting from the colors on screen
 $('#bar').addEventListener('click',async e=>{
@@ -437,9 +404,7 @@ $('#bar').addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;
     if(s.look&&(SC[s.look.t]||HEX.test((s.look.bg||'').slice(1))))look=s.look}}catch{}
   if(list)slots=Array.from({length:TEN},(_,i)=>list[i]||null);
   if(look.t==='h'){const one=filled()[0];hFor=one?key(one):''}
-  at=-1;paint();
-  if(location.hash==='#share'&&filled().length){history.replaceState({share:1},'');show(true)}
-  else{if(location.hash)history.replaceState(null,'',location.pathname+location.search);draw()}
+  at=-1;paint();drawName();draw();
 })();
 </script>
 </body>

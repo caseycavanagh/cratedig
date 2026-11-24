@@ -126,16 +126,19 @@ export async function spotifyAlbums(ids: string[]): Promise<SpotifyRecord[]> {
   return ids.map((id) => full.get(id)).filter((r): r is SpotifyRecord => !!r);
 }
 
-// what the maker shows before you type: Spotify's newest albums out that year, ten pages' worth at most
+// what the maker shows before you type: Spotify's albums out that year, in its own order (its best known first). Its new-releases
+// list isn't open to this app, so this is a search for the year alone
 export async function spotifyNew(year: string): Promise<SpotifyRecord[] | null> {
-  const pages = await Promise.all([0, 20].map((offset) => sp(`browse/new-releases?${new URLSearchParams({ limit: "20", offset: String(offset), country: "US" })}`)));
+  const pages = await Promise.all([0, 10, 20].map((offset) => sp(`search?${new URLSearchParams({ q: `year:${year}`, type: "album", limit: "10", offset: String(offset), market: "US" })}`)));
   if (!pages.some((r) => r?.ok)) return null;
   const out: SpotifyRecord[] = [], seen = new Set<string>();
   for (const res of pages) {
     if (!res?.ok) continue;
     for (const a of ((await res.json())?.albums?.items ?? []) as (SpAlbum | null)[]) {
-      if (!a || a.album_type !== "album" || !(a.release_date ?? "").startsWith(year) || seen.has(a.id)) continue;
-      seen.add(a.id); out.push(spotifyRecord(a));
+      if (!a || a.album_type !== "album" || !(a.release_date ?? "").startsWith(year)) continue;
+      const r = spotifyRecord(a), k = `${r.artist}\u0000${r.title}`.toLowerCase();
+      if (seen.has(k) || /\b(live|en vivo|karaoke|tribute|lullaby)\b/i.test(a.name)) continue;
+      seen.add(k); out.push(r);
     }
   }
   return out;
