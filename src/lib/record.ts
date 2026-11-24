@@ -3,15 +3,32 @@ import { join } from "node:path";
 import sharp from "sharp";
 import { kv } from "@/lib/kv";
 import { ALL, type Edits, IMG_ID, type Rec, imgKey, readEdits, slugOf } from "@/lib/crate";
+import { load, person, store } from "@/lib/store";
 
 // One of Casey's records, for a shared record link (/casey?r=<slug>) and its preview card (/og/r/<slug>).
-// The list is the crate's own: public/index.html's RECORDS, facts from public/vinyl/covers.json, then Casey's edits on top.
+// The list is the crate's own: from the store once it's set up (src/lib/store.ts), else public/index.html's RECORDS with facts
+// from public/vinyl/covers.json; then Casey's edits on top.
 
 export type Shared = { slug: string; title: string; artist: string; year?: string; label?: string; front?: string };
 
 const pub = (f: string) => join(process.cwd(), "public", f);
 
+// Casey's crate from the store, unless it's slow or not set up: a preview from the page's own list is better than none
+let fresh: { at: number; p: Promise<Awaited<ReturnType<typeof load>> | null> } | null = null;
+function stored() {
+  const db = store();
+  if (!db) return Promise.resolve(null);
+  if (!fresh || Date.now() - fresh.at > 5000)
+    fresh = {
+      at: Date.now(),
+      p: Promise.race([person(db).then((id) => load(db, id)).catch(() => null), new Promise<null>((r) => setTimeout(() => r(null), 2500))]),
+    };
+  return fresh.p;
+}
+
 async function base(): Promise<Map<string, Shared>> {
+  const s = await stored();
+  if (s) return new Map(s.base.map((r) => [r.slug, shared(r)]));
   const [html, covers] = await Promise.all([readFile(pub("index.html"), "utf8"), readFile(pub("vinyl/covers.json"), "utf8")]);
   const facts: Record<string, { year?: number | string; label?: string; front?: string }> = JSON.parse(covers);
   const list = html.match(/const RECORDS=\[([\s\S]*?)\]\.map\(/)?.[1] ?? "";
@@ -25,12 +42,14 @@ async function base(): Promise<Map<string, Shared>> {
 
 // Casey's edits, unless Redis is slow: a preview without them is better than none
 async function edits() {
+  const s = await stored();
+  if (s) return s.edits;
   const run = kv();
   if (!run) return null;
   return Promise.race([readEdits(run).catch(() => null), new Promise<null>((r) => setTimeout(() => r(null), 1500))]);
 }
 
-const shared = (a: Rec): Shared => ({ slug: a.slug, title: a.title, artist: a.artist, year: a.year, label: a.label, front: a.front });
+const shared = (a: Rec): Shared => ({ slug: a.slug, title: a.title, artist: a.artist, year: a.year ? String(a.year) : undefined, label: a.label, front: a.front });
 
 export async function findRecord(slug: string): Promise<Shared | null> {
   const [all, e] = await Promise.all([base(), edits()]);

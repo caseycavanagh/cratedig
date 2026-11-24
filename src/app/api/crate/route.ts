@@ -25,11 +25,20 @@ import { connection } from "next/server";
 import { kv } from "@/lib/kv";
 import { google } from "@/lib/auth";
 import { ALL, EDITS, type Crate, type Edits, type Notes, type Patch, type Rec, TOP, denied, dropFrom, imgKey, ownImg, owner, readEdits, reRank, slugOf, usedImgs } from "@/lib/crate";
+import { change, load, person, store } from "@/lib/store";
 
 export async function GET() {
   await connection();
-  const run = kv();
+  const run = kv(), db = store();
   const editable = !!(process.env.CRATE_KEY?.trim() || google());
+  // from the store (src/lib/store.ts), the records come too: the page uses them in place of the ones typed into it
+  if (db) {
+    const { base, edits } = await load(db, await person(db));
+    return Response.json(
+      { configured: !!run, editable, edits, records: base },
+      { headers: { "Cache-Control": "public, s-maxage=10, stale-while-revalidate=300" } },
+    );
+  }
   if (!run) return Response.json({ configured: false, editable, edits: { added: [], removed: [], patch: {}, crates: { list: [] } } });
   // the page asks for a fresh copy (?t=…) after Casey edits; everyone else can have one a few seconds old
   return Response.json(
@@ -86,6 +95,8 @@ function record(b: Record<string, unknown>): Rec | null {
     links: Object.keys(links).length ? links : undefined,
     // the day it came in, as the page sees it (Casey's own day, not the server's), else today on the server
     added: typeof b.added === "string" && /^\d{4}-\d{2}-\d{2}$/.test(b.added) ? b.added : new Date().toISOString().slice(0, 10),
+    release: typeof b.release === "string" && /^[0-9a-f-]{36}$/.test(b.release) ? b.release : undefined,
+    discogs: /^\d{1,12}$/.test(String(b.discogs ?? "")) ? String(b.discogs) : undefined,
   };
   return JSON.parse(JSON.stringify(r)); // without the empty fields
 }
@@ -97,14 +108,34 @@ export async function POST(req: Request) {
   const who = await owner(req, run);
   if (who !== true) return denied(who);
   const b = await req.json().catch(() => null);
+  const db = store();
+  if (db) {
+    // in the store, the change is made inside a transaction and only its rows are written (src/lib/store.ts)
+    const id = await person(db);
+    if (b?.op === "check") return Response.json({ edits: (await load(db, id)).edits });
+    const res = await change(db, id, (e) => edit(e, b));
+    if (res.bad) return Response.json({ error: res.bad }, { status: 400 });
+    const after = usedImgs(res.edits), gone = [...usedImgs(res.was)].filter((x) => !after.has(x));
+    if (gone.length) await run(gone.map((x) => ["DEL", imgKey(x)]));
+    return Response.json({ edits: res.edits });
+  }
   const e: Edits = await readEdits(run);
   if (b?.op === "check") return Response.json({ edits: e });
   const before = usedImgs(e);
+  const bad = edit(e, b);
+  if (bad) return Response.json({ error: bad }, { status: 400 });
+  const after = usedImgs(e), gone = [...before].filter((id) => !after.has(id));
+  await run([["SET", EDITS, JSON.stringify(e)], ...gone.map((id) => ["DEL", imgKey(id)])]);
+  return Response.json({ edits: e });
+}
+
+// one change to the edits, in memory: returns what went wrong, or nothing
+function edit(e: Edits, b: Record<string, unknown> | null): string | undefined {
   const slug = typeof b?.slug === "string" ? b.slug.slice(0, 200) : "";
 
   if (b?.op === "add") {
-    const r = record(b.record ?? {});
-    if (!r) return Response.json({ error: "a record needs an artist and a title" }, { status: 400 });
+    const r = record((b.record ?? {}) as Record<string, unknown>);
+    if (!r) return "a record needs an artist and a title";
     e.added = [...e.added.filter((x) => x.slug !== r.slug), r];
     e.removed = e.removed.filter((s) => s !== r.slug);
   } else if (b?.op === "unadd" && slug) {
@@ -115,35 +146,36 @@ export async function POST(req: Request) {
   } else if (b?.op === "restore" && slug) {
     e.removed = e.removed.filter((s) => s !== slug);
   } else if (b?.op === "patch" && slug && b.set && typeof b.set === "object") {
+    const set = b.set as Record<string, unknown>;
     const p: Patch = { ...e.patch[slug] };
     for (const k of ["bg", "spine", "front", "back"] as const) {
-      if (!(k in b.set)) continue;
-      const v = b.set[k] === null ? undefined : k === "bg" || k === "spine" ? color(b.set[k]) : image(b.set[k]);
+      if (!(k in set)) continue;
+      const v = set[k] === null ? undefined : k === "bg" || k === "spine" ? color(set[k]) : image(set[k]);
       if (v) p[k] = v;
       else delete p[k];
     }
     for (const k of ["title", "artist", "sortAs", "year", "label", "format", "added"] as const) {
-      if (!(k in b.set)) continue;
-      const v = b.set[k];
+      if (!(k in set)) continue;
+      const v = set[k];
       if (v === null || typeof v !== "string") delete p[k];
       else if ((k === "title" || k === "artist") && !v.trim()) continue; // a record always has both
       else if (k === "year" && !/^(\d{4})?$/.test(v.trim())) continue;
       else if (k === "added" && !/^(\d{4}-\d{2}-\d{2})?$/.test(v.trim())) continue; // a day, or empty for no day
       else p[k] = v.trim().slice(0, k === "format" ? 40 : 200);
     }
-    if (b.set.links && typeof b.set.links === "object") {
+    if (set.links && typeof set.links === "object") {
       const l: Record<string, string> = { ...p.links };
-      for (const [k, v] of Object.entries(b.set.links)) {
+      for (const [k, v] of Object.entries(set.links)) {
         if (!SERVICES.includes(k)) continue;
         if (v === null) delete l[k];
         else if (v === "" || (typeof v === "string" && /^https:\/\/[^\s"'<>]+$/.test(v))) l[k] = (v as string).slice(0, 500);
       }
       if (Object.keys(l).length) p.links = l;
       else delete p.links;
-    } else if (b.set.links === null) delete p.links;
-    if (b.set.notes && typeof b.set.notes === "object") {
+    } else if (set.links === null) delete p.links;
+    if (set.notes && typeof set.notes === "object") {
       const n: Notes = { ...p.notes };
-      for (const [k, v] of Object.entries(b.set.notes as Record<string, unknown>)) {
+      for (const [k, v] of Object.entries(set.notes as Record<string, unknown>)) {
         if (!(k in NOTES)) continue;
         const key = k as keyof Notes;
         if (v === null) delete n[key];
@@ -154,17 +186,12 @@ export async function POST(req: Request) {
       }
       if (Object.keys(n).length) p.notes = n;
       else delete p.notes;
-    } else if (b.set.notes === null) delete p.notes;
+    } else if (set.notes === null) delete p.notes;
     if (Object.keys(p).length) e.patch[slug] = p;
     else delete e.patch[slug];
   } else if (typeof b?.op === "string" && b.op.startsWith("crate-")) {
-    const bad = crateEdit(e, b);
-    if (bad) return Response.json({ error: bad }, { status: 400 });
-  } else return Response.json({ error: "unknown edit" }, { status: 400 });
-
-  const after = usedImgs(e), gone = [...before].filter((id) => !after.has(id));
-  await run([["SET", EDITS, JSON.stringify(e)], ...gone.map((id) => ["DEL", imgKey(id)])]);
-  return Response.json({ edits: e });
+    return crateEdit(e, b);
+  } else return "unknown edit";
 }
 
 // the crates: returns what went wrong, or nothing

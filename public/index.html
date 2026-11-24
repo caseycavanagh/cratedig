@@ -3812,7 +3812,7 @@ async function addCore(x){
   const m=await VisitorCrate.details(x).catch(()=>x);
   const keep=async u=>{if(!u)return'';try{const r=await fetch(u);return r.ok?await upload(await shrink(await r.blob())):''}catch{return''}};
   const [front,back]=await Promise.all([keep(m.front||(m.fallback||'').replace(/front-250$/,'front-1200')||(m.thumb||'').replace(/front-250$/,'front-1200')),keep(m.back)]);
-  await api({op:C?'crate-add':'add',crate:C?CRATE:undefined,record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined,added:today()}});
+  await api({op:C?'crate-add':'add',crate:C?CRATE:undefined,record:{artist:m.artist,title:m.title,year:m.year,label:m.label,format:m.format,front,back,spine:front?await edgeColor(front):undefined,spotify:m.spotify||undefined,links:m.apple?{appleMusic:m.apple}:undefined,added:today(),release:m.src==='m'?m.id:undefined,discogs:m.src==='d'?m.id:undefined}});
   return {r:added.get(slugOf(m.artist,m.title)),how:C?'crate-add':'add'};
 }
 async function addFrom(x,btn){
@@ -3972,6 +3972,8 @@ Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({}
     crateBy=v.name||'';document.title=TITLE=Y26?top26(v.name):VisitorCrate.crateName(v.name);if(Y26)$('#rkT').textContent=TITLE}
   else if(visiting){loadFailed();return} // a list that didn't load says so: never Casey's crate in its place
   else{
+    // from the store (src/lib/store.ts), the crate's own records come with its edits, in place of the ones typed in above
+    if(ed?.records?.length)RECORDS.splice(0,RECORDS.length,...ed.records.map(r=>({pal:['#d8d3ca','#2a2a2a','#8a8178'],art:'type',...r})));
     RECORDS.forEach((r,i)=>Object.assign(r,{...m[r.slug],...r,seq:i})); // a value written in RECORDS wins
     BASE=[...RECORDS];
     if(ed){EDITS=ed.edits||EDITS;EDITABLE=!!(ed.configured&&ed.editable);applyEdits()}

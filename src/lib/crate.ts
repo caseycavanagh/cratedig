@@ -19,6 +19,9 @@ export type Rec = {
   spotify?: string;
   links?: Record<string, string>;
   added?: string;
+  // which pressing it is, when the Add sheet knew: a MusicBrainz release id, or a Discogs release id
+  release?: string;
+  discogs?: string;
 };
 export type Patch = {
   bg?: string;
