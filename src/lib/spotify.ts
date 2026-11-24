@@ -126,17 +126,20 @@ export async function spotifyAlbums(ids: string[]): Promise<SpotifyRecord[]> {
   return ids.map((id) => full.get(id)).filter((r): r is SpotifyRecord => !!r);
 }
 
+// one album, whatever the edition: "The Great Divide: The Last Of The Bugs", "Melodie (Deluxe)" and "Melodie - Expanded" are the album they start with
+const edition = (t: string) => t.toLowerCase().replace(/\s*[([].*$/, "").replace(/\s+-\s.*$/, "").replace(/:\s.*$/, "").trim() || t.toLowerCase();
+
 // what the maker shows before you type: Spotify's albums out that year, in its own order (its best known first). Its new-releases
 // list isn't open to this app, so this is a search for the year alone
 export async function spotifyNew(year: string): Promise<SpotifyRecord[] | null> {
-  const pages = await Promise.all([0, 10, 20].map((offset) => sp(`search?${new URLSearchParams({ q: `year:${year}`, type: "album", limit: "10", offset: String(offset), market: "US" })}`)));
+  const pages = await Promise.all([0, 10, 20, 30, 40].map((offset) => sp(`search?${new URLSearchParams({ q: `year:${year}`, type: "album", limit: "10", offset: String(offset), market: "US" })}`)));
   if (!pages.some((r) => r?.ok)) return null;
   const out: SpotifyRecord[] = [], seen = new Set<string>();
   for (const res of pages) {
     if (!res?.ok) continue;
     for (const a of ((await res.json())?.albums?.items ?? []) as (SpAlbum | null)[]) {
       if (!a || a.album_type !== "album" || !(a.release_date ?? "").startsWith(year)) continue;
-      const r = spotifyRecord(a), k = `${r.artist}\u0000${r.title}`.toLowerCase();
+      const r = spotifyRecord(a), k = `${r.artist}\u0000${edition(r.title)}`.toLowerCase();
       if (seen.has(k) || /\b(live|en vivo|karaoke|tribute|lullaby)\b/i.test(a.name)) continue;
       seen.add(k); out.push(r);
     }
