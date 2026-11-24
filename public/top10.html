@@ -56,8 +56,6 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 @media(hover:hover){.row.e:hover{background:var(--bar)}}
 .row.e:active{background:var(--bar)}
 .row.e:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
-.row.e .plus{margin-left:auto;width:36px;height:36px;display:grid;place-items:center;color:var(--t3)}
-.row.e .plus svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 .row.f{cursor:grab}
 .row.f:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
 .cv{flex:none;width:48px;height:48px;border-radius:var(--r-cover);overflow:hidden;background:var(--soft)}
@@ -79,7 +77,6 @@ main{position:relative;min-width:0;--nw:40px;--gap:12px;--pl:14px}
 .ls.dragging .row.f:not(.drag){z-index:1}
 .row.to{background:var(--bar)}
 .row.to .n{color:var(--fg)}
-.ls.dragging .row.e .plus{opacity:0}
 
 /* the open place is the search */
 .fld{flex:1;min-width:0;position:relative}
@@ -269,7 +266,7 @@ function draw(focus){
   ls.innerHTML=slots.map((r,i)=>{
     if(r)return `<li class="row f" data-i="${i}" tabindex="0" aria-label="${i+1}. ${esc(r.title)} by ${esc(r.artist)}. Up and down arrows move it"><span class="n" aria-hidden="true">${i+1}</span>${cover(r)}<span class="tx" aria-hidden="true"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button></li>`;
     if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><div class="fld"><label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
-    return `<li class="row e" data-e="${i}" role="button" tabindex="0" aria-label="Add number ${i+1}"><span class="n" aria-hidden="true">${i+1}</span><span class="plus" aria-hidden="true">${IC.plus}</span></li>`;
+    return `<li class="row e" data-e="${i}" role="button" tabindex="0" aria-label="Add number ${i+1}"><span class="n" aria-hidden="true">${i+1}</span></li>`;
   }).join('');
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
   showFound();
@@ -288,7 +285,7 @@ function showFound(){
   fd.style.top=(row.offsetTop+row.offsetHeight+6)+'px';
   if(status){fd.innerHTML=`<li class="st">${esc(status)}</li>`;return}
   fd.innerHTML=found.slice(0,8).map((r,i)=>{const k=key(r),on=slots.some(x=>x&&key(x)===k);
-    return `<li><button class="hit" type="button" data-f="${i}"${on?' aria-disabled="true"':''}${busy.has(k)?' aria-busy="true"':''}>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}${r.year?' · '+esc(r.year):''}</span></span><span class="add">${on?IC.check:IC.plus}</span></button></li>`}).join('');
+    return `<li><button class="hit" type="button" data-f="${i}"${on?' aria-disabled="true"':''}${busy.has(k)?' aria-busy="true"':''}>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}${r.year?' · '+esc(r.year):''}</span></span>${on?`<span class="add">${IC.check}</span>`:''}</button></li>`}).join('');
 }
 // "Bad Bunny" or "rosalia lux": the artist's own records first (newest first), then this year's, then the rest as they came
 function rank(res,term){
