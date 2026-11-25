@@ -44,6 +44,8 @@ a{color:inherit;text-decoration:none}
 
 /* one column, laptop and phone */
 .t{max-width:560px;margin:0 auto;padding:96px 0 160px;min-height:100vh;min-height:100dvh}
+/* on a laptop the title and the list sit in the middle of the screen, both ways, in the room the header and the bar leave; taller than the screen, they start at the top and scroll */
+@media(min-width:901px){.t{display:flex;flex-direction:column;justify-content:center;padding:72px 0 150px}.from{height:0;margin-top:20px}} /* Start from a list hangs under the list without counting toward the middle */
 .side{display:flex;flex-direction:column;gap:24px;min-width:0;margin-bottom:28px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
 main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar starts --gap past the number, and the cover --pl inside the bar */
@@ -122,7 +124,7 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar star
 /* Start from a list: critics' year-end lists (vinyl/lists-2026.json). One tap fills the ten, with Undo */
 /* under the list, so the places never move when it comes and goes */
 .from{position:relative;display:grid;justify-items:start;margin-top:28px}
-.from[hidden]{display:none}
+.from[hidden]{display:grid!important;visibility:hidden} /* it keeps its room, so the list never moves when it goes */
 /* one pill that opens a menu of the lists: the crate's menu (index.html .tsm), rising above the pill so the bar never covers it.
    Lists still to come are in it, greyed */
 .pl .wc{flex:none;width:16px;height:16px;margin-right:-6px;transition:rotate .35s var(--ease)}
