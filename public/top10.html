@@ -177,11 +177,14 @@ h1{overflow-wrap:anywhere}
 /* the name is typed into the title: an input as wide as what's in it (a hidden copy of the words sets the width) */
 .nmw{display:inline-grid;vertical-align:top;max-width:100%}
 .nmw>*{grid-area:1/1;font:inherit;letter-spacing:inherit;min-width:2ch}
-/* the dashes are drawn along the bottom of the hidden copy of the name: exactly as wide as the name, below its descenders, the same in every browser */
-.nmw .mir{color:transparent;white-space:pre;overflow:hidden;padding-bottom:7px;pointer-events:none;--dash:color-mix(in srgb,var(--fg) 30%,transparent);
-  background:repeating-linear-gradient(90deg,var(--dash) 0 6px,transparent 6px 10px) left bottom/100% 2px no-repeat}
+/* the dashes: exactly as wide as the name, and a set distance under the line's own baseline. The baseline is measured
+   from a marker at the start of the title's first line (.bl), not guessed from font metrics, since phones and laptops place it differently */
+.nmw{position:relative;--dash:color-mix(in srgb,var(--fg) 30%,transparent)}
+.nmw .mir{color:transparent;white-space:pre;overflow:hidden;pointer-events:none}
+.nmw::after{content:'';position:absolute;left:0;right:0;top:calc(var(--bl,1em) + .3em);height:2px;pointer-events:none;background:repeating-linear-gradient(90deg,var(--dash) 0 6px,transparent 6px 10px)}
+.bl{display:inline-block;width:0;height:0;vertical-align:baseline}
 .nmw input{all:unset;grid-area:1/1;align-self:start;width:0;min-width:100%;color:inherit}
-.nmw:focus-within .mir{--dash:color-mix(in srgb,var(--fg) 60%,transparent)}
+.nmw:focus-within{--dash:color-mix(in srgb,var(--fg) 60%,transparent)}
 .nmw input::placeholder{color:color-mix(in srgb,var(--fg) 38%,transparent)}
 /* the header, as on the crate: the mark in its circle top left, and what this is beside it */
 .hdr{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
@@ -297,7 +300,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 <header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="where lk" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></header>
 <div class="t" id="mk">
   <div class="side">
-    <h1 id="h"><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
+    <h1 id="h"><i class="bl"></i><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
     <button type="button" class="clr lk" id="rs" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v4h4"/></svg>Start over</button>
   </div>
   <main>
@@ -573,7 +576,13 @@ ls.addEventListener('contextmenu',e=>{if(e.target.closest('.row.f'))e.preventDef
 
 // ---- the name, typed into the title; colors and the link in a bar at the bottom ----
 const nm=$('#nm'),mir=$('.mir');
-const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;$('#suf').textContent=name.trim()?suffix():'’s top 10 of '+YEAR;document.title=whose()};
+const nmw=$('.nmw'),bl=$('.bl'),suf=$('#suf');
+// the dashes hang from the baseline of the line the name is on: the marker sits on it, so its top is the baseline
+const placeDash=()=>nmw.style.setProperty('--bl',(bl.getBoundingClientRect().top-nmw.getBoundingClientRect().top)+'px');
+const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;
+  suf.textContent=name.trim()?suffix():'’s top 10 of '+YEAR;
+  document.title=whose();placeDash()};
+addEventListener('resize',placeDash);document.fonts?.ready.then(placeDash);
 const lookName=()=>SC[look.t]?.[0]||(look.t==='h'?'From your number one’s cover':'Your own');
 const one=$('#one'),cols=$('#cols'),lays=[...one.querySelectorAll('.lay')];
 // the tooltip (icons, color dots, Done, the check): shown after a beat on the first one, then it glides to each next one at once
