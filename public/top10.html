@@ -163,10 +163,11 @@ h1{overflow-wrap:anywhere}
 /* the name is typed into the title: an input as wide as what's in it (a hidden copy of the words sets the width) */
 .nmw{display:inline-grid;vertical-align:top;max-width:100%}
 .nmw>*{grid-area:1/1;font:inherit;letter-spacing:inherit;min-width:2ch}
-/* the dashes are the copy's own underline, so they run exactly under the letters, at their baseline, on any phone */
-.nmw .mir{color:transparent;white-space:pre;overflow:hidden;padding-bottom:8px;text-decoration:underline dashed 2px color-mix(in srgb,var(--fg) 30%,transparent);text-underline-offset:.24em;text-decoration-skip-ink:none;transition:text-decoration-color .2s;pointer-events:none}
-.nmw input{all:unset;grid-area:1/1;width:0;min-width:100%;color:inherit}
-.nmw:focus-within .mir{text-decoration-color:color-mix(in srgb,var(--fg) 60%,transparent)}
+/* the dashes are drawn along the bottom of the hidden copy of the name: exactly as wide as the name, below its descenders, the same in every browser */
+.nmw .mir{color:transparent;white-space:pre;overflow:hidden;padding-bottom:7px;pointer-events:none;--dash:color-mix(in srgb,var(--fg) 30%,transparent);
+  background:repeating-linear-gradient(90deg,var(--dash) 0 6px,transparent 6px 10px) left bottom/100% 2px no-repeat}
+.nmw input{all:unset;grid-area:1/1;align-self:start;width:0;min-width:100%;color:inherit}
+.nmw:focus-within .mir{--dash:color-mix(in srgb,var(--fg) 60%,transparent)}
 .nmw input::placeholder{color:color-mix(in srgb,var(--fg) 38%,transparent)}
 /* the header, as on the crate: the mark in its circle top left, and what this is beside it */
 .hdr{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
