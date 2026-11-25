@@ -150,13 +150,6 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar star
 .pl[aria-pressed=true]{background:var(--fg);color:var(--on-fg);border-color:var(--fg)}
 .row.w .cv{animation:wait 1.2s var(--ease) infinite alternate}
 @keyframes wait{to{opacity:.45}}
-/* the footer: who made it */
-.ft{margin-top:72px;font:400 var(--fs-1)/1.6 var(--mono);color:var(--m)}
-/* on a laptop it sits in the bottom left corner, level with the bar; on a phone the bar needs the width, so it ends the page */
-@media(min-width:701px){.ft{position:fixed;z-index:calc(var(--z-bar) + 1);margin:0;left:max(24px,env(safe-area-inset-left));bottom:calc(env(safe-area-inset-bottom) + 18px + 27px);translate:0 50%}}
-.ft a{color:var(--t1);text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:3px;transition:color .2s,text-decoration-color .2s}
-@media(hover:hover){.ft a:hover{color:var(--fg);text-decoration-color:currentColor}}
-.ft a:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
 
 /* ---- Share: the list as friends will see it, edited in place ---- */
 h1{overflow-wrap:anywhere}
@@ -179,10 +172,15 @@ body.under .hdr::before{opacity:1} /* the crate's top edge (index.html .find::be
 .logo:active{transform:scale(.96);transition-duration:.08s}
 .logo:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .where{display:flex;align-items:center;height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);white-space:nowrap}
+/* who made it: the crate's name pill, as a link, in the header beside the mark */
+a.where{transition:color .2s,background-color .2s}
+@media(hover:hover){a.where:hover{color:var(--fg);background:var(--hov)}}
+a.where:active{background:var(--prs)}
+a.where:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 
 /* the bar, always there: one glass bar (the crate's dock glass) with three icons. It changes shape for what you tap:
    the colors stretch out of it (× or a tap outside closes them), Copy link becomes "Link copied" for a moment */
-.dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:var(--db);display:flex;justify-content:center;padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
+.dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 28px);position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:var(--db);display:flex;justify-content:center;padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
 .dock::before{content:'';position:fixed;left:0;right:0;bottom:-200px;height:calc(env(safe-area-inset-bottom) + 350px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 68px,#000 105px);mask:linear-gradient(#0000,#000a 68px,#000 105px);pointer-events:none;z-index:-1} /* the places ease out under the bar, as the crate's grid and table do */
 /* both fades run 200px past the screen's edges: Safari on iOS draws the page under its status bar and its floating toolbar, outside the area fixed things are placed in, and a fade that stopped at the edge let the list show through there */
 .one{pointer-events:auto;position:relative;flex:none;max-width:100%;height:var(--H);box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);overflow:hidden;transition:width .5s var(--ease)}
@@ -246,7 +244,7 @@ body.colors .solo{width:0;margin:0 -6px;opacity:0;border-width:0;pointer-events:
 .pc input::-moz-color-swatch{border:1px solid var(--t3);border-radius:50%}
 
 /* the note: the crate's bar note (.dsay), glass over the glass bar. It stays until your next change, so Undo is always there */
-.note{position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(var(--db) + var(--H) + 14px);--db:calc(env(safe-area-inset-bottom) + 18px);--H:54px;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);box-sizing:border-box;height:40px;padding:0 6px 0 16px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);color:var(--fg);font-size:var(--fs-3);
+.note{position:fixed;z-index:var(--z-bar);left:50%;bottom:calc(var(--db) + var(--H) + 14px);--db:calc(env(safe-area-inset-bottom) + 28px);--H:54px;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);box-sizing:border-box;height:40px;padding:0 6px 0 16px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);color:var(--fg);font-size:var(--fs-3);
   opacity:0;visibility:hidden;translate:-50% 10px;transition:opacity .15s var(--out),visibility 0s .15s,translate 0s .15s}
 .note.on{opacity:1;visibility:visible;translate:-50% 0;transition:opacity .2s,translate .5s var(--ease)}
 .note span{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -257,7 +255,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 
 @media(max-width:900px){
   .t{display:block;padding:calc(env(safe-area-inset-top) + 72px) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 150px) max(16px,env(safe-area-inset-left))}
-  .dock,.note{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
+  .dock,.note{--H:58px;--db:calc(env(safe-area-inset-bottom) + 24px)}
   /* searching: room below so even number 10 can rise to the top, and the bar and note step aside for the results */
   body.searching .t{padding-bottom:100vh}
   body.searching .dock,body.searching .note,body.searching .hdr{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
@@ -274,7 +272,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 </head>
 <body class="none">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="0 0 350 350"><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:3" d="M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z" fill-rule="evenodd"/></symbol></svg>
-<header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><span class="where">Top 10 of 2026</span></header>
+<header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="where" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></header>
 <div class="t" id="mk">
   <div class="side">
     <h1 id="h"><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
@@ -284,7 +282,6 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
     <ul class="found" id="found" aria-live="polite"></ul>
   </main>
   <div class="from" id="from" hidden><button class="pl" type="button" id="fromB" aria-haspopup="menu" aria-expanded="false" aria-controls="fromM">Start from a list<svg class="wc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="tsm" id="fromM" role="menu" aria-labelledby="fromB" hidden></div></div>
-  <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
 </div>
 </div>
 <div class="dock"><div class="one" id="one">
