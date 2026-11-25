@@ -1143,6 +1143,7 @@ body.fon .rk{padding-top:calc(env(safe-area-inset-top) + 72px + 44px)}
 .y26 .rk-home{text-decoration:none;display:inline-flex;align-items:center;gap:10px;justify-self:start;font-size:var(--fs-3);font-weight:var(--w-name);color:var(--t1)}
 .y26 .rk-home svg{width:22px;height:22px;color:inherit}
 .y26 .rk-h h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance;color:var(--fg);margin:0}
+.y26 .rk-by{margin:-6px 0 0;font-size:var(--fs-4);font-weight:500;line-height:1.3;color:var(--t2);overflow-wrap:anywhere} /* who made it, signed under the title as in the maker */
 .y26 .rk ol{max-width:640px}
 .y26 .rk .n{text-align:left}
 .y26 .rk-mk{display:flex;max-width:640px;margin:40px auto 0;padding-left:88px}
@@ -1813,7 +1814,7 @@ html.phone .sx,html.phone body.searching .sx{display:none}
   <div class="vw" role="group" aria-label="View"><button type="button" data-v="rank" aria-pressed="false" hidden>Top 10</button><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
 </main>
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
-<section class="rk" id="rk" hidden tabindex="-1" aria-label="The top 10"><header class="rk-h"><a class="rk-home" href="/2026"><svg aria-hidden="true"><use href="#mark"/></svg>Crate Dig</a><h1 id="rkT"></h1></header><ol></ol><p class="rk-mk"><a class="rk-go" href="/2026">Make your own</a></p></section>
+<section class="rk" id="rk" hidden tabindex="-1" aria-label="The top 10"><header class="rk-h"><a class="rk-home" href="/2026"><svg aria-hidden="true"><use href="#mark"/></svg>Crate Dig</a><h1 id="rkT"></h1><p class="rk-by" id="rkBy" hidden></p></header><ol></ol><p class="rk-mk"><a class="rk-go" href="/2026">Make your own</a></p></section>
 <section class="tbl" id="tbl" hidden tabindex="-1" aria-label="Every record, as a table"><table><thead></thead><tbody></tbody></table></section>
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
 <div class="hv" id="hv" aria-hidden="true"></div>
@@ -3957,7 +3958,7 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 // The whole crate doesn't wait long for them; another crate needs them for its list, so it waits longer
 // a top 10 shared at /2026: its maker's name on top, "Make your own" at the end, and only search in the bar
 const Y26=document.documentElement.classList.contains('y26');
-const top26=n=>{n=(n||'').trim();return n?`${n}${/s$/i.test(n)?'’':'’s'} top 10 of 2026`:'A top 10 of 2026'};
+const top26=n=>{n=(n||'').trim();return n?`My 2026 top 10 by ${n}`:'My 2026 top 10'};
 // the records in a shared address didn't come back (the lookup was busy or down): say so plainly, with a way to try again
 function loadFailed(){
   const l=$('#loading');if(l)l.style.display='none';
@@ -3970,7 +3971,7 @@ const authQ=visiting?null:fetch('/api/auth').then(r=>r.ok?r.json():null).catch((
 Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
   if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);
     if(/[?&]top=1(&|$)/.test(location.search)||/^\/2026\/?$/.test(location.pathname))setRank(v.records.slice(0,10).map(r=>r.slug)); // a visitor's top ten (top=1, or a list shared at /2026) comes ranked, number one first
-    crateBy=v.name||'';document.title=TITLE=Y26?top26(v.name):VisitorCrate.crateName(v.name);if(Y26)$('#rkT').textContent=TITLE}
+    crateBy=v.name||'';document.title=TITLE=Y26?top26(v.name):VisitorCrate.crateName(v.name);if(Y26){$('#rkT').textContent='My 2026 top 10';const by=$('#rkBy'),n=(v.name||'').trim();by.textContent=n?'by '+n:'';by.hidden=!n}}
   else if(visiting){loadFailed();return} // a list that didn't load says so: never Casey's crate in its place
   else{
     RECORDS.forEach((r,i)=>Object.assign(r,{...m[r.slug],...r,seq:i})); // a value written in RECORDS wins

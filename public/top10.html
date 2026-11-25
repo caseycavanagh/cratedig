@@ -6,7 +6,7 @@
 <script defer src="/_vercel/insights/script.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#121212">
-<title>Your top 10 of 2026</title>
+<title>My 2026 top 10</title>
 <meta name="description" content="Pick your ten records of 2026, put them in order, and share the list.">
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="Crate Dig">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Crate Dig">
-<meta property="og:title" content="Your top 10 of 2026">
+<meta property="og:title" content="My 2026 top 10">
 <meta property="og:description" content="Pick your ten records of 2026, put them in order, and share the list.">
 <meta property="og:url" content="/2026">
 <meta property="og:image" content="/og/2026">
@@ -51,7 +51,13 @@ a{color:inherit;text-decoration:none}
 /* on a laptop the title and the list sit in the middle of the screen, both ways, in the room the header and the bar leave; taller than the screen, they start at the top and scroll */
 @media(min-width:901px){.t{display:flex;flex-direction:column;justify-content:center;padding:72px 0 150px}.from{height:0;margin-top:20px}} /* Start from a list hangs under the list without counting toward the middle */
 .side{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px;min-width:0;margin-bottom:28px}
-.side h1{flex:1 1 auto;min-width:0}
+.side .ttl{flex:1 1 auto;min-width:0}
+/* the title is fixed; who made it signs underneath, typed in place. 17px, so iOS doesn't zoom into the field */
+/* "by" and the name stay on one line (a long name is cut at the edge rather than dropping below "by"), and the line never widens
+   the title's row, so Start over keeps its place beside the title */
+.by{display:flex;align-items:baseline;gap:.28em;margin:8px 0 0;font-size:var(--fs-4);font-weight:500;line-height:1.3;color:var(--t2);white-space:nowrap;contain:inline-size}
+.by .nmw{min-width:0}
+.by .nmw{color:var(--fg)}
 /* Start over: just words, on the title's line, ending at the rows' right edge (on a phone, under the title). It comes in with the first pick, and its room is kept so nothing moves */
 /* one link style for every quiet action on the page (Made by, Start over, Start from a list, Undo): 13px, 500, the second text color, the page's text color on hover, an optional 16px icon */
 .lk{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-2);font-weight:500;line-height:1.3;color:var(--t2);white-space:nowrap;transition:color .2s}
@@ -308,7 +314,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 <header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="where lk" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></header>
 <div class="pg" id="pg"><div class="t" id="mk">
   <div class="side">
-    <h1 id="h"><i class="bl"></i><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
+    <div class="ttl"><h1 id="h">My 2026 top 10</h1><p class="by"><span><i class="bl"></i>by</span><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span></p></div>
     <button type="button" class="clr lk" id="rs" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v4h4"/></svg>Start over</button>
   </div>
   <main>
@@ -377,8 +383,7 @@ async function sampleCover(){
   if(!k){look={t:'a'};paint();drawBar();save();return}
   try{const c=await fromCover();if(c&&look.t==='h'&&hFor===k){Object.assign(look,c);paint();drawBar();save()}}catch{hFor='';if(look.t==='h'){look={t:'a'};paint();drawBar();save()}}
 }
-const suffix=()=>/s$/i.test(name.trim())?'’ top 10 of '+YEAR:'’s top 10 of '+YEAR;
-const whose=()=>name.trim()?`${name.trim()}${suffix()}`:`Your top 10 of ${YEAR}`;
+const whose=()=>name.trim()?`My ${YEAR} top 10 by ${name.trim()}`:`My ${YEAR} top 10`;
 const cover=r=>`<span class="cv">${r.thumb?`<img src="${esc(r.thumb)}" alt="" draggable="false"${r.fallback?` data-fallback="${esc(r.fallback)}"`:''}>`:''}</span>`;
 function save(){try{localStorage.setItem(KEY,JSON.stringify({name,slots:slots.map(r=>r?.src==='w'?null:r),look,from}))}catch{}}
 // the link: the list in its address, gaps closed up, opened on the crate page, ranked
@@ -587,11 +592,10 @@ ls.addEventListener('contextmenu',e=>{if(e.target.closest('.row.f'))e.preventDef
 
 // ---- the name, typed into the title; colors and the link in a bar at the bottom ----
 const nm=$('#nm'),mir=$('.mir');
-const nmw=$('.nmw'),bl=$('.bl'),suf=$('#suf');
+const nmw=$('.nmw'),bl=$('.bl');
 // the dashes hang from the baseline of the line the name is on: the marker sits on it, so its top is the baseline
 const placeDash=()=>nmw.style.setProperty('--bl',(bl.getBoundingClientRect().top-nmw.getBoundingClientRect().top)+'px');
 const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;mir.classList.toggle('ph',!name);
-  suf.textContent=name.trim()?suffix():'’s top 10 of '+YEAR;
   document.title=whose();placeDash()};
 addEventListener('resize',placeDash);document.fonts?.ready.then(placeDash);
 const lookName=()=>SC[look.t]?.[0]||(look.t==='h'?'From your number one’s cover':'Your own');
