@@ -271,9 +271,10 @@ a.where:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 /* × lets it go at once; so does a tap on the words */
 .note{padding-right:4px;gap:8px}
 .note span{cursor:default;margin-right:4px}
+.note .nu{border:0;padding:0 6px;font-size:var(--fs-3);font-weight:500;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .2s,transform .5s var(--ease)}
 .note .nx{width:28px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;color:var(--t2);transition:color .2s,background-color .2s}
 .note .nx svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-@media(hover:hover){.note .nx:hover{color:var(--fg);background:var(--hov)}.note .nu:hover{background:var(--hov)}}
+@media(hover:hover){.note .nx:hover{color:var(--fg);background:var(--hov)}.note .nu:hover{background:none;text-decoration-color:currentColor}}
 body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 
 @media(max-width:900px){
@@ -573,16 +574,17 @@ const nm=$('#nm'),mir=$('.mir');
 const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;$('#suf').textContent=name.trim()?suffix():'’s top 10 of '+YEAR;document.title=whose()};
 const lookName=()=>SC[look.t]?.[0]||(look.t==='h'?'From your number one’s cover':'Your own');
 const one=$('#one'),cols=$('#cols'),lays=[...one.querySelectorAll('.lay')];
-// the tooltip: shown after a beat on the first icon, then it glides to each next one at once
+// the tooltip (icons, color dots, Done, the check): shown after a beat on the first one, then it glides to each next one at once
 {const dock=one.closest('.dock'),tip=document.createElement('div');tip.className='tip';tip.setAttribute('aria-hidden','true');dock.append(tip);
   let on=false,wait=0;
   const at=b=>{const r=b.getBoundingClientRect(),d=dock.getBoundingClientRect();tip.textContent=b.getAttribute('aria-label');tip.style.setProperty('--x',(r.left+r.width/2-d.left)+'px')};
-  const show=b=>{if(shape!=='icons'||b.getAttribute('aria-disabled')==='true'){hide();return}clearTimeout(wait);
+  const S='.icons .fb,.cols .dot,.cols .x,.ok';
+  const show=b=>{if(!b.closest('.lay.on')||b.getAttribute('aria-disabled')==='true'){hide();return}clearTimeout(wait);
     if(on){at(b);return}wait=setTimeout(()=>{tip.style.transition='none';at(b);void tip.offsetWidth;tip.style.transition='';tip.classList.add('on');on=true},400)};
   const hide=()=>{clearTimeout(wait);tip.classList.remove('on');on=false};
-  one.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const b=e.target.closest('.icons .fb');b?show(b):hide()});
+  one.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const b=e.target.closest(S);b?show(b):hide()});
   one.addEventListener('pointerleave',hide);one.addEventListener('pointerdown',hide);
-  one.addEventListener('focusin',e=>{const b=e.target.closest('.icons .fb');if(b&&b.matches(':focus-visible'))show(b)});
+  one.addEventListener('focusin',e=>{const b=e.target.closest(S);if(b&&b.matches(':focus-visible'))show(b)});
   one.addEventListener('focusout',hide);
   window.hideTip=hide}
 let shape='icons',doneT=0;
