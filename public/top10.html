@@ -33,6 +33,8 @@
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
 html{background:var(--bg)}
 body{font-family:var(--sans);font-size:var(--fs-3);line-height:1.45;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+/* the crate's grain and soft light */
+body::after{content:"";position:fixed;inset:0;z-index:var(--z-grain);pointer-events:none;opacity:.02;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2.2 0 0 0 -.9'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E"),radial-gradient(60% 55% at 50% 42%,var(--fg),transparent)}
 button,input{font:inherit;color:inherit}
 a{color:inherit;text-decoration:none}
 :focus{outline:none}
@@ -44,7 +46,7 @@ a{color:inherit;text-decoration:none}
 .t{max-width:560px;margin:0 auto;padding:96px 0 160px;min-height:100vh;min-height:100dvh}
 .side{display:flex;flex-direction:column;gap:24px;min-width:0;margin-bottom:28px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
-main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px}
+main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar starts --gap past the number, and the cover --pl inside the bar */
 
 /* the ten places: soft bars, a little apart, no lines. A bar's color is the page's with a touch of the text's, so every color scheme has them */
 .ls{--bar:color-mix(in srgb,var(--fg) 5%,var(--bg));--bar-e:color-mix(in srgb,var(--fg) 2.5%,var(--bg));
@@ -52,7 +54,7 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px}
 /* the number hangs outside the bar, in the margin; the bar starts at the cover */
 .row{--rb:var(--bar);position:relative;display:flex;align-items:center;gap:var(--gap);min-height:64px;padding:0 10px 0 0;border-radius:var(--r-in);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .n{flex:none;width:var(--nw);font-size:var(--fs-5);font-weight:500;line-height:1;letter-spacing:-.02em;text-align:left;color:var(--rank-n,var(--fg))}
-.row::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;right:0;left:calc(var(--nw) + var(--gap) - var(--pl));border-radius:var(--r-in);background:var(--rb);transition:background-color .2s,box-shadow .2s var(--ease)}
+.row::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;right:0;left:calc(var(--nw) + var(--gap));border-radius:var(--r-in);background:var(--rb);transition:background-color .2s,box-shadow .2s var(--ease)}
 .row>.cv{margin-left:var(--pl)}
 .ls{position:relative;z-index:0}
 .row.e{--rb:var(--bar-e);cursor:pointer}
@@ -133,11 +135,11 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px}
 .row.w .cv{animation:wait 1.2s var(--ease) infinite alternate}
 @keyframes wait{to{opacity:.45}}
 /* the footer: who made it */
-.ft{margin-top:72px;font-size:var(--fs-2);color:var(--m)}
+.ft{margin-top:72px;font:400 var(--fs-1)/1.6 var(--mono);color:var(--m)}
 /* on a laptop it sits in the bottom left corner, level with the bar; on a phone the bar needs the width, so it ends the page */
-@media(min-width:701px){.ft{position:fixed;z-index:var(--z-bar);margin:0;left:max(24px,env(safe-area-inset-left));bottom:calc(env(safe-area-inset-bottom) + 18px + 27px);translate:0 50%}}
-.ft a{color:var(--t1);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;transition:text-decoration-color .2s}
-@media(hover:hover){.ft a:hover{text-decoration-color:currentColor}}
+@media(min-width:701px){.ft{position:fixed;z-index:calc(var(--z-bar) + 1);margin:0;left:max(24px,env(safe-area-inset-left));bottom:calc(env(safe-area-inset-bottom) + 18px + 27px);translate:0 50%}}
+.ft a{color:var(--t1);text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:3px;transition:color .2s,text-decoration-color .2s}
+@media(hover:hover){.ft a:hover{color:var(--fg);text-decoration-color:currentColor}}
 .ft a:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
 
 /* ---- Share: the list as friends will see it, edited in place ---- */
@@ -150,7 +152,9 @@ h1{overflow-wrap:anywhere}
 .nmw input:focus{border-bottom-color:color-mix(in srgb,var(--fg) 60%,transparent)}
 .nmw input::placeholder{color:color-mix(in srgb,var(--fg) 38%,transparent)}
 /* the header, as on the crate: the mark in its circle top left, and what this is beside it */
-.hdr{position:absolute;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
+.hdr{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
+.hdr::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 16px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 44px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1;opacity:0;transition:opacity .3s}
+body.under .hdr::before{opacity:1} /* the crate's top edge (index.html .find::before): it comes in once something has scrolled under the header */
 .logo{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--fg);transition:transform .5s var(--ease)}
 .logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s var(--ease)}
 @media(hover:hover){.logo:hover svg{transform:rotate(45deg)}}
@@ -161,6 +165,7 @@ h1{overflow-wrap:anywhere}
 /* the bar, always there: one glass bar (the crate's dock glass) with three icons. It changes shape for what you tap:
    the colors stretch out of it (× or a tap outside closes them), Copy link becomes "Link copied" for a moment */
 .dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:var(--db);display:flex;justify-content:center;padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
+.dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the places ease out under the bar, as the crate's grid and table do */
 .one{pointer-events:auto;position:relative;flex:none;max-width:100%;height:var(--H);box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);overflow:hidden;transition:width .5s var(--ease)}
 /* Start over: its own glass circle beside the bar (the crate's dock circles). It steps aside while the colors are out */
 .dock{gap:12px}
@@ -218,7 +223,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
   .dock,.note{--H:58px;--db:calc(env(safe-area-inset-bottom) + 14px)}
   /* searching: room below so even number 10 can rise to the top, and the bar and note step aside for the results */
   body.searching .t{padding-bottom:100vh}
-  body.searching .dock,body.searching .note{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+  body.searching .dock,body.searching .note,body.searching .hdr{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
   .side{position:static;gap:20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
   main{--nw:28px}
@@ -385,6 +390,7 @@ function fitFound(){if(at<0)return;const bottom=visualViewport?visualViewport.of
 // the keyboard coming up (or going) changes the visual viewport: place the row again once it settles
 let liftT=0;visualViewport?.addEventListener('resize',()=>{fitFound();clearTimeout(liftT);liftT=setTimeout(()=>{lift();setTimeout(fitFound,350)},120)});
 visualViewport?.addEventListener('scroll',fitFound);addEventListener('scroll',fitFound,{passive:true});
+const under=()=>document.body.classList.toggle('under',scrollY>4);addEventListener('scroll',under,{passive:true});under();
 fd.addEventListener('click',async e=>{
   const h=e.target.closest('.hit');if(!h||h.getAttribute('aria-disabled')==='true')return;
   let r=shown[+h.dataset.f];const k=key(r),i=at;if(busy.has(k)||i<0||slots[i])return;
