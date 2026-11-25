@@ -3958,7 +3958,7 @@ function edgeColor(src){return new Promise(res=>{const i=new Image();i.onload=()
 // The whole crate doesn't wait long for them; another crate needs them for its list, so it waits longer
 // a top 10 shared at /2026: its maker's name on top, "Make your own" at the end, and only search in the bar
 const Y26=document.documentElement.classList.contains('y26');
-const top26=n=>{n=(n||'').trim();return n?`My 2026 top 10 by ${n}`:'My 2026 top 10'};
+const top26=n=>{n=(n||'').trim();return n?`My top 10 in 2026 by ${n}`:'My top 10 in 2026'};
 // the records in a shared address didn't come back (the lookup was busy or down): say so plainly, with a way to try again
 function loadFailed(){
   const l=$('#loading');if(l)l.style.display='none';
@@ -3971,7 +3971,7 @@ const authQ=visiting?null:fetch('/api/auth').then(r=>r.ok?r.json():null).catch((
 Promise.all([fetch('/vinyl/covers.json').then(r=>r.ok?r.json():{}).catch(()=>({})),(window.visitorCrate||Promise.resolve(null)).catch(()=>null),Promise.race([edits,new Promise(r=>setTimeout(r,CRATE==='all'?2500:10000))])]).then(async([m,v,ed])=>{
   if(v&&v.records.length){v.records.forEach((r,i)=>r.seq=i);DATED=false;RECORDS.splice(0,RECORDS.length,...v.records);
     if(/[?&]top=1(&|$)/.test(location.search)||/^\/2026\/?$/.test(location.pathname))setRank(v.records.slice(0,10).map(r=>r.slug)); // a visitor's top ten (top=1, or a list shared at /2026) comes ranked, number one first
-    crateBy=v.name||'';document.title=TITLE=Y26?top26(v.name):VisitorCrate.crateName(v.name);if(Y26){$('#rkT').textContent='My 2026 top 10';const by=$('#rkBy'),n=(v.name||'').trim();by.textContent=n?'by '+n:'';by.hidden=!n}}
+    crateBy=v.name||'';document.title=TITLE=Y26?top26(v.name):VisitorCrate.crateName(v.name);if(Y26){$('#rkT').textContent='My top 10 in 2026';const by=$('#rkBy'),n=(v.name||'').trim();by.textContent=n?'by '+n:'';by.hidden=!n}}
   else if(visiting){loadFailed();return} // a list that didn't load says so: never Casey's crate in its place
   else{
     RECORDS.forEach((r,i)=>Object.assign(r,{...m[r.slug],...r,seq:i})); // a value written in RECORDS wins
