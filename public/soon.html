@@ -86,16 +86,19 @@ h1{font-size:var(--fs-d);font-weight:700;line-height:1;letter-spacing:-.035em;te
 .f:not(.ok){gap:0}
 .f:not(.ok) .btn{max-width:0;padding:0;opacity:0;pointer-events:none}
 .lb{display:inline-block;max-width:160px;overflow:hidden;transition:max-width .45s var(--ease),opacity .25s}
-.ck{display:none;width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-/* sent: the button closes to a check and the field says so */
-.sent .f .btn{max-width:220px;padding:0 13px;opacity:1;pointer-events:none}
-.sent .lb{max-width:0;opacity:0}
-.sent .ck{display:block}
-.sent .in{opacity:0;pointer-events:none}
-.msg{position:absolute;left:18px;right:60px;top:0;height:44px;display:flex;align-items:center;font-size:var(--fs-4);opacity:0;pointer-events:none;transition:opacity .3s .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* sent: the button slides back out, the field empties and holds a check and "You're on the list.", centered */
+.sent .f{gap:0}
+.sent .f .btn{max-width:0;padding:0;opacity:0;pointer-events:none}
+.sent .in{color:transparent;pointer-events:none}
+.msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:var(--fs-4);opacity:0;pointer-events:none;transition:opacity .3s .25s;white-space:nowrap}
+.msg svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .sent .msg{opacity:1}
 .busy .btn{opacity:.6}
-.oops{margin-top:10px;color:var(--t2);font-size:var(--fs-3);min-height:1.45em}
+.oops{margin-top:10px;color:var(--t2);font-size:var(--fs-3)}
+.oops:empty{display:none}
+/* the way into Casey's crate: quiet, no line until the pointer is on it */
+.see{margin-top:16px;color:var(--t2);font-size:var(--fs-3);text-underline-offset:3px;text-decoration-thickness:1px;transition:color .2s}
+@media(hover:hover){.see:hover{color:var(--fg);text-decoration:underline}}
 
 @media(max-width:700px){
   h1{font-size:var(--fs-d-ph)}
@@ -126,10 +129,11 @@ h1{font-size:var(--fs-d);font-weight:700;line-height:1;letter-spacing:-.035em;te
     <form class="f" id="f" novalidate>
       <label class="sr" for="em">Your email</label>
       <input class="in" id="em" name="email" type="email" placeholder="Your email" autocomplete="email" enterkeyhint="send" maxlength="254" required>
-      <button class="btn" type="submit"><span class="lb">Notify me</span><svg class="ck" viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg></button>
-      <span class="msg" aria-live="polite"></span>
+      <button class="btn" type="submit"><span class="lb">Notify me</span></button>
+      <span class="msg" aria-live="polite"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg><span></span></span>
     </form>
     <p class="oops" id="oops" aria-live="polite"></p>
+    <a class="see" href="/casey/all">See Casey’s crate</a>
   </div>
 </main>
 <script>
@@ -164,7 +168,7 @@ h1{font-size:var(--fs-d);font-weight:700;line-height:1;letter-spacing:-.035em;te
     try{
       const r=await fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em.value.trim()})});
       if(!r.ok)throw new Error(r.status);
-      f.querySelector('.msg').textContent='You’re on the list.';sign.classList.add('sent');em.blur();
+      f.querySelector('.msg span').textContent='You’re on the list.';sign.classList.add('sent');em.blur();
     }catch{oops.textContent='That didn’t go through. Try again in a minute.'}
     f.classList.remove('busy');
   });
