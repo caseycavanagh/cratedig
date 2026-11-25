@@ -175,17 +175,21 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:12px;--cv:48px} /* t
 /* ---- Share: the list as friends will see it, edited in place ---- */
 h1{overflow-wrap:anywhere}
 /* the name is typed into the title: an input as wide as what's in it (a hidden copy of the words sets the width) */
-.nmw{display:inline-grid;vertical-align:top;max-width:100%}
+.nmw{display:inline-grid;vertical-align:baseline;max-width:100%}
 .nmw>*{grid-area:1/1;font:inherit;letter-spacing:inherit;min-width:2ch}
 /* the dashes: exactly as wide as the name, and a set distance under the line's own baseline. The baseline is measured
    from a marker at the start of the title's first line (.bl), not guessed from font metrics, since phones and laptops place it differently */
 .nmw{position:relative;--dash:color-mix(in srgb,var(--fg) 30%,transparent)}
-.nmw .mir{color:transparent;white-space:pre;overflow:hidden;pointer-events:none}
+/* what you see is the copy, plain text on the title's own baseline, so the name and its ’s read as one word in every browser.
+   The input sits over it, its own letters clear, showing only its caret (iOS sets an input's text a little higher than the line's) */
+.nmw .mir{white-space:pre;overflow:clip;pointer-events:none}
+.nmw .mir.ph{color:color-mix(in srgb,var(--fg) 38%,transparent)}
 .nmw::after{content:'';position:absolute;left:0;right:0;top:calc(var(--bl,1em) + .3em);height:2px;pointer-events:none;background:repeating-linear-gradient(90deg,var(--dash) 0 6px,transparent 6px 10px)}
 .bl{display:inline-block;width:0;height:0;vertical-align:baseline}
-.nmw input{all:unset;grid-area:1/1;align-self:start;width:0;min-width:100%;color:inherit}
+.nmw input{all:unset;grid-area:1/1;align-self:start;width:0;min-width:100%;color:transparent;caret-color:var(--fg)}
+.nmw input::selection{color:transparent;background:color-mix(in srgb,var(--fg) 25%,transparent)}
 .nmw:focus-within{--dash:color-mix(in srgb,var(--fg) 60%,transparent)}
-.nmw input::placeholder{color:color-mix(in srgb,var(--fg) 38%,transparent)}
+.nmw input::placeholder{color:transparent}
 /* the header, as on the crate: the mark in its circle top left, and what this is beside it */
 .hdr{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
 .hdr::before{content:'';position:fixed;left:0;right:0;top:-200px;height:calc(env(safe-area-inset-top) + 350px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 216px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 244px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 calc(100% - 105px),#000a calc(100% - 68px),#0000);mask:linear-gradient(#000 calc(100% - 105px),#000a calc(100% - 68px),#0000);pointer-events:none;z-index:-1;opacity:0;transition:opacity .3s}
@@ -579,7 +583,7 @@ const nm=$('#nm'),mir=$('.mir');
 const nmw=$('.nmw'),bl=$('.bl'),suf=$('#suf');
 // the dashes hang from the baseline of the line the name is on: the marker sits on it, so its top is the baseline
 const placeDash=()=>nmw.style.setProperty('--bl',(bl.getBoundingClientRect().top-nmw.getBoundingClientRect().top)+'px');
-const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;
+const drawName=()=>{nm.value=name;mir.textContent=name||nm.placeholder;mir.classList.toggle('ph',!name);
   suf.textContent=name.trim()?suffix():'’s top 10 of '+YEAR;
   document.title=whose();placeDash()};
 addEventListener('resize',placeDash);document.fonts?.ready.then(placeDash);
