@@ -46,7 +46,14 @@ a{color:inherit;text-decoration:none}
 .t{max-width:560px;margin:0 auto;padding:96px 0 160px;min-height:100vh;min-height:100dvh}
 /* on a laptop the title and the list sit in the middle of the screen, both ways, in the room the header and the bar leave; taller than the screen, they start at the top and scroll */
 @media(min-width:901px){.t{display:flex;flex-direction:column;justify-content:center;padding:72px 0 150px}.from{height:0;margin-top:20px}} /* Start from a list hangs under the list without counting toward the middle */
-.side{display:flex;flex-direction:column;gap:24px;min-width:0;margin-bottom:28px}
+.side{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px;min-width:0;margin-bottom:28px}
+.side h1{flex:1 1 auto;min-width:0}
+/* Start over: just words, on the title's line, ending at the rows' right edge (on a phone, under the title). It comes in with the first pick, and its room is kept so nothing moves */
+.clr{all:unset;cursor:pointer;flex:none;margin-left:auto;font-size:var(--fs-2);color:var(--t2);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;white-space:nowrap;transition:opacity .6s var(--ease),color .2s,text-decoration-color .2s}
+.clr[aria-disabled=true]{opacity:0;visibility:hidden;transition:opacity .15s var(--out),visibility 0s .15s}
+@media(hover:hover){.clr:hover{color:var(--fg);text-decoration-color:currentColor}}
+.clr:active{opacity:.6}
+.clr:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
 main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar starts --gap past the number, and the cover --pl inside the bar */
 
@@ -173,7 +180,7 @@ body.under .hdr::before{opacity:1} /* the crate's top edge (index.html .find::be
 .logo:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .where{display:flex;align-items:center;height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);white-space:nowrap}
 /* who made it: the crate's name pill, as a link, in the header beside the mark */
-a.where{transition:color .2s,background-color .2s}
+a.where{margin-left:auto;margin-right:-8px;transition:color .2s,background-color .2s} /* top right: its words end level with the list's right edge */
 @media(hover:hover){a.where:hover{color:var(--fg);background:var(--hov)}}
 a.where:active{background:var(--prs)}
 a.where:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
@@ -184,16 +191,7 @@ a.where:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .dock::before{content:'';position:fixed;left:0;right:0;bottom:-200px;height:calc(env(safe-area-inset-bottom) + 350px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 68px,#000 105px);mask:linear-gradient(#0000,#000a 68px,#000 105px);pointer-events:none;z-index:-1} /* the places ease out under the bar, as the crate's grid and table do */
 /* both fades run 200px past the screen's edges: Safari on iOS draws the page under its status bar and its floating toolbar, outside the area fixed things are placed in, and a fade that stopped at the edge let the list show through there */
 .one{pointer-events:auto;position:relative;flex:none;max-width:100%;height:var(--H);box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);overflow:hidden;transition:width .5s var(--ease)}
-/* Start over: its own glass circle beside the bar (the crate's dock circles). It steps aside while the colors are out */
 .dock{gap:12px}
-.solo{all:unset;pointer-events:auto;cursor:pointer;flex:none;box-sizing:border-box;width:var(--H);height:var(--H);display:grid;place-items:center;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);color:var(--t2);overflow:hidden;
-  transition:width .5s var(--ease),margin .5s var(--ease),opacity .2s,color .2s,border-width 0s}
-@media(hover:hover){.solo:hover{color:var(--fg)}}
-.solo:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.solo svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s var(--ease)}
-.solo:active svg{transform:scale(.86)}
-.solo[aria-disabled=true]{opacity:.35;pointer-events:none}
-body.colors .solo{width:0;margin:0 -6px;opacity:0;border-width:0;pointer-events:none;transition:width .5s var(--ease),margin .5s var(--ease),opacity .15s,border-width 0s .5s}
 .lay{position:absolute;top:0;bottom:0;left:0;display:flex;align-items:center;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 .lay.on{opacity:1;visibility:visible;transition:opacity .25s .12s,visibility 0s}
 .icons{padding:0 3px}
@@ -233,7 +231,6 @@ body.colors .solo{width:0;margin:0 -6px;opacity:0;border-width:0;pointer-events:
   .dot[aria-pressed=true]:hover{transform:none}
   .pc:hover{background:var(--hov)}
   .cust .ok:hover{transform:scale(1.08)}
-  .solo:hover{background:color-mix(in srgb,var(--glass),var(--fg) 8%)}
   .note button:hover{background:var(--hov)}
   .pl:hover{border-color:var(--line2)}
 }
@@ -259,7 +256,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
   /* searching: room below so even number 10 can rise to the top, and the bar and note step aside for the results */
   body.searching .t{padding-bottom:100vh}
   body.searching .dock,body.searching .note,body.searching .hdr{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
-  .side{position:static;gap:20px;margin-bottom:16px}
+  .side{position:static;gap:6px 20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
   main{--nw:28px}
   .n{font-size:22px}
@@ -276,6 +273,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 <div class="t" id="mk">
   <div class="side">
     <h1 id="h"><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
+    <button type="button" class="clr" id="rs" aria-disabled="true">Start over</button>
   </div>
   <main>
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
@@ -289,7 +287,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
   <div class="lay cols" id="cols" role="group"></div>
   <div class="lay cust" id="cust" role="group" aria-label="Your own colors"></div>
   <div class="lay done" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Link copied</span></div>
-</div><button type="button" class="solo" id="rs" aria-label="Start over" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3L4.5 9"/><path d="M4.5 4.5V9H9"/></svg></button></div>
+</div></div>
 <div class="note" id="note" role="status" aria-live="polite"><span></span><button type="button">Undo</button></div>
 <script src="/vinyl/visitor-crate.js"></script>
 <script>
@@ -466,7 +464,7 @@ const fromEl=$('#from'),fromB=$('#fromB'),fromM=$('#fromM');
 // lists to come, shown greyed until they're in the data file
 const SOON=['NPR','NYT','Pitchfork','NME'];
 function drawFrom(){
-  fromEl.hidden=!LISTS.length||filled().length>0; // only while the list is empty; Undo brings it back
+  fromEl.hidden=!LISTS.length; // always there: picking a list fills the ten in its order, with Undo
   if(fromEl.hidden)menuFrom(false);
   const have=new Set(LISTS.map(l=>l.name.toLowerCase()));
   fromM.innerHTML=LISTS.map(l=>`<button type="button" role="menuitemradio" data-l="${esc(l.id)}" aria-checked="${from===l.id}" aria-label="${esc(l.title)}">${esc(l.name)}</button>`).join('')
