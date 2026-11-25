@@ -1,13 +1,19 @@
-import { FRESH, og, page } from "@/lib/page";
-import { crateInfo, facts, findRecord } from "@/lib/record";
+import { FRESH, missing, og, page } from "@/lib/page";
+import { crateExists, crateInfo, facts, findRecord } from "@/lib/record";
 
 // "/casey/<crate>" is rewritten here (next.config.ts) with ?crate=<crate>: one of Casey's crates, public/index.html, with whole
 // addresses for link previews. The page itself reads which crate from its address. "all" is the whole crate.
 // A crate previews as its name and words; a shared record (/casey/<crate>?r=<slug>) as that record, with its own card at /og/r/<slug>
-export const GET = await page(
+// which crate: the request comes through the rewrite still addressed /casey/<crate>, so read it from the path (or ?crate= when asked for directly)
+function crateOf(req: Request) {
+  const u = new URL(req.url);
+  return u.searchParams.get("crate") || u.pathname.match(/^\/casey\/([^/]+)\/?$/)?.[1] || "all";
+}
+
+const crate = await page(
   "index.html",
   async (html, req) => {
-    const q = new URL(req.url).searchParams, crate = q.get("crate") || "all", slug = q.get("r");
+    const q = new URL(req.url).searchParams, crate = crateOf(req), slug = q.get("r");
     if (!/^[a-z0-9-]{1,80}$/.test(crate)) return null;
     const [c, r] = await Promise.all([
       crate === "all" ? null : crateInfo(crate).catch(() => null),
@@ -29,3 +35,12 @@ export const GET = await page(
   },
   FRESH,
 );
+
+// a crate that doesn't exist gets the 404 instead (public/404.html). If the saved crates can't be read, the page goes out as usual
+// and sends itself to the whole crate if it finds no such crate (public/index.html)
+const notFound = await missing();
+export async function GET(req: Request) {
+  const name = crateOf(req);
+  if (!/^[a-z0-9-]{1,80}$/.test(name) || (await crateExists(name)) === false) return notFound();
+  return crate(req);
+}
