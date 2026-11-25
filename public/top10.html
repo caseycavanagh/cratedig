@@ -65,10 +65,10 @@ a{color:inherit;text-decoration:none}
 @media(hover:hover){.lk:hover{color:var(--fg)}}
 .lk:active{opacity:.6}
 .lk:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
-.clr{flex:none;margin-left:auto;transition:opacity .6s var(--ease),color .2s}
+.clr{flex:none;margin-left:auto;padding:4px 0;margin-block:-4px;transition:opacity .6s var(--ease),color .2s}
 .clr[aria-disabled=true]{opacity:0;visibility:hidden;transition:opacity .15s var(--out),visibility 0s .15s}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
-main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:12px;--cv:48px} /* the bar starts --gap past the number, and the cover sits --pl inside the bar on every side.
+.lw{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:12px;--cv:48px} /* the bar starts --gap past the number, and the cover sits --pl inside the bar on every side.
    Corners nest: the bar's 14 is the cover's 2 plus the 12 around it, so the two curves run parallel */
 
 /* the ten places: soft bars, a little apart, no lines. A bar's color is the page's with a touch of the text's, so every color scheme has them */
@@ -81,10 +81,11 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:12px;--cv:48px} /* t
 .row>.cv{margin-left:var(--pl);margin-right:calc(var(--pl) - var(--gap))} /* the same room on every side of the cover, the words included */
 .ls{position:relative;z-index:0}
 .row.e{--rb:var(--bar-e);cursor:pointer}
-.row.e .n{color:var(--t4);font-weight:400}
+.row.e .n{color:var(--m);font-weight:400} /* large text at 3:1 or more on every color but Tomato */
 @media(hover:hover){.row.e:hover{--rb:var(--bar)}}
 .row.e:active{--rb:var(--bar)}
-.row.e:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
+.row.e:has(.pick:focus-visible){outline:1px solid var(--ring);outline-offset:-1px}
+.row .pick{all:unset;position:absolute;inset:0;border-radius:var(--r-in);cursor:pointer}
 .row.f{cursor:grab}
 .row.f:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
 .cv{flex:none;width:var(--cv);height:var(--cv);border-radius:var(--r-cover);overflow:hidden;background:var(--soft)}
@@ -193,7 +194,7 @@ h1{overflow-wrap:anywhere}
 /* what you see is the copy, plain text on the title's own baseline, so the name and its ’s read as one word in every browser.
    The input sits over it, its own letters clear, showing only its caret (iOS sets an input's text a little higher than the line's) */
 .nmw .mir{white-space:pre;overflow:clip;pointer-events:none}
-.nmw .mir.ph{color:color-mix(in srgb,var(--fg) 38%,transparent)}
+.nmw .mir.ph{color:var(--t2)} /* 4.5:1 or more on every color but Tomato */
 .nmw::after{content:'';position:absolute;left:0;right:0;top:calc(var(--bl,1em) + .3em);height:2px;pointer-events:none;background:repeating-linear-gradient(90deg,var(--dash) 0 6px,transparent 6px 10px)}
 .bl{display:inline-block;width:0;height:0;vertical-align:baseline}
 .nmw input{all:unset;grid-area:1/1;align-self:start;width:0;min-width:100%;color:transparent;caret-color:var(--fg)}
@@ -201,9 +202,8 @@ h1{overflow-wrap:anywhere}
 .nmw:focus-within{--dash:color-mix(in srgb,var(--fg) 60%,transparent)}
 .nmw input::placeholder{color:transparent}
 /* the header, as on the crate: the mark in its circle top left, and what this is beside it */
-.hdr{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
-.hdr::before{content:'';position:fixed;left:0;right:0;top:-200px;height:calc(env(safe-area-inset-top) + 350px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 216px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 244px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 calc(100% - 105px),#000a calc(100% - 68px),#0000);mask:linear-gradient(#000 calc(100% - 105px),#000a calc(100% - 68px),#0000);pointer-events:none;z-index:-1;opacity:0;transition:opacity .3s}
-body.under .hdr::before{opacity:1} /* the crate's top edge (index.html .find::before): it comes in once something has scrolled under the header */
+/* the header scrolls away with the page (Casey, 2026-11-25: not sticky) */
+.hdr{position:absolute;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
 .logo{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--fg);transition:transform .5s var(--ease)}
 .logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s var(--ease)}
 @media(hover:hover){.logo:hover svg{transform:rotate(45deg)}}
@@ -300,30 +300,29 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
   body.searching .dock,body.searching .note,body.searching .hdr{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
   .side{position:static;gap:6px 20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
-  main{--nw:28px}
+  .lw{--nw:28px}
   .n{font-size:22px}
   .fld input{font-size:var(--fs-4)}
 }
-@media(max-width:369px){main{--nw:26px;--gap:8px;--pl:10px;--cv:42px}.n{font-size:20px}.cols .sc,.dots{gap:6px}.dot{width:26px;height:26px}}
+@media(max-width:369px){.lw{--nw:26px;--gap:8px;--pl:10px;--cv:42px}.n{font-size:20px}.cols .sc,.dots{gap:6px}.dot{width:26px;height:26px}}
 /* reduced motion: things fade, nothing moves */
 @media(prefers-reduced-motion:reduce){.btn,.btn:active,.pl:active{transform:none}.row.w .cv{animation:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.note,.note.on{translate:-50% 0;transition:opacity .2s}.one{transition:none}}
 </style>
 </head>
 <body class="none">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="0 0 350 350"><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:3" d="M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z" fill-rule="evenodd"/></symbol></svg>
-<header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="where lk" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></header>
-<div class="pg" id="pg"><div class="t" id="mk">
+<div class="pg" id="pg"><header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="where lk" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></header><main class="t" id="mk">
   <div class="side">
     <div class="ttl"><h1 id="h">My 2026 top 10</h1><p class="by"><span><i class="bl"></i>by</span><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span></p></div>
     <button type="button" class="clr lk" id="rs" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v4h4"/></svg>Start over</button>
   </div>
-  <main>
+  <div class="lw">
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
     <ul class="found" id="found" aria-live="polite"></ul>
-  </main>
+  </div>
   <div class="from" id="from" hidden><button class="gh lk" type="button" id="fromB" aria-haspopup="menu" aria-expanded="false" aria-controls="fromM">Start from a list<svg class="wc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="tsm" id="fromM" role="menu" aria-labelledby="fromB" hidden></div></div>
 </div>
-</div>
+</main>
 <div class="dock"><div class="one" id="one">
   <div class="lay icons on"><button class="fb" type="button" data-k="col" aria-label="Colors" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0 0 17c1 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.8.7-1.5 1.5-1.5h1.6a4.7 4.7 0 0 0 4.7-4.7c0-3.9-3.8-7.1-8.5-7.1z"/><circle cx="7.6" cy="11.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="10" cy="7.7" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.6" cy="7.7" r="1.1" fill="currentColor" stroke="none"/><circle cx="17" cy="11.4" r="1.1" fill="currentColor" stroke="none"/></svg></button><button class="fb" type="button" data-k="copy" aria-label="Copy link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></button><button class="fb" type="button" data-k="share" aria-label="Share"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M7 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H17"/></svg></button></div>
   <div class="lay cols" id="cols" role="group"></div>
@@ -400,7 +399,7 @@ function draw(focus){
   ls.innerHTML=slots.map((r,i)=>{
     if(r)return `<li class="row f${r.src==='w'?' w':''}" data-i="${i}" tabindex="0" aria-label="${i+1}. ${esc(r.title)} by ${esc(r.artist)}. Up and down arrows move it"><span class="n" aria-hidden="true">${i+1}</span>${cover(r)}<span class="tx" aria-hidden="true"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button></li>`;
     if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><span class="cv qi" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l4.5 4.5"/></svg></span><div class="fld"><label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
-    return `<li class="row e" data-e="${i}" role="button" tabindex="0" aria-label="Add number ${i+1}"><span class="n" aria-hidden="true">${i+1}</span></li>`;
+    return `<li class="row e" data-e="${i}"><span class="n" aria-hidden="true">${i+1}</span><button type="button" class="pick" aria-label="Add number ${i+1}"></button></li>`;
   }).join('');
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
   showFound();
@@ -447,9 +446,8 @@ async function find(term){
 ls.addEventListener('input',e=>{if(e.target.id!=='q')return;clearTimeout(timer);seq++;const v=e.target.value.trim();
   found=[];status=v.length>=3&&!cache[v]?'Searching…':'';showFound();timer=setTimeout(()=>find(v),250)});
 ls.addEventListener('keydown',e=>{
-  if(e.target.id==='q'){if(e.key==='Enter'){e.preventDefault();$('#found .hit:not([aria-disabled])')?.click()}else if(e.key==='Escape'){if(e.target.value){e.target.value='';found=[];status='';showFound()}else{const i=at;closeSearch();ls.querySelector(`[data-e="${i}"]`)?.focus()}}return}
+  if(e.target.id==='q'){if(e.key==='Enter'){e.preventDefault();$('#found .hit:not([aria-disabled])')?.click()}else if(e.key==='Escape'){if(e.target.value){e.target.value='';found=[];status='';showFound()}else{const i=at;closeSearch();ls.querySelector(`[data-e="${i}"] .pick`)?.focus()}}return}
   // an empty place: Enter or space opens the search there
-  const em=e.target.closest('.row.e');if(em&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openAt(+em.dataset.e);return}
   // a filled place: up and down move it, one place at a time (into a gap, or trading with the record there)
   const f=e.target.closest('.row.f');if(!f||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();
   const i=+f.dataset.i,j=i+(e.key==='ArrowUp'?-1:1);if(j<0||j>=TEN)return;[slots[i],slots[j]]=[slots[j],slots[i]];if(at===j)at=i;draw();ls.querySelector(`[data-i="${j}"]`).focus()});
@@ -469,7 +467,6 @@ function fitFound(){if(at<0)return;const bottom=visualViewport?visualViewport.of
 // the keyboard coming up (or going) changes the visual viewport: place the row again once it settles
 let liftT=0;visualViewport?.addEventListener('resize',()=>{fitFound();clearTimeout(liftT);liftT=setTimeout(()=>{lift();setTimeout(fitFound,350)},120)});
 visualViewport?.addEventListener('scroll',fitFound);pg.addEventListener('scroll',fitFound,{passive:true});
-const under=()=>document.body.classList.toggle('under',pg.scrollTop>4);pg.addEventListener('scroll',under,{passive:true});under();
 fd.addEventListener('click',async e=>{
   const h=e.target.closest('.hit');if(!h||h.getAttribute('aria-disabled')==='true')return;
   let r=shown[+h.dataset.f];const k=key(r),i=at;if(busy.has(k)||i<0||slots[i])return;
@@ -490,7 +487,7 @@ ls.addEventListener('click',e=>{
 const note=$('#note');let undo=null;
 function takeOut(i){
   const r=slots[i];slots[i]=null;draw();
-  ls.querySelector(`[data-e="${i}"]`)?.focus({preventScroll:true});
+  ls.querySelector(`[data-e="${i}"] .pick`)?.focus({preventScroll:true});
   tell(`Took out ${r.title}`,()=>{if(slots.some(x=>x&&key(x)===key(r)))return;const j=slots[i]?firstGap(i):i;if(j<0)return;slots[j]=r;draw()});
 }
 // the note says what just changed, with Undo, and stays until the next change
