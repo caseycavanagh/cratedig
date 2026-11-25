@@ -49,11 +49,14 @@ a{color:inherit;text-decoration:none}
 .side{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px;min-width:0;margin-bottom:28px}
 .side h1{flex:1 1 auto;min-width:0}
 /* Start over: just words, on the title's line, ending at the rows' right edge (on a phone, under the title). It comes in with the first pick, and its room is kept so nothing moves */
-.clr{all:unset;cursor:pointer;flex:none;margin-left:auto;font-size:var(--fs-2);color:var(--t2);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;white-space:nowrap;transition:opacity .6s var(--ease),color .2s,text-decoration-color .2s}
+/* one link style for every quiet action on the page (Made by, Start over, Start from a list, Undo): 13px, 500, the second text color, the page's text color on hover, an optional 16px icon */
+.lk{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-2);font-weight:500;line-height:1.3;color:var(--t2);white-space:nowrap;transition:color .2s}
+.lk svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media(hover:hover){.lk:hover{color:var(--fg)}}
+.lk:active{opacity:.6}
+.lk:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
+.clr{flex:none;margin-left:auto;transition:opacity .6s var(--ease),color .2s}
 .clr[aria-disabled=true]{opacity:0;visibility:hidden;transition:opacity .15s var(--out),visibility 0s .15s}
-@media(hover:hover){.clr:hover{color:var(--fg);text-decoration-color:currentColor}}
-.clr:active{opacity:.6}
-.clr:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
 main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:12px;--cv:48px} /* the bar starts --gap past the number, and the cover sits --pl inside the bar on every side.
    Corners nest: the bar's 14 is the cover's 2 plus the 12 around it, so the two curves run parallel */
@@ -144,10 +147,7 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:12px;--cv:48px} /* t
 /* one pill that opens a menu of the lists: the crate's menu (index.html .tsm), rising above the pill so the bar never covers it.
    Lists still to come are in it, greyed */
 /* a ghost: just the words and the chevron, the same size and color as Start over */
-.gh{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:4px;height:32px;font-size:var(--fs-2);color:var(--t2);white-space:nowrap;transition:color .2s}
-@media(hover:hover){.gh:hover{color:var(--fg)}}
-.gh:active{opacity:.6}
-.gh:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
+.gh{height:32px;gap:4px}
 .gh[aria-expanded=true]{color:var(--fg)}
 .gh .wc{flex:none;width:16px;height:16px;transition:rotate .35s var(--ease)}
 .gh[aria-expanded=true] .wc{rotate:180deg}
@@ -193,11 +193,9 @@ body.under .hdr::before{opacity:1} /* the crate's top edge (index.html .find::be
 .logo:active{transform:scale(.96);transition-duration:.08s}
 .logo:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .where{display:flex;align-items:center;height:32px;padding:0 12px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;color:var(--t2);white-space:nowrap}
+.where.lk{display:inline-flex}
 /* who made it: the crate's name pill, as a link, in the header beside the mark */
-a.where{margin-left:auto;margin-right:-8px;transition:color .2s,background-color .2s} /* top right: its words end level with the list's right edge */
-@media(hover:hover){a.where:hover{color:var(--fg);background:var(--hov)}}
-a.where:active{background:var(--prs)}
-a.where:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+a.where{margin-left:auto;margin-right:-8px} /* top right: its words end level with the list's right edge */
 
 /* the bar, always there: one glass bar (the crate's dock glass) with three icons. It changes shape for what you tap:
    the colors stretch out of it (× or a tap outside closes them), Copy link becomes "Link copied" for a moment */
@@ -271,10 +269,10 @@ a.where:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 /* × lets it go at once; so does a tap on the words */
 .note{padding-right:4px;gap:8px}
 .note span{cursor:default;margin-right:4px}
-.note .nu{border:0;padding:0 6px;font-size:var(--fs-3);font-weight:500;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .2s,transform .5s var(--ease)}
+.note .nu{display:inline-flex;align-items:center;height:28px;padding:0 6px;border:0;border-radius:0;font-size:var(--fs-2);font-weight:500;color:var(--t2);transition:color .2s}
 .note .nx{width:28px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;color:var(--t2);transition:color .2s,background-color .2s}
 .note .nx svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-@media(hover:hover){.note .nx:hover{color:var(--fg);background:var(--hov)}.note .nu:hover{background:none;text-decoration-color:currentColor}}
+@media(hover:hover){.note .nx:hover{color:var(--fg);background:var(--hov)}.note .nu:hover{background:none;color:var(--fg)}}
 body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 
 @media(max-width:900px){
@@ -296,17 +294,17 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 </head>
 <body class="none">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="0 0 350 350"><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:3" d="M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z" fill-rule="evenodd"/></symbol></svg>
-<header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="where" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></header>
+<header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="where lk" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></header>
 <div class="t" id="mk">
   <div class="side">
     <h1 id="h"><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
-    <button type="button" class="clr" id="rs" aria-disabled="true">Start over</button>
+    <button type="button" class="clr lk" id="rs" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v4h4"/></svg>Start over</button>
   </div>
   <main>
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
     <ul class="found" id="found" aria-live="polite"></ul>
   </main>
-  <div class="from" id="from" hidden><button class="gh" type="button" id="fromB" aria-haspopup="menu" aria-expanded="false" aria-controls="fromM">Start from a list<svg class="wc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="tsm" id="fromM" role="menu" aria-labelledby="fromB" hidden></div></div>
+  <div class="from" id="from" hidden><button class="gh lk" type="button" id="fromB" aria-haspopup="menu" aria-expanded="false" aria-controls="fromM">Start from a list<svg class="wc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="tsm" id="fromM" role="menu" aria-labelledby="fromB" hidden></div></div>
 </div>
 </div>
 <div class="dock"><div class="one" id="one">
@@ -315,7 +313,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
   <div class="lay cust" id="cust" role="group" aria-label="Your own colors"></div>
   <div class="lay done" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Link copied</span></div>
 </div></div>
-<div class="note" id="note" role="status" aria-live="polite"><span></span><button type="button" class="nu">Undo</button><button type="button" class="nx" aria-label="Dismiss"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
+<div class="note" id="note" role="status" aria-live="polite"><span></span><button type="button" class="nu lk">Undo</button><button type="button" class="nx" aria-label="Dismiss"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
 <script src="/vinyl/visitor-crate.js"></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s);
@@ -508,10 +506,14 @@ fromB.addEventListener('click',()=>menuFrom(fromM.hidden));
 document.addEventListener('pointerdown',e=>{if(!fromM.hidden&&!fromEl.contains(e.target))menuFrom(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!fromM.hidden){menuFrom(false);fromB.focus({preventScroll:true})}});
 // the best match for a critic's line: same artist and the same title (or one starting with it), else the same artist's first album
+// The suggestions already hold the critics' list matched on the server, so most places fill at once from them
 async function findOne(c){
-  const res=await V.search(`${c.artist} ${c.title}`,{albums:true,year:YEAR}).catch(()=>[]),a=fold(c.artist),t=fold(c.title);
+  const a=fold(c.artist),t=fold(c.title);
   const same=r=>{const x=fold(r.artist);return x===a||x.startsWith(a+' ')||a.startsWith(x+' ')};
-  let r=res.find(r=>same(r)&&(fold(r.title)===t||fold(r.title).startsWith(t+' ')))||res.find(r=>same(r)&&t.startsWith(fold(r.title)+' '));
+  const pick=res=>res.find(r=>same(r)&&(fold(r.title)===t||fold(r.title).startsWith(t+' ')))||res.find(r=>same(r)&&t.startsWith(fold(r.title)+' '));
+  const had=pick(suggestions);if(had)return had;
+  const res=await V.search(`${c.artist} ${c.title}`.replace(/[’‘]/g,"'"),{albums:true,year:YEAR}).catch(()=>[]);
+  let r=pick(res);
   if(r?.group)r=await V.pick(r).catch(()=>null);
   return r||null;
 }
