@@ -32,6 +32,10 @@
    link (vinyl/visitor-crate.js), gaps closed up, and the link opens it on the crate page, ranked. Tokens: /vinyl/tokens.css */
 *,*::before,*::after{box-sizing:border-box}*{margin:0}
 html{background:var(--bg)}
+/* the page scrolls inside a fixed box, as the crate's views do (index.html .rk, .tbl): the document itself never scrolls, so on
+   iPhone nothing can slide up under the status bar or down behind Safari's address bar */
+html,body{height:100%;overflow:hidden}
+.pg{position:fixed;inset:0;overflow:hidden auto;overscroll-behavior:contain}
 body{font-family:var(--sans);font-size:var(--fs-3);line-height:1.45;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 /* the crate's grain and soft light */
 body::after{content:"";position:fixed;inset:0;z-index:var(--z-grain);pointer-events:none;opacity:.02;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2.2 0 0 0 -.9'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E"),radial-gradient(60% 55% at 50% 42%,var(--fg),transparent)}
@@ -302,7 +306,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 <body class="none">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="0 0 350 350"><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:3" d="M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z" fill-rule="evenodd"/></symbol></svg>
 <header class="hdr"><a class="logo" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="where lk" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></header>
-<div class="t" id="mk">
+<div class="pg" id="pg"><div class="t" id="mk">
   <div class="side">
     <h1 id="h"><i class="bl"></i><span class="nmw"><span class="mir" aria-hidden="true">Your name</span><input id="nm" maxlength="40" autocomplete="given-name" placeholder="Your name" aria-label="Your name"></span><span id="suf">’s top 10 of 2026</span></h1>
     <button type="button" class="clr lk" id="rs" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v4h4"/></svg>Start over</button>
@@ -450,14 +454,17 @@ document.addEventListener('pointerdown',e=>{if(at>=0&&!e.target.closest('.row.q,
 function openAt(i){if(slots[i])return;at=i;found=[];status='';const q=$('#q');if(q)q.value='';draw(true);lift()}
 // on a phone the keyboard takes half the screen: the open place goes to the top, and its results fill what's left above the keyboard
 const phone=matchMedia('(max-width:700px)');
-function lift(){if(!phone.matches)return;const row=$('#q')?.closest('.row');if(!row)return;
-  const y=row.getBoundingClientRect().top-(visualViewport?.offsetTop||0)-12;if(Math.abs(y)>4)scrollBy({top:y,behavior:reduce?'auto':'smooth'})}
+// (a frame later, so the browser's own scroll to the focused field has had its turn and doesn't cancel this one)
+function lift(){if(!phone.matches)return;requestAnimationFrame(()=>{const row=$('#q')?.closest('.row');if(!row)return;
+  const y=row.getBoundingClientRect().top-(visualViewport?.offsetTop||0)-12;if(Math.abs(y)<=4)return;
+  // Safari can drop a smooth scroll while it's still bringing the field into view; if this one didn't move, it jumps
+  const from=pg.scrollTop;pg.scrollBy({top:y,behavior:reduce?'auto':'smooth'});setTimeout(()=>{if(pg.scrollTop===from)pg.scrollBy({top:y})},450)})}
 function fitFound(){if(at<0)return;const bottom=visualViewport?visualViewport.offsetTop+visualViewport.height:innerHeight;
   fd.style.maxHeight=phone.matches?Math.max(150,bottom-fd.getBoundingClientRect().top-10)+'px':''}
 // the keyboard coming up (or going) changes the visual viewport: place the row again once it settles
 let liftT=0;visualViewport?.addEventListener('resize',()=>{fitFound();clearTimeout(liftT);liftT=setTimeout(()=>{lift();setTimeout(fitFound,350)},120)});
-visualViewport?.addEventListener('scroll',fitFound);addEventListener('scroll',fitFound,{passive:true});
-const under=()=>document.body.classList.toggle('under',scrollY>4);addEventListener('scroll',under,{passive:true});under();
+visualViewport?.addEventListener('scroll',fitFound);pg.addEventListener('scroll',fitFound,{passive:true});
+const under=()=>document.body.classList.toggle('under',pg.scrollTop>4);pg.addEventListener('scroll',under,{passive:true});under();
 fd.addEventListener('click',async e=>{
   const h=e.target.closest('.hit');if(!h||h.getAttribute('aria-disabled')==='true')return;
   let r=shown[+h.dataset.f];const k=key(r),i=at;if(busy.has(k)||i<0||slots[i])return;
