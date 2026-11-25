@@ -221,6 +221,24 @@ body.colors .solo{width:0;margin:0 -6px;opacity:0;border-width:0;pointer-events:
 .dot:focus-visible{outline:1px solid var(--ring);outline-offset:5px}
 .dot.mine{background:conic-gradient(#ff5a5a,#ffcc33,#4fd06a,#33c6ff,#6a6aff,#ff5ac8,#ff5a5a)}
 .pcs{display:flex;gap:8px}
+.cust{gap:8px;padding:0 6px 0 8px}
+.cust .ok{all:unset;cursor:pointer;flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--on-fg);transition:transform .35s var(--ease),opacity .2s}
+.cust .ok svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cust .ok:active{transform:scale(.9)}
+.cust .ok:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.pc{transition:background-color .2s}
+/* where there's a pointer, everything in the bar answers it: icons and buttons get the soft hover fill, the dots lift a little */
+@media(hover:hover){
+  .fb,.cols .x{transition:color .2s,background-color .2s,opacity .2s}
+  .fb:hover{background:radial-gradient(circle closest-side,var(--hov) 84%,transparent 86%)}
+  .dot:hover{transform:scale(1.12)}
+  .dot[aria-pressed=true]:hover{transform:none}
+  .pc:hover{background:var(--hov)}
+  .cust .ok:hover{transform:scale(1.08)}
+  .solo:hover{background:color-mix(in srgb,var(--glass),var(--fg) 8%)}
+  .note button:hover{background:var(--hov)}
+  .pl:hover{border-color:var(--line2)}
+}
 .pc{display:flex;align-items:center;gap:8px;height:36px;padding:0 4px 0 14px;border-radius:var(--r-pill);background:var(--soft);font-size:var(--fs-2);cursor:pointer;white-space:nowrap}
 .pc input{flex:none;width:28px;height:28px;border:0;padding:0;background:none;cursor:pointer;-webkit-appearance:none;appearance:none}
 .pc input::-webkit-color-swatch-wrapper{padding:0}
@@ -272,6 +290,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 <div class="dock"><div class="one" id="one">
   <div class="lay icons on"><button class="fb" type="button" data-k="col" aria-label="Colors" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0 0 17c1 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.8.7-1.5 1.5-1.5h1.6a4.7 4.7 0 0 0 4.7-4.7c0-3.9-3.8-7.1-8.5-7.1z"/><circle cx="7.6" cy="11.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="10" cy="7.7" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.6" cy="7.7" r="1.1" fill="currentColor" stroke="none"/><circle cx="17" cy="11.4" r="1.1" fill="currentColor" stroke="none"/></svg></button><button class="fb" type="button" data-k="copy" aria-label="Copy link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></button><button class="fb" type="button" data-k="share" aria-label="Share"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M7 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H17"/></svg></button></div>
   <div class="lay cols" id="cols" role="group"></div>
+  <div class="lay cust" id="cust" role="group" aria-label="Your own colors"></div>
   <div class="lay done" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Link copied</span></div>
 </div><button type="button" class="solo" id="rs" aria-label="Start over" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3L4.5 9"/><path d="M4.5 4.5V9H9"/></svg></button></div>
 <div class="note" id="note" role="status" aria-live="polite"><span></span><button type="button">Undo</button></div>
@@ -298,6 +317,8 @@ const firstGap=(from=0)=>{for(let k=0;k<TEN;k++){const i=(from+k)%TEN;if(!slots[
 const SC={a:['Night','#121212','#ffffff','#ffffff'],b:['Paper','#f2ede2','#1f1b16','#1f1b16'],c:['Cobalt','#1f33c7','#ffffff','#ffffff'],d:['Tomato','#e2462c','#fff6ea','#fff6ea'],
   e:['Forest','#16382a','#f1e9d2','#d8b968'],f:['Bubblegum','#ffd3e3','#3a0d28','#c2185b'],g:['Mustard','#f1c232','#1c1708','#1c1708']};
 const HEX=/^[0-9a-f]{6}$/i;
+// the bar offers black and three colors; the others still open from links made before
+const SHOW=['a','c','d','e'];
 const colors=()=>SC[look.t]?{bg:SC[look.t][1],fg:SC[look.t][2],n:SC[look.t][3]}:{bg:look.bg,fg:look.fg,n:look.n||look.fg};
 // every other token comes from the two colors, mixed; Night keeps tokens.css as it is. A light page gets softer shadows
 const TOK=['--glass','--bg','--fg','--on-fg','--t1','--t2','--m','--t3','--t4','--line','--line2','--soft','--sheet','--hov','--prs','--sel','--ring','--rank-n','--lift','--float'];
@@ -531,14 +552,14 @@ const fit=()=>{const l=one.querySelector('.lay.on');if(!l)return;
   // the colors scroll inside the bar when there are more than fit, so their full width is the row of dots, the × and the padding around them
   const w=l===cols?cols.querySelector('.sc').scrollWidth-8+13+8+40+6:l.scrollWidth;one.style.width=Math.min(w+2,innerWidth-24)+'px'};
 function morph(k){shape=k;clearTimeout(doneT);lays.forEach(l=>l.classList.toggle('on',l.classList.contains(k)));
-  document.body.classList.toggle('colors',k==='cols');one.querySelector('[data-k=col]').setAttribute('aria-expanded',k==='cols');fit()}
+  document.body.classList.toggle('colors',k==='cols'||k==='cust');one.querySelector('[data-k=col]').setAttribute('aria-expanded',k==='cols'||k==='cust');fit()}
 function drawBar(){
   const c=colors(),first=filled()[0],n=filled().length;
   one.querySelectorAll('[data-k=copy],[data-k=share]').forEach(b=>b.setAttribute('aria-disabled',!n));
   $('#rs').setAttribute('aria-disabled',!n);
   const f=document.activeElement;if(f&&cols.contains(f)&&f.matches('.pc input'))return; // don't redraw a color picker while it's open
   cols.setAttribute('aria-label',`Colors: ${lookName()}`);
-  cols.innerHTML=`<div class="sc">${Object.entries(SC).map(([k,[nm,bg]])=>`<button class="dot" type="button" data-t="${k}" aria-label="${nm}" aria-pressed="${look.t===k}" style="background-color:${bg}"></button>`).join('')}${first?.thumb?`<button class="dot" type="button" data-t="h" aria-label="Colors from your number one’s cover" aria-pressed="${look.t==='h'}" style="background-image:url('${esc(first.thumb)}')"></button>`:''}<button class="dot mine" type="button" data-t="x" aria-label="Your own colors" aria-pressed="${look.t==='x'}"></button>${look.t==='x'?`<div class="pcs"><label class="pc">Text<input type="color" data-c="fg" value="${c.fg}"></label><label class="pc">Page<input type="color" data-c="bg" value="${c.bg}"></label></div>`:''}</div><button class="x" type="button" data-k="close" aria-label="Done">${IC.x}</button>`;
+  cols.innerHTML=`<div class="sc">${SHOW.map(k=>{const [nm,bg]=SC[k];return `<button class="dot" type="button" data-t="${k}" aria-label="${nm}" aria-pressed="${look.t===k}" style="background-color:${bg}"></button>`}).join('')}<button class="dot mine" type="button" data-t="x" aria-label="Your own colors" aria-pressed="${look.t==='x'}"></button></div><button class="x" type="button" data-k="close" aria-label="Done">${IC.x}</button>`;
   if(f?.dataset?.t)cols.querySelector(`.dot[data-t="${f.dataset.t}"]`)?.focus({preventScroll:true});
   if(shape==='cols')fit();
 }
@@ -553,11 +574,18 @@ one.addEventListener('click',async e=>{
   if(k==='share'){if(navigator.share){try{await navigator.share({title:whose(),url:link()})}catch{}}else copied();return}
   // a color dot; your own opens text and page pickers, starting from the colors on screen
   const d=e.target.closest('.dot');
-  if(d){const t=d.dataset.t;if(t===look.t&&t!=='x')return;const c=colors();look=t==='x'?{t,bg:c.bg,fg:c.fg}:t==='h'?{t,...c}:{t};hFor='';d.focus({preventScroll:true});paint();drawBar();save();sampleCover()}
+  if(d){const t=d.dataset.t;if(t==='x'){openCust();return}if(t===look.t)return;look={t};hFor='';d.focus({preventScroll:true});paint();drawBar();save()}
+  if(k==='apply'){custWas=null;save();drawBar();morph('icons');one.querySelector('[data-k=col]').focus({preventScroll:true});return}
 });
-cols.addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;look[k]=e.target.value;delete look.n;paint();save()});
-document.addEventListener('pointerdown',e=>{if(shape==='cols'&&!one.contains(e.target))morph('icons')});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&shape==='cols'){morph('icons');one.querySelector('[data-k=col]').focus({preventScroll:true})}});
+// your own colors: just text and page, starting from what's on screen, shown as you pick; ✓ keeps them, a tap outside or Esc puts back what was there
+const cust=$('#cust');let custWas=null;
+function openCust(){const c=colors();custWas=JSON.parse(JSON.stringify(look));look={t:'x',bg:c.bg,fg:c.fg};paint();
+  cust.innerHTML=`<label class="pc">Text<input type="color" data-c="fg" value="${c.fg}"></label><label class="pc">Page<input type="color" data-c="bg" value="${c.bg}"></label><button class="ok" type="button" data-k="apply" aria-label="Use these colors">${IC.check}</button>`;
+  morph('cust');cust.querySelector('input').focus({preventScroll:true})}
+function cancelCust(){if(custWas){look=custWas;custWas=null;paint();drawBar()}}
+cust.addEventListener('input',e=>{const k=e.target.dataset?.c;if(!k)return;look[k]=e.target.value;delete look.n;paint()});
+document.addEventListener('pointerdown',e=>{if((shape==='cols'||shape==='cust')&&!one.contains(e.target)){cancelCust();morph('icons')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(shape==='cols'||shape==='cust')){cancelCust();morph('icons');one.querySelector('[data-k=col]').focus({preventScroll:true})}});
 addEventListener('resize',fit);
 requestAnimationFrame(fit);document.fonts?.ready.then(fit);
 
