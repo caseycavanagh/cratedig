@@ -49,6 +49,11 @@ a{color:inherit;text-decoration:none}
 /* one column, laptop and phone */
 .t{max-width:560px;margin:0 auto;padding:96px 0 160px;min-height:100vh;min-height:100dvh}
 /* on a laptop the title and the list sit in the middle of the screen, both ways, in the room the header and the bar leave; taller than the screen, they start at the top and scroll */
+/* searching, at every width: the bar and its note step aside for the results, which would otherwise run under them */
+body.searching .dock,body.searching .note{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+/* on a laptop, room below the list while searching, so a low place can rise until its results fit (a margin, so the list doesn't move);
+   it stays until the page has glided back, so closing the search doesn't jump */
+@media(min-width:901px){body.room .t{margin-bottom:70vh}}
 @media(min-width:901px){.t{display:flex;flex-direction:column;justify-content:center;padding:72px 0 150px}.from{height:0;margin-top:20px}} /* Start from a list hangs under the list without counting toward the middle */
 .side{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px;min-width:0;margin-bottom:28px}
 .side .ttl{flex:1 1 auto;min-width:0}
@@ -295,9 +300,9 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
 @media(max-width:900px){
   .t{display:block;padding:calc(env(safe-area-inset-top) + 72px) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 150px) max(16px,env(safe-area-inset-left))}
   .dock,.note{--H:58px;--db:calc(env(safe-area-inset-bottom) + 24px)}
-  /* searching: room below so even number 10 can rise to the top, and the bar and note step aside for the results */
+  /* searching: room below so even number 10 can rise to the top, and the header steps aside too */
   body.searching .t{padding-bottom:100vh}
-  body.searching .dock,body.searching .note,body.searching .hdr{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+  body.searching .hdr{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
   .side{position:static;gap:6px 20px;margin-bottom:16px}
   h1{font-size:var(--fs-5)}
   .lw{--nw:28px}
@@ -403,7 +408,7 @@ function draw(focus){
   }).join('');
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
   showFound();
-  document.body.classList.toggle('none',!filled().length);document.body.classList.toggle('searching',at>=0);
+  document.body.classList.toggle('none',!filled().length);document.body.classList.toggle('searching',at>=0);if(at<0)unroom();
   drawBar();save();sampleCover();drawFrom();
 }
 // a pressing without its own cover borrows the album's; with neither, the square stays blank
@@ -423,9 +428,9 @@ function showFound(){
   if(!typed&&q.value.trim()){fd.innerHTML='';return}
   fd.style.top=(row.offsetTop+row.offsetHeight+6)+'px';
   if(typed&&status){fd.innerHTML=`<li class="st">${esc(status)}</li>`;return}
-  fitFound();
   fd.innerHTML=shown.slice(0,typed?8:25).map((r,i)=>{const k=key(r),on=slots.some(x=>x&&key(x)===k);
     return `<li><button class="hit" type="button" data-f="${i}"${on?' aria-disabled="true"':''}${busy.has(k)?' aria-busy="true"':''}>${cover(r)}<span class="tx"><b>${esc(r.title)}</b><span>${esc(r.artist)}${r.year?' · '+esc(r.year):''}</span></span>${on?`<span class="add">${IC.check}</span>`:''}</button></li>`}).join('');
+  fitFound();
 }
 // "Bad Bunny" or "rosalia lux": the artist's own records first (newest first), then this year's, then the rest as they came
 function rank(res,term){
@@ -453,17 +458,29 @@ ls.addEventListener('keydown',e=>{
   const i=+f.dataset.i,j=i+(e.key==='ArrowUp'?-1:1);if(j<0||j>=TEN)return;[slots[i],slots[j]]=[slots[j],slots[i]];if(at===j)at=i;draw();ls.querySelector(`[data-i="${j}"]`).focus()});
 // the search closes on Esc or a press anywhere else
 function closeSearch(){if(at<0)return;at=-1;found=[];status='';const q=$('#q');if(q)q.value='';draw()}
+function unroom(){if(!document.body.classList.contains('room'))return;clearTimeout(roomT);
+  const max=pg.scrollHeight-parseFloat(getComputedStyle($('#mk')).marginBottom)-pg.clientHeight,y=pg.scrollTop-Math.max(0,max);
+  if(y>4)pg.scrollBy({top:-y,behavior:reduce?'auto':'smooth'});
+  roomT=setTimeout(()=>document.body.classList.remove('room'),y>4&&!reduce?450:0)}
 document.addEventListener('pointerdown',e=>{if(at>=0&&!e.target.closest('.row.q,#found,.row.e'))closeSearch()});
 function openAt(i){if(slots[i])return;at=i;found=[];status='';const q=$('#q');if(q)q.value='';draw(true);lift()}
 // on a phone the keyboard takes half the screen: the open place goes to the top, and its results fill what's left above the keyboard
 const phone=matchMedia('(max-width:700px)');
 // (a frame later, so the browser's own scroll to the focused field has had its turn and doesn't cancel this one)
-function lift(){if(!phone.matches)return;requestAnimationFrame(()=>{const row=$('#q')?.closest('.row');if(!row)return;
+function lift(){if(!phone.matches){rise();return}requestAnimationFrame(()=>{const row=$('#q')?.closest('.row');if(!row)return;
   const y=row.getBoundingClientRect().top-(visualViewport?.offsetTop||0)-12;if(Math.abs(y)<=4)return;
   // Safari can drop a smooth scroll while it's still bringing the field into view; if this one didn't move, it jumps
   const from=pg.scrollTop;pg.scrollBy({top:y,behavior:reduce?'auto':'smooth'});setTimeout(()=>{if(pg.scrollTop===from)pg.scrollBy({top:y})},450)})}
+// on a laptop the place stays where it is unless its results would run off the bottom: then the page scrolls just enough
+// for them to fit, never so far that the place goes off the top
+const FIT=480,EDGE=24;
+let roomT=0;
+function rise(){clearTimeout(roomT);document.body.classList.add('room');requestAnimationFrame(()=>{const row=$('#q')?.closest('.row');if(!row)return;
+  const top=row.getBoundingClientRect().top,want=Math.min(FIT,innerHeight*.6),
+  y=Math.min(top-EDGE,top+row.offsetHeight+6+want-(innerHeight-EDGE));
+  if(y<=4)return;const from=pg.scrollTop;pg.scrollBy({top:y,behavior:reduce?'auto':'smooth'});setTimeout(()=>{if(pg.scrollTop===from)pg.scrollBy({top:y})},450)})}
 function fitFound(){if(at<0)return;const bottom=visualViewport?visualViewport.offsetTop+visualViewport.height:innerHeight;
-  fd.style.maxHeight=phone.matches?Math.max(150,bottom-fd.getBoundingClientRect().top-10)+'px':''}
+  fd.style.maxHeight=phone.matches?Math.max(150,bottom-fd.getBoundingClientRect().top-10)+'px':Math.max(150,Math.min(FIT,bottom-fd.getBoundingClientRect().top-EDGE))+'px'}
 // the keyboard coming up (or going) changes the visual viewport: place the row again once it settles
 let liftT=0;visualViewport?.addEventListener('resize',()=>{fitFound();clearTimeout(liftT);liftT=setTimeout(()=>{lift();setTimeout(fitFound,350)},120)});
 visualViewport?.addEventListener('scroll',fitFound);pg.addEventListener('scroll',fitFound,{passive:true});
