@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<meta name="robots" content="noindex">
+<title>Nothing playing · Crate Dig</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/vinyl/tokens.css">
+<style>
+/* Crate Dig's 404 (Casey, 2026-11-25): a giant 404 on a record sleeve, one line and one way home. The sleeve is the crate's loading
+   sleeve (.loading .lsl in index.html): dark card with a little grain, the same size as the front record in the crate.
+   Served with a 404 status by src/app/[...missing] and, for a crate that doesn't exist, src/app/home */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 var(--fs-3)/1.4 var(--sans);-webkit-font-smoothing:antialiased;
+  display:grid;place-content:center;justify-items:center;gap:32px;text-align:center;
+  padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.sl{--S:min(480px,82vw,58vh);position:relative;width:var(--S);height:var(--S);border-radius:var(--r-cover);overflow:hidden;display:grid;place-items:center;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/160px,#1d1d1f;background-blend-mode:overlay;
+  box-shadow:0 1px 2px #0006,0 calc(var(--S)*.05) calc(var(--S)*.08) calc(var(--S)*-.03) #000a,0 calc(var(--S)*.12) calc(var(--S)*.2) calc(var(--S)*-.07) #000d;
+  animation:in .9s var(--ease) both}
+.sl::before{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 1px 0 #ffffff14,inset 0 -1px 0 #0000002e}
+/* the 404, edge to edge, printed in the ink the loading mark fills with */
+.sl b{font-weight:500;font-size:calc(var(--S)*.48);line-height:1;letter-spacing:-.045em;color:#f2f2f2;font-variant-numeric:tabular-nums;translate:-.02em 0}
+p{margin:0;font-size:var(--fs-4);font-weight:500;text-wrap:balance}
+.btn{all:unset;cursor:pointer;box-sizing:border-box;height:44px;padding:0 24px;border-radius:var(--r-pill);display:inline-flex;align-items:center;justify-content:center;
+  background:var(--fg);color:var(--on-fg);font-size:var(--fs-3);font-weight:500;white-space:nowrap;transition:transform .5s var(--ease),opacity .2s}
+.btn:active{transform:scale(.97);transition-duration:.08s}
+.btn:focus-visible{outline:1px solid var(--ring);outline-offset:3px}
+.say{display:grid;justify-items:center;gap:16px;animation:in .9s .12s var(--ease) both}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+@media (prefers-reduced-motion:reduce){.sl,.say{animation:none}}
+</style>
+</head>
+<body>
+<main class="sl"><b>404</b></main>
+<div class="say">
+  <p>There’s nothing playing</p>
+  <a class="btn" href="/">Home</a>
+</div>
+</body>
+</html>

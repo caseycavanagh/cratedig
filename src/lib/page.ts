@@ -33,3 +33,10 @@ export function og(html: string, tags: Record<string, string>) {
     html,
   );
 }
+
+// Crate Dig's 404 (public/404.html): a giant 404 on a record sleeve and one way home. For addresses nothing answers to
+// (src/app/[...missing]) and crates that don't exist (src/app/home). Kept briefly, so a crate made a moment ago isn't stuck behind it
+export async function missing(cache = "public, max-age=0, s-maxage=10") {
+  const src = await readFile(join(process.cwd(), "public", "404.html"), "utf8");
+  return () => new Response(src, { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": cache } });
+}

@@ -136,6 +136,13 @@ export async function crateInfo(slug: string) {
   return c ? { name: c.name, about: c.about } : null;
 }
 
+// Is there a crate by this name? null when the saved crates can't be read just now (no database, or it's slow), so a page can be let through then
+export async function crateExists(slug: string): Promise<boolean | null> {
+  if (slug === ALL) return true;
+  const e = await edits();
+  return e ? !!e.crates?.list.some((c) => c.slug === slug) : null;
+}
+
 export const facts = (r: Shared) => [r.year, r.label].filter(Boolean).join(", ");
 
 // What Casey added to the crate and when, newest first, for the Recently feed on caseycavanagh.com: records added in code
