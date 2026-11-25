@@ -1,8 +1,8 @@
 import { titleCard } from "@/lib/og";
 import { origin } from "@/lib/page";
 
-// /og/landing: the landing page's link preview
+// /og/landing: the link preview for "/" (the coming soon page, public/soon.html)
 
 export function GET(req: Request) {
-  return titleCard({ title: "Crate Dig", sub: "Every record you own, flipped through like a crate", foot: "Make your crate", host: new URL(origin(req)).host });
+  return titleCard({ title: "Crate Dig", sub: "Dig your records", foot: "Coming Dec. 1", host: new URL(origin(req)).host });
 }

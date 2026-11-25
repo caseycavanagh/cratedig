@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<title>Crate Dig</title>
+<meta name="description" content="Dig your records. An experiment from Casey Cavanagh, coming Dec. 1">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Crate Dig">
+<!-- the coming soon page (Casey, 2026-11-25), served at / through src/app/soon. The loading sleeve from the crate (public/index.html, "Loading"):
+     ink fills the mark's grooves, then the sleeve turns over, and its back has the words. The email signup drops down from under it and stays;
+     a click turns the sleeve back and forth. Emails go to /api/notify. Casey's crates are at /casey. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Crate Dig">
+<meta property="og:title" content="Crate Dig">
+<meta property="og:description" content="Dig your records. An experiment from Casey Cavanagh, coming Dec. 1">
+<meta property="og:url" content="/">
+<meta property="og:image" content="/og/landing">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Crate Dig: dig your records">
+<meta name="twitter:card" content="summary_large_image">
+<!-- links to Casey's crate from when it lived at / (/#record/<slug>, /?edit) still open it; the server sends most, but not the hash or a bare ?edit -->
+<script>if(location.hash.length>1||/[?&](r|edit|dv|hints)(=|&|$)/.test(location.search))location.replace('/casey/all'+location.search+location.hash);document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="/vinyl/tokens.css">
+<style>
+/* tokens: /vinyl/tokens.css */
+*,*::before,*::after{box-sizing:border-box}*{margin:0}
+html,body{height:100%;background:var(--bg)}
+body{font-family:var(--sans);font-size:var(--fs-3);line-height:1.45;color:var(--fg);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overflow:hidden}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+:focus{outline:none}
+:focus-visible{outline:1px solid var(--ring);outline-offset:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* the sleeve, as big as fits: 520 on a laptop, the width less the margins on a phone, smaller on a short screen */
+.pg{--S:min(520px,calc(100vw - 40px),calc(100svh - 190px));min-height:100%;display:grid;place-content:center;justify-items:center;perspective:1600px;
+  padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left))}
+.flip{position:relative;z-index:1;width:var(--S);height:var(--S);transform-style:preserve-3d;transition:transform 1.1s var(--ease);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.first .flip{transition-duration:.7s}
+.turned .flip{transform:rotateY(180deg)}
+.flip:focus-visible{outline:none}
+.flip:focus-visible .lsl{box-shadow:0 0 0 1px var(--ring)}
+
+/* dark card with a little grain, the mark pressed blind into it; the ink copy fills its grooves from the label out as --p goes 0 to 1 */
+.lsl{position:absolute;inset:0;border-radius:var(--r-cover);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/160px,#1d1d1f;background-blend-mode:overlay;
+  box-shadow:0 1px 2px #0006,0 calc(var(--S)*.05) calc(var(--S)*.08) calc(var(--S)*-.03) #000a,0 calc(var(--S)*.12) calc(var(--S)*.2) calc(var(--S)*-.07) #000d}
+.lsl::before{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 1px 0 #ffffff14,inset 0 -1px 0 #0000002e;z-index:1;pointer-events:none}
+.mk{position:absolute;left:21%;top:21%;width:58%;height:58%}
+.mk:not(.ink){--p:1}
+.mk.hi{fill:var(--fg);opacity:.07;translate:-1px -1px}
+.mk.lo{fill:#000;opacity:.45;translate:1px 1.5px}
+.mk.base{fill:#1d1d1f}
+.mk.ink{fill:#f2f2f2;--lo:0}
+.bk{transform:rotateY(180deg)}
+
+/* the back: the name top left, the words in the middle */
+.bkin{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 8%}
+.name{position:absolute;left:7%;top:7%;display:flex;align-items:center;gap:10px;font-size:var(--fs-4);font-weight:var(--w-name);letter-spacing:-.01em}
+.name svg{width:28px;height:28px;fill:currentColor}
+h1{font-size:var(--fs-d);font-weight:700;line-height:1;letter-spacing:-.035em;text-wrap:balance}
+.when{margin-top:16px;color:var(--t2);font-size:var(--fs-4);text-wrap:balance}
+.when a{text-underline-offset:3px;text-decoration-thickness:1px}
+@media(hover:hover){.when a:hover{text-decoration:underline}}
+
+/* the signup drops down from under the sleeve right after the first turn, then stays put */
+/* it sits above the sleeve's shadow (which would grey it), and is clipped at the sleeve's edge while it comes down, so it seems to come from under it */
+.sign{position:relative;z-index:2;width:var(--S);display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;margin-top:32px}
+.js .sign{opacity:0;translate:0 -48px;clip-path:inset(16px -40px -40px)}
+.js .shown .sign{opacity:1;translate:0 0;clip-path:inset(0 -40px -40px);transition:opacity .3s ease-out .45s,translate .55s var(--ease) .45s,clip-path .55s var(--ease) .45s}
+.f{position:relative;display:flex;gap:8px;width:100%;max-width:400px}
+.in{all:unset;box-sizing:border-box;flex:1;min-width:0;height:44px;padding:0 18px;border-radius:var(--r-pill);background:var(--hov);box-shadow:inset 0 0 0 1px var(--line);font-size:var(--fs-4);color:var(--fg);text-align:left;transition:box-shadow .2s,opacity .2s}
+.in:focus{box-shadow:inset 0 0 0 1px var(--t3)}
+.in::placeholder{color:var(--t3)}
+/* the button stays out of the way until the email looks complete, then slides in and the field makes room */
+.btn{all:unset;box-sizing:border-box;cursor:pointer;flex:none;height:44px;padding:0 20px;max-width:220px;overflow:hidden;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);display:inline-flex;align-items:center;justify-content:center;font-size:var(--fs-3);font-weight:500;white-space:nowrap;
+  transition:padding .45s var(--ease),max-width .45s var(--ease),opacity .3s,transform .5s var(--ease)}
+.btn:active{transform:scale(.96);transition-duration:.08s}
+.f:not(.ok){gap:0}
+.f:not(.ok) .btn{max-width:0;padding:0;opacity:0;pointer-events:none}
+.lb{display:inline-block;max-width:160px;overflow:hidden;transition:max-width .45s var(--ease),opacity .25s}
+.ck{display:none;width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* sent: the button closes to a check and the field says so */
+.sent .f .btn{max-width:220px;padding:0 13px;opacity:1;pointer-events:none}
+.sent .lb{max-width:0;opacity:0}
+.sent .ck{display:block}
+.sent .in{opacity:0;pointer-events:none}
+.msg{position:absolute;left:18px;right:60px;top:0;height:44px;display:flex;align-items:center;font-size:var(--fs-4);opacity:0;pointer-events:none;transition:opacity .3s .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sent .msg{opacity:1}
+.busy .btn{opacity:.6}
+.oops{margin-top:10px;color:var(--t2);font-size:var(--fs-3);min-height:1.45em}
+
+@media(max-width:700px){
+  h1{font-size:var(--fs-d-ph)}
+  .when{margin-top:12px}
+  .sign{margin-top:24px}
+}
+/* a narrow phone: the sleeve is under 300, so the words step down to fit beside the name */
+@media(max-width:369px){
+  .when{font-size:var(--fs-3)}
+  .name{font-size:var(--fs-3)}
+  .name svg{width:24px;height:24px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="0 0 350 350"><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M157.145 0.0252864C160.03 -0.268345 162.5 2.03448 162.5 4.94184V20.1458C162.5 22.7538 160.496 24.9183 157.911 25.2131C83.1157 33.7382 25.0003 97.5464 25 175C25 252.453 83.1156 316.262 157.911 324.787C160.496 325.082 162.5 327.245 162.5 329.853V345.057C162.5 347.965 160.03 350.268 157.145 349.975C68.8822 340.985 0 266.079 0 175C0.000299011 83.9203 68.8823 9.01514 157.145 0.0252864Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:0" d="M187.5 4.94282C187.5 2.03527 189.97 -0.268454 192.855 0.0252864C281.118 9.01516 350 83.9211 350 175.001C350 266.08 281.118 340.985 192.855 349.975C189.97 350.269 187.5 347.966 187.5 345.058V329.853C187.5 327.245 189.504 325.082 192.089 324.787C266.884 316.262 325 252.454 325 175.001C325 97.5471 266.884 33.7373 192.089 25.2121C189.504 24.9174 187.5 22.7538 187.5 20.1458V4.94282Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M157.017 50.6613C159.943 50.2375 162.5 52.5624 162.5 55.5269V70.8483C162.5 73.3761 160.618 75.495 158.133 75.9195C110.937 83.9772 75.0003 125.27 75 175C75 224.729 110.936 266.022 158.133 274.079C160.618 274.504 162.5 276.623 162.5 279.151V294.473C162.5 297.438 159.943 299.763 157.017 299.34C96.5016 290.577 50 238.246 50 175C50.0003 111.753 96.5018 59.4244 157.017 50.6613Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:1" d="M187.5 55.5279C187.5 52.5633 190.057 50.2374 192.983 50.6613C253.498 59.4244 300 111.754 300 175.001C300 238.247 253.498 290.576 192.983 299.339C190.057 299.763 187.5 297.438 187.5 294.473V279.151C187.5 276.623 189.381 274.504 191.867 274.079C239.063 266.022 275 224.73 275 175.001C275 125.271 239.064 83.9772 191.867 75.9195C189.381 75.4951 187.5 73.3762 187.5 70.8483V55.5279Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M156.713 101.879C159.712 101.123 162.5 103.489 162.5 106.59V122.448C162.5 124.733 160.947 126.705 158.79 127.447C139.132 134.215 125 152.948 125 175C125 197.051 139.132 215.785 158.79 222.553C160.947 223.295 162.5 225.266 162.5 227.552V243.409C162.5 246.51 159.712 248.877 156.713 248.121C124.13 239.916 100 210.29 100 175C100 139.709 124.13 110.084 156.713 101.879Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:2" d="M187.5 106.59C187.5 103.489 190.287 101.123 193.286 101.878C225.869 110.083 250 139.709 250 175.001C250 210.291 225.869 239.917 193.286 248.122C190.287 248.877 187.5 246.51 187.5 243.41V227.551C187.5 225.266 189.053 223.294 191.21 222.552C210.868 215.784 225 197.052 225 175.001C225 152.949 210.868 134.215 191.21 127.447C189.053 126.705 187.5 124.734 187.5 122.448V106.59Z"/><path style="opacity:clamp(var(--lo,.16),calc(var(--p,1)*4 - 3 + var(--i)),1);--i:3" d="M174.622 150.689C188.429 150.689 199.622 161.91 199.622 175.751C199.622 189.593 188.429 200.814 174.622 200.814C160.815 200.814 149.622 189.593 149.622 175.751C149.622 161.91 160.815 150.689 174.622 150.689ZM174.622 170.739C171.861 170.739 169.622 172.983 169.622 175.751C169.622 178.52 171.861 180.764 174.622 180.764C177.383 180.764 179.622 178.52 179.622 175.751C179.622 172.983 177.383 170.739 174.622 170.739Z" fill-rule="evenodd"/></symbol></svg>
+<main class="pg" id="pg">
+  <div class="flip" id="flip" role="button" tabindex="0" aria-label="Turn the sleeve over">
+    <div class="lsl fr" id="ink" aria-hidden="true"><svg class="mk hi" viewBox="0 0 350 350"><use href="#mark"/></svg><svg class="mk lo" viewBox="0 0 350 350"><use href="#mark"/></svg><svg class="mk base" viewBox="0 0 350 350"><use href="#mark"/></svg><svg class="mk ink" viewBox="0 0 350 350"><use href="#mark"/></svg></div>
+    <div class="lsl bk"><div class="bkin">
+      <span class="name"><svg viewBox="0 0 350 350" aria-hidden="true"><use href="#mark" style="--lo:1"/></svg>Crate Dig</span>
+      <h1>Dig your records.</h1>
+      <p class="when">An experiment from <a href="https://caseycavanagh.com">Casey Cavanagh</a>, coming Dec. 1</p>
+    </div></div>
+  </div>
+  <div class="sign" id="sign">
+    <form class="f" id="f" novalidate>
+      <label class="sr" for="em">Your email</label>
+      <input class="in" id="em" name="email" type="email" placeholder="Your email" autocomplete="email" enterkeyhint="send" maxlength="254" required>
+      <button class="btn" type="submit"><span class="lb">Notify me</span><svg class="ck" viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg></button>
+      <span class="msg" aria-live="polite"></span>
+    </form>
+    <p class="oops" id="oops" aria-live="polite"></p>
+  </div>
+</main>
+<script>
+(()=>{
+  const pg=document.getElementById('pg'),flip=document.getElementById('flip'),ink=document.getElementById('ink'),f=document.getElementById('f'),em=document.getElementById('em'),oops=document.getElementById('oops'),sign=document.getElementById('sign');
+  const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let turned=false;
+  const turn=to=>{turned=to;pg.classList.toggle('turned',to);flip.style.transform='';flip.setAttribute('aria-label',to?'Turn the sleeve back over':'Turn the sleeve over')};
+  // the ink fills, then the sleeve turns over quickly by itself, once, and the signup comes down
+  const first=()=>{pg.classList.add('first','shown');turn(true);setTimeout(()=>pg.classList.remove('first'),750)};
+  if(still){ink.style.setProperty('--p',1);first()}
+  else{const t0=performance.now(),ez=t=>1-Math.pow(1-Math.min(1,Math.max(0,t)),3);
+    const tick=now=>{const t=(now-t0)/1000;ink.style.setProperty('--p',ez((t-.3)/1.5).toFixed(3));if(t<2)requestAnimationFrame(tick);else first()};
+    requestAnimationFrame(tick)}
+  // after that, a click or tap (not on the link) turns it back and forth; Enter or Space when it has focus
+  flip.addEventListener('click',e=>{if(e.target.closest('a')||!pg.classList.contains('shown'))return;turn(!turned)});
+  flip.addEventListener('keydown',e=>{if(e.target!==flip||(e.key!=='Enter'&&e.key!==' '))return;e.preventDefault();turn(!turned)});
+  flip.addEventListener('pointerup',e=>{if(e.pointerType!=='keyboard')setTimeout(()=>flip.blur(),0)});
+  // with a mouse, the sleeve leans toward it a little, as it does while the crate loads
+  if(!still&&matchMedia('(hover:hover) and (pointer:fine)').matches){
+    pg.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||pg.classList.contains('first'))return;const b=flip.getBoundingClientRect(),x=Math.max(-.5,Math.min(.5,(e.clientX-b.left)/b.width-.5)),y=Math.max(-.5,Math.min(.5,(e.clientY-b.top)/b.height-.5));
+      flip.style.transform=`rotateX(${(-y*3).toFixed(2)}deg) rotateY(${((turned?180:0)+x*5).toFixed(2)}deg)`});
+    pg.addEventListener('pointerleave',()=>flip.style.transform='');
+  }
+  // the signup: the button slides in once the email looks complete
+  const looks=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+  em.addEventListener('input',()=>{f.classList.toggle('ok',looks(em.value));oops.textContent=''});
+  f.addEventListener('submit',async e=>{
+    e.preventDefault();if(sign.classList.contains('sent')||f.classList.contains('busy'))return;
+    if(!looks(em.value)){em.focus();return}
+    f.classList.add('busy');oops.textContent='';
+    try{
+      const r=await fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em.value.trim()})});
+      if(!r.ok)throw new Error(r.status);
+      f.querySelector('.msg').textContent='You’re on the list.';sign.classList.add('sent');em.blur();
+    }catch{oops.textContent='That didn’t go through. Try again in a minute.'}
+    f.classList.remove('busy');
+  });
+})();
+</script>
+</body>
+</html>
