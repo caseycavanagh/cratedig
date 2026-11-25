@@ -11,21 +11,21 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/vinyl/tokens.css">
 <style>
-/* Crate Dig's 404 (Casey picked I3, 2026-11-25): one record out of its sleeve, 404 pressed into the vinyl, a plain black label with
-   its hole showing, one line and one way home. Served with a 404 status by src/app/[...missing] and, for a crate that doesn't exist, src/app/home */
+/* Crate Dig's 404 (Casey, 2026-11-25): a giant 404 on a record sleeve, one line and one way home. The sleeve is the crate's loading
+   sleeve (.loading .lsl in index.html): dark card with a little grain, the same size as the front record in the crate.
+   Served with a 404 status by src/app/[...missing] and, for a crate that doesn't exist, src/app/home */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:400 var(--fs-3)/1.4 var(--sans);-webkit-font-smoothing:antialiased;
   display:grid;place-content:center;justify-items:center;gap:32px;text-align:center;
   padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
-/* the record: about the size of the front record in the crate */
-.rec{--S:min(440px,82vw,58vh);position:relative;width:var(--S);height:var(--S);border-radius:50%;
-  background:repeating-radial-gradient(circle,#161616 0 1.5px,#1d1d1d 1.5px 3px);
-  box-shadow:inset 0 0 0 1px #ffffff0a,var(--rest);animation:in .9s var(--ease) both}
-.rec svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-/* light on the grooves, from the room, not the record: it drifts a little and doesn't turn with it */
-.rec .sheen{position:absolute;inset:0;border-radius:50%;pointer-events:none;mix-blend-mode:screen;
-  background:conic-gradient(from 30deg,#0000,#ffffff12 8%,#0000 16%,#0000 50%,#ffffff0d 58%,#0000 66%);animation:drift 14s ease-in-out infinite alternate}
+.sl{--S:min(480px,82vw,58vh);position:relative;width:var(--S);height:var(--S);border-radius:var(--r-cover);overflow:hidden;display:grid;place-items:center;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/160px,#1d1d1f;background-blend-mode:overlay;
+  box-shadow:0 1px 2px #0006,0 calc(var(--S)*.05) calc(var(--S)*.08) calc(var(--S)*-.03) #000a,0 calc(var(--S)*.12) calc(var(--S)*.2) calc(var(--S)*-.07) #000d;
+  animation:in .9s var(--ease) both}
+.sl::before{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 1px 0 #ffffff14,inset 0 -1px 0 #0000002e}
+/* the 404, edge to edge, printed in the ink the loading mark fills with */
+.sl b{font-weight:500;font-size:calc(var(--S)*.48);line-height:1;letter-spacing:-.045em;color:#f2f2f2;font-variant-numeric:tabular-nums;translate:-.02em 0}
 p{margin:0;font-size:var(--fs-4);font-weight:500;text-wrap:balance}
 .btn{all:unset;cursor:pointer;box-sizing:border-box;height:44px;padding:0 24px;border-radius:var(--r-pill);display:inline-flex;align-items:center;justify-content:center;
   background:var(--fg);color:var(--on-fg);font-size:var(--fs-3);font-weight:500;white-space:nowrap;transition:transform .5s var(--ease),opacity .2s}
@@ -33,51 +33,11 @@ p{margin:0;font-size:var(--fs-4);font-weight:500;text-wrap:balance}
 .btn:focus-visible{outline:1px solid var(--ring);outline-offset:3px}
 .say{display:grid;justify-items:center;gap:16px;animation:in .9s .12s var(--ease) both}
 @keyframes in{from{opacity:0;transform:translateY(10px)}}
-@keyframes drift{from{rotate:-14deg}to{rotate:14deg}}
-@media (prefers-reduced-motion:reduce){.rec,.say,.rec .sheen{animation:none}}
+@media (prefers-reduced-motion:reduce){.sl,.say{animation:none}}
 </style>
 </head>
 <body>
-<main class="rec" aria-hidden="true">
-  <!-- 1000 units across. The label (r 105) sits inside the 0, the hole (r 12) at the middle. The digits are pressed into the vinyl -->
-  <svg viewBox="0 0 1000 1000">
-    <defs>
-      <g id="d" fill="none" stroke="#fff" stroke-width="52" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M228 300V705M263 575H70L228 300"/>
-        <ellipse cx="500" cy="500" rx="145" ry="205"/>
-        <path d="M895 300V705M930 575H737L895 300"/>
-      </g>
-      <!-- pressed in: the grooves run on through the digits, flattened, and the walls show at the edges. Lit from the top left, so the
-           wall just inside each top and left edge is in shadow and the one inside each bottom and right edge catches the light -->
-      <filter id="press" x="-5%" y="-5%" width="110%" height="110%">
-        <feOffset in="SourceAlpha" dx="7" dy="7" result="dn"/>
-        <feComposite in="SourceAlpha" in2="dn" operator="out" result="tl"/>
-        <feGaussianBlur in="tl" stdDeviation="2.5" result="tlb"/>
-        <feFlood flood-color="#000" flood-opacity=".9"/>
-        <feComposite in2="tlb" operator="in" result="shade"/>
-        <feOffset in="SourceAlpha" dx="-3" dy="-3" result="up"/>
-        <feComposite in="SourceAlpha" in2="up" operator="out" result="br"/>
-        <feGaussianBlur in="br" stdDeviation="1" result="brb"/>
-        <feFlood flood-color="#fff" flood-opacity=".22"/>
-        <feComposite in2="brb" operator="in" result="lit"/>
-        <feMerge><feMergeNode in="shade"/><feMergeNode in="lit"/></feMerge>
-        <feComposite in2="SourceAlpha" operator="in"/>
-      </filter>
-      <mask id="m"><use href="#d"/></mask>
-    </defs>
-    <!-- the run-out: smooth vinyl between the last groove and the label -->
-    <circle cx="500" cy="500" r="132" fill="#171717"/>
-    <!-- the digits -->
-    <rect width="1000" height="1000" fill="#0c0c0c" fill-opacity=".45" mask="url(#m)"/>
-    <use href="#d" filter="url(#press)"/>
-    <!-- a plain black paper label, and the hole -->
-    <circle cx="500" cy="500" r="105" fill="#1f1f21"/>
-    <circle cx="500" cy="500" r="105" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="2"/>
-    <circle cx="500" cy="500" r="13" fill="#ffffff14"/>
-    <circle cx="500" cy="500" r="12" fill="#0b0b0b"/>
-  </svg>
-  <i class="sheen"></i>
-</main>
+<main class="sl"><b>404</b></main>
 <div class="say">
   <p>There’s nothing playing</p>
   <a class="btn" href="/">Home</a>
