@@ -112,8 +112,14 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:12px;--cv:48px} /* t
 .row.q:focus-within::before{box-shadow:inset 0 0 0 1px var(--line2)}
 /* results float over the places below, so nothing moves */
 /* the whole way across, under the place it fills */
-.found{position:absolute;z-index:4;left:0;right:0;list-style:none;padding:6px;max-height:min(480px,60vh);max-height:min(480px,60dvh);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
+.found{position:absolute;z-index:4;left:calc(var(--nw) + var(--gap));right:0;list-style:none;padding:6px;max-height:min(480px,60vh);max-height:min(480px,60dvh);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:var(--r-in);background:var(--sheet);box-shadow:var(--float);display:grid}
 .found:empty{display:none}
+/* the results' own scrollbar: a thin thumb in the page's text color, no track, kept clear of the rounded corners */
+.found{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--fg) 22%,transparent) transparent}
+.found::-webkit-scrollbar{width:12px}
+.found::-webkit-scrollbar-track{background:none;margin:12px 0}
+.found::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--fg) 22%,transparent);border:4px solid transparent;background-clip:padding-box;border-radius:6px}
+.found::-webkit-scrollbar-thumb:hover{background-color:color-mix(in srgb,var(--fg) 40%,transparent)}
 .found .st{padding:12px 6px;color:var(--m);font-size:var(--fs-3)}
 .hit{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:6px;border-radius:calc(var(--r-in) - 6px);transition:background-color .2s}
 @media(hover:hover){.hit:hover{background:var(--hov)}}
