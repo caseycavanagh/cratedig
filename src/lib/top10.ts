@@ -20,10 +20,10 @@ export function colors(q: URLSearchParams) {
   return { bg: `#${bg}`, fg: `#${fg}`, n: HEX.test(n) ? `#${n}` : `#${fg}` };
 }
 
-// "Sam’s top 10 of 2026", or "A top 10 of 2026" without a name
+// "My 2026 top 10 by Sam", as the maker titles it (the title, with the name signed under it), or just "My 2026 top 10"
 export function whose(by: string | null) {
   const n = (by || "").trim().slice(0, 40);
-  return n ? `${n}${/s$/i.test(n) ? "’" : "’s"} top 10 of 2026` : "A top 10 of 2026";
+  return n ? `My 2026 top 10 by ${n}` : "My 2026 top 10";
 }
 
 // the address's colors, name and records: what the link picture needs
