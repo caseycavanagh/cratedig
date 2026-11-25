@@ -584,7 +584,8 @@ const one=$('#one'),cols=$('#cols'),lays=[...one.querySelectorAll('.lay')];
   const show=b=>{if(!b.closest('.lay.on')||b.getAttribute('aria-disabled')==='true'){hide();return}clearTimeout(wait);
     if(on){at(b);return}wait=setTimeout(()=>{tip.style.transition='none';at(b);void tip.offsetWidth;tip.style.transition='';tip.classList.add('on');on=true},400)};
   const hide=()=>{clearTimeout(wait);tip.classList.remove('on');on=false};
-  one.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const b=e.target.closest(S);b?show(b):hide()});
+  // the gaps between swatches and icons keep it up, so it glides from one to the next; it goes only when the pointer leaves the bar
+  one.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const b=e.target.closest(S);if(b)show(b);else if(!e.target.closest('.lay.on'))hide()});
   one.addEventListener('pointerleave',hide);one.addEventListener('pointerdown',hide);
   one.addEventListener('focusin',e=>{const b=e.target.closest(S);if(b&&b.matches(':focus-visible'))show(b)});
   one.addEventListener('focusout',hide);
