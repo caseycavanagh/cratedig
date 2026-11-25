@@ -268,6 +268,12 @@ a.where:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .note button{all:unset;flex:none;cursor:pointer;height:28px;padding:0 12px;border-radius:var(--r-pill);border:1px solid var(--line2);font-size:var(--fs-2);transition:transform .5s var(--ease)}
 .note button:active{transform:scale(.97);transition-duration:.08s}
 .note button:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+/* × lets it go at once; so does a tap on the words */
+.note{padding-right:4px;gap:8px}
+.note span{cursor:default;margin-right:4px}
+.note .nx{width:28px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;color:var(--t2);transition:color .2s,background-color .2s}
+.note .nx svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+@media(hover:hover){.note .nx:hover{color:var(--fg);background:var(--hov)}.note .nu:hover{background:var(--hov)}}
 body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility 0s .12s}
 
 @media(max-width:900px){
@@ -308,7 +314,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
   <div class="lay cust" id="cust" role="group" aria-label="Your own colors"></div>
   <div class="lay done" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Link copied</span></div>
 </div></div>
-<div class="note" id="note" role="status" aria-live="polite"><span></span><button type="button">Undo</button></div>
+<div class="note" id="note" role="status" aria-live="polite"><span></span><button type="button" class="nu">Undo</button><button type="button" class="nx" aria-label="Dismiss"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
 <script src="/vinyl/visitor-crate.js"></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s);
@@ -470,9 +476,15 @@ function takeOut(i){
   tell(`Took out ${r.title}`,()=>{if(slots.some(x=>x&&key(x)===key(r)))return;const j=slots[i]?firstGap(i):i;if(j<0)return;slots[j]=r;draw()});
 }
 // the note says what just changed, with Undo, and stays until the next change
-function tell(t,fn){undo=fn;note.firstElementChild.textContent=t;note.classList.remove('on');void note.offsetWidth;note.classList.add('on')}
-const hush=()=>{undo=null;note.classList.remove('on')};
-note.lastElementChild.addEventListener('click',()=>{if(!undo)return;const fn=undo;hush();fn()});
+// the note goes by itself: 4s when it holds an Undo, 2s when it doesn't (the crate's is 1.8s); a pointer resting on it holds it; × or a tap on the words lets it go at once
+let noteT=0;const noteFor=()=>{clearTimeout(noteT);noteT=setTimeout(hush,undo?4000:2000)};
+function tell(t,fn){undo=fn;note.firstElementChild.textContent=t;note.querySelector('.nu').hidden=!fn;note.classList.remove('on');void note.offsetWidth;note.classList.add('on');noteFor()}
+const hush=()=>{clearTimeout(noteT);undo=null;note.classList.remove('on')};
+note.querySelector('.nu').addEventListener('click',()=>{if(!undo)return;const fn=undo;hush();fn()});
+note.querySelector('.nx').addEventListener('click',hush);
+note.firstElementChild.addEventListener('click',hush);
+note.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')clearTimeout(noteT)});
+note.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&note.classList.contains('on'))noteFor()});
 // Start over: the whole list goes, with Undo
 $('#rs').addEventListener('click',()=>{if(!filled().length)return;const was={slots:slots.slice(),from};fillSeq++;slots=Array(TEN).fill(null);from='';at=-1;draw();
   tell('Cleared your list',()=>{slots=was.slots;from=was.from;draw()})});
