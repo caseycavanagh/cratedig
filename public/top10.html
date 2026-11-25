@@ -121,9 +121,23 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar star
 .btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* Start from a list: critics' year-end lists (vinyl/lists-2026.json). One tap fills the ten, with Undo */
 /* under the list, so the places never move when it comes and goes */
-.from{display:grid;gap:8px;margin-top:28px}
+.from{position:relative;display:grid;justify-items:start;margin-top:28px}
 .from[hidden]{display:none}
-.from .lab{font-size:var(--fs-2);color:var(--m)}
+/* one pill that opens a menu of the lists: the crate's menu (index.html .tsm), rising above the pill so the bar never covers it.
+   Lists still to come are in it, greyed */
+.pl .wc{flex:none;width:16px;height:16px;margin-right:-6px;transition:rotate .35s var(--ease)}
+.pl[aria-expanded=true]{background:var(--soft)}
+.pl[aria-expanded=true] .wc{rotate:180deg}
+.tsm{position:absolute;z-index:5;left:0;bottom:calc(100% + 8px);width:220px;padding:6px;display:grid;gap:2px;border-radius:var(--r-panel);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);transform-origin:0 100%;animation:tsmIn .35s var(--ease)}
+.tsm[hidden]{display:none}
+.tsm button{all:unset;box-sizing:border-box;height:42px;padding:0 12px;border-radius:var(--r-in);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:var(--fs-3);color:var(--t1);cursor:pointer;white-space:nowrap}
+@media(hover:hover){.tsm button:hover{background:var(--hov);color:var(--fg)}}
+.tsm button:active{background:var(--prs)}
+.tsm button[aria-checked=true]{background:var(--sel);color:var(--fg)}
+.tsm button:focus-visible{outline:1px solid var(--ring);outline-offset:-2px}
+.tsm button[aria-disabled=true]{color:var(--t4);cursor:default;background:none}
+@keyframes tsmIn{from{opacity:0;scale:.96}}
+@media(prefers-reduced-motion:reduce){.tsm{animation:none}.pl .wc{transition:none}}
 .pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 4px}
 .pills::-webkit-scrollbar{display:none}
 /* the same pills as the crate's wall (index.html .wall .pills) */
@@ -147,13 +161,14 @@ h1{overflow-wrap:anywhere}
 /* the name is typed into the title: an input as wide as what's in it (a hidden copy of the words sets the width) */
 .nmw{display:inline-grid;vertical-align:top;max-width:100%}
 .nmw>*{grid-area:1/1;font:inherit;letter-spacing:inherit;min-width:2ch}
-.nmw .mir{visibility:hidden;white-space:pre;overflow:hidden;padding-bottom:4px}
-.nmw input{all:unset;grid-area:1/1;width:0;min-width:100%;color:inherit;border-bottom:2px dashed color-mix(in srgb,var(--fg) 30%,transparent);transition:border-color .2s}
-.nmw input:focus{border-bottom-color:color-mix(in srgb,var(--fg) 60%,transparent)}
+/* the dashes are the copy's own underline, so they run exactly under the letters, at their baseline, on any phone */
+.nmw .mir{color:transparent;white-space:pre;overflow:hidden;padding-bottom:8px;text-decoration:underline dashed 2px color-mix(in srgb,var(--fg) 30%,transparent);text-underline-offset:.24em;text-decoration-skip-ink:none;transition:text-decoration-color .2s;pointer-events:none}
+.nmw input{all:unset;grid-area:1/1;width:0;min-width:100%;color:inherit}
+.nmw:focus-within .mir{text-decoration-color:color-mix(in srgb,var(--fg) 60%,transparent)}
 .nmw input::placeholder{color:color-mix(in srgb,var(--fg) 38%,transparent)}
 /* the header, as on the crate: the mark in its circle top left, and what this is beside it */
 .hdr{position:fixed;z-index:var(--z-bar);top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:2px}
-.hdr::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 16px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 44px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1;opacity:0;transition:opacity .3s}
+.hdr::before{content:'';position:fixed;left:0;right:0;top:-200px;height:calc(env(safe-area-inset-top) + 350px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 216px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 244px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 calc(100% - 105px),#000a calc(100% - 68px),#0000);mask:linear-gradient(#000 calc(100% - 105px),#000a calc(100% - 68px),#0000);pointer-events:none;z-index:-1;opacity:0;transition:opacity .3s}
 body.under .hdr::before{opacity:1} /* the crate's top edge (index.html .find::before): it comes in once something has scrolled under the header */
 .logo{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--fg);transition:transform .5s var(--ease)}
 .logo svg{width:24px;height:24px;fill:currentColor;transition:transform .6s var(--ease)}
@@ -165,7 +180,8 @@ body.under .hdr::before{opacity:1} /* the crate's top edge (index.html .find::be
 /* the bar, always there: one glass bar (the crate's dock glass) with three icons. It changes shape for what you tap:
    the colors stretch out of it (× or a tap outside closes them), Copy link becomes "Link copied" for a moment */
 .dock{--H:54px;--db:calc(env(safe-area-inset-bottom) + 18px);position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:var(--db);display:flex;justify-content:center;padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
-.dock::before{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 150px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 45%,#000 70%);mask:linear-gradient(#0000,#000a 45%,#000 70%);pointer-events:none;z-index:-1} /* the places ease out under the bar, as the crate's grid and table do */
+.dock::before{content:'';position:fixed;left:0;right:0;bottom:-200px;height:calc(env(safe-area-inset-bottom) + 350px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 68px,#000 105px);mask:linear-gradient(#0000,#000a 68px,#000 105px);pointer-events:none;z-index:-1} /* the places ease out under the bar, as the crate's grid and table do */
+/* both fades run 200px past the screen's edges: Safari on iOS draws the page under its status bar and its floating toolbar, outside the area fixed things are placed in, and a fade that stopped at the edge let the list show through there */
 .one{pointer-events:auto;position:relative;flex:none;max-width:100%;height:var(--H);box-sizing:border-box;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float);overflow:hidden;transition:width .5s var(--ease)}
 /* Start over: its own glass circle beside the bar (the crate's dock circles). It steps aside while the colors are out */
 .dock{gap:12px}
@@ -246,7 +262,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
     <ol class="ls" id="ls" aria-labelledby="h"></ol>
     <ul class="found" id="found" aria-live="polite"></ul>
   </main>
-  <div class="from" id="from" role="group" aria-labelledby="fromL" hidden><span class="lab" id="fromL">Start from a list</span><div class="pills"></div></div>
+  <div class="from" id="from" hidden><button class="pl" type="button" id="fromB" aria-haspopup="menu" aria-expanded="false" aria-controls="fromM">Start from a list<svg class="wc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="tsm" id="fromM" role="menu" aria-labelledby="fromB" hidden></div></div>
   <footer class="ft">Made by <a href="https://caseycavanagh.com">Casey Cavanagh</a></footer>
 </div>
 </div>
@@ -425,11 +441,20 @@ $('#rs').addEventListener('click',()=>{if(!filled().length)return;const was={slo
 // ---- Start from a list: a critic's ten fill the places at once (each found by name, so it opens like one you searched for), with Undo ----
 // The lists are data, /vinyl/lists-2026.json: add a publication's list there the day it comes out
 let LISTS=[],fillSeq=0;
-const fromEl=$('#from');
+const fromEl=$('#from'),fromB=$('#fromB'),fromM=$('#fromM');
+// lists to come, shown greyed until they're in the data file
+const SOON=['NPR','NYT','Pitchfork','NME'];
 function drawFrom(){
   fromEl.hidden=!LISTS.length||filled().length>0; // only while the list is empty; Undo brings it back
-  fromEl.lastElementChild.innerHTML=LISTS.map(l=>`<button class="pl" type="button" data-l="${esc(l.id)}" aria-pressed="${from===l.id}" aria-label="${esc(l.title)}">${esc(l.name)}</button>`).join('');
+  if(fromEl.hidden)menuFrom(false);
+  const have=new Set(LISTS.map(l=>l.name.toLowerCase()));
+  fromM.innerHTML=LISTS.map(l=>`<button type="button" role="menuitemradio" data-l="${esc(l.id)}" aria-checked="${from===l.id}" aria-label="${esc(l.title)}">${esc(l.name)}</button>`).join('')
+    +SOON.filter(n=>!have.has(n.toLowerCase())).map(n=>`<button type="button" role="menuitem" aria-disabled="true">${n}</button>`).join('');
 }
+function menuFrom(on){fromM.hidden=!on;fromB.setAttribute('aria-expanded',on);if(on)fromM.querySelector('[data-l]')?.focus({preventScroll:true})}
+fromB.addEventListener('click',()=>menuFrom(fromM.hidden));
+document.addEventListener('pointerdown',e=>{if(!fromM.hidden&&!fromEl.contains(e.target))menuFrom(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!fromM.hidden){menuFrom(false);fromB.focus({preventScroll:true})}});
 // the best match for a critic's line: same artist and the same title (or one starting with it), else the same artist's first album
 async function findOne(c){
   const res=await V.search(`${c.artist} ${c.title}`,{albums:true,year:YEAR}).catch(()=>[]),a=fold(c.artist),t=fold(c.title);
@@ -453,7 +478,7 @@ async function fillFrom(id){
     slots[i]=r;draw()}};
   await Promise.all([work(),work(),work()]);
 }
-fromEl.addEventListener('click',e=>{const b=e.target.closest('[data-l]');if(b)fillFrom(b.dataset.l)});
+fromM.addEventListener('click',e=>{const b=e.target.closest('[data-l]');if(b){menuFrom(false);fillFrom(b.dataset.l)}});
 fetch('/vinyl/lists-'+YEAR+'.json').then(r=>r.ok?r.json():null).then(d=>{LISTS=(d?.lists||[]).filter(l=>l.id&&l.name&&l.records?.length);drawFrom()}).catch(()=>{});
 
 // ---- drag: from anywhere on a filled row. A mouse just presses and moves; a finger holds still for a beat first ----
