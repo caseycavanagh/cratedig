@@ -55,16 +55,17 @@ a{color:inherit;text-decoration:none}
 .clr:active{opacity:.6}
 .clr:focus-visible{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
 h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
-main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar starts --gap past the number, and the cover --pl inside the bar */
+main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:12px;--cv:48px} /* the bar starts --gap past the number, and the cover sits --pl inside the bar on every side.
+   Corners nest: the bar's 14 is the cover's 2 plus the 12 around it, so the two curves run parallel */
 
 /* the ten places: soft bars, a little apart, no lines. A bar's color is the page's with a touch of the text's, so every color scheme has them */
 .ls{--bar:color-mix(in srgb,var(--fg) 5%,var(--bg));--bar-e:color-mix(in srgb,var(--fg) 2.5%,var(--bg));
   list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0}
 /* the number hangs outside the bar, in the margin; the bar starts at the cover */
-.row{--rb:var(--bar);position:relative;display:flex;align-items:center;gap:var(--gap);min-height:64px;padding:0 10px 0 0;border-radius:var(--r-in);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.row{--rb:var(--bar);position:relative;display:flex;align-items:center;gap:var(--gap);min-height:calc(var(--cv) + 2*var(--pl));padding:0 calc(var(--pl) - 2px) 0 0;border-radius:var(--r-in);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .n{flex:none;width:var(--nw);font-size:var(--fs-5);font-weight:500;line-height:1;letter-spacing:-.02em;text-align:left;color:var(--rank-n,var(--fg))}
 .row::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;right:0;left:calc(var(--nw) + var(--gap));border-radius:var(--r-in);background:var(--rb);transition:background-color .2s,box-shadow .2s var(--ease)}
-.row>.cv{margin-left:var(--pl)}
+.row>.cv{margin-left:var(--pl);margin-right:calc(var(--pl) - var(--gap))} /* the same room on every side of the cover, the words included */
 .ls{position:relative;z-index:0}
 .row.e{--rb:var(--bar-e);cursor:pointer}
 .row.e .n{color:var(--t4);font-weight:400}
@@ -73,7 +74,7 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar star
 .row.e:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
 .row.f{cursor:grab}
 .row.f:focus-visible{outline:1px solid var(--ring);outline-offset:-1px}
-.cv{flex:none;width:48px;height:48px;border-radius:var(--r-cover);overflow:hidden;background:var(--soft)}
+.cv{flex:none;width:var(--cv);height:var(--cv);border-radius:var(--r-cover);overflow:hidden;background:var(--soft)}
 .cv img{display:block;width:100%;height:100%;object-fit:cover;-webkit-user-drag:none}
 .tx{flex:1;min-width:0;display:grid;line-height:1.25}
 .tx b{font-weight:500;font-size:var(--fs-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -101,10 +102,12 @@ main{position:relative;min-width:0;--nw:34px;--gap:8px;--pl:8px} /* the bar star
 .fld input:focus-visible{box-shadow:0 0 0 1px var(--ring)}
 .fld input::placeholder{color:var(--m)}
 .fld input::-webkit-search-cancel-button{display:none}
-.row.q{padding-right:10px;--rb:var(--bar)}
-.row.q .fld{margin-left:var(--pl)}
+.row.q{--rb:var(--bar)}
+/* the empty place keeps a cover's spot, with the search mark in it, so what you type starts where a title will */
+.row>.cv.qi{display:grid;place-items:center;background:color-mix(in srgb,var(--fg) 6%,transparent);color:var(--m)}
+.cv.qi svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 /* the open place is the field itself: no box inside the bar, and what you type starts where a cover would */
-.row.q .fld input{height:64px;margin-block:-1px;border-radius:0;background:none;padding:0 8px 0 0}
+.row.q .fld input{height:calc(var(--cv) + 2*var(--pl));margin-block:-1px;border-radius:0;background:none;padding:0 8px 0 0}
 .row.q .fld input:focus-visible{box-shadow:none}
 .row.q:focus-within::before{box-shadow:inset 0 0 0 1px var(--line2)}
 /* results float over the places below, so nothing moves */
@@ -273,7 +276,7 @@ body.colors .note{opacity:0;visibility:hidden;transition:opacity .12s,visibility
   .n{font-size:22px}
   .fld input{font-size:var(--fs-4)}
 }
-@media(max-width:369px){main{--nw:26px;--gap:8px;--pl:8px}.n{font-size:20px}.cv{width:42px;height:42px}.cols .sc,.dots{gap:6px}.dot{width:26px;height:26px}}
+@media(max-width:369px){main{--nw:26px;--gap:8px;--pl:10px;--cv:42px}.n{font-size:20px}.cols .sc,.dots{gap:6px}.dot{width:26px;height:26px}}
 /* reduced motion: things fade, nothing moves */
 @media(prefers-reduced-motion:reduce){.btn,.btn:active,.pl:active{transform:none}.row.w .cv{animation:none}.ls.dragging .row:not(.drag){transition:none}.row.drag{scale:none}.note,.note.on{translate:-50% 0;transition:opacity .2s}.one{transition:none}}
 </style>
@@ -369,7 +372,7 @@ function draw(focus){
   if(at>=0&&slots[at])at=-1;
   ls.innerHTML=slots.map((r,i)=>{
     if(r)return `<li class="row f${r.src==='w'?' w':''}" data-i="${i}" tabindex="0" aria-label="${i+1}. ${esc(r.title)} by ${esc(r.artist)}. Up and down arrows move it"><span class="n" aria-hidden="true">${i+1}</span>${cover(r)}<span class="tx" aria-hidden="true"><b>${esc(r.title)}</b><span>${esc(r.artist)}</span></span><button class="ib x" type="button" data-x aria-label="Take out ${esc(r.title)}">${IC.x}</button></li>`;
-    if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><div class="fld"><label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
+    if(i===at)return `<li class="row q" data-e="${i}"><span class="n">${i+1}</span><span class="cv qi" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l4.5 4.5"/></svg></span><div class="fld"><label class="sr" for="q">Find a record for number ${i+1}</label><input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Artist or album"></div></li>`;
     return `<li class="row e" data-e="${i}" role="button" tabindex="0" aria-label="Add number ${i+1}"><span class="n" aria-hidden="true">${i+1}</span></li>`;
   }).join('');
   const nq=$('#q');if(nq){nq.value=had;if(focus||was)nq.focus({preventScroll:!focus})}
