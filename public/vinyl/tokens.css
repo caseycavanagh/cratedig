@@ -8,6 +8,12 @@
   --mono:'Geist Mono',ui-monospace,monospace;
   /* six sizes and nothing else: small print, labels, body, lede, a name on a phone, a name on a laptop */
   --fs-1:12px;--fs-2:13px;--fs-3:15px;--fs-4:17px;--fs-5:26px;--fs-6:34px;
+  /* and one display size, for a page's one big line (the coming soon page): a laptop, then a phone */
+  --fs-d:56px;--fs-d-ph:40px;
+  /* the name "Crate Dig" is set heavy wherever it's written, to match the weight of the mark's strokes */
+  --w-name:700;
+  /* the light under the pointer, on covers and sleeves: how strong, everywhere (1 was the old strength; Casey, 2026-11-25: more muted) */
+  --light:.45;
 
   /* the page, white, and the grey ladder from bright to faint */
   --bg:#121212;--fg:#fff;--on-fg:#111;

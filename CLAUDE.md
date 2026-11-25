@@ -6,7 +6,7 @@ Casey's record crate: every record Casey owns, flipped through like a crate. It 
 
 ## Where things are
 
-- For now (2026-11-07) `/` and `/casey` redirect to `/casey/all` (next.config.ts redirects); the landing page and crates page below are kept but not shown.
+- Since 2026-11-25 `/` is the coming soon page, `public/soon.html` (through `src/app/soon`): the crate's loading sleeve fills with ink, turns over to the words, and an email signup drops down under it (`/api/notify`, kept in Upstash under the sorted set `notify:emails`). `/casey` is Casey's crates page again. The landing page below (search box) is kept but not shown.
 
 - `public/landing.html`: the front door, served at `/` through `src/app/landing`. The sentence and a search box that hands off to the make page (`/vinyl-make.html?q=…`), with one of Casey's crates beside it as the example (the pinned one, else the whole crate; filled in by the route). Old `/?r=`, `?edit` links redirect to `/casey` (next.config.ts), old `/#record/…` links are forwarded by the page.
 - `public/crates.html`: Casey's crates, served at `/casey` through `src/app/crates` (which puts in the crates from `crateTiles` in `src/lib/record.ts`). A pinned crate, or the only one, leads big; the rest sit equal, with the words Casey wrote for each. Old `/casey?r=`, `?edit` and `#record/…` links go to `/casey/all`.
