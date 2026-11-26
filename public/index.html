@@ -1530,13 +1530,16 @@ html.phone .ab-name{margin-top:-6px!important;font-size:56px}
 html.phone .ab-body{font-size:var(--fs-4)}
 html.phone .ab-cr{margin-top:12px}
 /* the bar and the dial share one edge: a blur that eases off into a long fade, at the top and at the bottom; solid under the status bar so no edge of the pile peeks through there */
-.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 16px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 44px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 30%,#000a 55%,#0000);mask:linear-gradient(#000 30%,#000a 55%,#0000);pointer-events:none;z-index:-1}
+/* solid under the status bar and the whole row of the bar (the row ends 54px under the safe area), so nothing shows beside the crate's name; only below the row does it ease off */
+.find::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + 150px);background:linear-gradient(var(--bg) calc(env(safe-area-inset-top) + 62px),color-mix(in srgb,var(--bg) 88%,transparent) calc(env(safe-area-inset-top) + 90px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 100px),#0000);mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 100px),#0000);pointer-events:none;z-index:-1}
+/* and a plain solid strip under the status bar itself: no blur and no mask, so iPhone Safari has nothing to see through there and colors its status bar to match */
+.find::after{content:'';position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background-color:var(--bg);pointer-events:none;z-index:-1;transition:opacity .3s}
 .kd::after{content:'';position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-190px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:var(--bg);opacity:0;transition:opacity .5s;-webkit-mask:linear-gradient(#0000,#000 calc(50% - 92px));mask:linear-gradient(#0000,#000 calc(50% - 92px));pointer-events:none}
 .kd.kd-on::after{opacity:calc(var(--kz,0)*.94);transition:opacity .2s} /* open on records, the dial darkens what's behind it, but only while you're turning it */
 .kd::before,.kd::before{top:-120px;bottom:calc(-106px - env(safe-area-inset-bottom) - 160px);background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0);mask:radial-gradient(150% 100% at 50% 100%,#000 52%,#000e 60%,#000b 69%,#0007 78%,#0003 88%,#0000) 0 0/100% calc(100% - 184px) no-repeat,linear-gradient(#0000 calc(100% - 184px),#000 0)} /* dark enough behind the labels that records under it don't compete; its top edge arcs like the dial and eases in, so there's no flat line. It runs on past the bottom of the screen, so a swipe that stretches the page never shows what's under the bar */
-html.phone body.searching .find::before{display:none}
+html.phone body.searching .find::before,html.phone body.searching .find::after{display:none}
 .find::before{transition:opacity .3s}
-body.walling:not(.under) .find::before{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
+body.walling:not(.under) .find::before,body.walling:not(.under) .find::after{opacity:0} /* in the grid and the table it comes in once something has scrolled under the bar */
 /* the grid and the table run up under the bar instead of stopping at a hard line */
 .wall,.tbl{top:0;padding-top:calc(env(safe-area-inset-top) + 72px)}
 .tbl thead th,.tbl thead{position:static}
@@ -1597,7 +1600,7 @@ html:not(.phone) #oq{right:calc(var(--edge) + 52px)}
 html.pulldown .open.in #oq{transition:none}
 #oq:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 body.seek .find{z-index:var(--z-raised)}
-body.seek .find::before{opacity:0}
+body.seek .find::before,body.seek .find::after{opacity:0}
 body.seek .crate.lifted~.find>.q,body.seek .crate.lifted~.find>.sx{opacity:1;visibility:visible;pointer-events:auto;scale:1;transition:none}
 html:has(.crate.lifted) body.seek #oq{opacity:0;visibility:hidden}
 html body.seek .sl,html:not(.phone) body.seek .sl{z-index:var(--z-pop)}
@@ -1623,10 +1626,11 @@ html:has(.crate.lifted) .find>.q,html:not(:has(.crate.lifted)) #oq{transition:no
 html:has(.crate.lifted) .find>.q{scale:1}
 /* the mark stays put over an open record too, above it, where it takes you back to the front */
 html:has(.open:not([hidden])) .find{z-index:var(--z-raised)}
-html:has(.open:not([hidden])) .find::before{display:none}
+html:has(.open:not([hidden])) .find::before,html:has(.open:not([hidden])) .find::after{display:none}
 /* phones: once About and the rest rise up the screen, the strip behind the mark comes back, solid where the mark sits, so words
    scrolling under it go out of sight instead of running into it. It follows the rise, so it's gone while the record is at rest */
 html.phone:has(.open:not([hidden])) .find::before{display:block;height:calc(env(safe-area-inset-top) + 120px);background:color-mix(in srgb,var(--bg) 95%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);mask:linear-gradient(#000 calc(env(safe-area-inset-top) + 62px),#000a calc(env(safe-area-inset-top) + 84px),#0000);opacity:var(--rise,0);transition:none}
+html.phone:has(.open:not([hidden])) .find::after{display:block;opacity:var(--rise,0);transition:none}
 html:has(.open:not([hidden])) .find>.logo{opacity:1;visibility:visible;scale:1;pointer-events:auto;transition:none}
 #oq,.open.in #oq{opacity:0;transition:none}
 html:has(.crate.lifted) #oq{opacity:1}
