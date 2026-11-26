@@ -1138,38 +1138,31 @@ body.reading .wall,body.reading .cv{opacity:0;transition:opacity .3s}
 @media(prefers-reduced-motion:reduce){.rk .pic{transition:none}}
 body.fon .rk{padding-top:calc(env(safe-area-inset-top) + 72px + 44px)}
 /* a top 10 shared at /2026: whose list it is above, a way to make your own below, one centered column */
-.rk-h,.rk-mk{display:none}
+.rk-h{display:none}
 .y26 .rk-h{display:grid;gap:8px;max-width:640px;margin:0 auto 32px;padding-left:88px}
-/* the maker's header: the mark top left, who made Crate Dig top right; both scroll away with the list */
+/* the maker's header: the mark top left, Make your own top right in the list's own text color; both scroll away with the list */
 .y26 .rk-top{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center}
 .y26 .rk-home{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--fg);transition:transform .5s var(--ease)}
 .y26 .rk-home svg{width:24px;height:24px;fill:currentColor;transition:transform .6s var(--ease)}
 @media(hover:hover){.y26 .rk-home:hover svg{transform:rotate(45deg)}}
 .y26 .rk-home:active{transform:scale(.96);transition-duration:.08s}
-.y26 .rk-home:focus-visible,.y26 .rk-made:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
-.y26 .rk-made{margin-left:auto;display:inline-flex;align-items:center;height:32px;padding:0 12px;margin-right:-8px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:500;line-height:1.3;color:var(--t2);text-decoration:none;white-space:nowrap;transition:color .2s}
-@media(hover:hover){.y26 .rk-made:hover{color:var(--fg)}}
+.y26 .rk-home:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
 .y26 .rk-h h1{font-size:var(--fs-6);font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance;color:var(--fg);margin:0}
 .y26 .rk-by{margin:0;font-size:var(--fs-4);font-weight:500;line-height:1.3;color:var(--t2);overflow-wrap:anywhere} /* who made it, signed under the title as in the maker */
 .y26 .rk ol{max-width:640px}
 .y26 .rk .n{text-align:left}
-/* Make your own rides in a glass bar at the bottom, in the bar's own glass rather than the white of a primary button */
-.y26 .rk-mk{display:flex;justify-content:center;position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 18px);margin:0;pointer-events:none}
-.y26 .rk-mk::before{content:'';position:fixed;left:0;right:0;bottom:-200px;height:calc(env(safe-area-inset-bottom) + 330px);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask:linear-gradient(#0000,#000a 68px,#000 105px);mask:linear-gradient(#0000,#000a 68px,#000 105px);pointer-events:none;z-index:-1}
-.y26 .rk-mk .rk-go{pointer-events:auto;height:54px;padding:0 26px;background:var(--glass);color:var(--fg);border:1px solid var(--line);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--float)}
-@media(hover:hover){.y26 .rk-mk .rk-go:hover{background:color-mix(in srgb,var(--fg) 8%,var(--glass))}}
-html.phone.y26 .rk-mk{bottom:calc(env(safe-area-inset-bottom) + 14px)}html.phone.y26 .rk-mk .rk-go{height:58px}
 .rk-go{all:unset;box-sizing:border-box;cursor:pointer;height:44px;padding:0 22px;border-radius:var(--r-pill);background:var(--fg);color:var(--on-fg);display:inline-flex;align-items:center;font-size:var(--fs-3);font-weight:500;white-space:nowrap;transition:transform .5s var(--ease)}
 .rk-go:active{transform:scale(.97);transition-duration:.08s}
 .rk-go:focus-visible{outline:1px solid var(--ring);outline-offset:2px}
+.y26 .rk-own{margin-left:auto;height:36px;padding:0 16px;font-size:var(--fs-2);text-decoration:none}
+@media(hover:hover){.y26 .rk-own:hover{background:var(--t1)}}
 .y26 .logo{display:none}
 .y26 .rk{padding-top:calc(env(safe-area-inset-top) + 96px)}
 .y26:not(:has(.open:not([hidden]))) .dock{display:none} /* the list's only bar is Make your own; an open record keeps its own */
-.y26:has(.open:not([hidden])) .rk-mk,.y26 .rk[hidden] .rk-mk{display:none}
 .lerr{position:fixed;inset:0;z-index:var(--z-about);background:var(--bg);color:var(--fg);display:grid;place-content:center;justify-items:center;gap:18px;padding:24px;text-align:center;font-size:var(--fs-4)}
 .lerr p{margin:0}
 .lerr a{font-size:var(--fs-3);color:var(--m)}
-@media(max-width:700px){.y26 .rk{padding-top:calc(env(safe-area-inset-top) + 80px)}.y26 .rk-top{left:max(6px,env(safe-area-inset-left))} /* the mark's left edge lines up with the numbers */.y26 .rk-h{padding-left:50px;margin-bottom:24px}.y26 .rk-h h1{font-size:var(--fs-5)}}
+@media(max-width:700px){.y26 .rk{padding-top:calc(env(safe-area-inset-top) + 80px)}.y26 .rk-top{left:max(6px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right))} /* the mark's left edge lines up with the numbers, Make your own's right edge with the rows */.y26 .rk-h{padding-left:50px;margin-bottom:24px}.y26 .rk-h h1{font-size:var(--fs-5)}}
 body:not(.ready) .rk{pointer-events:none}
 .tbl{position:fixed;inset:0;z-index:3;overflow:hidden auto;overscroll-behavior:contain;background:var(--bg);padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 120px);transition:opacity .4s var(--ease)}
 .tbl[hidden]{display:none}
@@ -1828,7 +1821,7 @@ html.phone .sx,html.phone body.searching .sx{display:none}
   <div class="vw" role="group" aria-label="View"><button type="button" data-v="rank" aria-pressed="false" hidden>Top 10</button><button type="button" data-v="crate" aria-pressed="true">Crate</button><button type="button" data-v="wall" aria-pressed="false">Grid</button><button type="button" data-v="table" aria-pressed="false">Table</button></div>
 </main>
 <section class="cv" id="cv" hidden tabindex="-1" aria-label="Every cover, laid out on a canvas. Drag or use the arrow keys to look around, pinch or use plus and minus to zoom"><div class="board" id="board"></div></section>
-<section class="rk" id="rk" hidden tabindex="-1" aria-label="The top 10"><header class="rk-h"><div class="rk-top"><a class="rk-home" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="rk-made" href="https://caseycavanagh.com">Made by Casey Cavanagh</a></div><h1 id="rkT"></h1><p class="rk-by" id="rkBy" hidden></p></header><ol></ol><p class="rk-mk"><a class="rk-go" href="/2026">Make your own</a></p></section>
+<section class="rk" id="rk" hidden tabindex="-1" aria-label="The top 10"><header class="rk-h"><div class="rk-top"><a class="rk-home" href="/" aria-label="Crate Dig"><svg aria-hidden="true"><use href="#mark"/></svg></a><a class="rk-go rk-own" href="/2026">Make your own</a></div><h1 id="rkT"></h1><p class="rk-by" id="rkBy" hidden></p></header><ol></ol></section>
 <section class="tbl" id="tbl" hidden tabindex="-1" aria-label="Every record, as a table"><table><thead></thead><tbody></tbody></table></section>
 <section class="wall" id="wall" hidden tabindex="-1" aria-label="Every cover"><div class="in"><div class="pills" id="pills" role="group" aria-label="Show"></div><div class="tiles" id="tiles"></div></div></section>
 <div class="hv" id="hv" aria-hidden="true"></div>
