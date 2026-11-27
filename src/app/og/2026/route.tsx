@@ -6,5 +6,5 @@ import { colors, covers } from "@/lib/top10";
 // the picture says what the list is; whose it is rides in the link's own title under it (og:title, whose() in src/lib/top10.ts)
 export async function GET(req: Request) {
   const q = new URL(req.url).searchParams;
-  return top10Card({ title: "Top 10 albums of 2026", ...colors(q), covers: await covers(q) });
+  return top10Card({ title: "My top 10 albums of 2026", ...colors(q), covers: await covers(q) });
 }

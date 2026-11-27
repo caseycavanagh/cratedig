@@ -181,7 +181,7 @@ export function top10Card({ title, bg, fg, n, covers = [] }: { title: string; bg
       {MARK.map((d, i) => <path key={i} fill={fg} fillRule="evenodd" d={d} />)}
     </svg>
   );
-  // with covers (Casey's pick H, 2026-11-24): a band with the mark and "Top 10 albums of 2026" (no address, Casey 2026-11-27), then the ten covers
+  // with covers (Casey's pick H, 2026-11-24): a band with the mark and "My top 10 albums of 2026" (no address, Casey 2026-11-27), then the ten covers
   // edge to edge, five across, 240 px each, no numbers; a missing cover is a soft square
   if (any) {
     const size = title.length > 34 ? 40 : title.length > 24 ? 50 : 58;
