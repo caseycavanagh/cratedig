@@ -25,11 +25,6 @@ export async function page(file: string, tweak?: (html: string, req: Request) =>
   };
 }
 
-export const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-// a cover at a smaller size: a bare cover name has 360px and 720px copies in vinyl/t/ (scripts/vinyl-thumbs.mjs, made at build); Casey's uploads come smaller at ?w=; anything else as it is
-export const thumb = (f: string, w: 360 | 720 = 720) =>
-  /^[a-z0-9-]+-front\.webp$/.test(f) ? `/vinyl/t/${f.replace(/\.webp$/, "")}-${w}.webp` : /^\/api\/crate\/img\/[0-9a-f]{24}$/.test(f) ? `${f}?w=${w}` : /^(https?:|\/)/.test(f) ? f : `/vinyl/${f}`;
-
 // a page's preview tags, set to other words
 export function og(html: string, tags: Record<string, string>) {
   const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");

@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="Crate Dig">
 <!-- the coming soon page (Casey, 2026-11-25), served at / through src/app/soon. The loading sleeve from the crate (public/index.html, "Loading"):
      ink fills the mark's grooves, then the sleeve turns over, and its back has the words. The email signup drops down from under it and stays;
-     a click turns the sleeve back and forth. Its back previews Casey's crate (src/app/soon). The line about what it is and what the email is for sits over the field. Emails go to /api/notify. Casey's crates are at /casey. -->
+     a click turns the sleeve back and forth. Its back is a wall of type with the name and a link to Casey's crate along the foot; the line about what it is sits over the field, whose own words say what the email is for. Emails go to /api/notify. Casey's crates are at /casey. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Crate Dig">
 <meta property="og:title" content="Crate Dig">
@@ -63,21 +63,28 @@ button,input{font:inherit;color:inherit}
 .mk.ink{fill:#f2f2f2;--lo:0}
 .bk{transform:rotateY(180deg)}
 
-/* the back: the name top left, the words in the middle */
-.bkin{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 8%}
-.name{position:absolute;left:7%;top:7%;display:flex;align-items:center;gap:10px;font-size:var(--fs-4);font-weight:var(--w-name);letter-spacing:-.01em}
-.name svg{width:28px;height:28px;fill:currentColor}
-h1{font-size:var(--fs-d);font-weight:700;line-height:1;letter-spacing:-.035em;text-wrap:balance}
+/* the back, a wall of type (Casey's pick, 2026-11-27): the headline as big as the sleeve takes, three lines flush left,
+   and along the foot the name on the left and the way into Casey's crate on the right, both a little smaller on a small sleeve so they share the line */
+.bkin{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;padding:7%}
+h1{font-size:calc(var(--S)*.235);font-weight:700;line-height:.86;letter-spacing:-.055em;margin-left:-.04em}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.name{display:flex;align-items:center;gap:clamp(8px,calc(var(--S)*.03),10px);font-size:clamp(var(--fs-2),calc(var(--S)*.05),var(--fs-4));font-weight:var(--w-name);letter-spacing:-.01em;white-space:nowrap}
+.name svg{flex:none;width:clamp(22px,calc(var(--S)*.083),28px);height:clamp(22px,calc(var(--S)*.083),28px);fill:currentColor}
+/* it only takes a tap while the back is up, and stays drawn until the sleeve is halfway round */
+.cr{display:inline-flex;align-items:center;gap:6px;font-size:clamp(var(--fs-1),calc(var(--S)*.045),var(--fs-3));font-weight:500;color:var(--t2);white-space:nowrap;transition:color .2s;-webkit-tap-highlight-color:transparent}
+.cr svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:translate .5s var(--ease)}
+@media(hover:hover){.cr:hover{color:var(--fg)}.cr:hover svg{translate:3px 0}}
+.cr:active{opacity:.6}
+.pg:not(.turned) .cr{pointer-events:none;visibility:hidden;transition:visibility 0s .55s}
 
 /* the signup drops down from under the sleeve right after the first turn, then stays put */
 /* it sits above the sleeve's shadow (which would grey it), and is clipped at the sleeve's edge while it comes down, so it seems to come from under it */
 .sign{position:relative;z-index:2;width:var(--S);display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;margin-top:32px}
 .js .sign{opacity:0;translate:0 -48px;clip-path:inset(16px -40px -40px)}
 .js .shown .sign{opacity:1;translate:0 0;clip-path:inset(0 -40px -40px);transition:opacity .3s ease-out .45s,translate .55s var(--ease) .45s,clip-path .55s var(--ease) .45s}
-/* what it is and what you're signing up for, over the field */
-.when{font-size:var(--fs-4);font-weight:500;text-align:center;text-wrap:balance}
-.what{margin-top:4px;color:var(--t2);font-size:var(--fs-3);text-align:center;text-wrap:balance}
-.f{margin-top:20px;position:relative;display:flex;gap:8px;width:100%;max-width:400px}
+/* what it is, over the field; the field's own words say what the email is for */
+.when{font-size:var(--fs-4);font-weight:500;color:var(--t1);text-align:center;text-wrap:balance}
+.f{margin-top:16px;position:relative;display:flex;gap:8px;width:100%;max-width:400px}
 .in{all:unset;box-sizing:border-box;flex:1;min-width:0;height:44px;padding:0 18px;border-radius:var(--r-pill);background:var(--hov);box-shadow:inset 0 0 0 1px var(--line);font-size:var(--fs-4);color:var(--fg);text-align:left;transition:box-shadow .2s,opacity .2s}
 .in:focus{box-shadow:inset 0 0 0 1px var(--t3)}
 .in::placeholder{color:var(--t3)}
@@ -98,38 +105,13 @@ h1{font-size:var(--fs-d);font-weight:700;line-height:1;letter-spacing:-.035em;te
 .busy .btn{opacity:.6}
 .oops{margin-top:10px;color:var(--t2);font-size:var(--fs-3)}
 .oops:empty{display:none}
-/* the way into Casey's crate: quiet, no line until the pointer is on it */
-.see{margin-top:16px;color:var(--t2);font-size:var(--fs-3);text-underline-offset:3px;text-decoration-thickness:1px;transition:color .2s}
-@media(hover:hover){.see:hover{color:var(--fg);text-decoration:underline}}
-/* the back previews Casey's crate, like the back of a sampler: five covers along the foot with the crate's name under them, the whole row a link
-   (filled in by src/app/soon; without it the plain link above stays). The headline centers in what's left above it.
-   It only takes a tap while the back is up, and stays drawn until the sleeve is halfway round */
-.smp-on .bkin{bottom:calc(var(--S)*.242 + 23px);padding-top:calc(var(--S)*.1)}
-.smp-on .name{top:calc(var(--S)*.07)}
-.smp{position:absolute;left:7%;right:7%;bottom:7%;z-index:3;display:flex;flex-direction:column;gap:10px;color:var(--t1);-webkit-tap-highlight-color:transparent}
-.pg:not(.turned) .smp{pointer-events:none;visibility:hidden;transition:visibility 0s .55s}
-.smp .rw{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
-.smp img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:var(--r-cover);background:var(--soft);box-shadow:0 1px 2px #0008;transition:translate .5s var(--ease)}
-.smp .lb{display:flex;align-items:center;gap:6px;font-size:var(--fs-2);font-weight:500;transition:color .2s}
-.smp svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:translate .5s var(--ease)}
-@media(hover:hover){.smp:hover .lb{color:var(--fg)}.smp:hover svg{translate:3px 0}.smp:hover img{translate:0 -3px}.smp:hover img:nth-child(2){transition-delay:.03s}.smp:hover img:nth-child(3){transition-delay:.06s}.smp:hover img:nth-child(4){transition-delay:.09s}.smp:hover img:nth-child(5){transition-delay:.12s}}
-.smp:active{opacity:.7}
-.smp:focus-visible{outline:none}
-.smp:focus-visible .lb{outline:1px solid var(--ring);outline-offset:3px;border-radius:2px}
 /* who made it: at the foot of the page, clear of the home indicator; the page keeps 50px free for it so the signup never runs into it */
 .by{position:absolute;left:0;right:0;bottom:max(20px,env(safe-area-inset-bottom));display:flex;justify-content:center;pointer-events:none}
 .by a{pointer-events:auto;font-size:var(--fs-2);font-weight:500;color:var(--t2);white-space:nowrap;transition:color .2s}
 @media(hover:hover){.by a:hover{color:var(--fg)}}
 
 @media(max-width:700px){
-  h1{font-size:var(--fs-d-ph)}
-  .when{font-size:var(--fs-3)}
   .sign{margin-top:24px}
-}
-/* a narrow phone: the sleeve is under 300, so the words step down to fit beside the name */
-@media(max-width:369px){
-  .name{font-size:var(--fs-3)}
-  .name svg{width:24px;height:24px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -140,21 +122,19 @@ h1{font-size:var(--fs-d);font-weight:700;line-height:1;letter-spacing:-.035em;te
   <div class="flip" id="flip" role="button" tabindex="0" aria-label="Turn the sleeve over">
     <div class="lsl fr" id="ink" aria-hidden="true"><svg class="mk hi" viewBox="0 0 350 350"><use href="#mark"/></svg><svg class="mk lo" viewBox="0 0 350 350"><use href="#mark"/></svg><svg class="mk base" viewBox="0 0 350 350"><use href="#mark"/></svg><svg class="mk ink" viewBox="0 0 350 350"><use href="#mark"/></svg></div>
     <div class="lsl bk"><div class="bkin">
-      <span class="name"><svg viewBox="0 0 350 350" aria-hidden="true"><use href="#mark" style="--lo:1"/></svg>Crate Dig</span>
-      <h1>Dig your records</h1>
-    </div><!--crate--></div>
+      <h1>Dig<br>your<br>records</h1>
+      <div class="foot"><span class="name"><svg viewBox="0 0 350 350" aria-hidden="true"><use href="#mark" style="--lo:1"/></svg>Crate Dig</span><a class="cr" href="/casey/all">Casey’s crate<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div>
+    </div></div>
   </div>
   <div class="sign" id="sign">
     <p class="when">A digital home for your vinyl, coming soon.</p>
-    <p class="what">Get one email when it opens. That’s it.</p>
     <form class="f" id="f" novalidate>
       <label class="sr" for="em">Your email</label>
-      <input class="in" id="em" name="email" type="email" placeholder="Your email" autocomplete="email" enterkeyhint="send" maxlength="254" required>
+      <input class="in" id="em" name="email" type="email" placeholder="Email me when it opens" autocomplete="email" enterkeyhint="send" maxlength="254" required>
       <button class="btn" type="submit"><span class="lb">Notify me</span></button>
       <span class="msg" aria-live="polite"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg><span></span></span>
     </form>
     <p class="oops" id="oops" aria-live="polite"></p>
-    <a class="see" href="/casey/all">See Casey’s crate</a>
   </div>
 </main>
 <footer class="by"><a href="https://caseycavanagh.com">Made by Casey Cavanagh</a></footer>
