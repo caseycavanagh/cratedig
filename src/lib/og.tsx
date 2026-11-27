@@ -171,7 +171,7 @@ export function titleCard({ title, sub, foot, host }: { title: string; sub: stri
 
 // a shared top 10 (/og/2026): the title card in the list's own colors, its name, then its ten covers in a row with their numbers under them.
 // Without covers (an old link) the numbers stand alone. A missing cover is a soft square
-export function top10Card({ title, bg, fg, n, host, covers = [] }: { title: string; bg: string; fg: string; n: string; host: string; covers?: (string | null)[] }) {
+export function top10Card({ title, bg, fg, n, covers = [] }: { title: string; bg: string; fg: string; n: string; covers?: (string | null)[] }) {
   const any = covers.some(Boolean);
   // a tenth of the text color over the background (satori has no color-mix)
   const ch = (h: string, i: number) => parseInt(h.slice(1 + i * 2, 3 + i * 2), 16) || 0;
@@ -181,7 +181,7 @@ export function top10Card({ title, bg, fg, n, host, covers = [] }: { title: stri
       {MARK.map((d, i) => <path key={i} fill={fg} fillRule="evenodd" d={d} />)}
     </svg>
   );
-  // with covers (Casey's pick H, 2026-11-24): a band with the mark, the name on one line and the address, then the ten covers
+  // with covers (Casey's pick H, 2026-11-24): a band with the mark and "My top 10 albums of 2026" (no address, Casey 2026-11-27), then the ten covers
   // edge to edge, five across, 240 px each, no numbers; a missing cover is a soft square
   if (any) {
     const size = title.length > 34 ? 40 : title.length > 24 ? 50 : 58;
@@ -191,7 +191,6 @@ export function top10Card({ title, bg, fg, n, host, covers = [] }: { title: stri
           <div style={{ height: 150, display: "flex", alignItems: "center", gap: 22, padding: "0 56px" }}>
             {logo(44)}
             <div style={{ flex: 1, fontSize: size, fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1.1, lineClamp: 1, display: "block" }}>{title}</div>
-            <span style={{ fontFamily: MONO, fontSize: 18, opacity: 0.6 }}>{host}/2026</span>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", width: 1200 }}>
             {Array.from({ length: 10 }, (_, i) =>
@@ -222,7 +221,6 @@ export function top10Card({ title, bg, fg, n, host, covers = [] }: { title: stri
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 64, fontSize: 40, fontWeight: 500, color: n }}>
             {Array.from({ length: 10 }, (_, i) => <span key={i}>{i + 1}</span>)}
           </div>
-          <div style={{ display: "flex", marginTop: 28, fontFamily: MONO, fontSize: 24, opacity: 0.6 }}>{host}/2026</div>
         </div>
       </div>
     ),
