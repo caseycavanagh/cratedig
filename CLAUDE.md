@@ -6,7 +6,7 @@ Casey's record crate: every record Casey owns, flipped through like a crate. It 
 
 ## Where things are
 
-- Since 2026-11-25 `/` is the coming soon page, `public/soon.html` (through `src/app/soon`): the crate's loading sleeve fills with ink, turns over to the words, and an email signup drops down under it (`/api/notify`, kept in Upstash under the sorted set `notify:emails`). `/casey` is Casey's crates page again. The landing page below (search box) is kept but not shown.
+- Since 2026-11-25 `/` is the coming soon page, `public/soon.html` (through `src/app/soon`): the crate's loading sleeve fills with ink, turns over to the words, and an email signup drops down under it (`/api/notify`, kept in Upstash under the sorted set `notify:emails`), with "Made by Casey Cavanagh" pinned to the bottom (the 2026 maker's header no longer carries it, since 2026-11-27). `/casey` is Casey's crates page again. The landing page below (search box) is kept but not shown.
 
 - `public/404.html`: the 404 (since 2026-11-25): a giant 404 on a record sleeve (the loading sleeve's dark card), "There’s nothing playing" and one Home button. Served with a 404 status for any address nothing else answers (`src/app/[...missing]`, unknown `/api/…` get JSON) and for a crate that doesn't exist (`src/app/home`; if the saved crates can't be read the crate page goes out as before).
 - `public/landing.html`: the front door, served at `/` through `src/app/landing`. The sentence and a search box that hands off to the make page (`/vinyl-make.html?q=…`), with one of Casey's crates beside it as the example (the pinned one, else the whole crate; filled in by the route). Old `/?r=`, `?edit` links redirect to `/casey` (next.config.ts), old `/#record/…` links are forwarded by the page.
