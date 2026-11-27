@@ -45,7 +45,7 @@ const mbids = (c: string | null) =>
     const h = n.toString(16).padStart(32, "0");
     return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
   }))];
-const UA = "cratedig/1.0 (https://cratedig-demo.vercel.app)";
+const UA = "cratedig/1.0 (https://cratedig.me)";
 async function dataURL(url: string) {
   try {
     const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(4000) });
